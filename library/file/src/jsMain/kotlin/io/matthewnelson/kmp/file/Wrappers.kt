@@ -20,7 +20,7 @@ import io.matthewnelson.kmp.file.internal.fs_Stats
 
 /**
  * If printing to console, use [unwrap] beforehand, otherwise
- * will print the
+ * will not print the contents of [buffer_Buffer].
  *
  * e.g.
  *

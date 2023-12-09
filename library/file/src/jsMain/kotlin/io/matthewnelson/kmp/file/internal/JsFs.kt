@@ -19,9 +19,6 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.Buffer
-import io.matthewnelson.kmp.file.DelicateFileApi
-
 /** [docs](https://nodejs.org/api/fs.html#fschmodsyncpath-mode) */
 @JsName("chmodSync")
 internal external fun fs_chmodSync(path: String, mode: String)
@@ -57,6 +54,14 @@ internal external fun fs_unlinkSync(path: String)
 /** [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options) */
 @JsName("writeFileSync")
 internal external fun fs_writeFileSync(path: String, data: buffer_Buffer)
+
+/** [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options) */
+@JsName("writeFileSync")
+internal external fun fs_writeFileSync(path: String, data: ByteArray)
+
+/** [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options) */
+@JsName("writeFileSync")
+internal external fun fs_writeFileSync(path: String, data: String)
 
 /** [docs](https://nodejs.org/api/fs.html#fslstatsyncpath-options) */
 @JsName("lstatSync")

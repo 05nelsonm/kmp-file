@@ -76,12 +76,20 @@ public actual fun File.readUtf8(): String = try {
 
 @OptIn(DelicateFileApi::class)
 public actual fun File.writeBytes(array: ByteArray) {
-    TODO()
+    try {
+        fs_writeFileSync(path, array)
+    } catch (t: Throwable) {
+        throw t.toIOException()
+    }
 }
 
 @OptIn(DelicateFileApi::class)
 public actual fun File.writeUtf8(text: String) {
-    TODO()
+    try {
+        fs_writeFileSync(path, text)
+    } catch (t: Throwable) {
+        throw t.toIOException()
+    }
 }
 
 @DelicateFileApi
