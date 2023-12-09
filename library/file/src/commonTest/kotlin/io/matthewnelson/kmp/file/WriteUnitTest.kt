@@ -15,11 +15,12 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.encoding.base16.Base16
+import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// TODO: Move to commonTest once js is implemented
 class WriteUnitTest {
 
     @Test
@@ -30,6 +31,21 @@ class WriteUnitTest {
         try {
             tmp.writeBytes(bytes)
             assertEquals(bytes.sha256(), tmp.readBytes().sha256())
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
+    fun givenFile_whenWriteUtf8_thenIsSuccessful() {
+        val tmp = File(SYSTEM_TEMP_DIRECTORY.path + SYSTEM_PATH_SEPARATOR + randomName())
+
+        val text = Random.Default.nextBytes(20_000)
+            .encodeToString(Base16)
+
+        try {
+            tmp.writeUtf8(text)
+            assertEquals(text, tmp.readUtf8())
         } finally {
             tmp.delete()
         }
