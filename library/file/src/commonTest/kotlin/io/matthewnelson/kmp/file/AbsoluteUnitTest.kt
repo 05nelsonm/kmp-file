@@ -15,7 +15,36 @@
  **/
 package io.matthewnelson.kmp.file
 
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
 class AbsoluteUnitTest {
 
-    // TODO
+    @Test
+    fun givenFile_whenIsAbsolute_thenReturnsExpected() {
+        assertEquals(!isWindows, "/".toFile().isAbsolute())
+        assertEquals(!isWindows, "/some/thing".toFile().isAbsolute())
+        assertEquals(isWindows, "\\".toFile().isAbsolute())
+        assertEquals(isWindows, "\\\\windowsUNC\\path".toFile().isAbsolute())
+        assertEquals(isWindows, "C:\\".toFile().isAbsolute())
+
+        // **should** be relative for all filesystems
+        assertFalse("C:something".toFile().isAbsolute())
+    }
+
+    @Test
+    fun givenFile_whenRelativePath_thenResolvesCWD() {
+        val rootDir = PROJECT_DIR_PATH.substringBeforeLast(
+            "library"
+                .toFile("file")
+                .path
+        )
+
+        // Should resolve the current working directory
+        val absolute = "relative".toFile().absolutePath
+        assertTrue(absolute.startsWith(rootDir))
+        assertTrue(absolute.endsWith("relative"))
+    }
 }
