@@ -57,11 +57,13 @@ public actual class File {
 
     public actual fun exists(): Boolean = fs_exists(realPath)
 
-    // swallows exceptions and returns false instead
     public actual fun delete(): Boolean = try {
         fs_remove(realPath)
     } catch (_: IOException) {
         // Will throw if a directory is not empty
+        //
+        // Swallow it and return false to be
+        // consistent with Jvm.
         false
     }
 
@@ -73,7 +75,11 @@ public actual class File {
     // use .parent
     internal actual fun getParent(): String? = path_parent(realPath)
     // use .parentFile
-    internal actual fun getParentFile(): File? = getParent()?.let { File(it) }
+    internal actual fun getParentFile(): File? {
+        val path = getParent() ?: return null
+        if (path == realPath) return this
+        return File(path)
+    }
     // use .path
     internal actual fun getPath(): String = realPath
 
@@ -81,16 +87,23 @@ public actual class File {
     public actual fun getAbsolutePath(): String {
         TODO("Not yet implemented")
     }
-
     // use .absoluteFile
-    internal actual fun getAbsoluteFile(): File = File(getAbsolutePath())
+    internal actual fun getAbsoluteFile(): File {
+        val path = getAbsolutePath()
+        if (path == realPath) return this
+        return File(path)
+    }
 
     // use .canonicalPath
     @Throws(IOException::class)
     internal actual fun getCanonicalPath(): String = fs_canonicalize(realPath)
     // use .canonicalFile
     @Throws(IOException::class)
-    internal actual fun getCanonicalFile(): File = File(getCanonicalPath())
+    internal actual fun getCanonicalFile(): File {
+        val path = getCanonicalPath()
+        if (path == realPath) return this
+        return File(path)
+    }
 
     override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
     override fun hashCode(): Int = realPath.hashCode() xor 1234321
