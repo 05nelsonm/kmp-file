@@ -17,8 +17,6 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.File.Companion.normalizeInternal
-import io.matthewnelson.kmp.file.File.Companion.resolveInternal
 import io.matthewnelson.kmp.file.internal.*
 
 public actual class File {
@@ -98,22 +96,7 @@ public actual class File {
     override fun hashCode(): Int = realPath.hashCode() xor 1234321
     override fun toString(): String = realPath
 
-    // skips unnecessary work
-    @Suppress("UNUSED_PARAMETER")
-    private constructor(path: String, raw: Any?) {
-        realPath = path
-    }
-
-    internal companion object {
-
-        internal fun File.normalizeInternal(): File = File(path_normalize(realPath), raw = null)
-
-        internal fun File.resolveInternal(relative: File): File = when {
-            realPath.isEmpty() -> relative
-            relative.isAbsolute() -> relative
-            realPath.endsWith(SYSTEM_PATH_SEPARATOR) -> File(realPath + relative.realPath, raw = null)
-            else -> File(realPath + SYSTEM_PATH_SEPARATOR + relative.realPath, raw = null)
-        }
+    private companion object {
 
         private fun String.toPath(): String {
             // TODO: fix slashes + remove any trailing slash
@@ -123,6 +106,18 @@ public actual class File {
     }
 }
 
-public actual fun File.normalize(): File = normalizeInternal()
+public actual fun File.normalize(): File {
+    val normalized = path_normalize(path)
+    if (normalized == path) return this
+    return File(normalized)
+}
 
-public actual fun File.resolve(relative: File): File = resolveInternal(relative)
+public actual fun File.resolve(relative: File): File {
+    val joined = path_join(path, relative.path)
+
+    return when (joined) {
+        path -> this
+        relative.path -> relative
+        else -> File(joined)
+    }
+}
