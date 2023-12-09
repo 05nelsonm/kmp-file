@@ -35,8 +35,7 @@ class MkdirUnitTest {
 
     @Test
     fun givenDir_when2DirsDeep_thenMkdirReturnsFalse() {
-        val dir = (randomTemp().path + SYSTEM_PATH_SEPARATOR + randomName()).toFile()
-
+        val dir = randomTemp().resolve(randomName())
         assertFalse(dir.mkdir())
     }
 }

@@ -23,32 +23,30 @@ class ParentUnitTest {
 
     @Test
     fun givenFile_whenEmpty_thenReturnsNull() {
-        assertNull(File("").parentPath)
+        assertNull("".toFile().parentPath)
     }
 
     @Test
     fun givenFile_whenNoPathSeparator_thenReturnsNull() {
-        assertNull(File(randomName()).parentPath)
+        assertNull(randomName().toFile().parentPath)
     }
 
     @Test
     fun givenFile_whenParentDirNameIsSpace_thenReturnsSpace() {
         val expected = " "
-        assertEquals(expected, File("$expected${SYSTEM_PATH_SEPARATOR}anything").parentPath)
+        assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
     @Test
     fun givenFile_whenParentIsDot_thenReturnsNull() {
         val expected = "."
-
-        assertEquals(expected, File(".${SYSTEM_PATH_SEPARATOR}anything").parentPath)
+        assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
     @Test
     fun givenFile_whenParentIsDotDot_thenReturnsNull() {
         val expected = ".."
-
-        assertEquals(expected, File("$expected${SYSTEM_PATH_SEPARATOR}anything").parentPath)
+        assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
     // TODO: Implement toPath() (Native)

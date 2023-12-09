@@ -38,6 +38,6 @@ class FileUnitTest {
     @Test
     fun givenFile_whenToString_thenPrintsPath() {
         val expected = "something"
-        assertEquals(expected, File(expected).toString())
+        assertEquals(expected, expected.toFile().toString())
     }
 }

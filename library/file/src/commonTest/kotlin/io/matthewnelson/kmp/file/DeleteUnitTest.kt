@@ -45,7 +45,7 @@ class DeleteUnitTest {
     @Test
     fun givenDir_whenNotEmpty_thenReturnsFalse() {
         val tmpDir = randomTemp()
-        val tmpFile = File(tmpDir.path + SYSTEM_PATH_SEPARATOR + randomName())
+        val tmpFile = tmpDir.resolve(randomName())
         assertTrue(tmpDir.mkdir())
         try {
             tmpFile.writeUtf8("Hello World!")

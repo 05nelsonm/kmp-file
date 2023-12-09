@@ -21,27 +21,24 @@ import org.kotlincrypto.hash.sha2.SHA256
 import kotlin.random.Random
 
 val DIR_TEST_SUPPORT by lazy {
-    PROJECT_DIR_PATH +
-        SYSTEM_PATH_SEPARATOR +
-        "test_support"
+    PROJECT_DIR_PATH
+        .toFile()
+        .resolve("test_support")
 }
 
 val FILE_LOREM_IPSUM by lazy {
-    (DIR_TEST_SUPPORT +
-        SYSTEM_PATH_SEPARATOR +
-        "lorem_ipsum").toFile()
+    DIR_TEST_SUPPORT
+        .resolve("lorem_ipsum")
 }
 
 val FILE_SYM_LINK_1 by lazy {
-    (DIR_TEST_SUPPORT +
-        SYSTEM_PATH_SEPARATOR +
-        "sym_link1").toFile()
+    DIR_TEST_SUPPORT
+        .resolve("sym_link1")
 }
 
 val FILE_SYM_LINK_2 by lazy {
-    (DIR_TEST_SUPPORT +
-        SYSTEM_PATH_SEPARATOR +
-        "sym_link2").toFile()
+    DIR_TEST_SUPPORT
+        .resolve("sym_link2")
 }
 
 val BASE_16_LC = Base16 { encodeToLowercase = true }
@@ -53,11 +50,8 @@ fun randomName(): String = Random
     .nextBytes(16)
     .encodeToString(Base16)
 
-fun randomTemp(): File =
-    (SYSTEM_TEMP_DIRECTORY.path +
-        SYSTEM_PATH_SEPARATOR +
-        randomName()
-    ).toFile()
+fun randomTemp(): File = SYSTEM_TEMP_DIRECTORY
+    .resolve(randomName())
 
 fun ByteArray.sha256(): String = SHA256()
     .digest(this)
