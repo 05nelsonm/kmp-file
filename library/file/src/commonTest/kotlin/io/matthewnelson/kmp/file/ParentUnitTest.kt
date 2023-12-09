@@ -51,7 +51,7 @@ class ParentUnitTest {
         assertEquals(expected, File("$expected${SYSTEM_PATH_SEPARATOR}anything").parentPath)
     }
 
-    // TODO: Implement path_join (Native)
+    // TODO: Implement toPath() (Native)
 //    @Test
 //    fun givenFile_whenHasTrailingSlashes_thenIgnoresThem() {
 //        val path = buildString {

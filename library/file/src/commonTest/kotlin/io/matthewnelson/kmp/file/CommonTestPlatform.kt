@@ -53,6 +53,12 @@ fun randomName(): String = Random
     .nextBytes(16)
     .encodeToString(Base16)
 
+fun randomTemp(): File =
+    (SYSTEM_TEMP_DIRECTORY.path +
+        SYSTEM_PATH_SEPARATOR +
+        randomName()
+    ).toFile()
+
 fun ByteArray.sha256(): String = SHA256()
     .digest(this)
     .encodeToString(BASE_16_LC)

@@ -16,6 +16,7 @@
 package io.matthewnelson.kmp.file
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
@@ -27,10 +28,13 @@ class WrapperUnitTest {
         val buffer = FILE_LOREM_IPSUM.read()
         val gzip = Buffer.wrap(zlib_gzipSync(buffer.unwrap()))
 
-        val tmp = File(SYSTEM_TEMP_DIRECTORY.path + SYSTEM_PATH_SEPARATOR + randomName())
+        val bytes = ByteArray(gzip.length.toInt()) { i -> gzip.readInt8(i) }
+        assertTrue(bytes.isNotEmpty())
+
+        val tmp = randomTemp()
         try {
             tmp.write(gzip)
-            assertTrue(tmp.readBytes().isNotEmpty())
+            assertEquals(bytes.sha256(), tmp.readBytes().sha256())
         } finally {
             tmp.delete()
         }

@@ -24,10 +24,17 @@ For `Jvm`, `File` is `typealias` to `java.io.File`
 ```kotlin
 import io.matthewnelson.kmp.file.*
 
-fun common(f: File) {
+fun commonMain(f: File) {
     SYSTEM_PATH_SEPARATOR
     SYSTEM_TEMP_DIRECTORY
 
+    f.isAbsolute()
+    f.exists()
+    f.delete()
+    f.mkdir()
+    f.mkdirs()
+
+    // ↓↓ Extension functions ↓↓
     f.name
     f.parentPath
     f.parentFile
@@ -37,24 +44,21 @@ fun common(f: File) {
     f.canonicalPath()
     f.canonicalFile()
 
-    f.isAbsolute()
-    f.exists()
-    f.delete()
-    f.mkdir()
-    f.mkdirs()
-
+    // resolve child paths
     val child = f.resolve("child")
     child.resolve(f)
-    
-    val normalized = f.normalize()
 
+    // normalized File (e.g. removal of . and ..)
+    f.normalize()
+
+    // basic write functionality
     f.writeBytes(ByteArray(25) { it.toByte() })
     f.writeUtf8("Hello World!")
 
-    val bytes: ByteArray = f.readBytes()
-    val utf8 = f.readUtf8()
-    println(utf8)
-    // Hello World!
+    // basic read functionality
+    f.readBytes()
+    val utf8: String = f.readUtf8()
+    println(utf8) // prints >> Hello World!
 }
 ```
 
@@ -62,7 +66,8 @@ fun common(f: File) {
 import io.matthewnelson.kmp.file.*
 
 @OptIn(DelicateFileApi::class)
-fun nonJvm(f: File) {
+fun nonJvmMain(f: File) {
+    // File permissions (no-op for Windows) for Node.js/Native
     f.chmod("700")
 }
 ```
@@ -71,18 +76,38 @@ fun nonJvm(f: File) {
 import io.matthewnelson.kmp.file.*
 
 @OptIn(DelicateFileApi::class)
-fun nodeJs(f1: File, f2: File) {
+fun jsMain(f1: File, f2: File) {
+    // Node.js specific extension functions
+
+    // Buffers for reading/writing
     val buffer = f1.read()
-    val b = ByteArray(25)
-    for (i in b.indices) {
-        b[i] = buffer.readInt8(i)
-    }
+    val b = ByteArray(25) { i -> buffer.readInt8(i) }
     println(b.toList())
-    
-    f2.write(buffer)
-    
+
+    // If APIs aren't available, simply unwrap
+    val bufferDynamic = buffer.unwrap()
+    val gzipBufferDynamic = try {
+        // zlib might not work if you haven't declared
+        // it, but for this example lets assume it's
+        // available.
+        js("require('zlib')").gzipSync(bufferDynamic)
+    } catch (t: Throwable) {
+        // helper for converting exceptions to IOException
+        throw t.toIOException()
+    }
+
+    // Can re-wrap the dynamic buffer for a "safer" API
+    val gzipBuffer = Buffer.wrap(gzipBufferDynamic)
+
+    f2.write(gzipBuffer)
+
+    // File stats
     val lstats = f1.lstat()
     val stats = f1.stat()
+    
+    // If APIs aren't available, simply unwrap to use.
+    val statsDynamic = stats.unwrap()
+    statsDynamic.nlink.toInt()
 }
 ```
 
@@ -90,16 +115,24 @@ fun nodeJs(f1: File, f2: File) {
 import io.matthewnelson.kmp.file.*
 
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-fun native(f1: File, f2: File) {
+fun nativeMain(f1: File, f2: File) {
+    // Native specific extension functions
+
+    // Use a CPointer<FILE> with auto-closure on completion
     f1.open(flags = "rb") { file1 ->
         f2.open(flags = "wb") { file2 ->
             val buf = ByteArray(4096)
 
             while (true) {
+                // posix.fread helper extension for CPointer<FILE>
                 val read = file1.fRead(buf)
                 if (read < 0) throw errnoToIOException(errno)
                 if (read == 0) break
+
+                // posix.fwrite helper extension for CPointer<FILE>
                 if (file2.fWrite(buf, len = read) < 0) {
+
+                    // helper for converting an error to an IOException
                     throw errnoToIOException(errno)
                 }
             }

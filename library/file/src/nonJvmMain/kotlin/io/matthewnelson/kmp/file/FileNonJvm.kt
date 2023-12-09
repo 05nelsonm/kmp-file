@@ -58,8 +58,15 @@ public actual class File {
     public actual fun isAbsolute(): Boolean = path_isAbsolute(realPath)
 
     public actual fun exists(): Boolean = fs_exists(realPath)
-    @Throws(IOException::class)
-    public actual fun delete(): Boolean = fs_remove(realPath)
+
+    // swallows exceptions and returns false instead
+    public actual fun delete(): Boolean = try {
+        fs_remove(realPath)
+    } catch (_: IOException) {
+        // Will throw if a directory is not empty
+        false
+    }
+
     public actual fun mkdir(): Boolean = fs_mkdir(realPath)
     public actual fun mkdirs(): Boolean = fs_mkdirs(realPath)
 

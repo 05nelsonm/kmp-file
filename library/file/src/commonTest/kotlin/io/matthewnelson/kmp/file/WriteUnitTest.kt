@@ -25,7 +25,7 @@ class WriteUnitTest {
 
     @Test
     fun givenFile_whenWriteBytes_thenIsSuccessful() {
-        val tmp = File(SYSTEM_TEMP_DIRECTORY.path + SYSTEM_PATH_SEPARATOR + randomName())
+        val tmp = randomTemp()
 
         val bytes = Random.Default.nextBytes(500_000)
         try {
@@ -38,7 +38,7 @@ class WriteUnitTest {
 
     @Test
     fun givenFile_whenWriteUtf8_thenIsSuccessful() {
-        val tmp = File(SYSTEM_TEMP_DIRECTORY.path + SYSTEM_PATH_SEPARATOR + randomName())
+        val tmp = randomTemp()
 
         val text = Random.Default.nextBytes(20_000)
             .encodeToString(Base16)
@@ -46,6 +46,23 @@ class WriteUnitTest {
         try {
             tmp.writeUtf8(text)
             assertEquals(text, tmp.readUtf8())
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
+    fun givenFile_whenExists_thenIsOverWritten() {
+        val tmp = randomTemp()
+        val bytes = Random.Default.nextBytes(500_000)
+
+        try {
+            tmp.writeBytes(bytes)
+            val read = tmp.readBytes()
+            assertEquals(bytes.size, read.size)
+            tmp.writeBytes(bytes.copyOf(50))
+            val read2 = tmp.readBytes()
+            assertEquals(50, read2.size)
         } finally {
             tmp.delete()
         }

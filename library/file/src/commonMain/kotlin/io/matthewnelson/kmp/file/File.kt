@@ -43,7 +43,6 @@ public expect class File {
     public fun isAbsolute(): Boolean
 
     public fun exists(): Boolean
-    @Throws(IOException::class)
     public fun delete(): Boolean
     public fun mkdir(): Boolean
     public fun mkdirs(): Boolean

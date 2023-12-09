@@ -47,10 +47,7 @@ public actual fun File.readBytes(): ByteArray = try {
         throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
     }
 
-    val bytes = ByteArray(buffer.length.toInt())
-    for (i in bytes.indices) {
-        bytes[i] = buffer.readInt8(i)
-    }
+    val bytes = ByteArray(buffer.length.toInt()) { buffer.readInt8(it) }
     buffer.fill()
     bytes
 } catch (t: Throwable) {

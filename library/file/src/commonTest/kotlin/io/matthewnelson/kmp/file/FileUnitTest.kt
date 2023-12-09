@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
 
 class FileUnitTest {
 
-    // TODO: Implement path_join (Native)
+    // TODO: Implement toPath() (Native)
 //    @Test
 //    fun givenFile_whenTrailingSlashes_thenAreRemoved() {
 //        val expected = "expected"

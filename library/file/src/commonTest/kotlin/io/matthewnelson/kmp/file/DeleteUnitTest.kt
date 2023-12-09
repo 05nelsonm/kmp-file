@@ -15,7 +15,45 @@
  **/
 package io.matthewnelson.kmp.file
 
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
 class DeleteUnitTest {
 
-    // TODO
+    @Test
+    fun givenFile_whenDoesNotExist_thenReturnsFalse() {
+        assertFalse(randomTemp().delete())
+    }
+
+    @Test
+    fun givenFile_whenDoesExist_thenReturnsTrue() {
+        val tmp = randomTemp()
+        tmp.writeUtf8("Hello World!")
+        assertTrue(tmp.delete())
+        assertFalse(tmp.exists())
+    }
+
+    @Test
+    fun givenDir_whenExists_thenReturnsTrue() {
+        val tmp = randomTemp()
+        tmp.mkdir()
+        assertTrue(tmp.delete())
+        assertFalse(tmp.exists())
+    }
+
+    @Test
+    fun givenDir_whenNotEmpty_thenReturnsFalse() {
+        val tmpDir = randomTemp()
+        val tmpFile = File(tmpDir.path + SYSTEM_PATH_SEPARATOR + randomName())
+        assertTrue(tmpDir.mkdir())
+        try {
+            tmpFile.writeUtf8("Hello World!")
+            assertTrue(tmpFile.exists())
+            assertFalse(tmpDir.delete())
+        } finally {
+            tmpFile.delete()
+            tmpDir.delete()
+        }
+    }
 }
