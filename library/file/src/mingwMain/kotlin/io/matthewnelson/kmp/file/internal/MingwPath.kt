@@ -17,12 +17,23 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import kotlinx.cinterop.*
+import io.matthewnelson.kmp.file.SYSTEM_PATH_SEPARATOR
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.MemScope
+import kotlinx.cinterop.cstr
 import platform.posix.basename
 import platform.posix.dirname
+import platform.windows.FALSE
+import platform.windows.PathIsRelativeA
 
 internal actual fun path_isAbsolute(path: String): Boolean {
-    TODO()
+    if (path.startsWith(SYSTEM_PATH_SEPARATOR)) return true
+
+    // Fallback to shell function. Returns FALSE if absolute
+    // https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-pathisrelativea?redirectedfrom=MSDN
+    return PathIsRelativeA(path) == FALSE
 }
 
 @Suppress("NOTHING_TO_INLINE")
