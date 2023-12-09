@@ -15,6 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
+actual val isSimulator: Boolean = false
 actual val isWindows: Boolean = System.getProperty("os.name")
     ?.ifBlank { null }
     ?.contains("windows", ignoreCase = true)

@@ -36,6 +36,11 @@ class AbsoluteUnitTest {
 
     @Test
     fun givenFile_whenRelativePath_thenResolvesCWD() {
+        // Do not run in simulators. The CWD will
+        // register as whatever the simulators environment
+        // is using.
+        if (isSimulator) return
+
         val rootDir = PROJECT_DIR_PATH.substringBeforeLast(
             "library"
                 .toFile("file")
