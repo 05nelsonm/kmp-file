@@ -85,7 +85,9 @@ public actual class File {
 
     // use .absolutePath
     public actual fun getAbsolutePath(): String {
-        TODO("Not yet implemented")
+        if (isAbsolute()) return realPath
+        val cwd = fs_realpath(".")
+        return cwd + SYSTEM_PATH_SEPARATOR + realPath
     }
     // use .absoluteFile
     internal actual fun getAbsoluteFile(): File {
