@@ -24,14 +24,16 @@ class AbsoluteUnitTest {
 
     @Test
     fun givenFile_whenIsAbsolute_thenReturnsExpected() {
-        assertEquals(!isWindows, "/".toFile().isAbsolute())
-        assertEquals(!isWindows, "/some/thing".toFile().isAbsolute())
-        assertEquals(isWindows, "\\".toFile().isAbsolute())
+        assertEquals(!isWindows, "/".toFile().isAbsolute())                     // js
+        assertEquals(!isWindows, "/some/thing".toFile().isAbsolute())           // js
         assertEquals(isWindows, "\\\\windowsUNC\\path".toFile().isAbsolute())
         assertEquals(isWindows, "C:\\".toFile().isAbsolute())
 
         // **should** be relative for all filesystems
         assertFalse("C:something".toFile().isAbsolute())
+        assertFalse("C:".toFile().isAbsolute())
+        assertFalse("\\".toFile().isAbsolute())                                 // js
+        assertFalse("\\Windows".toFile().isAbsolute())                          // js
     }
 
     @Test

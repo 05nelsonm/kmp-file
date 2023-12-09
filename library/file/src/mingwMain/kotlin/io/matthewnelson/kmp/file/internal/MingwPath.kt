@@ -29,11 +29,29 @@ import platform.windows.FALSE
 import platform.windows.PathIsRelativeA
 
 internal actual fun path_isAbsolute(path: String): Boolean {
-    if (path.startsWith(SYSTEM_PATH_SEPARATOR)) return true
+    if (path.isEmpty()) return false
+    if (path[0] == SYSTEM_PATH_SEPARATOR) {
+        // UNC path (rooted):    `\\server_name`
+        // Otherwise (relative): `\` or `\Windows`
+        return path.length > 1 && path[1] == SYSTEM_PATH_SEPARATOR
+    }
 
-    // Fallback to shell function. Returns FALSE if absolute
-    // https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-pathisrelativea?redirectedfrom=MSDN
-    return PathIsRelativeA(path) == FALSE
+    // does not start with `\` so check drive
+    when (path[0]) {
+        in 'a'..'z' -> {} // continue
+        in 'A'..'Z' -> {} // continue
+        else -> return false
+    }
+
+    // Have a drive letter
+    return if (path.length > 1 && path[1] == ':') {
+        // Check for `\`
+        path.length > 2 && path[2] == SYSTEM_PATH_SEPARATOR
+    } else {
+        // Fallback to shell function. Returns FALSE if absolute
+        // https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-pathisrelativea?redirectedfrom=MSDN
+        PathIsRelativeA(path) == FALSE
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")
