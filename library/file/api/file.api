@@ -1,0 +1,30 @@
+public final class io/matthewnelson/kmp/file/Exceptions {
+	public static final fun wrapIOException (Ljava/lang/Throwable;)Ljava/io/IOException;
+	public static final fun wrapIOException (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)Ljava/io/IOException;
+}
+
+public final class io/matthewnelson/kmp/file/File {
+	public static final fun absoluteFile (Ljava/io/File;)Ljava/io/File;
+	public static final fun absolutePath (Ljava/io/File;)Ljava/lang/String;
+	public static final fun canonicalFile (Ljava/io/File;)Ljava/io/File;
+	public static final fun canonicalPath (Ljava/io/File;)Ljava/lang/String;
+	public static final fun name (Ljava/io/File;)Ljava/lang/String;
+	public static final fun parentFile (Ljava/io/File;)Ljava/io/File;
+	public static final fun parentPath (Ljava/io/File;)Ljava/lang/String;
+	public static final fun path (Ljava/io/File;)Ljava/lang/String;
+	public static final fun resolve (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
+	public static final fun toFile (Ljava/lang/String;)Ljava/io/File;
+	public static final fun toFile (Ljava/lang/String;Ljava/lang/String;)Ljava/io/File;
+}
+
+public final class io/matthewnelson/kmp/file/FileJvm {
+	public static final field SYSTEM_PATH_SEPARATOR C
+	public static final field SYSTEM_TEMP_DIRECTORY Ljava/io/File;
+	public static final fun normalize (Ljava/io/File;)Ljava/io/File;
+	public static final fun readBytes (Ljava/io/File;)[B
+	public static final fun readUtf8 (Ljava/io/File;)Ljava/lang/String;
+	public static final fun resolve (Ljava/io/File;Ljava/io/File;)Ljava/io/File;
+	public static final fun writeBytes (Ljava/io/File;[B)V
+	public static final fun writeUtf8 (Ljava/io/File;Ljava/lang/String;)V
+}
+
