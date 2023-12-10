@@ -25,8 +25,6 @@ import kotlin.io.resolve as _resolve
 import kotlin.io.writeBytes as _writeBytes
 import kotlin.io.writeText as _writeText
 
-public actual typealias File = java.io.File
-
 @JvmField
 public actual val SysPathSep: Char = File.separatorChar
 
@@ -34,6 +32,8 @@ public actual val SysPathSep: Char = File.separatorChar
 public actual val SysTempDir: File = System
     .getProperty("java.io.tmpdir")
     .toFile()
+
+public actual typealias File = java.io.File
 
 public actual fun File.normalize(): File = _normalize()
 

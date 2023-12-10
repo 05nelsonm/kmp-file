@@ -20,24 +20,47 @@ import kotlin.test.assertEquals
 
 class FileUnitTest {
 
-    // TODO: Implement toPath() (Native)
-//    @Test
-//    fun givenFile_whenTrailingSlashes_thenAreRemoved() {
-//        val expected = "expected"
-//
-//        (0..5).forEach { times ->
-//            val file = File(buildString {
-//                append(expected)
-//                repeat(times) { append(SYSTEM_PATH_SEPARATOR) }
-//            })
-//
-//            assertEquals(expected, file.path)
-//        }
-//    }
-
     @Test
     fun givenFile_whenToString_thenPrintsPath() {
         val expected = "something"
         assertEquals(expected, expected.toFile().toString())
+    }
+
+    @Test
+    fun givenFile_whenInsaneSlashes_thenAreResolved() {
+        // windows should replace all unix path separators with `\` before
+        assertEquals("relative${SysPathSep}path", "relative////path///".toFile().path)
+        assertEquals("relative${SysPathSep}path${SysPathSep}.", "relative////path///.".toFile().path)
+        assertEquals(".${SysPathSep}..", "./..".toFile().path)
+
+        assertEquals(".", ".".toFile().path)
+        assertEquals("..", "..".toFile().path)
+        assertEquals("...", "...".toFile().path)
+        assertEquals("....", "....".toFile().path)
+
+        if (isWindows) {
+            assertEquals("\\", "\\".toFile().path)
+            assertEquals("\\Relative", "\\Relative".toFile().path)
+            assertEquals("\\Relative", "/Relative".toFile().path)
+            assertEquals("\\Relative\\path", "/Relative/path".toFile().path)
+
+            assertEquals("\\\\", "\\\\".toFile().path)
+            assertEquals("\\\\", "\\\\\\".toFile().path)
+            assertEquals("\\\\Absolute", "\\\\Absolute".toFile().path)
+            assertEquals("\\\\Absolute", "\\\\\\Absolute".toFile().path)
+            assertEquals("\\\\Absolute", "//Absolute".toFile().path)
+            assertEquals("\\\\Absolute", "///Absolute".toFile().path)
+            assertEquals("\\\\Absolute\\path", "///Absolute//path".toFile().path)
+
+            assertEquals("C:\\", "C://".toFile().path)
+            assertEquals("F:", "F:".toFile().path)
+            assertEquals("F:\\", "F:\\\\\\".toFile().path)
+        } else {
+            assertEquals("/", "/".toFile().path)
+            assertEquals("\\", "\\".toFile().path)
+            assertEquals("\\\\", "\\\\".toFile().path)
+            assertEquals("/absolute", "//absolute".toFile().path)
+            assertEquals("/absolute\\/path", "///absolute\\////path".toFile().path)
+        }
     }
 }

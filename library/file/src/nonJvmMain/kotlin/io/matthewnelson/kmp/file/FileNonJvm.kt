@@ -21,29 +21,16 @@ import io.matthewnelson.kmp.file.internal.*
 
 public actual class File {
 
-    private val realPath: String
+    private val realPath: Path
 
     public actual constructor(pathname: String) {
-        realPath = pathname.toPath()
+        realPath = pathname.toUTF8().resolveSlashes()
     }
 
-    public actual constructor(parent: String, child: String) {
-        // TODO: Do not use join here. java.io.File concatenates
-        //  parent and child whether child is rooted or not.
-        //  e.g.
-        //  println(File("/path", "/something").path)
-        //  >> `/path/something`
-        //  println(File(File("/path"), "something").path)
-        //  >> `/path/something`
-        //  println(File("path", "/something").path)
-        //  >> `path/something`
-        //  println(File("path", "something").path)
-        //  >> `path/something`
-        realPath = path_join(parent.toPath(), child.toPath())
-    }
-
-    public actual constructor(parent: File, child: String) {
-        realPath = path_join(parent.realPath, child.toPath())
+    @Suppress("UNUSED_PARAMETER")
+    internal constructor(pathname: Path, direct: Any?) {
+        // skip unnecessary work
+        realPath = pathname
     }
 
     /**
@@ -83,13 +70,13 @@ public actual class File {
 
     // use .name
     internal actual fun getName(): String = path_basename(realPath)
-    // use .parent
+    // use .parentPath
     internal actual fun getParent(): String? = path_parent(realPath)
     // use .parentFile
     internal actual fun getParentFile(): File? {
         val path = getParent() ?: return null
         if (path == realPath) return this
-        return File(path)
+        return File(path, direct = null)
     }
     // use .path
     internal actual fun getPath(): String = realPath
@@ -104,7 +91,7 @@ public actual class File {
     internal actual fun getAbsoluteFile(): File {
         val path = getAbsolutePath()
         if (path == realPath) return this
-        return File(path)
+        return File(path, direct = null)
     }
 
     // use .canonicalPath
@@ -115,35 +102,97 @@ public actual class File {
     internal actual fun getCanonicalFile(): File {
         val path = getCanonicalPath()
         if (path == realPath) return this
-        return File(path)
+        return File(path, direct = null)
     }
 
     override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
     override fun hashCode(): Int = realPath.hashCode() xor 1234321
     override fun toString(): String = realPath
-
-    private companion object {
-
-        private fun String.toPath(): String {
-            // TODO: fix slashes + remove any trailing slash
-            return encodeToByteArray()
-                .decodeToString()
-        }
-    }
 }
 
 public actual fun File.normalize(): File {
     val normalized = path_normalize(path)
     if (normalized == path) return this
-    return File(normalized)
+    return File(normalized, direct = null)
 }
 
-public actual fun File.resolve(relative: File): File {
-    val joined = path_join(path, relative.path)
+public actual fun File.resolve(relative: File): File = when {
+    path.isEmpty() -> relative
+    relative.path.isEmpty() -> this
+    relative.isAbsolute() -> relative
+    else -> File(path.concatenateWith(relative.path))
+}
 
-    return when (joined) {
-        path -> this
-        relative.path -> relative
-        else -> File(joined)
+@Suppress("NOTHING_TO_INLINE")
+private inline fun Path.concatenateWith(
+    child: Path,
+): Path = when {
+    isEmpty() -> child
+    endsWith(SysPathSep) -> this + child
+    child.startsWith(SysPathSep) -> this + child
+    else -> this + SysPathSep + child
+}
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun Path.toUTF8(): Path = encodeToByteArray()
+    .decodeToString()
+
+private fun Path.resolveSlashes(): Path {
+    if (isEmpty()) return this
+    var result = this
+    var lastWasSlash = false
+    var i = 0
+
+    val prefix: String = if (IsWindows) {
+        result = result.replace('/', SysPathSep)
+
+        when {
+            result.startsWith("\\\\") -> {
+                // preserve windows UNC path
+                i = 2
+                lastWasSlash = true
+                "\\\\"
+            }
+            result.startsWith(SysPathSep) -> {
+                // preserver relative slash
+                i = 1
+                lastWasSlash = true
+                SysPathSep.toString()
+            }
+            else -> ""
+        }
+    } else {
+        // preserve unix root
+        val c = result.first()
+        if (c == SysPathSep) {
+            i = 1
+            lastWasSlash = true
+            c.toString()
+        } else {
+            ""
+        }
     }
+
+    result = buildString {
+        while (i < result.length) {
+            val c = result[i++]
+
+            if (c == SysPathSep) {
+                if (!lastWasSlash) {
+                    append(c)
+                    lastWasSlash = true
+                }
+                // else continue
+            } else {
+                append(c)
+                lastWasSlash = false
+            }
+        }
+    }
+
+    if (result.isNotEmpty() && lastWasSlash) {
+        result = result.dropLast(1)
+    }
+
+    return prefix + result
 }

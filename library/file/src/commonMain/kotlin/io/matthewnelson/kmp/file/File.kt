@@ -30,22 +30,37 @@ public expect val SysPathSep: Char
  * */
 public expect val SysTempDir: File
 
+public fun String.toFile(): File = File(this)
+
 /**
  * A File
  * */
-public expect class File {
+public expect class File(pathname: String) {
 
-    public constructor(pathname: String)
-
-    /**
-     * Concatenates [parent] with [child]
-     * */
-    public constructor(parent: String, child: String)
-
-    /**
-     * Concatenates [parent] path with [child]
-     * */
-    public constructor(parent: File, child: String)
+    // Not exposing any secondary constructors because
+    // Jvm has undocumented behavior that cannot be
+    // modified because it's typealias.
+    //
+    // java.io.File's secondary constructors take 2
+    // arguments and concatenate the paths together. If
+    // the first argument is empty though, the result
+    // will always contain the system path separator as
+    // the first character.
+    //
+    // println(File("", "child").path) >> "/child"
+    // println(File(File(""), "child").path) >> "/child"
+    // println(File("", "./child").path) >> "/./child"
+    //
+    // So for Unix, the "child" argument now magically
+    // becomes absolute instead of relative to the current
+    // working directory.
+    //
+    // This could be dangerous if someone were to do:
+    //
+    // File(fileFromSomewhereElse, "child")
+    //
+    // thinking that it would simply be appended to the
+    // parent.
 
     public fun isAbsolute(): Boolean
 
@@ -75,9 +90,6 @@ public expect class File {
     @Throws(IOException::class)
     internal fun getCanonicalFile(): File
 }
-
-public fun String.toFile(): File = File(this)
-public fun String.toFile(child: String): File = File(this, child)
 
 @get:JvmName("name")
 public val File.name: String get() = getName()

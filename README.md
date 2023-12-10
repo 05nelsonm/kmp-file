@@ -47,14 +47,13 @@ fun commonMain(f: File) {
     f.canonicalPath()
     f.canonicalFile()
 
-    // equivalent to File("some/path")
-    "some/path".toFile()
-    // equivalent to File("some", "path")
-    "some".toFile("path")
+    // equivalent to File("/some/path")
+    val file = "/some/path".toFile()
 
     // resolve child paths
-    val child = f.resolve("child")
-    child.resolve(f)
+    val child = file.resolve("child")
+    println(child.path) // >> `/some/path/child`
+    println(child.resolve(file).path) // >> `/some/path` (file is rooted)
 
     // normalized File (e.g. removal of . and ..)
     f.normalize()

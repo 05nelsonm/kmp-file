@@ -16,3 +16,5 @@
 package io.matthewnelson.kmp.file.internal
 
 internal expect val IsWindows: Boolean
+
+internal typealias Path = String

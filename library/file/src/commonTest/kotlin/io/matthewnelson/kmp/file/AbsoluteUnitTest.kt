@@ -32,7 +32,9 @@ class AbsoluteUnitTest {
         assertFalse("C:".toFile().isAbsolute())
         assertFalse("".toFile().isAbsolute())
         assertFalse(".".toFile().isAbsolute())
+        assertFalse("..".toFile().isAbsolute())
         assertFalse("./something".toFile().isAbsolute())
+        assertFalse("../something".toFile().isAbsolute())
         assertFalse("some/path".toFile().isAbsolute())
 
         // TODO: Fix isAbsolute for Nodejs on windows
@@ -52,8 +54,8 @@ class AbsoluteUnitTest {
         if (isSimulator) return
 
         val rootDir = PROJECT_DIR_PATH.substringBeforeLast(
-            "library"
-                .toFile("file")
+            "library".toFile()
+                .resolve("file")
                 .path
         )
 

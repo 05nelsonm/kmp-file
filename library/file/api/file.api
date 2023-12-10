@@ -14,7 +14,6 @@ public final class io/matthewnelson/kmp/file/File {
 	public static final fun path (Ljava/io/File;)Ljava/lang/String;
 	public static final fun resolve (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
 	public static final fun toFile (Ljava/lang/String;)Ljava/io/File;
-	public static final fun toFile (Ljava/lang/String;Ljava/lang/String;)Ljava/io/File;
 }
 
 public final class io/matthewnelson/kmp/file/FileJvm {
