@@ -17,6 +17,9 @@ package io.matthewnelson.kmp.file
 
 import kotlin.experimental.ExperimentalNativeApi
 
+actual val isJvm: Boolean = false
+actual val isNative: Boolean = true
+actual val isNodejs: Boolean = false
 actual val isSimulator: Boolean by lazy {
     @OptIn(ExperimentalNativeApi::class)
     when (Platform.osFamily) {
@@ -26,7 +29,6 @@ actual val isSimulator: Boolean by lazy {
         else -> false
     }
 }
-
 actual val isWindows: Boolean by lazy {
     @OptIn(ExperimentalNativeApi::class)
     Platform.osFamily == OsFamily.WINDOWS

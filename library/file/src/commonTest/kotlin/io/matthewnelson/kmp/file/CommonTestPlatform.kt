@@ -43,6 +43,9 @@ val FILE_SYM_LINK_2 by lazy {
 
 val BASE_16_LC = Base16 { encodeToLowercase = true }
 
+expect val isJvm: Boolean
+expect val isNative: Boolean
+expect val isNodejs: Boolean
 expect val isSimulator: Boolean
 expect val isWindows: Boolean
 

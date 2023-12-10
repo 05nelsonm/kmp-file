@@ -28,6 +28,17 @@ public actual class File {
     }
 
     public actual constructor(parent: String, child: String) {
+        // TODO: Do not use join here. java.io.File concatenates
+        //  parent and child whether child is rooted or not.
+        //  e.g.
+        //  println(File("/path", "/something").path)
+        //  >> `/path/something`
+        //  println(File(File("/path"), "something").path)
+        //  >> `/path/something`
+        //  println(File("path", "/something").path)
+        //  >> `path/something`
+        //  println(File("path", "something").path)
+        //  >> `path/something`
         realPath = path_join(parent.toPath(), child.toPath())
     }
 

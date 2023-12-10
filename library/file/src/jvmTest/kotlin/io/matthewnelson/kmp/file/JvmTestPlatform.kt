@@ -15,6 +15,9 @@
  **/
 package io.matthewnelson.kmp.file
 
+actual val isJvm: Boolean = true
+actual val isNative: Boolean = false
+actual val isNodejs: Boolean = false
 actual val isSimulator: Boolean = false
 actual val isWindows: Boolean = System.getProperty("os.name")
     ?.ifBlank { null }
