@@ -24,9 +24,6 @@ class AbsoluteUnitTest {
 
     @Test
     fun givenFile_whenIsAbsolute_thenReturnsExpected() {
-        assertEquals(isWindows, "\\\\windowsUNC\\path".toFile().isAbsolute())
-        assertEquals(isWindows, "C:\\".toFile().isAbsolute())
-
         // should be relative for all platforms (even windows)
         assertFalse("C:something".toFile().isAbsolute())
         assertFalse("C:".toFile().isAbsolute())
@@ -36,14 +33,16 @@ class AbsoluteUnitTest {
         assertFalse("./something".toFile().isAbsolute())
         assertFalse("../something".toFile().isAbsolute())
         assertFalse("some/path".toFile().isAbsolute())
-
-        // TODO: Fix isAbsolute for Nodejs on windows
-        if (isNodejs && isWindows) return
-        assertEquals(!isWindows, "/".toFile().isAbsolute())
-        assertEquals(!isWindows, "/some/thing".toFile().isAbsolute())
-
         assertFalse("\\".toFile().isAbsolute())
         assertFalse("\\Windows".toFile().isAbsolute())
+
+        // should only be true on Windows
+        assertEquals(isWindows, "\\\\windowsUNC\\path".toFile().isAbsolute())
+        assertEquals(isWindows, "C:\\".toFile().isAbsolute())
+
+        // should never be true on Windows
+        assertEquals(!isWindows, "/".toFile().isAbsolute())
+        assertEquals(!isWindows, "/some/thing".toFile().isAbsolute())
     }
 
     @Test
@@ -53,15 +52,11 @@ class AbsoluteUnitTest {
         // is using, not that of the host machine.
         if (isSimulator) return
 
-        val rootDir = PROJECT_DIR_PATH.substringBeforeLast(
-            "library".toFile()
-                .resolve("file")
-                .path
-        )
+        val projectRoot = projectRootDir()
 
         // Should resolve the current working directory
         val absolute = "relative".toFile().absolutePath
-        assertTrue(absolute.startsWith(rootDir))
+        assertTrue(absolute.startsWith(projectRoot))
 
         // NOTE: Need to ensure that this also checks that the system separator
         // is prefixing `relative` so that on Windows any potential drive letters
@@ -71,5 +66,29 @@ class AbsoluteUnitTest {
         // for a relative path of:
         //   `C:relative`
         assertTrue(absolute.endsWith("${SysPathSep}relative"))
+    }
+
+    @Test
+    fun givenWindows_whenRelativeDrivePath_thenResolvesToCurrentWorkingDirectory() {
+        if (!isWindows) return
+
+        val projectRoot = projectRootDir()
+
+        // The drive of the host machine that this test is
+        // running on (e.g. `C:`)
+        val drive = projectRoot.substring(0, 2)
+
+        val absolute = "${drive}relative".toFile().absolutePath
+
+        assertTrue(absolute.startsWith(drive), absolute)
+        assertTrue(absolute.endsWith("\\relative"), absolute)
+    }
+
+    private fun projectRootDir(): String {
+        return PROJECT_DIR_PATH.substringBeforeLast(
+            "library".toFile()
+                .resolve("file")
+                .path
+        )
     }
 }

@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName")
+@file:Suppress("KotlinRedundantDiagnosticSuppress")
 
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.SysPathSep
 
-internal actual fun path_isAbsolute(path: String): Boolean {
-    return path.startsWith(SysPathSep)
-}
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun Path.isAbsolute(): Boolean = startsWith(SysPathSep)

@@ -25,20 +25,20 @@ internal external val path_sep: String
 
 /** [docs](https://nodejs.org/api/path.html#pathbasenamepath-suffix) **/
 @JsName("basename")
-internal actual external fun path_basename(path: String): String
+internal external fun path_basename(path: String): String
 
 /** [docs](https://nodejs.org/api/path.html#pathdirnamepath) **/
 @JsName("dirname")
-internal actual external fun path_dirname(path: String): String
+internal external fun path_dirname(path: String): String
 
 /** [docs](https://nodejs.org/api/path.html#pathisabsolutepath) **/
 @JsName("isAbsolute")
-internal actual external fun path_isAbsolute(path: String): Boolean
+internal external fun path_isAbsolute(path: String): Boolean
 
 /** [docs](https://nodejs.org/api/path.html#pathnormalizepath) **/
 @JsName("normalize")
-internal actual external fun path_normalize(path: String): String
+internal external fun path_normalize(path: String): String
 
 /** [docs](https://nodejs.org/api/path.html#pathresolvepaths) **/
 @JsName("resolve")
-internal actual external fun path_resolve(vararg paths: String): String
+internal external fun path_resolve(vararg paths: String): String

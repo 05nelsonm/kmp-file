@@ -23,19 +23,17 @@ import io.matthewnelson.kmp.file.IOException
 internal fun fs_canonicalize(path: String): String {
     if (path.isEmpty()) return fs_realpath(".")
 
-    val resolved = path_resolve(path)
+    val resolved = path.resolve()
 
     var existingPath = resolved
 
     while (true) {
         if (fs_exists(existingPath)) break
-        val parent = path_parent(existingPath) ?: break
+        val parent = existingPath.parentOrNull() ?: break
         existingPath = parent
     }
 
-    return resolved.replaceFirst(existingPath,
-        fs_realpath(existingPath)
-    )
+    return resolved.replaceFirst(existingPath, fs_realpath(existingPath))
 }
 
 @Throws(IOException::class)
@@ -56,7 +54,7 @@ internal fun fs_mkdirs(path: String): Boolean {
 
     var exists = false
     while (!exists) {
-        val parent = path_parent(dirsToMake.first()) ?: break
+        val parent = dirsToMake.first().parentOrNull() ?: break
         exists = fs_exists(parent)
         if (!exists) {
             dirsToMake.add(0, parent)

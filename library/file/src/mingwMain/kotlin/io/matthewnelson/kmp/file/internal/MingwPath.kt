@@ -28,33 +28,34 @@ import platform.posix.dirname
 import platform.windows.FALSE
 import platform.windows.PathIsRelativeA
 
-internal actual fun path_isAbsolute(path: String): Boolean {
-    if (path.isEmpty()) return false
-    if (path[0] == SysPathSep) {
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun Path.isAbsolute(): Boolean {
+    if (isEmpty()) return false
+    if (get(0) == SysPathSep) {
         // UNC path (rooted):    `\\server_name`
         // Otherwise (relative): `\` or `\Windows`
-        return path.length > 1 && path[1] == SysPathSep
+        return length > 1 && get(1) == SysPathSep
     }
 
     // does not start with `\` so check drive
-    return if (path.driveOrNull() != null) {
+    return if (driveOrNull() != null) {
         // Check for `\`
-        path.length > 2 && path[2] == SysPathSep
+        length > 2 && get(2) == SysPathSep
     } else {
         // Fallback to shell function. Returns FALSE if absolute
         // https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-pathisrelativea?redirectedfrom=MSDN
-        PathIsRelativeA(path) == FALSE
+        PathIsRelativeA(this) == FALSE
     }
 }
 
 @Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
-internal actual inline fun MemScope.path_platform_basename(
-    path: String,
+internal actual inline fun MemScope.platformBasename(
+    path: Path,
 ): CPointer<ByteVar>? = basename(path.cstr.ptr)
 
 @Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
-internal actual inline fun MemScope.path_platform_dirname(
-    path: String,
+internal actual inline fun MemScope.platformDirname(
+    path: Path,
 ): CPointer<ByteVar>? = dirname(path.cstr.ptr)
