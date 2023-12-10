@@ -119,6 +119,11 @@ public actual fun File.normalize(): File {
 public actual fun File.resolve(relative: File): File = when {
     path.isEmpty() -> relative
     relative.path.isEmpty() -> this
+    // Functionality on Jvm is that if relative is
+    // rooted, it will be returned instead of concatenating
+    // it to the parent path. isAbsolute would return false
+    // if the path on windows was something like `\Windows`
+    relative.path.startsWith(SysPathSep) -> relative
     relative.isAbsolute() -> relative
     else -> File(path.concatenateWith(relative.path))
 }
