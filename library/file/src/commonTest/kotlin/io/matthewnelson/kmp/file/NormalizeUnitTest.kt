@@ -39,6 +39,7 @@ class NormalizeUnitTest {
 
         assertEquals("\\\\rooted\\path", "\\\\rooted\\path".toFile().normalize().path)
         assertEquals("\\\\rooted", "\\\\rooted\\path\\..".toFile().normalize().path)
+        assertEquals("\\\\rooted\\..\\path", "\\\\rooted\\..\\path\\.\\.".toFile().normalize().path)
         assertEquals("C:\\path", "C:\\rooted\\..\\path".toFile().normalize().path)
         assertEquals("\\", "\\rooted\\..\\path\\..".toFile().normalize().path)
         assertEquals("\\rooted\\path", "\\rooted\\.\\path\\.".toFile().normalize().path)

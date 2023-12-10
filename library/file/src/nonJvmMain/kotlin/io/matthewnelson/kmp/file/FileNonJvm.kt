@@ -146,10 +146,10 @@ private fun Path.resolveSlashes(): Path {
         result = result.replace('/', SysPathSep)
     }
 
-    val root = result.rootOrNull() ?: ""
+    val rootSlashes = result.rootOrNull() ?: ""
 
-    var lastWasSlash = root.isNotEmpty()
-    var i = root.length
+    var lastWasSlash = rootSlashes.isNotEmpty()
+    var i = rootSlashes.length
 
     result = buildString {
         while (i < result.length) {
@@ -172,5 +172,5 @@ private fun Path.resolveSlashes(): Path {
         result = result.dropLast(1)
     }
 
-    return root + result
+    return rootSlashes + result
 }
