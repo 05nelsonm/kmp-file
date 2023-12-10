@@ -78,7 +78,7 @@ internal fun Path.normalize(): Path {
         root.endsWith(SysPathSep) -> root
         normalized.isEmpty() -> root
         else -> root + SysPathSep
-    } + list.joinToString("$SysPathSep")
+    } + normalized
 }
 
 @JvmSynthetic

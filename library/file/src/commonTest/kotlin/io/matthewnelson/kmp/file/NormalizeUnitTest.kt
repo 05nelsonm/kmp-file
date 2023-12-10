@@ -27,7 +27,7 @@ class NormalizeUnitTest {
         assertEquals("${s}rooted${s}path", "/rooted/path".toFile().normalize().path)
         assertEquals("${s}rooted", "/../rooted/path/..".toFile().normalize().path)
         assertEquals("${s}path", "/rooted/../path".toFile().normalize().path)
-        assertEquals("$s", "/rooted/../path/..".toFile().normalize().path)
+        assertEquals("$s", "/rooted/../../path/..".toFile().normalize().path)
         assertEquals("${s}rooted", "/rooted/./path/..".toFile().normalize().path)
 
         assertEquals("relative${s}path", "relative/path".toFile().normalize().path)
