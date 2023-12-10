@@ -38,7 +38,3 @@ internal external fun path_isAbsolute(path: String): Boolean
 /** [docs](https://nodejs.org/api/path.html#pathnormalizepath) **/
 @JsName("normalize")
 internal external fun path_normalize(path: String): String
-
-/** [docs](https://nodejs.org/api/path.html#pathresolvepaths) **/
-@JsName("resolve")
-internal external fun path_resolve(vararg paths: String): String

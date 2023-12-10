@@ -71,6 +71,9 @@ internal inline fun Path.driveOrNull(): Path? {
     }
 }
 
+/**
+ * Returns something like `C:\`
+ * */
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun Path.driveRootOrNull(): Path? {
     val drive = driveOrNull() ?: return null
@@ -100,7 +103,3 @@ internal inline fun Path.parentOrNull(): Path? {
         else -> parent
     }
 }
-
-// TODO: Remove???
-@Suppress("NOTHING_TO_INLINE")
-internal expect inline fun Path.resolve(): Path

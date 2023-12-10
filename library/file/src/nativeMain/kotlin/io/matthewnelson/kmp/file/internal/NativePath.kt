@@ -43,11 +43,6 @@ internal actual inline fun Path.normalize(): Path {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-internal actual inline fun Path.resolve(): Path {
-    TODO()
-}
-
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal expect inline fun MemScope.platformBasename(
     path: Path,
