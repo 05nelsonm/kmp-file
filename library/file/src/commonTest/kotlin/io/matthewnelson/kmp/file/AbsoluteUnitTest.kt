@@ -24,9 +24,6 @@ class AbsoluteUnitTest {
 
     @Test
     fun givenFile_whenIsAbsolute_thenReturnsExpected() {
-        assertEquals(isWindows, "\\\\windowsUNC\\path".toFile().isAbsolute())
-        assertEquals(isWindows, "C:\\".toFile().isAbsolute())
-
         // should be relative for all platforms (even windows)
         assertFalse("C:something".toFile().isAbsolute())
         assertFalse("C:".toFile().isAbsolute())
@@ -36,14 +33,16 @@ class AbsoluteUnitTest {
         assertFalse("./something".toFile().isAbsolute())
         assertFalse("../something".toFile().isAbsolute())
         assertFalse("some/path".toFile().isAbsolute())
-
-        // TODO: Fix isAbsolute for Nodejs on windows
-        if (isNodejs && isWindows) return
-        assertEquals(!isWindows, "/".toFile().isAbsolute())
-        assertEquals(!isWindows, "/some/thing".toFile().isAbsolute())
-
         assertFalse("\\".toFile().isAbsolute())
         assertFalse("\\Windows".toFile().isAbsolute())
+
+        // should only be true on Windows
+        assertEquals(isWindows, "\\\\windowsUNC\\path".toFile().isAbsolute())
+        assertEquals(isWindows, "C:\\".toFile().isAbsolute())
+
+        // should never be true on Windows
+        assertEquals(!isWindows, "/".toFile().isAbsolute())
+        assertEquals(!isWindows, "/some/thing".toFile().isAbsolute())
     }
 
     @Test
@@ -72,4 +71,6 @@ class AbsoluteUnitTest {
         //   `C:relative`
         assertTrue(absolute.endsWith("${SysPathSep}relative"))
     }
+
+    // TODO: Windows only test to check if drive letter was replaced with absolute path
 }

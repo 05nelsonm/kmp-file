@@ -84,8 +84,21 @@ public actual class File {
     // use .absolutePath
     public actual fun getAbsolutePath(): String {
         if (isAbsolute()) return realPath
-        val cwd = fs_realpath(".")
-        return cwd + SysPathSep + realPath
+
+        val drive = realPath.driveOrNull()
+
+        return if (drive != null) {
+            // Windows
+            //
+            // Path starts with C: (or some other letter)
+            // and is not rooted (because isAbsolute was false)
+            val resolvedDrive = fs_realpath(drive) + SysPathSep
+            realPath.replaceFirst(drive, resolvedDrive)
+        } else {
+            // Unix or no drive specified
+            //
+            fs_realpath(".") + SysPathSep + realPath
+        }
     }
     // use .absoluteFile
     internal actual fun getAbsoluteFile(): File {

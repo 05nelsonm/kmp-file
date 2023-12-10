@@ -36,7 +36,20 @@ internal actual inline fun Path.basename(): String = path_basename(this)
 internal actual inline fun Path.dirname(): Path = path_dirname(this)
 
 @Suppress("NOTHING_TO_INLINE")
-internal actual inline fun Path.isAbsolute(): Boolean = path_isAbsolute(this)
+internal actual inline fun Path.isAbsolute(): Boolean {
+    if (IsWindows) {
+        // Node.js windows implementation declares
+        // something like `\path` as being absolute.
+        // This is wrong. `path` is relative to the
+        // current working drive in this instance.
+        if (startsWith(SysPathSep)) {
+            // Check for UNC path `\\server_name`
+            return length > 1 && get(1) == SysPathSep
+        }
+    }
+
+    return path_isAbsolute(this)
+}
 
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun Path.normalize(): Path = path_normalize(this)
