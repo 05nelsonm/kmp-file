@@ -15,7 +15,6 @@
  **/
 package io.matthewnelson.kmp.file
 
-actual val isJvm: Boolean = false
-actual val isNative: Boolean = false
-actual val isNodejs: Boolean = true
-actual val isSimulator: Boolean = false
+import io.matthewnelson.kmp.file.internal.IsWindows
+
+actual val isWindows: Boolean by lazy { IsWindows }

@@ -18,7 +18,16 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.DelicateFileApi
+import io.matthewnelson.kmp.file.SysPathSep
 import io.matthewnelson.kmp.file.toIOException
+
+internal actual val IsWindows: Boolean by lazy {
+    try {
+        os_platform() == "win32"
+    } catch (_: Throwable) {
+        SysPathSep == '\\'
+    }
+}
 
 internal actual fun fs_chmod(path: String, mode: String) {
     try {

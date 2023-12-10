@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file
+package io.matthewnelson.kmp.file.internal
 
-actual val isJvm: Boolean = false
-actual val isNative: Boolean = false
-actual val isNodejs: Boolean = true
-actual val isSimulator: Boolean = false
+internal expect val IsWindows: Boolean

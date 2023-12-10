@@ -36,7 +36,15 @@ public expect val SysTempDir: File
 public expect class File {
 
     public constructor(pathname: String)
+
+    /**
+     * Concatenates [parent] with [child]
+     * */
     public constructor(parent: String, child: String)
+
+    /**
+     * Concatenates [parent] path with [child]
+     * */
     public constructor(parent: File, child: String)
 
     public fun isAbsolute(): Boolean
