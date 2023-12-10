@@ -37,14 +37,7 @@ internal actual fun path_isAbsolute(path: String): Boolean {
     }
 
     // does not start with `\` so check drive
-    when (path[0]) {
-        in 'a'..'z' -> {} // continue
-        in 'A'..'Z' -> {} // continue
-        else -> return false
-    }
-
-    // Have a drive letter
-    return if (path.length > 1 && path[1] == ':') {
+    return if (path.driveOrNull() != null) {
         // Check for `\`
         path.length > 2 && path[2] == SysPathSep
     } else {

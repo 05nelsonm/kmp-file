@@ -46,6 +46,7 @@ class FileUnitTest {
 
             assertEquals("\\\\", "\\\\".toFile().path)
             assertEquals("\\\\", "\\\\\\".toFile().path)
+            assertEquals("\\\\", "\\//\\".toFile().path)
             assertEquals("\\\\Absolute", "\\\\Absolute".toFile().path)
             assertEquals("\\\\Absolute", "\\\\\\Absolute".toFile().path)
             assertEquals("\\\\Absolute", "//Absolute".toFile().path)
@@ -57,6 +58,7 @@ class FileUnitTest {
             assertEquals("F:\\", "F:\\\\\\".toFile().path)
         } else {
             assertEquals("/", "/".toFile().path)
+            assertEquals("/", "////".toFile().path)
             assertEquals("\\", "\\".toFile().path)
             assertEquals("\\\\", "\\\\".toFile().path)
             assertEquals("/absolute", "//absolute".toFile().path)

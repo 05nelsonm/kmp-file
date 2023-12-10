@@ -146,7 +146,14 @@ private fun Path.resolveSlashes(): Path {
     val prefix: String = if (IsWindows) {
         result = result.replace('/', SysPathSep)
 
+        val driveRoot = result.driveRootOrNull()
         when {
+            driveRoot != null -> {
+                // preserve drive root
+                i = 3
+                lastWasSlash = true
+                driveRoot
+            }
             result.startsWith("\\\\") -> {
                 // preserve windows UNC path
                 i = 2
@@ -154,7 +161,7 @@ private fun Path.resolveSlashes(): Path {
                 "\\\\"
             }
             result.startsWith(SysPathSep) -> {
-                // preserver relative slash
+                // preserve relative slash
                 i = 1
                 lastWasSlash = true
                 SysPathSep.toString()
