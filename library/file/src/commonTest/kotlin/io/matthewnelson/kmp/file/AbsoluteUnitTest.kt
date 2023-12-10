@@ -30,6 +30,10 @@ class AbsoluteUnitTest {
         // should be relative for all platforms (even windows)
         assertFalse("C:something".toFile().isAbsolute())
         assertFalse("C:".toFile().isAbsolute())
+        assertFalse("".toFile().isAbsolute())
+        assertFalse(".".toFile().isAbsolute())
+        assertFalse("./something".toFile().isAbsolute())
+        assertFalse("some/path".toFile().isAbsolute())
 
         // TODO: Fix isAbsolute for Nodejs on windows
         if (isNodejs && isWindows) return
