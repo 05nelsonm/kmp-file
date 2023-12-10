@@ -29,7 +29,3 @@ actual val isSimulator: Boolean by lazy {
         else -> false
     }
 }
-actual val isWindows: Boolean by lazy {
-    @OptIn(ExperimentalNativeApi::class)
-    Platform.osFamily == OsFamily.WINDOWS
-}

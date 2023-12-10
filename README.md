@@ -19,14 +19,17 @@
 
 A very simple `File` API for Kotlin Multiplatform. It gets the job done.
 
-For `Jvm`, `File` is `typealias` to `java.io.File`
+For `Jvm`, `File` is `typealias` to `java.io.File`. `File` for `nonJvm` is
+operationally equivalent to `Jvm` for consistency across platforms.
 
 ```kotlin
 import io.matthewnelson.kmp.file.*
 
 fun commonMain(f: File) {
-    SYSTEM_PATH_SEPARATOR
-    SYSTEM_TEMP_DIRECTORY
+    // System path separator character (`/` or `\`)
+    SysPathSep
+    // System temporary directory
+    SysTempDir
 
     f.isAbsolute()
     f.exists()
@@ -44,9 +47,13 @@ fun commonMain(f: File) {
     f.canonicalPath()
     f.canonicalFile()
 
+    // equivalent to File("/some/path")
+    val file = "/some/path".toFile()
+
     // resolve child paths
-    val child = f.resolve("child")
-    child.resolve(f)
+    val child = file.resolve("child")
+    println(child.path) // >> `/some/path/child`
+    println(child.resolve(file).path) // >> `/some/path` (file is rooted)
 
     // normalized File (e.g. removal of . and ..)
     f.normalize()

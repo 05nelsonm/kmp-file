@@ -30,6 +30,12 @@ class AbsoluteUnitTest {
         // should be relative for all platforms (even windows)
         assertFalse("C:something".toFile().isAbsolute())
         assertFalse("C:".toFile().isAbsolute())
+        assertFalse("".toFile().isAbsolute())
+        assertFalse(".".toFile().isAbsolute())
+        assertFalse("..".toFile().isAbsolute())
+        assertFalse("./something".toFile().isAbsolute())
+        assertFalse("../something".toFile().isAbsolute())
+        assertFalse("some/path".toFile().isAbsolute())
 
         // TODO: Fix isAbsolute for Nodejs on windows
         if (isNodejs && isWindows) return
@@ -48,8 +54,8 @@ class AbsoluteUnitTest {
         if (isSimulator) return
 
         val rootDir = PROJECT_DIR_PATH.substringBeforeLast(
-            "library"
-                .toFile("file")
+            "library".toFile()
+                .resolve("file")
                 .path
         )
 
@@ -64,6 +70,6 @@ class AbsoluteUnitTest {
         //   `C:\Users\path\to\current\working\dir\C:relative`
         // for a relative path of:
         //   `C:relative`
-        assertTrue(absolute.endsWith("${SYSTEM_PATH_SEPARATOR}relative"))
+        assertTrue(absolute.endsWith("${SysPathSep}relative"))
     }
 }

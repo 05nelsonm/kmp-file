@@ -49,14 +49,13 @@ class ParentUnitTest {
         assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
-    // TODO: Implement toPath() (Native)
-//    @Test
-//    fun givenFile_whenHasTrailingSlashes_thenIgnoresThem() {
-//        val path = buildString {
-//            append(' ')
-//            repeat(3) { append(SYSTEM_PATH_SEPARATOR) }
-//        }
-//
-//        assertNull(File(path).parent)
-//    }
+    @Test
+    fun givenFile_whenHasTrailingSlashes_thenIgnoresThem() {
+        val path = buildString {
+            append(' ')
+            repeat(3) { append(SysPathSep) }
+        }
+
+        assertNull(path.toFile().parentPath)
+    }
 }

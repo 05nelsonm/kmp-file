@@ -54,7 +54,7 @@ fun randomName(): String = Random
     .nextBytes(16)
     .encodeToString(Base16)
 
-fun randomTemp(): File = SYSTEM_TEMP_DIRECTORY
+fun randomTemp(): File = SysTempDir
     .resolve(randomName())
 
 fun ByteArray.sha256(): String = SHA256()

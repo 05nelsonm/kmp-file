@@ -15,7 +15,18 @@
  **/
 package io.matthewnelson.kmp.file
 
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
 class ResolveUnitTest {
 
-    // TODO
+    @Test
+    fun givenFile_whenResolve_thenIsExpected() {
+        assertEquals("", "".toFile().resolve("").path)
+        assertEquals("c", "".toFile().resolve("c").path)
+        assertEquals("p${SysPathSep}c", "p".toFile().resolve("c").path)
+        assertEquals("p${SysPathSep}..", "p".toFile().resolve("..").path)
+        assertEquals("p${SysPathSep}p2${SysPathSep}..", "p".toFile().resolve("p2").resolve("..").path)
+        assertEquals("${SysPathSep}c", "p".toFile().resolve("${SysPathSep}c").path)
+    }
 }

@@ -15,16 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.os_platform
-
 actual val isJvm: Boolean = false
 actual val isNative: Boolean = false
 actual val isNodejs: Boolean = true
 actual val isSimulator: Boolean = false
-actual val isWindows: Boolean by lazy {
-    try {
-        os_platform() == "win32"
-    } catch (_: Throwable) {
-        SYSTEM_PATH_SEPARATOR == '\\'
-    }
-}

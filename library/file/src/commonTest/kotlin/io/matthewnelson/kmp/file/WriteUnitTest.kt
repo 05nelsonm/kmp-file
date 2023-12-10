@@ -20,6 +20,7 @@ import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class WriteUnitTest {
 
@@ -65,6 +66,18 @@ class WriteUnitTest {
             assertEquals(50, read2.size)
         } finally {
             tmp.delete()
+        }
+    }
+
+    @Test
+    fun givenFile_whenDirDoesNotExist_thenThrowsIOException() {
+        val tmp = randomTemp().resolve(randomName()).resolve(randomName())
+
+        try {
+            tmp.writeUtf8("Hello World!")
+            fail()
+        } catch (_: IOException) {
+            // pass
         }
     }
 }

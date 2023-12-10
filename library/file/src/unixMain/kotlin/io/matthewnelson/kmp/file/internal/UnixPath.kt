@@ -17,8 +17,8 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.SYSTEM_PATH_SEPARATOR
+import io.matthewnelson.kmp.file.SysPathSep
 
 internal actual fun path_isAbsolute(path: String): Boolean {
-    return path.startsWith(SYSTEM_PATH_SEPARATOR)
+    return path.startsWith(SysPathSep)
 }

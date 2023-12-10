@@ -15,4 +15,6 @@
  **/
 package io.matthewnelson.kmp.file
 
-public actual val SysPathSep: Char = '/'
+import io.matthewnelson.kmp.file.internal.IsWindows
+
+actual val isWindows: Boolean by lazy { IsWindows }
