@@ -22,13 +22,14 @@ class NormalizeUnitTest {
 
     @Test
     fun givenFile_whenNormalize_thenResolvesAsExpected() {
-        assertEquals("/rooted/path", "/rooted/path".toFile().normalize().path)
-        assertEquals("/rooted", "/rooted/path/..".toFile().normalize().path)
-        assertEquals("/path", "/rooted/../path".toFile().normalize().path)
-        assertEquals("/", "/rooted/../path/..".toFile().normalize().path)
-        assertEquals("/rooted", "/rooted/./path/..".toFile().normalize().path)
+        val s = SysPathSep
+        assertEquals("${s}rooted${s}path", "/rooted/path".toFile().normalize().path)
+        assertEquals("${s}rooted", "/rooted/path/..".toFile().normalize().path)
+        assertEquals("${s}path", "/rooted/../path".toFile().normalize().path)
+        assertEquals("${s}", "/rooted/../path/..".toFile().normalize().path)
+        assertEquals("${s}rooted", "/rooted/./path/..".toFile().normalize().path)
 
-        assertEquals("relative/path", "relative/path".toFile().normalize().path)
+        assertEquals("relative${s}path", "relative/path".toFile().normalize().path)
         assertEquals("relative", "relative/path/..".toFile().normalize().path)
         assertEquals("path", "relative/../path".toFile().normalize().path)
         assertEquals("", "relative/../path/..".toFile().normalize().path)
@@ -37,7 +38,7 @@ class NormalizeUnitTest {
         if (!isWindows) return
 
         assertEquals("\\\\rooted\\path", "\\\\rooted\\path".toFile().normalize().path)
-        assertEquals("\\\\rooted", "\\rooted\\path\\..".toFile().normalize().path)
+        assertEquals("\\\\rooted", "\\\\rooted\\path\\..".toFile().normalize().path)
         assertEquals("C:\\path", "C:\\rooted\\..\\path".toFile().normalize().path)
         assertEquals("\\", "\\rooted\\..\\path\\..".toFile().normalize().path)
         assertEquals("\\rooted\\path", "\\rooted\\.\\path\\.".toFile().normalize().path)
