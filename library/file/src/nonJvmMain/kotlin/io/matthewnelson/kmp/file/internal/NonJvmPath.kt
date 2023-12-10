@@ -71,20 +71,6 @@ internal inline fun Path.driveOrNull(): Path? {
     }
 }
 
-/**
- * Returns something like `C:\`
- * */
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun Path.driveRootOrNull(): Path? {
-    val drive = driveOrNull() ?: return null
-
-    return if (length > 2 && get(2) == SysPathSep) {
-        "${drive}${SysPathSep}"
-    } else {
-        null
-    }
-}
-
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.isAbsolute(): Boolean
 
@@ -101,5 +87,33 @@ internal inline fun Path.parentOrNull(): Path? {
         parent.isEmpty() -> null
         parent == this -> null
         else -> parent
+    }
+}
+
+internal fun Path.rootOrNull(): Path? = if (IsWindows) {
+    val driveRoot = driveRootOrNull()
+    when {
+        // drive letter with slash (e.g. `C:\`)
+        driveRoot != null -> driveRoot
+        // Absolute UNC path (e.g. `\\server_name`)
+        startsWith("$SysPathSep$SysPathSep") -> "$SysPathSep$SysPathSep"
+        // Relative path (e.g. `\Windows`)
+        startsWith(SysPathSep) -> "$SysPathSep"
+        else -> null
+    }
+} else {
+    // Unix root
+    val c = firstOrNull()
+    if (c == SysPathSep) "$c" else null
+}
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun Path.driveRootOrNull(): Path? {
+    val drive = driveOrNull() ?: return null
+
+    return if (length > 2 && get(2) == SysPathSep) {
+        "${drive}${SysPathSep}"
+    } else {
+        null
     }
 }

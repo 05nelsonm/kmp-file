@@ -141,45 +141,15 @@ private inline fun Path.toUTF8(): Path = encodeToByteArray()
 private fun Path.resolveSlashes(): Path {
     if (isEmpty()) return this
     var result = this
-    var lastWasSlash = false
-    var i = 0
 
-    val prefix: String = if (IsWindows) {
+    if (IsWindows) {
         result = result.replace('/', SysPathSep)
-
-        val driveRoot = result.driveRootOrNull()
-        when {
-            driveRoot != null -> {
-                // preserve drive root
-                i = 3
-                lastWasSlash = true
-                driveRoot
-            }
-            result.startsWith("\\\\") -> {
-                // preserve windows UNC path
-                i = 2
-                lastWasSlash = true
-                "\\\\"
-            }
-            result.startsWith(SysPathSep) -> {
-                // preserve relative slash
-                i = 1
-                lastWasSlash = true
-                SysPathSep.toString()
-            }
-            else -> ""
-        }
-    } else {
-        // preserve unix root
-        val c = result.first()
-        if (c == SysPathSep) {
-            i = 1
-            lastWasSlash = true
-            c.toString()
-        } else {
-            ""
-        }
     }
+
+    val root = result.rootOrNull() ?: ""
+
+    var lastWasSlash = root.isNotEmpty()
+    var i = root.length
 
     result = buildString {
         while (i < result.length) {
@@ -202,5 +172,5 @@ private fun Path.resolveSlashes(): Path {
         result = result.dropLast(1)
     }
 
-    return prefix + result
+    return root + result
 }
