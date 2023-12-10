@@ -43,10 +43,10 @@ public actual fun File.readBytes(): ByteArray = _readBytes()
 @Throws(IOException::class)
 public actual fun File.readUtf8(): String = _readText()
 
+public actual fun File.resolve(relative: File): File = _resolve(relative)
+
 @Throws(IOException::class)
 public actual fun File.writeBytes(array: ByteArray) { _writeBytes(array) }
 
 @Throws(IOException::class)
 public actual fun File.writeUtf8(text: String) { _writeText(text) }
-
-public actual fun File.resolve(relative: File): File = _resolve(relative)

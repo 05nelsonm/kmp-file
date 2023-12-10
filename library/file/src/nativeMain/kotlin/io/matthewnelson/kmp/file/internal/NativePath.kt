@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.SysPathSep
 import kotlinx.cinterop.*
 
 @Suppress("NOTHING_TO_INLINE")
@@ -35,11 +36,6 @@ internal actual inline fun Path.dirname(): Path {
     return memScoped {
         platformDirname(this@dirname)?.toKString() ?: ""
     }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-internal actual inline fun Path.normalize(): Path {
-    TODO()
 }
 
 @Suppress("NOTHING_TO_INLINE")

@@ -34,7 +34,3 @@ internal external fun path_dirname(path: String): String
 /** [docs](https://nodejs.org/api/path.html#pathisabsolutepath) **/
 @JsName("isAbsolute")
 internal external fun path_isAbsolute(path: String): Boolean
-
-/** [docs](https://nodejs.org/api/path.html#pathnormalizepath) **/
-@JsName("normalize")
-internal external fun path_normalize(path: String): String

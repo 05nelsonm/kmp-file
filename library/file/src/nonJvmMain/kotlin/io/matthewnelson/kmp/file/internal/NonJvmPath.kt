@@ -74,8 +74,31 @@ internal inline fun Path.driveOrNull(): Path? {
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.isAbsolute(): Boolean
 
-@Suppress("NOTHING_TO_INLINE")
-internal expect inline fun Path.normalize(): Path
+internal fun Path.normalize(): Path {
+    if (isEmpty()) return this
+
+    val root = rootOrNull() ?: ""
+
+    val segments = subSequence(root.length, length).split(SysPathSep)
+
+    val list = mutableListOf<String>()
+
+    for (segment in segments) {
+        when (segment) {
+            "." -> {}
+            ".." -> {
+                if (list.isNotEmpty() && list.last() != "..") {
+                    list.removeAt(list.size -1)
+                } else {
+                    list.add(segment)
+                }
+            }
+            else -> list.add(segment)
+        }
+    }
+
+    return root + list.joinToString("$SysPathSep")
+}
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun Path.parentOrNull(): Path? {
