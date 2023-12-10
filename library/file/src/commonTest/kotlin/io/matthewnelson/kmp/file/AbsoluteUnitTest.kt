@@ -46,6 +46,13 @@ class AbsoluteUnitTest {
     }
 
     @Test
+    fun givenFile_whenPathEmpty_thenResolvesCWD() {
+        val absolute = "".toFile().absolutePath
+        assertTrue(!absolute.endsWith(SysPathSep))
+        assertTrue(absolute.isNotBlank())
+    }
+
+    @Test
     fun givenFile_whenRelativePath_thenResolvesCWD() {
         // Do not run in simulators. The CWD will
         // register as whatever the simulators environment

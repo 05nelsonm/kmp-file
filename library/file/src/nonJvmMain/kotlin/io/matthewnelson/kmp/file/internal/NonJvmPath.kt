@@ -21,6 +21,32 @@ import io.matthewnelson.kmp.file.SysPathSep
 
 internal typealias Path = String
 
+internal fun Path.absolute(): Path {
+    if (isAbsolute()) return this
+
+    val drive = driveOrNull()
+
+    return if (drive != null) {
+        // Windows
+        //
+        // Path starts with C: (or some other letter)
+        // and is not rooted (because isAbsolute was false)
+        val resolvedDrive = fs_realpath(drive) + SysPathSep
+        replaceFirst(drive, resolvedDrive)
+    } else {
+        // Unix or no drive specified
+
+        val cwd = fs_realpath(".")
+        if (isEmpty() || startsWith(SysPathSep)) {
+            // Could be on windows where `\path`
+            // is a thing (and would not be absolute)
+            cwd + this
+        } else {
+            cwd + SysPathSep + this
+        }
+    }
+}
+
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.basename(): String
 

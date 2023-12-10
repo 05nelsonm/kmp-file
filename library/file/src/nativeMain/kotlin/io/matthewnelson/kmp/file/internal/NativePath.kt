@@ -29,6 +29,7 @@ internal actual inline fun Path.basename(): String {
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun Path.dirname(): Path {
     @OptIn(ExperimentalForeignApi::class)
     return memScoped {
