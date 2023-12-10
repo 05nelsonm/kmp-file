@@ -52,6 +52,7 @@ class NormalizeUnitTest {
         assertEquals("C:path", "C:relative\\..\\path".toFile().normalize().path)
         assertEquals("C:relative", "C:relative\\path\\..".toFile().normalize().path)
         assertEquals("C:", "C:relative\\..\\path\\..".toFile().normalize().path)
+        assertEquals("C:", "C:relative\\..\\..\\.\\path\\..".toFile().normalize().path)
         assertEquals("C:relative\\path", "C:relative\\.\\path".toFile().normalize().path)
     }
 }

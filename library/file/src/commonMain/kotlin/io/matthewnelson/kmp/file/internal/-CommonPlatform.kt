@@ -81,6 +81,7 @@ internal fun Path.normalize(): Path {
     } + list.joinToString("$SysPathSep")
 }
 
+@JvmSynthetic
 internal fun Path.rootOrNull(
     normalizing: Boolean = false
 ): Path? = if (IsWindows) {
