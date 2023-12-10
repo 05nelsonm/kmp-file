@@ -51,7 +51,7 @@ public actual class File {
     @Throws(IOException::class)
     public fun chmod(mode: String) { fs_chmod(realPath, mode) }
 
-    public actual fun isAbsolute(): Boolean = path_isAbsolute(realPath)
+    public actual fun isAbsolute(): Boolean = realPath.isAbsolute()
 
     public actual fun exists(): Boolean = fs_exists(realPath)
 
@@ -69,9 +69,9 @@ public actual class File {
     public actual fun mkdirs(): Boolean = fs_mkdirs(realPath)
 
     // use .name
-    internal actual fun getName(): String = path_basename(realPath)
+    internal actual fun getName(): String = realPath.basename()
     // use .parentPath
-    internal actual fun getParent(): String? = path_parent(realPath)
+    internal actual fun getParent(): String? = realPath.parentOrNull()
     // use .parentFile
     internal actual fun getParentFile(): File? {
         val path = getParent() ?: return null
@@ -111,18 +111,18 @@ public actual class File {
 }
 
 public actual fun File.normalize(): File {
-    val normalized = path_normalize(path)
+    val normalized = path.normalize()
     if (normalized == path) return this
     return File(normalized, direct = null)
 }
 
 public actual fun File.resolve(relative: File): File = when {
     path.isEmpty() -> relative
-    relative.path.isEmpty() -> this
+
     // Functionality on Jvm is that if relative is
-    // rooted, it will be returned instead of concatenating
-    // it to the parent path. isAbsolute would return false
-    // if the path on windows was something like `\Windows`
+    // rooted it will be returned instead of concatenating
+    // it with the parent path. isAbsolute would return false
+    // if the path on windows was relative, like `\Windows`.
     relative.path.startsWith(SysPathSep) -> relative
     relative.isAbsolute() -> relative
     else -> File(path.concatenateWith(relative.path))

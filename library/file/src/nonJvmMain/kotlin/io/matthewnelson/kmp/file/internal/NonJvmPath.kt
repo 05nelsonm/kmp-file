@@ -13,30 +13,68 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress")
 
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.SysPathSep
 
-internal expect fun path_basename(path: String): String
+internal typealias Path = String
 
-internal expect fun path_isAbsolute(path: String): Boolean
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun Path.basename(): String
 
-internal fun path_parent(path: String): String? {
-    if (!path.contains(SysPathSep)) return null
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun Path.dirname(): Path
 
-    val parent = path_dirname(path)
+/**
+ * returns something like `C:`
+ * */
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun Path.driveOrNull(): Path? {
+    if (!IsWindows) return null
+
+    return if (length > 1 && get(1) == ':') {
+        when (val letter = get(0)) {
+            in 'a'..'z' -> "${letter}:"
+            in 'A'..'Z' -> "${letter}:"
+            else -> null
+        }
+    } else {
+        null
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun Path.driveRootOrNull(): Path? {
+    val drive = driveOrNull() ?: return null
+
+    return if (length > 2 && get(2) == SysPathSep) {
+        "${drive}${SysPathSep}"
+    } else {
+        null
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun Path.isAbsolute(): Boolean
+
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun Path.normalize(): Path
+
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun Path.parentOrNull(): Path? {
+    if (!contains(SysPathSep)) return null
+
+    val parent = dirname()
 
     return when {
         parent.isEmpty() -> null
-        parent == path -> null
+        parent == this -> null
         else -> parent
     }
 }
 
-internal expect fun path_normalize(path: String): String
-
-internal expect fun path_resolve(vararg paths: String): String
-
-internal expect fun path_dirname(path: String): String
+// TODO: Remove???
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun Path.resolve(): Path

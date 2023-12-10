@@ -19,38 +19,41 @@ package io.matthewnelson.kmp.file.internal
 
 import kotlinx.cinterop.*
 
-internal actual fun path_basename(path: String): String {
-    if (path.isEmpty()) return path
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun Path.basename(): String {
+    if (isEmpty()) return this
 
     @OptIn(ExperimentalForeignApi::class)
     return memScoped {
-        path_platform_basename(path)?.toKString() ?: ""
+        platformBasename(this@basename)?.toKString() ?: ""
     }
 }
 
-internal actual fun path_normalize(path: String): String {
-    TODO()
-}
-
-internal actual fun path_resolve(vararg paths: String): String {
-    TODO()
-}
-
-internal actual fun path_dirname(path: String): String {
+internal actual inline fun Path.dirname(): Path {
     @OptIn(ExperimentalForeignApi::class)
     return memScoped {
-        path_platform_dirname(path)?.toKString() ?: ""
+        platformDirname(this@dirname)?.toKString() ?: ""
     }
 }
 
 @Suppress("NOTHING_TO_INLINE")
+internal actual inline fun Path.normalize(): Path {
+    TODO()
+}
+
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun Path.resolve(): Path {
+    TODO()
+}
+
+@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
-internal expect inline fun MemScope.path_platform_basename(
-    path: String,
+internal expect inline fun MemScope.platformBasename(
+    path: Path,
 ): CPointer<ByteVar>?
 
 @Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
-internal expect inline fun MemScope.path_platform_dirname(
-    path: String,
+internal expect inline fun MemScope.platformDirname(
+    path: Path,
 ): CPointer<ByteVar>?

@@ -23,12 +23,12 @@ import platform.posix.dirname
 
 @Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
-internal actual inline fun MemScope.path_platform_basename(
-    path: String,
+internal actual inline fun MemScope.platformBasename(
+    path: Path,
 ): CPointer<ByteVar>? = __xpg_basename(path.cstr.ptr)
 
 @Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
-internal actual inline fun MemScope.path_platform_dirname(
-    path: String,
+internal actual inline fun MemScope.platformDirname(
+    path: Path,
 ): CPointer<ByteVar>? = dirname(path.cstr.ptr)
