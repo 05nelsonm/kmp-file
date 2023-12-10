@@ -34,10 +34,10 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString
 import platform.posix.getenv
 
-public actual val SYSTEM_PATH_SEPARATOR: Char = '\\'
+public actual val SysPathSep: Char = '\\'
 
 @OptIn(ExperimentalForeignApi::class)
-public actual val SYSTEM_TEMP_DIRECTORY: File by lazy {
+public actual val SysTempDir: File by lazy {
     // Windows' built-in APIs check the TEMP, TMP, and USERPROFILE environment variables in order.
     // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-gettemppatha?redirectedfrom=MSDN
     val temp = getenv("TEMP")

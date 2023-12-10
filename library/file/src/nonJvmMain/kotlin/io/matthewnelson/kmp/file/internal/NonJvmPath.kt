@@ -17,7 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.SYSTEM_PATH_SEPARATOR
+import io.matthewnelson.kmp.file.SysPathSep
 
 internal expect fun path_basename(path: String): String
 
@@ -30,12 +30,12 @@ internal fun path_join(
 ): String = when {
     parent.isEmpty() -> child
     path_isAbsolute(child) -> child
-    parent.endsWith(SYSTEM_PATH_SEPARATOR) -> parent + child
-    else -> parent + SYSTEM_PATH_SEPARATOR + child
+    parent.endsWith(SysPathSep) -> parent + child
+    else -> parent + SysPathSep + child
 }
 
 internal fun path_parent(path: String): String? {
-    if (!path.contains(SYSTEM_PATH_SEPARATOR)) return null
+    if (!path.contains(SysPathSep)) return null
 
     val parent = path_dirname(path)
 

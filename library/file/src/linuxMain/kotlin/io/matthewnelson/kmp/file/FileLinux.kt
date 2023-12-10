@@ -20,7 +20,7 @@ import kotlinx.cinterop.toKString
 import platform.posix.getenv
 
 @OptIn(ExperimentalForeignApi::class)
-public actual val SYSTEM_TEMP_DIRECTORY: File by lazy {
+public actual val SysTempDir: File by lazy {
     val tmpdir = getenv("TMPDIR")
     (tmpdir?.toKString() ?: "/tmp").toFile()
 }

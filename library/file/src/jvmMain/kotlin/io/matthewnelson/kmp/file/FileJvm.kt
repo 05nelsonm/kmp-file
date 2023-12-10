@@ -28,10 +28,10 @@ import kotlin.io.writeText as _writeText
 public actual typealias File = java.io.File
 
 @JvmField
-public actual val SYSTEM_PATH_SEPARATOR: Char = File.separatorChar
+public actual val SysPathSep: Char = File.separatorChar
 
 @JvmField
-public actual val SYSTEM_TEMP_DIRECTORY: File = System
+public actual val SysTempDir: File = System
     .getProperty("java.io.tmpdir")
     .toFile()
 

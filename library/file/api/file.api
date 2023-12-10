@@ -18,8 +18,8 @@ public final class io/matthewnelson/kmp/file/File {
 }
 
 public final class io/matthewnelson/kmp/file/FileJvm {
-	public static final field SYSTEM_PATH_SEPARATOR C
-	public static final field SYSTEM_TEMP_DIRECTORY Ljava/io/File;
+	public static final field SysPathSep C
+	public static final field SysTempDir Ljava/io/File;
 	public static final fun normalize (Ljava/io/File;)Ljava/io/File;
 	public static final fun readBytes (Ljava/io/File;)[B
 	public static final fun readUtf8 (Ljava/io/File;)Ljava/lang/String;

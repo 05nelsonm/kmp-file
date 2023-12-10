@@ -25,6 +25,6 @@ actual val isWindows: Boolean by lazy {
     try {
         os_platform() == "win32"
     } catch (_: Throwable) {
-        SYSTEM_PATH_SEPARATOR == '\\'
+        SysPathSep == '\\'
     }
 }

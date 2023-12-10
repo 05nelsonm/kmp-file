@@ -21,15 +21,14 @@ package io.matthewnelson.kmp.file
 import kotlin.jvm.JvmName
 
 /**
- * Most all systems it will be `/`, but for Windows because it is
- * special it will be `\`
+ * The operating system's path separator character
  * */
-public expect val SYSTEM_PATH_SEPARATOR: Char
+public expect val SysPathSep: Char
 
 /**
  * The system temporary directory
  * */
-public expect val SYSTEM_TEMP_DIRECTORY: File
+public expect val SysTempDir: File
 
 /**
  * A File
@@ -49,7 +48,7 @@ public expect class File {
 
     // use .name
     internal fun getName(): String
-    // use .parent
+    // use .parentPath
     internal fun getParent(): String?
     // use .parentFile
     internal fun getParentFile(): File?

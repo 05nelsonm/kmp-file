@@ -17,7 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.SYSTEM_PATH_SEPARATOR
+import io.matthewnelson.kmp.file.SysPathSep
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -30,10 +30,10 @@ import platform.windows.PathIsRelativeA
 
 internal actual fun path_isAbsolute(path: String): Boolean {
     if (path.isEmpty()) return false
-    if (path[0] == SYSTEM_PATH_SEPARATOR) {
+    if (path[0] == SysPathSep) {
         // UNC path (rooted):    `\\server_name`
         // Otherwise (relative): `\` or `\Windows`
-        return path.length > 1 && path[1] == SYSTEM_PATH_SEPARATOR
+        return path.length > 1 && path[1] == SysPathSep
     }
 
     // does not start with `\` so check drive
@@ -46,7 +46,7 @@ internal actual fun path_isAbsolute(path: String): Boolean {
     // Have a drive letter
     return if (path.length > 1 && path[1] == ':') {
         // Check for `\`
-        path.length > 2 && path[2] == SYSTEM_PATH_SEPARATOR
+        path.length > 2 && path[2] == SysPathSep
     } else {
         // Fallback to shell function. Returns FALSE if absolute
         // https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-pathisrelativea?redirectedfrom=MSDN

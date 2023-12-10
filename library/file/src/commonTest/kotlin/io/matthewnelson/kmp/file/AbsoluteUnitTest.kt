@@ -68,6 +68,6 @@ class AbsoluteUnitTest {
         //   `C:\Users\path\to\current\working\dir\C:relative`
         // for a relative path of:
         //   `C:relative`
-        assertTrue(absolute.endsWith("${SYSTEM_PATH_SEPARATOR}relative"))
+        assertTrue(absolute.endsWith("${SysPathSep}relative"))
     }
 }

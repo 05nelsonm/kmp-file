@@ -15,4 +15,4 @@
  **/
 package io.matthewnelson.kmp.file
 
-public actual val SYSTEM_PATH_SEPARATOR: Char = '/'
+public actual val SysPathSep: Char = '/'

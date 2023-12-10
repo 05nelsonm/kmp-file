@@ -21,7 +21,7 @@ import io.matthewnelson.kmp.file.internal.*
 import io.matthewnelson.kmp.file.internal.errorCode
 import io.matthewnelson.kmp.file.internal.path_sep
 
-public actual val SYSTEM_PATH_SEPARATOR: Char by lazy {
+public actual val SysPathSep: Char by lazy {
     try {
         path_sep.first()
     } catch (_: Throwable) {
@@ -29,7 +29,7 @@ public actual val SYSTEM_PATH_SEPARATOR: Char by lazy {
     }
 }
 
-public actual val SYSTEM_TEMP_DIRECTORY: File by lazy {
+public actual val SysTempDir: File by lazy {
     try {
         os_tmpdir()
     } catch (_: Throwable) {
