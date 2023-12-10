@@ -18,7 +18,6 @@
 
 package io.matthewnelson.kmp.file
 
-import kotlin.io.normalize as _normalize
 import kotlin.io.readText as _readText
 import kotlin.io.readBytes as _readBytes
 import kotlin.io.resolve as _resolve
@@ -35,18 +34,16 @@ public actual val SysTempDir: File = System
 
 public actual typealias File = java.io.File
 
-public actual fun File.normalize(): File = _normalize()
-
 @Throws(IOException::class)
 public actual fun File.readBytes(): ByteArray = _readBytes()
 
 @Throws(IOException::class)
 public actual fun File.readUtf8(): String = _readText()
 
+public actual fun File.resolve(relative: File): File = _resolve(relative)
+
 @Throws(IOException::class)
 public actual fun File.writeBytes(array: ByteArray) { _writeBytes(array) }
 
 @Throws(IOException::class)
 public actual fun File.writeUtf8(text: String) { _writeText(text) }
-
-public actual fun File.resolve(relative: File): File = _resolve(relative)

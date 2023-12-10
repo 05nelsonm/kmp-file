@@ -19,8 +19,13 @@
 
 A very simple `File` API for Kotlin Multiplatform. It gets the job done.
 
-For `Jvm`, `File` is `typealias` to `java.io.File`. `File` for `nonJvm` is
-operationally equivalent to `Jvm` for consistency across platforms.
+For `Jvm`, `File` is `typealias` to `java.io.File`, and `commonMain` extensions 
+point to `kotlin.io` extensions so that the footprint is very small for 
+Java/Android only consumers.
+
+The `File` implementation for `nonJvm` is operationally equivalent to 
+`Jvm` for consistency across platforms. Please submit an [issue][url-issue] 
+if you discover any inconsistencies (e.g. path resolution).
 
 ```kotlin
 import io.matthewnelson.kmp.file.*
@@ -175,3 +180,4 @@ fun nativeMain(f1: File, f2: File) {
 [url-latest-release]: https://github.com/05nelsonm/kmp-file/releases/latest
 [url-license]: https://www.apache.org/licenses/LICENSE-2.0
 [url-kotlin]: https://kotlinlang.org
+[url-issue]: https://github.com/05nelsonm/kmp-file/issues

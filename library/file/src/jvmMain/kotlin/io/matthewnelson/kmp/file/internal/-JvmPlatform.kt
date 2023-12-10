@@ -13,8 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress")
-
 package io.matthewnelson.kmp.file.internal
 
-internal expect val IsWindows: Boolean
+import java.io.File
+
+@JvmField
+@JvmSynthetic
+internal actual val IsWindows: Boolean = System.getProperty("os.name")
+    ?.ifBlank { null }
+    ?.contains("windows", ignoreCase = true)
+    ?: (File.separatorChar == '\\')

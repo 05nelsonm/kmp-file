@@ -19,7 +19,31 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.SysPathSep
 
-internal typealias Path = String
+internal fun Path.absolute(): Path {
+    if (isAbsolute()) return this
+
+    val drive = driveOrNull()
+
+    return if (drive != null) {
+        // Windows
+        //
+        // Path starts with C: (or some other letter)
+        // and is not rooted (because isAbsolute was false)
+        val resolvedDrive = fs_realpath(drive) + SysPathSep
+        replaceFirst(drive, resolvedDrive)
+    } else {
+        // Unix or no drive specified
+
+        val cwd = fs_realpath(".")
+        if (isEmpty() || startsWith(SysPathSep)) {
+            // Could be on windows where `\path`
+            // is a thing (and would not be absolute)
+            cwd + this
+        } else {
+            cwd + SysPathSep + this
+        }
+    }
+}
 
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.basename(): String
@@ -27,40 +51,8 @@ internal expect inline fun Path.basename(): String
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.dirname(): Path
 
-/**
- * returns something like `C:`
- * */
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun Path.driveOrNull(): Path? {
-    if (!IsWindows) return null
-
-    return if (length > 1 && get(1) == ':') {
-        when (val letter = get(0)) {
-            in 'a'..'z' -> "${letter}:"
-            in 'A'..'Z' -> "${letter}:"
-            else -> null
-        }
-    } else {
-        null
-    }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun Path.driveRootOrNull(): Path? {
-    val drive = driveOrNull() ?: return null
-
-    return if (length > 2 && get(2) == SysPathSep) {
-        "${drive}${SysPathSep}"
-    } else {
-        null
-    }
-}
-
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.isAbsolute(): Boolean
-
-@Suppress("NOTHING_TO_INLINE")
-internal expect inline fun Path.normalize(): Path
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun Path.parentOrNull(): Path? {
@@ -74,7 +66,3 @@ internal inline fun Path.parentOrNull(): Path? {
         else -> parent
     }
 }
-
-// TODO: Remove???
-@Suppress("NOTHING_TO_INLINE")
-internal expect inline fun Path.resolve(): Path

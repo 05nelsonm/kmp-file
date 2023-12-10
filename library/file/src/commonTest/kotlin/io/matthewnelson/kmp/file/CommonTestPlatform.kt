@@ -47,7 +47,6 @@ expect val isJvm: Boolean
 expect val isNative: Boolean
 expect val isNodejs: Boolean
 expect val isSimulator: Boolean
-expect val isWindows: Boolean
 
 fun randomName(): String = Random
     .Default

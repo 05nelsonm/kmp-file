@@ -15,6 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -37,12 +38,19 @@ class AbsoluteUnitTest {
         assertFalse("\\Windows".toFile().isAbsolute())
 
         // should only be true on Windows
-        assertEquals(isWindows, "\\\\windowsUNC\\path".toFile().isAbsolute())
-        assertEquals(isWindows, "C:\\".toFile().isAbsolute())
+        assertEquals(IsWindows, "\\\\windowsUNC\\path".toFile().isAbsolute())
+        assertEquals(IsWindows, "C:\\".toFile().isAbsolute())
 
         // should never be true on Windows
-        assertEquals(!isWindows, "/".toFile().isAbsolute())
-        assertEquals(!isWindows, "/some/thing".toFile().isAbsolute())
+        assertEquals(!IsWindows, "/".toFile().isAbsolute())
+        assertEquals(!IsWindows, "/some/thing".toFile().isAbsolute())
+    }
+
+    @Test
+    fun givenFile_whenPathEmpty_thenResolvesCWD() {
+        val absolute = "".toFile().absolutePath
+        assertTrue(!absolute.endsWith(SysPathSep))
+        assertTrue(absolute.isNotBlank())
     }
 
     @Test
@@ -70,7 +78,7 @@ class AbsoluteUnitTest {
 
     @Test
     fun givenWindows_whenRelativeDrivePath_thenResolvesToCurrentWorkingDirectory() {
-        if (!isWindows) return
+        if (!IsWindows) return
 
         val projectRoot = projectRootDir()
 

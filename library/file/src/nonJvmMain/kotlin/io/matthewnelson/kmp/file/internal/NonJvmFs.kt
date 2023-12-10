@@ -23,7 +23,7 @@ import io.matthewnelson.kmp.file.IOException
 internal fun fs_canonicalize(path: String): String {
     if (path.isEmpty()) return fs_realpath(".")
 
-    val resolved = path.resolve()
+    val resolved = path.absolute().normalize()
 
     var existingPath = resolved
 

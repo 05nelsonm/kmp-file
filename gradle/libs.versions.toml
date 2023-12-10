@@ -9,12 +9,12 @@ gradle-publish-maven = "0.25.3"
 kotlincrypto-hash = "0.4.0"
 
 [libraries]
-encoding-base16 = { module = "io.matthewnelson.encoding:base16", version.ref = "encoding" }
-
 gradle-kmp-configuration = { module = "io.matthewnelson:gradle-kmp-configuration-plugin", version.ref = "gradle-kmp-configuration" }
 gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "gradle-kotlin" }
 gradle-publish-maven = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "gradle-publish-maven" }
 
+# tests
+encoding-base16 = { module = "io.matthewnelson.encoding:base16", version.ref = "encoding" }
 kotlincrypto-hash-sha2 = { module = "org.kotlincrypto.hash:sha2", version.ref = "kotlincrypto-hash" }
 
 [plugins]

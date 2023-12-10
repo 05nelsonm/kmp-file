@@ -51,12 +51,6 @@ internal actual inline fun Path.isAbsolute(): Boolean {
     return path_isAbsolute(this)
 }
 
-@Suppress("NOTHING_TO_INLINE")
-internal actual inline fun Path.normalize(): Path = path_normalize(this)
-
-@Suppress("NOTHING_TO_INLINE")
-internal actual inline fun Path.resolve(): Path = path_resolve(this)
-
 internal actual fun fs_chmod(path: String, mode: String) {
     try {
         fs_chmodSync(path, mode)

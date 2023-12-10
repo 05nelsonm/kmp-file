@@ -15,6 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -27,7 +28,7 @@ class FileUnitTest {
     }
 
     @Test
-    fun givenFile_whenInsaneSlashes_thenAreResolved() {
+    fun givenFile_whenInsanePaths_thenResolvesCorrectly() {
         // windows should replace all unix path separators with `\` before
         assertEquals("relative${SysPathSep}path", "relative////path///".toFile().path)
         assertEquals("relative${SysPathSep}path${SysPathSep}.", "relative////path///.".toFile().path)
@@ -38,7 +39,7 @@ class FileUnitTest {
         assertEquals("...", "...".toFile().path)
         assertEquals("....", "....".toFile().path)
 
-        if (isWindows) {
+        if (IsWindows) {
             assertEquals("\\", "\\".toFile().path)
             assertEquals("\\Relative", "\\Relative".toFile().path)
             assertEquals("\\Relative", "/Relative".toFile().path)

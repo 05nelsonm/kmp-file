@@ -82,24 +82,7 @@ public actual class File {
     internal actual fun getPath(): String = realPath
 
     // use .absolutePath
-    public actual fun getAbsolutePath(): String {
-        if (isAbsolute()) return realPath
-
-        val drive = realPath.driveOrNull()
-
-        return if (drive != null) {
-            // Windows
-            //
-            // Path starts with C: (or some other letter)
-            // and is not rooted (because isAbsolute was false)
-            val resolvedDrive = fs_realpath(drive) + SysPathSep
-            realPath.replaceFirst(drive, resolvedDrive)
-        } else {
-            // Unix or no drive specified
-            //
-            fs_realpath(".") + SysPathSep + realPath
-        }
-    }
+    public actual fun getAbsolutePath(): String = realPath.absolute()
     // use .absoluteFile
     internal actual fun getAbsoluteFile(): File {
         val path = getAbsolutePath()
@@ -121,12 +104,6 @@ public actual class File {
     override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
     override fun hashCode(): Int = realPath.hashCode() xor 1234321
     override fun toString(): String = realPath
-}
-
-public actual fun File.normalize(): File {
-    val normalized = path.normalize()
-    if (normalized == path) return this
-    return File(normalized, direct = null)
 }
 
 public actual fun File.resolve(relative: File): File = when {
@@ -158,45 +135,15 @@ private inline fun Path.toUTF8(): Path = encodeToByteArray()
 private fun Path.resolveSlashes(): Path {
     if (isEmpty()) return this
     var result = this
-    var lastWasSlash = false
-    var i = 0
 
-    val prefix: String = if (IsWindows) {
+    if (IsWindows) {
         result = result.replace('/', SysPathSep)
-
-        val driveRoot = result.driveRootOrNull()
-        when {
-            driveRoot != null -> {
-                // preserve drive root
-                i = 3
-                lastWasSlash = true
-                driveRoot
-            }
-            result.startsWith("\\\\") -> {
-                // preserve windows UNC path
-                i = 2
-                lastWasSlash = true
-                "\\\\"
-            }
-            result.startsWith(SysPathSep) -> {
-                // preserve relative slash
-                i = 1
-                lastWasSlash = true
-                SysPathSep.toString()
-            }
-            else -> ""
-        }
-    } else {
-        // preserve unix root
-        val c = result.first()
-        if (c == SysPathSep) {
-            i = 1
-            lastWasSlash = true
-            c.toString()
-        } else {
-            ""
-        }
     }
+
+    val rootSlashes = result.rootOrNull() ?: ""
+
+    var lastWasSlash = rootSlashes.isNotEmpty()
+    var i = rootSlashes.length
 
     result = buildString {
         while (i < result.length) {
@@ -219,5 +166,5 @@ private fun Path.resolveSlashes(): Path {
         result = result.dropLast(1)
     }
 
-    return prefix + result
+    return rootSlashes + result
 }

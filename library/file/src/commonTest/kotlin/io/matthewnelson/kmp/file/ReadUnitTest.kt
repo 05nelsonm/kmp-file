@@ -15,6 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -24,7 +25,7 @@ class ReadUnitTest {
 
     @Test
     fun givenFile_whenReadBytes_thenSha256MatchesExpected() {
-        val expected = if (isWindows) {
+        val expected = if (IsWindows) {
             // Windows will produce a different result because of its
             // EOL value.
             "9d8f1dc39b0fc445f5c85b23dc6cdcb156bb166e0974c62ee5ffa82b590d417c"
