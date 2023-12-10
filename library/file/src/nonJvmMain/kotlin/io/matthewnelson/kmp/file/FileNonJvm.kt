@@ -106,12 +106,6 @@ public actual class File {
     override fun toString(): String = realPath
 }
 
-public actual fun File.normalize(): File {
-    val normalized = path.normalize()
-    if (normalized == path) return this
-    return File(normalized, direct = null)
-}
-
 public actual fun File.resolve(relative: File): File = when {
     path.isEmpty() -> relative
 

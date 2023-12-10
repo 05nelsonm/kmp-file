@@ -19,8 +19,6 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.SysPathSep
 
-internal typealias Path = String
-
 internal fun Path.absolute(): Path {
     if (isAbsolute()) return this
 
@@ -53,57 +51,8 @@ internal expect inline fun Path.basename(): String
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.dirname(): Path
 
-/**
- * returns something like `C:`
- * */
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun Path.driveOrNull(): Path? {
-    if (!IsWindows) return null
-
-    return if (length > 1 && get(1) == ':') {
-        when (val letter = get(0)) {
-            in 'a'..'z' -> "${letter}:"
-            in 'A'..'Z' -> "${letter}:"
-            else -> null
-        }
-    } else {
-        null
-    }
-}
-
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.isAbsolute(): Boolean
-
-internal fun Path.normalize(): Path {
-    if (isEmpty()) return this
-
-    val root = rootOrNull(includeUNCServerName = true) ?: ""
-
-    val segments = subSequence(root.length, length).split(SysPathSep)
-
-    val list = mutableListOf<String>()
-
-    for (segment in segments) {
-        when (segment) {
-            "", "." -> {}
-            ".." -> {
-                if (list.isNotEmpty() && list.last() != "..") {
-                    list.removeAt(list.size -1)
-                } else {
-                    list.add(segment)
-                }
-            }
-            else -> list.add(segment)
-        }
-    }
-
-    return when {
-        root.isEmpty() -> root
-        root.endsWith(SysPathSep) -> root
-        list.isEmpty() -> root
-        else -> root + SysPathSep
-    } + list.joinToString("$SysPathSep")
-}
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun Path.parentOrNull(): Path? {
@@ -115,42 +64,5 @@ internal inline fun Path.parentOrNull(): Path? {
         parent.isEmpty() -> null
         parent == this -> null
         else -> parent
-    }
-}
-
-internal fun Path.rootOrNull(
-    includeUNCServerName: Boolean = false
-): Path? = if (IsWindows) {
-    val driveRoot = driveRootOrNull()
-    when {
-        // drive letter with slash (e.g. `C:\`)
-        driveRoot != null -> driveRoot
-        // Absolute UNC path (e.g. `\\server_name`)
-        startsWith("$SysPathSep$SysPathSep") -> {
-            if (includeUNCServerName) {
-                val i = indexOf(SysPathSep, startIndex = 2)
-                if (i == -1) this else substring(0, i)
-            } else {
-                "$SysPathSep$SysPathSep"
-            }
-        }
-        // Relative path (e.g. `\Windows`)
-        startsWith(SysPathSep) -> "$SysPathSep"
-        else -> null
-    }
-} else {
-    // Unix root
-    val c = firstOrNull()
-    if (c == SysPathSep) "$c" else null
-}
-
-@Suppress("NOTHING_TO_INLINE")
-private inline fun Path.driveRootOrNull(): Path? {
-    val drive = driveOrNull() ?: return null
-
-    return if (length > 2 && get(2) == SysPathSep) {
-        "${drive}${SysPathSep}"
-    } else {
-        null
     }
 }

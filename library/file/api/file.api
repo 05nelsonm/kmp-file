@@ -9,6 +9,7 @@ public final class io/matthewnelson/kmp/file/File {
 	public static final fun canonicalFile (Ljava/io/File;)Ljava/io/File;
 	public static final fun canonicalPath (Ljava/io/File;)Ljava/lang/String;
 	public static final fun name (Ljava/io/File;)Ljava/lang/String;
+	public static final fun normalize (Ljava/io/File;)Ljava/io/File;
 	public static final fun parentFile (Ljava/io/File;)Ljava/io/File;
 	public static final fun parentPath (Ljava/io/File;)Ljava/lang/String;
 	public static final fun path (Ljava/io/File;)Ljava/lang/String;
@@ -19,7 +20,6 @@ public final class io/matthewnelson/kmp/file/File {
 public final class io/matthewnelson/kmp/file/FileJvm {
 	public static final field SysPathSep C
 	public static final field SysTempDir Ljava/io/File;
-	public static final fun normalize (Ljava/io/File;)Ljava/io/File;
 	public static final fun readBytes (Ljava/io/File;)[B
 	public static final fun readUtf8 (Ljava/io/File;)Ljava/lang/String;
 	public static final fun resolve (Ljava/io/File;Ljava/io/File;)Ljava/io/File;

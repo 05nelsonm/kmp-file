@@ -18,6 +18,7 @@
 
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.normalize
 import kotlin.jvm.JvmName
 
 /**
@@ -119,7 +120,11 @@ public fun File.canonicalFile(): File = getCanonicalFile()
  * Removes all `.` and resolves all possible `..` for
  * the provided [File.path].
  * */
-public expect fun File.normalize(): File
+public fun File.normalize(): File {
+    val normalized = path.normalize()
+    if (normalized == path) return this
+    return File(normalized)
+}
 
 /**
  * Read the full contents of the file (as bytes).

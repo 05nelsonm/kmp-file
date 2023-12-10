@@ -15,6 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -38,7 +39,7 @@ class FileUnitTest {
         assertEquals("...", "...".toFile().path)
         assertEquals("....", "....".toFile().path)
 
-        if (isWindows) {
+        if (IsWindows) {
             assertEquals("\\", "\\".toFile().path)
             assertEquals("\\Relative", "\\Relative".toFile().path)
             assertEquals("\\Relative", "/Relative".toFile().path)
