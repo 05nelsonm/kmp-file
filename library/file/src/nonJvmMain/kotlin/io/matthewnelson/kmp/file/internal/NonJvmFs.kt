@@ -21,7 +21,7 @@ import io.matthewnelson.kmp.file.IOException
 
 @Throws(IOException::class)
 internal fun fs_canonicalize(path: String): String {
-    if (path.isEmpty()) throw IOException("path cannot be empty")
+    if (path.isEmpty()) return fs_realpath(".")
 
     val resolved = path_resolve(path)
 

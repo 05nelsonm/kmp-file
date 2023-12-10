@@ -45,7 +45,7 @@ class ReadUnitTest {
 
     @Test
     fun givenFile_whenDoesNotExist_thenThrowsFileNotFoundException() {
-        val doesNotExist = File(DIR_TEST_SUPPORT + SYSTEM_PATH_SEPARATOR + "does_not_exist")
+        val doesNotExist = randomTemp()
 
         try {
             doesNotExist.readBytes()

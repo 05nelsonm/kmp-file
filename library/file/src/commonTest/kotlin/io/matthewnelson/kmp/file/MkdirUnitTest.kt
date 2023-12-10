@@ -28,20 +28,14 @@ class MkdirUnitTest {
 
     @Test
     fun givenDir_whenDoesNotExist_thenMkdirReturnsTrue() {
-        val dir = File(SYSTEM_TEMP_DIRECTORY.path + SYSTEM_PATH_SEPARATOR + randomName())
+        val dir = randomTemp()
         assertTrue(dir.mkdir())
         assertTrue(dir.delete())
     }
 
     @Test
     fun givenDir_when2DirsDeep_thenMkdirReturnsFalse() {
-        val dir = File(SYSTEM_TEMP_DIRECTORY.path +
-            SYSTEM_PATH_SEPARATOR +
-            randomName() +
-            SYSTEM_PATH_SEPARATOR +
-            randomName()
-        )
-
+        val dir = randomTemp().resolve(randomName())
         assertFalse(dir.mkdir())
     }
 }

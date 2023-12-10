@@ -15,4 +15,21 @@
  **/
 package io.matthewnelson.kmp.file
 
-actual val isWindows: Boolean = SYSTEM_PATH_SEPARATOR == '\\'
+import kotlin.experimental.ExperimentalNativeApi
+
+actual val isJvm: Boolean = false
+actual val isNative: Boolean = true
+actual val isNodejs: Boolean = false
+actual val isSimulator: Boolean by lazy {
+    @OptIn(ExperimentalNativeApi::class)
+    when (Platform.osFamily) {
+        OsFamily.IOS,
+        OsFamily.TVOS,
+        OsFamily.WATCHOS -> true
+        else -> false
+    }
+}
+actual val isWindows: Boolean by lazy {
+    @OptIn(ExperimentalNativeApi::class)
+    Platform.osFamily == OsFamily.WINDOWS
+}

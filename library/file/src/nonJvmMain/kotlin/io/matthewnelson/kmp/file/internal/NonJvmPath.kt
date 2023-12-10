@@ -24,12 +24,14 @@ internal expect fun path_basename(path: String): String
 internal expect fun path_isAbsolute(path: String): Boolean
 
 // This assumes all paths coming in have been cleansed
-internal fun path_join(parent: String, child: String): String {
-    return when {
-        parent.isEmpty() -> child
-        path_isAbsolute(child) -> child
-        else -> parent + SYSTEM_PATH_SEPARATOR + child
-    }
+internal fun path_join(
+    parent: String,
+    child: String,
+): String = when {
+    parent.isEmpty() -> child
+    path_isAbsolute(child) -> child
+    parent.endsWith(SYSTEM_PATH_SEPARATOR) -> parent + child
+    else -> parent + SYSTEM_PATH_SEPARATOR + child
 }
 
 internal fun path_parent(path: String): String? {

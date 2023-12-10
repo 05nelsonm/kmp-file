@@ -17,8 +17,6 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.File.Companion.normalizeInternal
-import io.matthewnelson.kmp.file.File.Companion.resolveInternal
 import io.matthewnelson.kmp.file.internal.*
 
 public actual class File {
@@ -30,6 +28,17 @@ public actual class File {
     }
 
     public actual constructor(parent: String, child: String) {
+        // TODO: Do not use join here. java.io.File concatenates
+        //  parent and child whether child is rooted or not.
+        //  e.g.
+        //  println(File("/path", "/something").path)
+        //  >> `/path/something`
+        //  println(File(File("/path"), "something").path)
+        //  >> `/path/something`
+        //  println(File("path", "/something").path)
+        //  >> `path/something`
+        //  println(File("path", "something").path)
+        //  >> `path/something`
         realPath = path_join(parent.toPath(), child.toPath())
     }
 
@@ -58,8 +67,17 @@ public actual class File {
     public actual fun isAbsolute(): Boolean = path_isAbsolute(realPath)
 
     public actual fun exists(): Boolean = fs_exists(realPath)
-    @Throws(IOException::class)
-    public actual fun delete(): Boolean = fs_remove(realPath)
+
+    public actual fun delete(): Boolean = try {
+        fs_remove(realPath)
+    } catch (_: IOException) {
+        // Will throw if a directory is not empty
+        //
+        // Swallow it and return false to be
+        // consistent with Jvm.
+        false
+    }
+
     public actual fun mkdir(): Boolean = fs_mkdir(realPath)
     public actual fun mkdirs(): Boolean = fs_mkdirs(realPath)
 
@@ -68,45 +86,43 @@ public actual class File {
     // use .parent
     internal actual fun getParent(): String? = path_parent(realPath)
     // use .parentFile
-    internal actual fun getParentFile(): File? = getParent()?.let { File(it) }
+    internal actual fun getParentFile(): File? {
+        val path = getParent() ?: return null
+        if (path == realPath) return this
+        return File(path)
+    }
     // use .path
     internal actual fun getPath(): String = realPath
 
     // use .absolutePath
     public actual fun getAbsolutePath(): String {
-        TODO("Not yet implemented")
+        if (isAbsolute()) return realPath
+        val cwd = fs_realpath(".")
+        return cwd + SYSTEM_PATH_SEPARATOR + realPath
     }
-
     // use .absoluteFile
-    internal actual fun getAbsoluteFile(): File = File(getAbsolutePath())
+    internal actual fun getAbsoluteFile(): File {
+        val path = getAbsolutePath()
+        if (path == realPath) return this
+        return File(path)
+    }
 
     // use .canonicalPath
     @Throws(IOException::class)
     internal actual fun getCanonicalPath(): String = fs_canonicalize(realPath)
     // use .canonicalFile
     @Throws(IOException::class)
-    internal actual fun getCanonicalFile(): File = File(getCanonicalPath())
+    internal actual fun getCanonicalFile(): File {
+        val path = getCanonicalPath()
+        if (path == realPath) return this
+        return File(path)
+    }
 
     override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
     override fun hashCode(): Int = realPath.hashCode() xor 1234321
     override fun toString(): String = realPath
 
-    // skips unnecessary work
-    @Suppress("UNUSED_PARAMETER")
-    private constructor(path: String, raw: Any?) {
-        realPath = path
-    }
-
-    internal companion object {
-
-        internal fun File.normalizeInternal(): File = File(path_normalize(realPath), raw = null)
-
-        internal fun File.resolveInternal(relative: File): File = when {
-            realPath.isEmpty() -> relative
-            relative.isAbsolute() -> relative
-            realPath.endsWith(SYSTEM_PATH_SEPARATOR) -> File(realPath + relative.realPath, raw = null)
-            else -> File(realPath + SYSTEM_PATH_SEPARATOR + relative.realPath, raw = null)
-        }
+    private companion object {
 
         private fun String.toPath(): String {
             // TODO: fix slashes + remove any trailing slash
@@ -116,6 +132,18 @@ public actual class File {
     }
 }
 
-public actual fun File.normalize(): File = normalizeInternal()
+public actual fun File.normalize(): File {
+    val normalized = path_normalize(path)
+    if (normalized == path) return this
+    return File(normalized)
+}
 
-public actual fun File.resolve(relative: File): File = resolveInternal(relative)
+public actual fun File.resolve(relative: File): File {
+    val joined = path_join(path, relative.path)
+
+    return when (joined) {
+        path -> this
+        relative.path -> relative
+        else -> File(joined)
+    }
+}

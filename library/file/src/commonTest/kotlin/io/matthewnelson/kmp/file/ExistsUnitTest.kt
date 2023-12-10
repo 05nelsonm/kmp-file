@@ -28,7 +28,7 @@ class ExistsUnitTest {
 
     @Test
     fun givenFile_whenDoesNotExist_thenReturnsFalse() {
-        val doesNotExist = File(DIR_TEST_SUPPORT + SYSTEM_PATH_SEPARATOR + "does_not_exist")
+        val doesNotExist = DIR_TEST_SUPPORT.resolve("does_not_exist")
         assertFalse(doesNotExist.exists())
     }
 }
