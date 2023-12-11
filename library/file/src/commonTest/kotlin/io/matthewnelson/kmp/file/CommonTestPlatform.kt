@@ -26,9 +26,14 @@ val DIR_TEST_SUPPORT by lazy {
         .resolve("test_support")
 }
 
-val DIR_TEST_DIR by lazy {
+val DIR_TEST_SYM by lazy {
     DIR_TEST_SUPPORT
-        .resolve("test_dir")
+        .resolve("dir_sym")
+}
+
+val DIR_TEST_SYM_ACTUAL by lazy {
+    DIR_TEST_SUPPORT
+        .resolve("test/support/sym")
 }
 
 val DIR_TEST_DIR_SYM by lazy {

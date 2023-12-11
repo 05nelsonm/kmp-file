@@ -24,7 +24,7 @@ class CanonicalUnitTest {
     @Test
     fun givenFile_whenPathHasSymlink_thenReturnsActualPath() {
         // windows doesn't do sym links
-        if (!IsWindows) return
+        if (IsWindows) return
 
         assertEquals(FILE_LOREM_IPSUM, FILE_SYM_LINK_2.canonicalFile())
     }
@@ -35,14 +35,14 @@ class CanonicalUnitTest {
             // This will still test that the full path
             // is still resolved for non-existent
             // paths.
-            DIR_TEST_DIR
+            DIR_TEST_SYM_ACTUAL
         } else {
             // Use the symlink directory on non-windows
-            DIR_TEST_DIR_SYM
+            DIR_TEST_SYM
         }
 
         val name = randomName()
-        val expected = DIR_TEST_DIR.resolve(name).resolve(name)
+        val expected = DIR_TEST_SYM_ACTUAL.resolve(name).resolve(name)
         assertEquals(expected, dir.resolve(name).resolve(name).canonicalFile())
     }
 }
