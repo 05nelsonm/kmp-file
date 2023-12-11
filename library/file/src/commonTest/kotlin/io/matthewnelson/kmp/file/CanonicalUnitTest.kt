@@ -15,7 +15,34 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
 class CanonicalUnitTest {
 
-    // TODO
+    @Test
+    fun givenFile_whenPathHasSymlink_thenReturnsActualPath() {
+        // windows doesn't do sym links
+        if (!IsWindows) return
+
+        assertEquals(FILE_LOREM_IPSUM, FILE_SYM_LINK_2.canonicalFile())
+    }
+
+    @Test
+    fun givenFile_whenPathDoesNotExist_thenResolvesExistingPathAndReplaces() {
+        val dir = if (IsWindows) {
+            // This will still test that the full path
+            // is still resolved for non-existent
+            // paths.
+            DIR_TEST_DIR
+        } else {
+            // Use the symlink directory on non-windows
+            DIR_TEST_DIR_SYM
+        }
+
+        val name = randomName()
+        val expected = DIR_TEST_DIR.resolve(name).resolve(name)
+        assertEquals(expected, dir.resolve(name).resolve(name).canonicalFile())
+    }
 }

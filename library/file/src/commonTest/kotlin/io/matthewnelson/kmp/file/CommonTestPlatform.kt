@@ -26,6 +26,16 @@ val DIR_TEST_SUPPORT by lazy {
         .resolve("test_support")
 }
 
+val DIR_TEST_DIR by lazy {
+    DIR_TEST_SUPPORT
+        .resolve("test_dir")
+}
+
+val DIR_TEST_DIR_SYM by lazy {
+    DIR_TEST_SUPPORT
+        .resolve("test_dir_sym")
+}
+
 val FILE_LOREM_IPSUM by lazy {
     DIR_TEST_SUPPORT
         .resolve("lorem_ipsum")
