@@ -15,7 +15,24 @@
  **/
 package io.matthewnelson.kmp.file
 
+import kotlin.test.Test
+import kotlin.test.assertTrue
+
 class MkdirsUnitTest {
 
-    // TODO
+    @Test
+    fun givenFile_whenMkdirs_thenSucceeds() {
+        val tmp = randomTemp()
+        val dir1 = tmp.resolve(randomName())
+        val dir2 = dir1.resolve(randomName())
+
+        try {
+            assertTrue(dir2.mkdirs())
+            assertTrue(dir2.exists())
+        } finally {
+            dir2.delete()
+            dir1.delete()
+            tmp.delete()
+        }
+    }
 }
