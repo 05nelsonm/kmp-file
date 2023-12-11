@@ -36,7 +36,7 @@ public fun String.toFile(): File = File(this)
 /**
  * A File
  * */
-public expect class File(pathname: String) {
+public expect class File(pathname: String): Comparable<File> {
 
     // Not exposing any secondary constructors because
     // Jvm has undocumented behavior that cannot be
