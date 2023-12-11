@@ -19,7 +19,7 @@ package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.*
 
-public actual class File {
+public actual class File: Comparable<File> {
 
     private val realPath: Path
 
@@ -100,6 +100,8 @@ public actual class File {
         if (path == realPath) return this
         return File(path, direct = null)
     }
+
+    override fun compareTo(other: File): Int = realPath.compareTo(other.realPath)
 
     override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
     override fun hashCode(): Int = realPath.hashCode() xor 1234321
