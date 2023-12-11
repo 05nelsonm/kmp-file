@@ -26,7 +26,6 @@ kmpConfiguration {
                 kotlin.srcDir(testConfig.testConfigSrcDir)
 
                 dependencies {
-                    implementation(kotlin("test"))
                     implementation(libs.encoding.base16)
                     implementation(libs.kotlincrypto.hash.sha2)
                 }

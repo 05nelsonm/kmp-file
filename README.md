@@ -153,8 +153,17 @@ fun nativeMain(f1: File, f2: File) {
 }
 ```
 
+### Get Started
+
 <!-- TAG_VERSION -->
-[badge-latest-release]: https://img.shields.io/badge/latest--release-0.1.0-5d2f68.svg?style=flat&logoColor=5d2f68
+```kotlin
+dependencies {
+    implementation("io.matthewnelson.kmp-file:file:0.1.0-alpha01")
+}
+```
+
+<!-- TAG_VERSION -->
+[badge-latest-release]: https://img.shields.io/badge/latest--release-0.1.0--alpha01-blue.svg?style=flat
 [badge-license]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
 
 <!-- TAG_DEPENDENCIES -->
