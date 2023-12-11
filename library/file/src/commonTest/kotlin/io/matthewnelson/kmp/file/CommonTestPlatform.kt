@@ -26,6 +26,21 @@ val DIR_TEST_SUPPORT by lazy {
         .resolve("test_support")
 }
 
+val DIR_TEST_SYM by lazy {
+    DIR_TEST_SUPPORT
+        .resolve("dir_sym")
+}
+
+val DIR_TEST_SYM_ACTUAL by lazy {
+    DIR_TEST_SUPPORT
+        .resolve("test/support/sym")
+}
+
+val DIR_TEST_DIR_SYM by lazy {
+    DIR_TEST_SUPPORT
+        .resolve("test_dir_sym")
+}
+
 val FILE_LOREM_IPSUM by lazy {
     DIR_TEST_SUPPORT
         .resolve("lorem_ipsum")
@@ -50,7 +65,7 @@ expect val isSimulator: Boolean
 
 fun randomName(): String = Random
     .Default
-    .nextBytes(16)
+    .nextBytes(8)
     .encodeToString(Base16)
 
 fun randomTemp(): File = SysTempDir
