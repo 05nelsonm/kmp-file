@@ -15,7 +15,14 @@
  **/
 package io.matthewnelson.kmp.file
 
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
 class NameUnitTest {
 
-    // TODO
+    @Test
+    fun givenFile_whenName_thenIsAsExpected() {
+        assertEquals("lorem_ipsum", FILE_LOREM_IPSUM.name)
+        assertEquals("abc123", "/some/path".toFile().resolve("abc123").name)
+    }
 }
