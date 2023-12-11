@@ -60,7 +60,7 @@ expect val isSimulator: Boolean
 
 fun randomName(): String = Random
     .Default
-    .nextBytes(16)
+    .nextBytes(8)
     .encodeToString(Base16)
 
 fun randomTemp(): File = SysTempDir
