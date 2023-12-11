@@ -18,6 +18,7 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class CanonicalUnitTest {
 
@@ -27,6 +28,14 @@ class CanonicalUnitTest {
         if (IsWindows) return
 
         assertEquals(FILE_LOREM_IPSUM, FILE_SYM_LINK_2.canonicalFile())
+    }
+
+    @Test
+    fun givenFile_whenEmpty_thenReturnsCurrentWorkingDirectory() {
+        val cwd = "".toFile().canonicalPath()
+
+        // not empty and has some (any) path
+        assertTrue(cwd.contains(SysPathSep))
     }
 
     // This passes locally on all my machines, but CI does not like it
