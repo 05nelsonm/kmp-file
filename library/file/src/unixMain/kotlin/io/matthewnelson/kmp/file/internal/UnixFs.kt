@@ -64,7 +64,7 @@ internal actual fun fs_realpath(path: String): String {
 
 internal actual fun fs_platform_mkdir(
     path: String,
-): Int = fs_platform_mkdir(path, Mode("777").toModeT())
+): Int = fs_platform_mkdir(path, Mode("775").toModeT())
 
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun fs_platform_chmod(

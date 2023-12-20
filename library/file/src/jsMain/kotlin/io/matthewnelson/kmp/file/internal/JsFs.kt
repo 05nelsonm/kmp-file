@@ -29,7 +29,7 @@ internal actual external fun fs_exists(path: String): Boolean
 
 /** [docs](https://nodejs.org/api/fs.html#fsmkdirsyncpath-options) */
 @JsName("mkdirSync")
-internal external fun fs_mkdirSync(path: String): String?
+internal external fun fs_mkdirSync(path: String, options: Options.Mkdir): String?
 
 /** [docs](https://nodejs.org/api/fs.html#fsreadfilesyncpath-options) */
 @JsName("readFileSync")
