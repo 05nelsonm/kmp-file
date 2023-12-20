@@ -19,6 +19,14 @@ package io.matthewnelson.kmp.file.internal
 
 internal sealed class Options {
 
+    internal class Mkdir private constructor(
+        internal val recursive: Boolean,
+        internal val mode: String,
+    ): Options() {
+        // modifies the default directory permissions used from 777 to 775
+        internal constructor(): this(false, "775")
+    }
+
     internal class ReadDir private constructor(
         internal val encoding: String?,
         internal val withFileTypes: Boolean,

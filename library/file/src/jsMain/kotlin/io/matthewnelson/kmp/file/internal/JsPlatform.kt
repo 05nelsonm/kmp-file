@@ -84,7 +84,7 @@ internal actual fun fs_remove(path: String): Boolean {
 
 internal actual fun fs_mkdir(path: String): Boolean {
     return try {
-        fs_mkdirSync(path)
+        fs_mkdirSync(path, Options.Mkdir())
         true
     } catch (_: Throwable) {
         false
