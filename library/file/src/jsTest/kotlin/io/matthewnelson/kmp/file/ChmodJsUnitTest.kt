@@ -15,7 +15,4 @@
  **/
 package io.matthewnelson.kmp.file
 
-class FileChmodUnitTest {
-
-    // TODO
-}
+class ChmodJsUnitTest: ChmodBaseTest()
