@@ -15,6 +15,11 @@
  **/
 package io.matthewnelson.kmp.file
 
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.posix.F_OK
+import platform.posix.X_OK
+import platform.posix.access
+import platform.posix.errno
 import kotlin.experimental.ExperimentalNativeApi
 
 actual val isJvm: Boolean = false
@@ -28,4 +33,18 @@ actual val isSimulator: Boolean by lazy {
         OsFamily.WATCHOS -> true
         else -> false
     }
+}
+
+@Throws(IOException::class, IndexOutOfBoundsException::class)
+@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
+fun File.checkAccess(vararg access: Int): Boolean {
+    if (!exists()) throw FileNotFoundException()
+
+    var final = access.first()
+    for (i in 1 until access.size) {
+        final = final or access[i]
+    }
+
+    // Will be -1 Permission Denied if false
+    return access(path, final) == 0
 }
