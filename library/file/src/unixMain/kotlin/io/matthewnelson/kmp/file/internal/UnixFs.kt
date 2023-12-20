@@ -121,9 +121,9 @@ constructor(private val value: String) {
         }
 
         companion object {
-            val Owner = Mask(400, 200, 100)
-            val Group = Mask(40, 20, 10)
-            val Other = Mask(4, 2, 1)
+            val Owner = Mask(S_IRUSR, S_IWUSR, S_IXUSR)
+            val Group = Mask(S_IRGRP, S_IWGRP, S_IXGRP)
+            val Other = Mask(S_IROTH, S_IWOTH, S_IXOTH)
         }
     }
 }
