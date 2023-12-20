@@ -15,6 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
 import platform.posix.*
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -25,6 +26,8 @@ class ChmodNativeUnitTest: ChmodBaseTest() {
 
     @Test
     fun givenFile_whenChmod_thenReturnsExpected() {
+        if (IsWindows) return
+
         val tmpDir = randomTemp()
         assertTrue(tmpDir.mkdir())
 
@@ -74,6 +77,8 @@ class ChmodNativeUnitTest: ChmodBaseTest() {
 
     @Test
     fun givenFile_whenCheckAccess_thenReturnsExpected() {
+        if (IsWindows) return
+
         // simple test for our helper function
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
