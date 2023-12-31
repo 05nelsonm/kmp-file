@@ -15,4 +15,27 @@
  **/
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.toFile
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.toKString
+import platform.posix.getenv
+
+internal actual val PlatformPathSeparator: Char = '\\'
+
+@OptIn(ExperimentalForeignApi::class)
+internal actual val PlatformTempDirectory: File by lazy {
+    // Windows' built-in APIs check the TEMP, TMP, and USERPROFILE environment variables in order.
+    // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-gettemppatha?redirectedfrom=MSDN
+    val temp = getenv("TEMP")
+        ?.toKString()
+        ?: getenv("TMP")
+            ?.toKString()
+        ?: getenv("USERPROFILE")
+            ?.toKString()
+        ?: "\\Windows\\TEMP"
+
+    temp.toFile()
+}
+
 internal actual val IsWindows: Boolean = true

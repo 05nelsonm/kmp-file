@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+
 package io.matthewnelson.kmp.file
 
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.toKString
-import platform.posix.getenv
+public actual typealias File = java.io.File
 
-@OptIn(ExperimentalForeignApi::class)
-public actual val SysTempDir: File by lazy {
-    val tmpdir = getenv("TMPDIR")
-    (tmpdir?.toKString() ?: "/tmp").toFile()
-}
+public actual typealias IOException = java.io.IOException
+public actual typealias EOFException = java.io.EOFException
+public actual typealias FileNotFoundException = java.io.FileNotFoundException

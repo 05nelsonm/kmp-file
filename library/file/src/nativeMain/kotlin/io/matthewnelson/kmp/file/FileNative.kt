@@ -28,61 +28,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-@Throws(IOException::class)
-@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-public actual fun File.readBytes(): ByteArray = open(flags = "rb") { file ->
-    val bufferedBytes = mutableListOf<ByteArray>()
-    val buf = ByteArray(4096)
-
-    var fileSize = 0L
-    while (true) {
-        val read = file.fRead(buf)
-
-        if (read < 0) throw errnoToIOException(errno)
-        if (read == 0) break
-        fileSize += read
-        if (fileSize >= Int.MAX_VALUE.toLong()) {
-            throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
-        }
-        bufferedBytes.add(buf.copyOf(read))
-    }
-
-    buf.fill(0)
-    // would have already thrown exception, so we know it does not exceed Int.MAX_VALUE
-    val final = ByteArray(fileSize.toInt())
-
-    var finalOffset = 0
-    while (bufferedBytes.isNotEmpty()) {
-        val b = bufferedBytes.removeAt(0)
-        b.copyInto(final, finalOffset)
-        finalOffset += b.size
-        b.fill(0)
-    }
-
-    final
-}
-
-@Throws(IOException::class)
-public actual fun File.readUtf8(): String = readBytes().decodeToString()
-
-@Throws(IOException::class)
-@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-public actual fun File.writeBytes(array: ByteArray) {
-    open("wb") { file ->
-        var written = 0
-
-        while (written < array.size) {
-            val write = file.fWrite(array, written, array.size - written)
-            if (write < 0) throw errnoToIOException(errno)
-            if (write == 0) break
-            written += write
-        }
-    }
-}
-
-@Throws(IOException::class)
-public actual fun File.writeUtf8(text: String) { writeBytes(text.encodeToByteArray()) }
-
 /**
  * Opens the [File], closing it automatically once [block] completes.
  *

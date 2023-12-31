@@ -17,12 +17,36 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.SysPathSep
 import kotlin.jvm.JvmSynthetic
 
+internal typealias Path = String
+
+internal expect val PlatformPathSeparator: Char
+internal expect val PlatformTempDirectory: File
+
 internal expect val IsWindows: Boolean
 
-internal typealias Path = String
+@Throws(IOException::class)
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun File.platformReadBytes(): ByteArray
+
+@Throws(IOException::class)
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun File.platformReadUtf8(): String
+
+@Throws(IOException::class)
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun File.platformWriteBytes(array: ByteArray)
+
+@Throws(IOException::class)
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun File.platformWriteUtf8(text: String)
+
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun File.platformResolve(relative: File): File
 
 /**
  * returns something like `C:`
