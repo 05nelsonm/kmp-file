@@ -108,28 +108,6 @@ public actual class File: Comparable<File> {
     override fun toString(): String = realPath
 }
 
-public actual fun File.resolve(relative: File): File = when {
-    path.isEmpty() -> relative
-
-    // Functionality on Jvm is that if relative is
-    // rooted it will be returned instead of concatenating
-    // it with the parent path. isAbsolute would return false
-    // if the path on windows was relative, like `\Windows`.
-    relative.path.startsWith(SysPathSep) -> relative
-    relative.isAbsolute() -> relative
-    else -> File(path.concatenateWith(relative.path))
-}
-
-@Suppress("NOTHING_TO_INLINE")
-private inline fun Path.concatenateWith(
-    child: Path,
-): Path = when {
-    isEmpty() -> child
-    endsWith(SysPathSep) -> this + child
-    child.startsWith(SysPathSep) -> this + child
-    else -> this + SysPathSep + child
-}
-
 @Suppress("NOTHING_TO_INLINE")
 private inline fun Path.toUTF8(): Path = encodeToByteArray()
     .decodeToString()

@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file
+package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString
 import platform.posix.getenv
 
 @OptIn(ExperimentalForeignApi::class)
-public actual val SysTempDir: File by lazy {
+internal actual val PlatformTempDirectory: File by lazy {
     val tmpdir = getenv("TMPDIR")
     (tmpdir?.toKString() ?: "/tmp").toFile()
 }

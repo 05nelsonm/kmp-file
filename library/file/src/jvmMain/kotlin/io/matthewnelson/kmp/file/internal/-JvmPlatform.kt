@@ -15,7 +15,24 @@
  **/
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.toFile
 import java.io.File
+import kotlin.io.readText as _readText
+import kotlin.io.readBytes as _readBytes
+import kotlin.io.resolve as _resolve
+import kotlin.io.writeBytes as _writeBytes
+import kotlin.io.writeText as _writeText
+
+@JvmField
+@JvmSynthetic
+internal actual val PlatformPathSeparator: Char = File.separatorChar
+
+@JvmField
+@JvmSynthetic
+internal actual val PlatformTempDirectory: File = System
+    .getProperty("java.io.tmpdir")
+    .toFile()
 
 @JvmField
 @JvmSynthetic
@@ -23,3 +40,22 @@ internal actual val IsWindows: Boolean = System.getProperty("os.name")
     ?.ifBlank { null }
     ?.contains("windows", ignoreCase = true)
     ?: (File.separatorChar == '\\')
+
+@Throws(IOException::class)
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun File.platformReadBytes(): ByteArray = _readBytes()
+
+@Throws(IOException::class)
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun File.platformReadUtf8(): String = _readText()
+
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun File.platformResolve(relative: File): File = _resolve(relative)
+
+@Throws(IOException::class)
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun File.platformWriteBytes(array: ByteArray) { _writeBytes(array) }
+
+@Throws(IOException::class)
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun File.platformWriteUtf8(text: String) { _writeText(text) }

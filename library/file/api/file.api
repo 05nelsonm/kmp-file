@@ -4,26 +4,23 @@ public final class io/matthewnelson/kmp/file/Exceptions {
 }
 
 public final class io/matthewnelson/kmp/file/File {
-	public static final fun absoluteFile (Ljava/io/File;)Ljava/io/File;
-	public static final fun absolutePath (Ljava/io/File;)Ljava/lang/String;
-	public static final fun canonicalFile (Ljava/io/File;)Ljava/io/File;
-	public static final fun canonicalPath (Ljava/io/File;)Ljava/lang/String;
-	public static final fun name (Ljava/io/File;)Ljava/lang/String;
-	public static final fun normalize (Ljava/io/File;)Ljava/io/File;
-	public static final fun parentFile (Ljava/io/File;)Ljava/io/File;
-	public static final fun parentPath (Ljava/io/File;)Ljava/lang/String;
-	public static final fun path (Ljava/io/File;)Ljava/lang/String;
-	public static final fun resolve (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
-	public static final fun toFile (Ljava/lang/String;)Ljava/io/File;
-}
-
-public final class io/matthewnelson/kmp/file/FileJvm {
 	public static final field SysPathSep C
 	public static final field SysTempDir Ljava/io/File;
-	public static final fun readBytes (Ljava/io/File;)[B
-	public static final fun readUtf8 (Ljava/io/File;)Ljava/lang/String;
+	public static final fun absoluteFileOf (Ljava/io/File;)Ljava/io/File;
+	public static final fun absolutePathOf (Ljava/io/File;)Ljava/lang/String;
+	public static final fun canonicalFileOf (Ljava/io/File;)Ljava/io/File;
+	public static final fun canonicalPathOf (Ljava/io/File;)Ljava/lang/String;
+	public static final fun get (Ljava/lang/String;)Ljava/io/File;
+	public static final fun nameOf (Ljava/io/File;)Ljava/lang/String;
+	public static final fun normalizedFileOf (Ljava/io/File;)Ljava/io/File;
+	public static final fun parentFileOf (Ljava/io/File;)Ljava/io/File;
+	public static final fun parentPathOf (Ljava/io/File;)Ljava/lang/String;
+	public static final fun pathOf (Ljava/io/File;)Ljava/lang/String;
+	public static final fun readBytesFrom (Ljava/io/File;)[B
+	public static final fun readUtf8From (Ljava/io/File;)Ljava/lang/String;
 	public static final fun resolve (Ljava/io/File;Ljava/io/File;)Ljava/io/File;
-	public static final fun writeBytes (Ljava/io/File;[B)V
-	public static final fun writeUtf8 (Ljava/io/File;Ljava/lang/String;)V
+	public static final fun resolve (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
+	public static final fun writeBytesTo (Ljava/io/File;[B)V
+	public static final fun writeUtf8To (Ljava/io/File;Ljava/lang/String;)V
 }
 

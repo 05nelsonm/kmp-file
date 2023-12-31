@@ -17,15 +17,85 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.DelicateFileApi
-import io.matthewnelson.kmp.file.SysPathSep
-import io.matthewnelson.kmp.file.toIOException
+import io.matthewnelson.kmp.file.*
+
+internal actual val PlatformPathSeparator: Char by lazy {
+    try {
+        path_sep.first()
+    } catch (_: Throwable) {
+        '/'
+    }
+}
+
+internal actual val PlatformTempDirectory: File by lazy {
+    try {
+        os_tmpdir()
+    } catch (_: Throwable) {
+        "/tmp"
+    }.toFile()
+}
 
 internal actual val IsWindows: Boolean by lazy {
     try {
         os_platform() == "win32"
     } catch (_: Throwable) {
         SysPathSep == '\\'
+    }
+}
+
+@OptIn(DelicateFileApi::class)
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun File.platformReadBytes(): ByteArray = try {
+    val buffer = read()
+
+    // Max buffer size for Node.js 16 can be larger than the
+    // maximum size of the ByteArray capacity
+    if (buffer.length.toLong() >= Int.MAX_VALUE.toLong()) {
+        throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
+    }
+
+    val bytes = ByteArray(buffer.length.toInt()) { buffer.readInt8(it) }
+    buffer.fill()
+    bytes
+} catch (t: Throwable) {
+    throw t.toIOException()
+}
+
+@OptIn(DelicateFileApi::class)
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun File.platformReadUtf8(): String = try {
+    val buffer = read()
+
+    // Max buffer size for Node.js 16 can be larger than the
+    // maximum size of the ByteArray capacity
+    if (buffer.length.toLong() >= Int.MAX_VALUE.toLong()) {
+        throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
+    }
+
+    val text = buffer.toUtf8()
+    buffer.fill()
+    text
+} catch (t: Throwable) {
+    throw t.toIOException()
+}
+
+@OptIn(DelicateFileApi::class)
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun File.platformWriteBytes(array: ByteArray) {
+    try {
+        fs_writeFileSync(path, array)
+    } catch (t: Throwable) {
+        throw t.toIOException()
+    }
+}
+
+@OptIn(DelicateFileApi::class)
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun File.platformWriteUtf8(text: String) {
+    try {
+        fs_writeFileSync(path, text)
+    } catch (t: Throwable) {
+        throw t.toIOException()
     }
 }
 
