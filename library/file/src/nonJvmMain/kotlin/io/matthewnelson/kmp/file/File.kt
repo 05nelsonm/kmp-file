@@ -28,7 +28,7 @@ public actual class File: Comparable<File> {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    internal constructor(pathname: Path, direct: Any?) {
+    private constructor(pathname: Path, direct: Any?) {
         // skip unnecessary work
         realPath = pathname
     }
@@ -82,7 +82,7 @@ public actual class File: Comparable<File> {
     internal actual fun getPath(): String = realPath
 
     // use .absolutePath
-    public actual fun getAbsolutePath(): String = realPath.absolute()
+    internal actual fun getAbsolutePath(): String = realPath.absolute()
     // use .absoluteFile
     internal actual fun getAbsoluteFile(): File {
         val path = getAbsolutePath()
@@ -101,11 +101,11 @@ public actual class File: Comparable<File> {
         return File(path, direct = null)
     }
 
-    override fun compareTo(other: File): Int = realPath.compareTo(other.realPath)
+    public override fun compareTo(other: File): Int = realPath.compareTo(other.realPath)
 
-    override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
-    override fun hashCode(): Int = realPath.hashCode() xor 1234321
-    override fun toString(): String = realPath
+    public override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
+    public override fun hashCode(): Int = realPath.hashCode() xor 1234321
+    public override fun toString(): String = realPath
 }
 
 @Suppress("NOTHING_TO_INLINE")
