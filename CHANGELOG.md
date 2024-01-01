@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Version 0.1.0-alpha02 (2023-01-02)
+## Version 0.1.0-alpha02 (2023-01-01)
  - Cleans up API for Java consumers [[#27]][27]
  - Fixes visibility modifiers of `nonJvm` implementation of `File` [[#29]][29]
 
