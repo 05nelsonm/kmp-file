@@ -24,7 +24,7 @@ import platform.posix.errno
 @Throws(IOException::class)
 @Suppress("NOTHING_TO_INLINE")
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-internal actual inline fun File.platformReadBytes(): ByteArray = open(flags = "rb") { file ->
+internal actual inline fun File.platformReadBytes(): ByteArray = fOpen(flags = "rb") { file ->
     val bufferedBytes = mutableListOf<ByteArray>()
     val buf = ByteArray(4096)
 
@@ -64,7 +64,7 @@ internal actual inline fun File.platformReadUtf8(): String = readBytes().decodeT
 @Suppress("NOTHING_TO_INLINE")
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 internal actual inline fun File.platformWriteBytes(array: ByteArray) {
-    open("wb") { file ->
+    fOpen("wb") { file ->
         var written = 0
 
         while (written < array.size) {
