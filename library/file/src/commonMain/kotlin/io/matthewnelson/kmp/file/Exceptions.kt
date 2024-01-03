@@ -37,6 +37,7 @@ public expect open class FileNotFoundException: IOException {
     public constructor(message: String?)
 }
 
+@JvmName("wrapIO")
 public fun Throwable.wrapIOException(): IOException {
     return when (this) {
         is IOException -> this
@@ -44,6 +45,7 @@ public fun Throwable.wrapIOException(): IOException {
     }
 }
 
+@JvmName("wrapIO")
 public fun Throwable.wrapIOException(
     lazyMessage: () -> String,
 ): IOException {

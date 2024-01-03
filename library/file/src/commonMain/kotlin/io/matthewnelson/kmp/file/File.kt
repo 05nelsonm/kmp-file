@@ -14,32 +14,8 @@
  * limitations under the License.
  **/
 @file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-@file:JvmName("File")
 
 package io.matthewnelson.kmp.file
-
-import io.matthewnelson.kmp.file.internal.*
-import io.matthewnelson.kmp.file.internal.normalize
-import io.matthewnelson.kmp.file.internal.platformResolve
-import io.matthewnelson.kmp.file.internal.platformWriteBytes
-import io.matthewnelson.kmp.file.internal.platformWriteUtf8
-import kotlin.jvm.JvmField
-import kotlin.jvm.JvmName
-
-/**
- * The operating system's path separator character
- * */
-@JvmField
-public val SysPathSep: Char = PlatformPathSeparator
-
-/**
- * The system temporary directory
- * */
-@JvmField
-public val SysTempDir: File = PlatformTempDirectory
-
-@JvmName("get")
-public fun String.toFile(): File = File(this)
 
 /**
  * A File
@@ -99,81 +75,3 @@ public expect class File(pathname: String): Comparable<File> {
     @Throws(IOException::class)
     internal fun getCanonicalFile(): File
 }
-
-@get:JvmName("nameOf")
-public val File.name: String get() = getName()
-
-@get:JvmName("parentPathOf")
-public val File.parentPath: String? get() = getParent()
-
-@get:JvmName("parentFileOf")
-public val File.parentFile: File? get() = getParentFile()
-
-@get:JvmName("pathOf")
-public val File.path: String get() = getPath()
-
-@get:JvmName("absolutePathOf")
-public val File.absolutePath: String get() = getAbsolutePath()
-
-@get:JvmName("absoluteFileOf")
-public val File.absoluteFile: File get() = getAbsoluteFile()
-
-@Throws(IOException::class)
-@JvmName("canonicalPathOf")
-public fun File.canonicalPath(): String = getCanonicalPath()
-
-@Throws(IOException::class)
-@JvmName("canonicalFileOf")
-public fun File.canonicalFile(): File = getCanonicalFile()
-
-/**
- * Removes all `.` and resolves all possible `..` for
- * the provided [File.path].
- * */
-@JvmName("normalizedFileOf")
-public fun File.normalize(): File {
-    val normalized = path.normalize()
-    if (normalized == path) return this
-    return File(normalized)
-}
-
-/**
- * Read the full contents of the file (as bytes).
- *
- * Should only be utilized for smallish files.
- * */
-@Throws(IOException::class)
-@JvmName("readBytesFrom")
-public fun File.readBytes(): ByteArray = platformReadBytes()
-
-/**
- * Read the full contents of the file (as UTF-8 text).
- *
- * Should only be utilized for smallish files.
- * */
-@Throws(IOException::class)
-@JvmName("readUtf8From")
-public fun File.readUtf8(): String = platformReadUtf8()
-
-/**
- * Writes the full contents of [array] to the file
- * */
-@Throws(IOException::class)
-@JvmName("writeBytesTo")
-public fun File.writeBytes(array: ByteArray) { platformWriteBytes(array) }
-
-/**
- * Writes the full contents of [text] to the file (as UTF-8)
- * */
-@Throws(IOException::class)
-@JvmName("writeUtf8To")
-public fun File.writeUtf8(text: String) { platformWriteUtf8(text) }
-
-/**
- * Resolves the [File] for provided [relative]. If [relative]
- * is absolute, returns [relative], otherwise will concatenate
- * the [File.path]s.
- * */
-public fun File.resolve(relative: File): File = platformResolve(relative)
-
-public fun File.resolve(relative: String): File = resolve(relative.toFile())
