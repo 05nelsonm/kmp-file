@@ -1,11 +1,11 @@
 # CHANGELOG
 
-## Version 0.1.0-alpha02 (2023-01-03)
+## Version 0.1.0-alpha04 (2023-01-03)
  - Fixes `File.normalize` preservation of `..` when path is not rooted [[#31]][31]
  - Fixes usage of `JvmName` for `File` [[#33]][33]
  - Renames `open` to `fOpen` for native [[#35]][35]
 
-## Version 0.1.0-alpha02 (2023-01-01)
+## Version 0.1.0-alpha03 (2023-01-01)
  - Cleans up API for Java consumers [[#27]][27]
  - Fixes visibility modifiers of `nonJvm` implementation of `File` [[#29]][29]
 
