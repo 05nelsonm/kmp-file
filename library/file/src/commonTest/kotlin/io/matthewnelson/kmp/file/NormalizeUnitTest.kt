@@ -35,6 +35,7 @@ class NormalizeUnitTest {
         assertEquals("path", "relative/../path".toFile().normalize().path)
         assertEquals("", "relative/../path/..".toFile().normalize().path)
         assertEquals("relative", "relative/o/./.././path/..".toFile().normalize().path)
+        assertEquals("..${s}..${s}relative", "../../relative/path/..".toFile().normalize().path)
 
         if (!IsWindows) return
 

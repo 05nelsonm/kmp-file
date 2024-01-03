@@ -72,42 +72,48 @@ internal fun Path.normalize(): Path {
     if (isEmpty()) return this
 
     val root = rootOrNull(normalizing = true) ?: ""
+    // If relative path (not rooted) check for a
+    // drive letter to preserve its relation
+    val drive = if (root.isEmpty()) driveOrNull() ?: "" else ""
 
-    val segments = subSequence(root.length, length).split(SysPathSep)
+    val segments = mutableListOf<String>()
 
-    val list = mutableListOf<String>()
-
-    for (segment in segments) {
+    subSequence(root.length + drive.length, length).split(SysPathSep).forEach { segment ->
         when (segment) {
             "", "." -> {}
             ".." -> {
-                if (list.isNotEmpty()) {
-                    list.removeAt(list.size -1)
+                if (segments.isEmpty()) {
+                    if (root.isEmpty() && drive.isEmpty()) {
+                        segments.add(segment)
+                    }
+                    return@forEach
+                }
+
+                if (segments.last() == segment) {
+                    segments.add(segment)
+                } else {
+                    segments.removeAt(segments.size - 1)
                 }
             }
-            else -> list.add(segment)
+            else -> segments.add(segment)
         }
     }
 
-    val normalized = list.joinToString("$SysPathSep")
+    val normalized = segments.joinToString("$SysPathSep")
 
-    return when {
-        root.isEmpty() -> {
-            // Was not a rooted path. Check for a Windows
-            // drive letter (e.g. `C:`) to preserve the path's
-            // relation.
-            val drive = driveOrNull()
-            if (drive != null && !normalized.startsWith(drive)) drive else ""
-        }
+    val prefix =  when {
+        root.isEmpty() -> drive
         root.endsWith(SysPathSep) -> root
         normalized.isEmpty() -> root
         else -> root + SysPathSep
-    } + normalized
+    }
+
+    return prefix + normalized
 }
 
 @JvmSynthetic
 internal fun Path.rootOrNull(
-    normalizing: Boolean = false
+    normalizing: Boolean
 ): Path? = if (IsWindows) {
     val driveRoot = driveRootOrNull()
     when {

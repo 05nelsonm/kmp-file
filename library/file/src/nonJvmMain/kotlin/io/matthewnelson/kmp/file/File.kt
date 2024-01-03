@@ -120,7 +120,7 @@ private fun Path.resolveSlashes(): Path {
         result = result.replace('/', SysPathSep)
     }
 
-    val rootSlashes = result.rootOrNull() ?: ""
+    val rootSlashes = result.rootOrNull(normalizing = false) ?: ""
 
     var lastWasSlash = rootSlashes.isNotEmpty()
     var i = rootSlashes.length
