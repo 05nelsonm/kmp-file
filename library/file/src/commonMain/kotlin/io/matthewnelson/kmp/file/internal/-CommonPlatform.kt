@@ -73,23 +73,30 @@ internal fun Path.normalize(): Path {
 
     val root = rootOrNull(normalizing = true) ?: ""
 
-    val segments = subSequence(root.length, length).split(SysPathSep)
+    val segments = mutableListOf<String>()
 
-    val list = mutableListOf<String>()
-
-    for (segment in segments) {
+    subSequence(root.length, length).split(SysPathSep).forEach { segment ->
         when (segment) {
             "", "." -> {}
             ".." -> {
-                if (list.isNotEmpty()) {
-                    list.removeAt(list.size -1)
+                if (segments.isEmpty()) {
+                    if (root.isEmpty()) {
+                        segments.add(segment)
+                    }
+                    return@forEach
+                }
+
+                if (segments.last() == segment) {
+                    segments.add(segment)
+                } else {
+                    segments.removeAt(segments.size - 1)
                 }
             }
-            else -> list.add(segment)
+            else -> segments.add(segment)
         }
     }
 
-    val normalized = list.joinToString("$SysPathSep")
+    val normalized = segments.joinToString("$SysPathSep")
 
     return when {
         root.isEmpty() -> {
@@ -107,7 +114,7 @@ internal fun Path.normalize(): Path {
 
 @JvmSynthetic
 internal fun Path.rootOrNull(
-    normalizing: Boolean = false
+    normalizing: Boolean
 ): Path? = if (IsWindows) {
     val driveRoot = driveRootOrNull()
     when {
