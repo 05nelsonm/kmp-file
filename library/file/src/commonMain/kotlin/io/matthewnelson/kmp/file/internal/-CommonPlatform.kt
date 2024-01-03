@@ -72,15 +72,18 @@ internal fun Path.normalize(): Path {
     if (isEmpty()) return this
 
     val root = rootOrNull(normalizing = true) ?: ""
+    // If relative path (not rooted) check for a
+    // drive letter to preserve its relation
+    val drive = if (root.isEmpty()) driveOrNull() ?: "" else ""
 
     val segments = mutableListOf<String>()
 
-    subSequence(root.length, length).split(SysPathSep).forEach { segment ->
+    subSequence(root.length + drive.length, length).split(SysPathSep).forEach { segment ->
         when (segment) {
             "", "." -> {}
             ".." -> {
                 if (segments.isEmpty()) {
-                    if (root.isEmpty()) {
+                    if (root.isEmpty() && drive.isEmpty()) {
                         segments.add(segment)
                     }
                     return@forEach
@@ -98,18 +101,14 @@ internal fun Path.normalize(): Path {
 
     val normalized = segments.joinToString("$SysPathSep")
 
-    return when {
-        root.isEmpty() -> {
-            // Was not a rooted path. Check for a Windows
-            // drive letter (e.g. `C:`) to preserve the path's
-            // relation.
-            val drive = driveOrNull()
-            if (drive != null && !normalized.startsWith(drive)) drive else ""
-        }
+    val prefix =  when {
+        root.isEmpty() -> drive
         root.endsWith(SysPathSep) -> root
         normalized.isEmpty() -> root
         else -> root + SysPathSep
-    } + normalized
+    }
+
+    return prefix + normalized
 }
 
 @JvmSynthetic
