@@ -44,7 +44,7 @@ import kotlin.contracts.contract
 @ExperimentalForeignApi
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
-public inline fun <T: Any?> File.open(
+public inline fun <T: Any?> File.fOpen(
     flags: String,
     block: (file: CPointer<FILE>) -> T,
 ): T {

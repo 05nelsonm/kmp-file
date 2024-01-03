@@ -131,8 +131,8 @@ fun nativeMain(f1: File, f2: File) {
     // Native specific extension functions
 
     // Use a CPointer<FILE> with auto-closure on completion
-    f1.open(flags = "rb") { file1 ->
-        f2.open(flags = "wb") { file2 ->
+    f1.fOpen(flags = "rb") { file1 ->
+        f2.fOpen(flags = "wb") { file2 ->
             val buf = ByteArray(4096)
 
             while (true) {
