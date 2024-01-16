@@ -3,7 +3,7 @@ public final class io/matthewnelson/kmp/file/Exceptions {
 	public static final fun wrapIO (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)Ljava/io/IOException;
 }
 
-public final class io/matthewnelson/kmp/file/FileExt {
+public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final field SysPathSep C
 	public static final field SysTempDir Ljava/io/File;
 	public static final fun absoluteFileOf (Ljava/io/File;)Ljava/io/File;
