@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 0.1.0-alpha06 (2023-02-08)
+ - Changed `JvmName` for `FileExt` to `KmpFile` [[#37]][37]
+ - Added `InterruptedException` [[#39]][39]
+
 ## Version 0.1.0-alpha05 (2023-01-03)
  - Fixes `File.normalize` preservation of `..` when path is not rooted [[#31]][31]
  - Fixes usage of `JvmName` for `File` [[#33]][33]
@@ -23,3 +27,5 @@
 [31]: https://github.com/05nelsonm/kmp-file/pull/31
 [33]: https://github.com/05nelsonm/kmp-file/pull/33
 [35]: https://github.com/05nelsonm/kmp-file/pull/35
+[37]: https://github.com/05nelsonm/kmp-file/pull/37
+[39]: https://github.com/05nelsonm/kmp-file/pull/39
