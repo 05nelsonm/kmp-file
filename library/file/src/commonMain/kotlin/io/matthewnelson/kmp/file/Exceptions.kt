@@ -37,6 +37,11 @@ public expect open class FileNotFoundException: IOException {
     public constructor(message: String?)
 }
 
+public expect open class InterruptedException: Exception {
+    public constructor()
+    public constructor(message: String?)
+}
+
 @JvmName("wrapIO")
 public fun Throwable.wrapIOException(): IOException {
     return when (this) {
