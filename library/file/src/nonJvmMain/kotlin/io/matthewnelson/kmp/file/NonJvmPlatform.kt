@@ -33,3 +33,8 @@ public actual open class FileNotFoundException: IOException {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)
 }
+
+public actual open class InterruptedException: Exception {
+    public actual constructor(): super()
+    public actual constructor(message: String?): super(message)
+}

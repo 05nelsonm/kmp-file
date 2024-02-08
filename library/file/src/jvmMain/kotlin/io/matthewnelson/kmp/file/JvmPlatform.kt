@@ -22,3 +22,4 @@ public actual typealias File = java.io.File
 public actual typealias IOException = java.io.IOException
 public actual typealias EOFException = java.io.EOFException
 public actual typealias FileNotFoundException = java.io.FileNotFoundException
+public actual typealias InterruptedException = java.lang.InterruptedException
