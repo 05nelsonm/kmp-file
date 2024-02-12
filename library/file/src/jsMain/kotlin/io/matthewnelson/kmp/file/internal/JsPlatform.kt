@@ -50,7 +50,7 @@ internal actual inline fun File.platformReadBytes(): ByteArray = try {
 
     // Max buffer size for Node.js 16 can be larger than the
     // maximum size of the ByteArray capacity
-    if (buffer.length.toLong() >= Int.MAX_VALUE.toLong()) {
+    if (buffer.length >= Int.MAX_VALUE.toLong()) {
         throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
     }
 

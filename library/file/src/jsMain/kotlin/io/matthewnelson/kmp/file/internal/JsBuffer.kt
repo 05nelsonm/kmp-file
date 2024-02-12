@@ -22,8 +22,12 @@ package io.matthewnelson.kmp.file.internal
 /** [docs](https://nodejs.org/api/buffer.html#class-buffer) */
 @JsName("Buffer")
 internal external class buffer_Buffer {
-    val length: Number
-    fun fill()
-    fun readInt8(offset: Number): Number
-    fun toString(encoding: String, start: Number, end: Number): String
+    internal val length: Number
+    internal fun fill()
+    internal fun readInt8(offset: Number): Number
+    internal fun toString(encoding: String, start: Number, end: Number): String
+
+    internal companion object {
+        internal fun isBuffer(obj: dynamic): Boolean
+    }
 }
