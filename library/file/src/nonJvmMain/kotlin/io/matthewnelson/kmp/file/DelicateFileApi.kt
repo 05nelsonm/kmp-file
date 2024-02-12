@@ -17,15 +17,11 @@ package io.matthewnelson.kmp.file
 
 /**
  * Denotes an api as being delicate. Probably shouldn't use it.
- *
- * Any usage of a declaration annotated with [DelicateFileApi]
- * must be accepted by annotating that usage with the [OptIn]
- * annotation, e.g. @OptIn(DelicateFileApi::class), or by using
- * the following compiler argument:
- *
- *   -Xopt-in=io.matthewnelson.kmp.file.DelicateFileApi
  * */
-@RequiresOptIn
+@RequiresOptIn(
+    level = RequiresOptIn.Level.WARNING,
+    message = "This is a delicate API and requires care when using"
+)
 @MustBeDocumented
 @Target(
     AnnotationTarget.CLASS,

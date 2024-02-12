@@ -24,7 +24,7 @@ import kotlinx.cinterop.*
 import platform.posix.*
 
 @Throws(IOException::class)
-@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun fs_chmod(path: String, mode: String) {
     val modeT = try {
         Mode(value = mode).toModeT()
@@ -39,7 +39,7 @@ internal actual fun fs_chmod(path: String, mode: String) {
 }
 
 @Throws(IOException::class)
-@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun fs_remove(path: String): Boolean {
     val result = remove(path)
     if (result != 0) {
@@ -50,7 +50,7 @@ internal actual fun fs_remove(path: String): Boolean {
 }
 
 @Throws(IOException::class)
-@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun fs_realpath(path: String): String {
     val real = realpath(path, null)
         ?: throw errnoToIOException(errno)

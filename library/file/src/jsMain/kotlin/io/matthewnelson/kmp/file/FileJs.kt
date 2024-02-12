@@ -18,28 +18,28 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.internal.*
 import io.matthewnelson.kmp.file.internal.errorCode
 
-@DelicateFileApi
+// @Throws(IOException::class)
 public fun File.lstat(): Stats = try {
     Stats(fs_lstatSync(path))
 } catch (t: Throwable) {
     throw t.toIOException()
 }
 
-@DelicateFileApi
+// @Throws(IOException::class)
 public fun File.stat(): Stats = try {
     Stats(fs_statSync(path))
 } catch (t: Throwable) {
     throw t.toIOException()
 }
 
-@DelicateFileApi
+// @Throws(IOException::class)
 public fun File.read(): Buffer = try {
     Buffer(fs_readFileSync(path))
 } catch (t: Throwable) {
     throw t.toIOException()
 }
 
-@DelicateFileApi
+// @Throws(IOException::class)
 public fun File.write(data: Buffer) {
     try {
         fs_writeFileSync(path, data.value)
@@ -48,7 +48,6 @@ public fun File.write(data: Buffer) {
     }
 }
 
-@DelicateFileApi
 public fun Throwable.toIOException(): IOException {
     if (this is IOException) return this
 

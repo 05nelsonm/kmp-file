@@ -15,11 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
-import kotlinx.cinterop.ExperimentalForeignApi
-import platform.posix.F_OK
-import platform.posix.X_OK
 import platform.posix.access
-import platform.posix.errno
 import kotlin.experimental.ExperimentalNativeApi
 
 actual val isJvm: Boolean = false
@@ -36,7 +32,6 @@ actual val isSimulator: Boolean by lazy {
 }
 
 @Throws(IOException::class, IndexOutOfBoundsException::class)
-@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 fun File.checkAccess(vararg access: Int): Boolean {
     if (!exists()) throw FileNotFoundException()
 

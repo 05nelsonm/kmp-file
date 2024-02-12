@@ -27,7 +27,6 @@ import io.matthewnelson.kmp.file.internal.fs_Stats
  *     println(buffer.unwrap())
  *
  * */
-@DelicateFileApi
 public value class Buffer internal constructor(
     internal val value: buffer_Buffer
 ) {
@@ -69,7 +68,6 @@ public value class Buffer internal constructor(
     }
 }
 
-@DelicateFileApi
 public value class Stats internal constructor(
     private val value: fs_Stats
 ) {

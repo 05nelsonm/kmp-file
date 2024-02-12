@@ -43,7 +43,6 @@ internal actual val IsWindows: Boolean by lazy {
     }
 }
 
-@OptIn(DelicateFileApi::class)
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadBytes(): ByteArray = try {
     val buffer = read()
@@ -61,7 +60,6 @@ internal actual inline fun File.platformReadBytes(): ByteArray = try {
     throw t.toIOException()
 }
 
-@OptIn(DelicateFileApi::class)
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadUtf8(): String = try {
     val buffer = read()
@@ -79,7 +77,6 @@ internal actual inline fun File.platformReadUtf8(): String = try {
     throw t.toIOException()
 }
 
-@OptIn(DelicateFileApi::class)
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteBytes(array: ByteArray) {
     try {
@@ -89,7 +86,6 @@ internal actual inline fun File.platformWriteBytes(array: ByteArray) {
     }
 }
 
-@OptIn(DelicateFileApi::class)
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteUtf8(text: String) {
     try {
@@ -125,7 +121,6 @@ internal actual fun fs_chmod(path: String, mode: String) {
     try {
         fs_chmodSync(path, mode)
     } catch (t: Throwable) {
-        @OptIn(DelicateFileApi::class)
         throw t.toIOException()
     }
 }
@@ -146,7 +141,6 @@ internal actual fun fs_remove(path: String): Boolean {
             fs_rmdirSync(path, Options.Remove(force = true, recursive = false))
             true
         } catch (t: Throwable) {
-            @OptIn(DelicateFileApi::class)
             throw t.toIOException()
         }
     }
@@ -165,7 +159,6 @@ internal actual fun fs_realpath(path: String): String {
     return try {
         fs_realpathSync(path)
     } catch (t: Throwable) {
-        @OptIn(DelicateFileApi::class)
         throw t.toIOException()
     }
 }

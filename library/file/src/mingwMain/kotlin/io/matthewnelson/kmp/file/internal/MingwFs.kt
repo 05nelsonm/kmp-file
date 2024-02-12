@@ -19,7 +19,6 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.DelicateFileApi
 import io.matthewnelson.kmp.file.errnoToIOException
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
@@ -43,7 +42,7 @@ import platform.posix.rmdir
 internal actual fun fs_chmod(path: String, mode: String) { /* no-op */ }
 
 @Throws(IOException::class)
-@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun fs_remove(path: String): Boolean {
     if (remove(path) == 0) return true
 
@@ -60,7 +59,7 @@ internal actual fun fs_platform_mkdir(
 ): Int = mkdir(path)
 
 @Throws(IOException::class)
-@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class)
 internal actual fun fs_realpath(
     path: String,
 ): String {
