@@ -32,15 +32,17 @@ public value class Buffer internal constructor(
     internal val value: buffer_Buffer
 ) {
 
-    public val length: Number get() = value.length.toLong()
+    public val length: Long get() = value.length.toLong()
     public fun fill() { value.fill() }
 
+    // @Throws(IOException::class)
     public fun readInt8(index: Number): Byte = try {
         value.readInt8(index) as Byte
     } catch (t: Throwable) {
         throw t.toIOException()
     }
 
+    // @Throws(IOException::class)
     public fun toUtf8(
         start: Number = 0,
         end: Number = this.length,
@@ -56,14 +58,13 @@ public value class Buffer internal constructor(
 
     public companion object {
 
-        public fun wrap(buffer: dynamic): Buffer = try {
-            val buf = Buffer(buffer.unsafeCast<buffer_Buffer>())
-            // Attempt to read a single byte to test
-            // if it is actually a Buffer
-            buf.readInt8(0)
-            buf
-        } catch (t: Throwable) {
-            throw t.toIOException()
+        // @Throws(IOException::class)
+        public fun wrap(buffer: dynamic): Buffer {
+            if (!buffer_Buffer.isBuffer(buffer)) {
+                throw IOException("Not a buffer")
+            }
+
+            return Buffer(buffer.unsafeCast<buffer_Buffer>())
         }
     }
 }

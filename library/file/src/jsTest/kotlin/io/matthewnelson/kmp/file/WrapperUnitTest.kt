@@ -15,10 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-import kotlin.test.fail
+import kotlin.test.*
 
 @OptIn(DelicateFileApi::class)
 class WrapperUnitTest {
@@ -43,11 +40,13 @@ class WrapperUnitTest {
     @Test
     fun givenBuffer_whenFromDynamicAndNotActuallyABuffer_thenThrowsException() {
         val stats = FILE_LOREM_IPSUM.stat().unwrap()
-        try {
-            Buffer.wrap(stats)
-            fail()
-        } catch (_: IOException) {
-            // pass
-        }
+        assertFailsWith<IOException> { Buffer.wrap(stats) }
+    }
+
+    @Test
+    fun givenEmptyBuffer_whenToString_thenIsEmptyString() {
+        val buf = js("Buffer").alloc(0)
+        val string = Buffer.wrap(buf).toUtf8()
+        assertTrue(string.isEmpty())
     }
 }

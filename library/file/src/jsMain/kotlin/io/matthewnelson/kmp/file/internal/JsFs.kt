@@ -74,8 +74,8 @@ internal external fun fs_statSync(path: String): fs_Stats
 /** [docs](https://nodejs.org/api/fs.html#class-fsstats) */
 @JsName("Stats")
 internal external class fs_Stats {
-    val mode: Number
-    fun isFile(): Boolean
-    fun isDirectory(): Boolean
-    fun isSymbolicLink(): Boolean
+    internal val mode: Number
+    internal fun isFile(): Boolean
+    internal fun isDirectory(): Boolean
+    internal fun isSymbolicLink(): Boolean
 }
