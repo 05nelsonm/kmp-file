@@ -119,7 +119,7 @@ fun jsMain(f1: File, f2: File) {
     
     // If APIs aren't available, simply unwrap to use.
     val statsDynamic = stats.unwrap()
-    statsDynamic.nlink.toInt()
+    statsDynamic.nlink as Int
 }
 ```
 
