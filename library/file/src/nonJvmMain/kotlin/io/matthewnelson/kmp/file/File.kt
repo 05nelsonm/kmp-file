@@ -47,7 +47,6 @@ public actual class File: Comparable<File> {
      * @throws [IOException] if [mode] is inappropriate
      * @throws [FileNotFoundException] if the file does not exist
      * */
-    @DelicateFileApi
     @Throws(IOException::class)
     public fun chmod(mode: String) { fs_chmod(realPath, mode) }
 

@@ -17,7 +17,6 @@ package io.matthewnelson.kmp.file
 
 import kotlin.test.*
 
-@OptIn(DelicateFileApi::class)
 class WrapperUnitTest {
 
     @Test

@@ -21,7 +21,6 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@OptIn(DelicateFileApi::class)
 class ChmodNativeUnitTest: ChmodBaseTest() {
 
     @Test

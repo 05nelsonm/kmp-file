@@ -65,6 +65,14 @@ public inline fun <T: Any?> File.fOpen(
     return result
 }
 
+/**
+ * Reads the contents of [FILE] into provided ByteArray.
+ *
+ * When return value is:
+ *  - Negative: error, check [errno]
+ *  - 0: no more data to read (break)
+ *  - Positive: [buf] was filled with that much data starting from 0
+ * */
 @DelicateFileApi
 @ExperimentalForeignApi
 public fun CPointer<FILE>.fRead(
@@ -73,6 +81,14 @@ public fun CPointer<FILE>.fRead(
     fs_platform_fread(this, pinned.addressOf(0), buf.size)
 }
 
+/**
+ * Writes [buf] to [FILE]
+ *
+ * When return value is:
+ *  - Negative: error, check [errno]
+ *  - 0: wrote no data (break)
+ *  - Positive: Amount of data from [buf] written.
+ * */
 @DelicateFileApi
 @ExperimentalForeignApi
 public fun CPointer<FILE>.fWrite(
@@ -83,7 +99,6 @@ public fun CPointer<FILE>.fWrite(
     fs_platform_fwrite(this, pinned.addressOf(offset), len)
 }
 
-@DelicateFileApi
 @ExperimentalForeignApi
 public fun errnoToIOException(errno: Int): IOException {
     val message = strerror(errno)?.toKString() ?: "errno: $errno"
