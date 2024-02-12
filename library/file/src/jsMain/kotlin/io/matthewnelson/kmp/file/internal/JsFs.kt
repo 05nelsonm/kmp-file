@@ -29,7 +29,7 @@ internal actual external fun fs_exists(path: String): Boolean
 
 /** [docs](https://nodejs.org/api/fs.html#fsmkdirsyncpath-options) */
 @JsName("mkdirSync")
-internal external fun fs_mkdirSync(path: String, options: Options.Mkdir): String?
+internal external fun fs_mkdirSync(path: String, options: dynamic): String?
 
 /** [docs](https://nodejs.org/api/fs.html#fsreadfilesyncpath-options) */
 @JsName("readFileSync")
@@ -41,11 +41,11 @@ internal external fun fs_realpathSync(path: String): String
 
 /** [docs](https://nodejs.org/api/fs.html#fsrmsyncpath-options) */
 @JsName("rmSync")
-internal external fun fs_rmSync(path: String, options: Options.Remove)
+internal external fun fs_rmSync(path: String, options: dynamic)
 
 /** [docs](https://nodejs.org/api/fs.html#fsrmdirsyncpath-options) */
 @JsName("rmdirSync")
-internal external fun fs_rmdirSync(path: String, options: Options.Remove)
+internal external fun fs_rmdirSync(path: String, options: dynamic)
 
 /** [docs](https://nodejs.org/api/fs.html#fsunlinksyncpath) */
 @JsName("unlinkSync")
