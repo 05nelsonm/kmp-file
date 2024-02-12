@@ -133,12 +133,16 @@ internal actual fun fs_remove(path: String): Boolean {
         if (t.errorCode == "ENOENT") return false
     }
 
+    val options = js("{}")
+    options["force"] = true
+    options["recursive"] = false
+
     return try {
-        fs_rmSync(path, Options.Remove(force = true, recursive = false))
+        fs_rmSync(path, options)
         true
     } catch (_: Throwable) {
         try {
-            fs_rmdirSync(path, Options.Remove(force = true, recursive = false))
+            fs_rmdirSync(path, options)
             true
         } catch (t: Throwable) {
             throw t.toIOException()
@@ -148,7 +152,11 @@ internal actual fun fs_remove(path: String): Boolean {
 
 internal actual fun fs_mkdir(path: String): Boolean {
     return try {
-        fs_mkdirSync(path, Options.Mkdir())
+        val options = js("{}")
+        options["recursive"] = false
+        options["mode"] = "775"
+
+        fs_mkdirSync(path, options)
         true
     } catch (_: Throwable) {
         false
