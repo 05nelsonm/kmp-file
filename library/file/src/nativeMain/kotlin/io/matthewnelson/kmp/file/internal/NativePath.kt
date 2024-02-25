@@ -17,7 +17,6 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.SysPathSep
 import kotlinx.cinterop.*
 
 @Suppress("NOTHING_TO_INLINE")

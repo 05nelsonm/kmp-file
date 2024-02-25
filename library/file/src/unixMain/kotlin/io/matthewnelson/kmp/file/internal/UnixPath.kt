@@ -17,7 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.SysPathSep
+import io.matthewnelson.kmp.file.SysDirSep
 
 @Suppress("NOTHING_TO_INLINE")
-internal actual inline fun Path.isAbsolute(): Boolean = startsWith(SysPathSep)
+internal actual inline fun Path.isAbsolute(): Boolean = startsWith(SysDirSep)

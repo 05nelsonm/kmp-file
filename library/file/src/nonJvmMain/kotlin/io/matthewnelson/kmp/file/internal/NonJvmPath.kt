@@ -17,7 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.SysPathSep
+import io.matthewnelson.kmp.file.SysDirSep
 
 internal fun Path.absolute(): Path {
     if (isAbsolute()) return this
@@ -29,18 +29,18 @@ internal fun Path.absolute(): Path {
         //
         // Path starts with C: (or some other letter)
         // and is not rooted (because isAbsolute was false)
-        val resolvedDrive = fs_realpath(drive) + SysPathSep
+        val resolvedDrive = fs_realpath(drive) + SysDirSep
         replaceFirst(drive, resolvedDrive)
     } else {
         // Unix or no drive specified
 
         val cwd = fs_realpath(".")
-        if (isEmpty() || startsWith(SysPathSep)) {
+        if (isEmpty() || startsWith(SysDirSep)) {
             // Could be on windows where `\path`
             // is a thing (and would not be absolute)
             cwd + this
         } else {
-            cwd + SysPathSep + this
+            cwd + SysDirSep + this
         }
     }
 }
@@ -56,7 +56,7 @@ internal expect inline fun Path.isAbsolute(): Boolean
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun Path.parentOrNull(): Path? {
-    if (!contains(SysPathSep)) return null
+    if (!contains(SysDirSep)) return null
 
     val parent = dirname()
 

@@ -26,7 +26,7 @@ import kotlin.io.writeText as _writeText
 
 @JvmField
 @JvmSynthetic
-internal actual val PlatformPathSeparator: Char = File.separatorChar
+internal actual val PlatformDirSeparator: Char = File.separatorChar
 
 @JvmField
 @JvmSynthetic

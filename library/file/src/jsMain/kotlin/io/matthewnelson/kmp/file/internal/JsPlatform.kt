@@ -19,7 +19,7 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.*
 
-internal actual val PlatformPathSeparator: Char by lazy {
+internal actual val PlatformDirSeparator: Char by lazy {
     try {
         path_sep.first()
     } catch (_: Throwable) {
@@ -39,7 +39,7 @@ internal actual val IsWindows: Boolean by lazy {
     try {
         os_platform() == "win32"
     } catch (_: Throwable) {
-        SysPathSep == '\\'
+        SysDirSep == '\\'
     }
 }
 
@@ -66,7 +66,7 @@ internal actual inline fun File.platformReadUtf8(): String = try {
 
     // Max buffer size for Node.js 16 can be larger than the
     // maximum size of the ByteArray capacity
-    if (buffer.length.toLong() >= Int.MAX_VALUE.toLong()) {
+    if (buffer.length >= Int.MAX_VALUE.toLong()) {
         throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
     }
 
@@ -108,9 +108,9 @@ internal actual inline fun Path.isAbsolute(): Boolean {
         // something like `\path` as being absolute.
         // This is wrong. `path` is relative to the
         // current working drive in this instance.
-        if (startsWith(SysPathSep)) {
+        if (startsWith(SysDirSep)) {
             // Check for UNC path `\\server_name`
-            return length > 1 && get(1) == SysPathSep
+            return length > 1 && get(1) == SysDirSep
         }
     }
 

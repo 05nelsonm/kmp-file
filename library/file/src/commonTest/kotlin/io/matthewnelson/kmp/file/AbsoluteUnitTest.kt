@@ -49,7 +49,7 @@ class AbsoluteUnitTest {
     @Test
     fun givenFile_whenPathEmpty_thenResolvesCWD() {
         val absolute = "".toFile().absolutePath
-        assertTrue(!absolute.endsWith(SysPathSep))
+        assertTrue(!absolute.endsWith(SysDirSep))
         assertTrue(absolute.isNotBlank())
     }
 
@@ -73,7 +73,7 @@ class AbsoluteUnitTest {
         //   `C:\Users\path\to\current\working\dir\C:relative`
         // for a relative path of:
         //   `C:relative`
-        assertTrue(absolute.endsWith("${SysPathSep}relative"))
+        assertTrue(absolute.endsWith("${SysDirSep}relative"))
     }
 
     @Test

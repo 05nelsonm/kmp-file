@@ -116,7 +116,7 @@ private fun Path.resolveSlashes(): Path {
     var result = this
 
     if (IsWindows) {
-        result = result.replace('/', SysPathSep)
+        result = result.replace('/', SysDirSep)
     }
 
     val rootSlashes = result.rootOrNull(normalizing = false) ?: ""
@@ -128,7 +128,7 @@ private fun Path.resolveSlashes(): Path {
         while (i < result.length) {
             val c = result[i++]
 
-            if (c == SysPathSep) {
+            if (c == SysDirSep) {
                 if (!lastWasSlash) {
                     append(c)
                     lastWasSlash = true

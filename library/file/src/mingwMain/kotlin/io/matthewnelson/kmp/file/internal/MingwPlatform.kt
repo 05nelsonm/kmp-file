@@ -21,7 +21,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString
 import platform.posix.getenv
 
-internal actual val PlatformPathSeparator: Char = '\\'
+internal actual val PlatformDirSeparator: Char = '\\'
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual val PlatformTempDirectory: File by lazy {

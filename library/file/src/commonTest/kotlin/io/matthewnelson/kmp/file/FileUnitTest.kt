@@ -30,9 +30,9 @@ class FileUnitTest {
     @Test
     fun givenFile_whenInsanePaths_thenResolvesCorrectly() {
         // windows should replace all unix path separators with `\` before
-        assertEquals("relative${SysPathSep}path", "relative////path///".toFile().path)
-        assertEquals("relative${SysPathSep}path${SysPathSep}.", "relative////path///.".toFile().path)
-        assertEquals(".${SysPathSep}..", "./..".toFile().path)
+        assertEquals("relative${SysDirSep}path", "relative////path///".toFile().path)
+        assertEquals("relative${SysDirSep}path${SysDirSep}.", "relative////path///.".toFile().path)
+        assertEquals(".${SysDirSep}..", "./..".toFile().path)
 
         assertEquals(".", ".".toFile().path)
         assertEquals("..", "..".toFile().path)

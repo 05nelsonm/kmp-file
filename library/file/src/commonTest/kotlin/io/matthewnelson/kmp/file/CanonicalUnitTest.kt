@@ -35,7 +35,7 @@ class CanonicalUnitTest {
         val cwd = "".toFile().canonicalPath()
 
         // not empty and has some (any) path
-        assertTrue(cwd.contains(SysPathSep))
+        assertTrue(cwd.contains(SysDirSep))
     }
 
     // This passes locally on all my machines, but CI does not like it

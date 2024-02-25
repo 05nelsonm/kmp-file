@@ -53,7 +53,7 @@ class ParentUnitTest {
     fun givenFile_whenHasTrailingSlashes_thenIgnoresThem() {
         val path = buildString {
             append(' ')
-            repeat(3) { append(SysPathSep) }
+            repeat(3) { append(SysDirSep) }
         }
 
         assertNull(path.toFile().parentPath)

@@ -15,6 +15,6 @@
  **/
 package io.matthewnelson.kmp.file.internal
 
-internal actual val PlatformPathSeparator: Char = '/'
+internal actual val PlatformDirSeparator: Char = '/'
 
 internal actual val IsWindows: Boolean = false

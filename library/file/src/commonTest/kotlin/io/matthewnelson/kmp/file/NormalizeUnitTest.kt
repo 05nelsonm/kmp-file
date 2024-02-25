@@ -23,7 +23,7 @@ class NormalizeUnitTest {
 
     @Test
     fun givenFile_whenNormalize_thenResolvesAsExpected() {
-        val s = SysPathSep
+        val s = SysDirSep
         assertEquals("${s}rooted${s}path", "/rooted/path".toFile().normalize().path)
         assertEquals("${s}rooted", "/../rooted/path/..".toFile().normalize().path)
         assertEquals("${s}path", "/rooted/../path".toFile().normalize().path)
