@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("KotlinRedundantDiagnosticSuppress")
+
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
@@ -22,7 +24,8 @@ import kotlinx.cinterop.toKString
 import platform.posix.getenv
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual val PlatformTempDirectory: File by lazy {
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformTempDirectory(): File {
     val tmpdir = getenv("TMPDIR")
-    (tmpdir?.toKString() ?: "/tmp").toFile()
+    return (tmpdir?.toKString() ?: "/tmp").toFile()
 }

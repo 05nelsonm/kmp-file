@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("KotlinRedundantDiagnosticSuppress")
+
 package io.matthewnelson.kmp.file.internal
 
-internal actual val PlatformDirSeparator: Char = '/'
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformDirSeparator(): Char = '/'
 
 internal actual val IsWindows: Boolean = false

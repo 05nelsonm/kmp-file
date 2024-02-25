@@ -19,21 +19,19 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.*
 
-internal actual val PlatformDirSeparator: Char by lazy {
-    try {
-        path_sep.first()
-    } catch (_: Throwable) {
-        '/'
-    }
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformDirSeparator(): Char = try {
+    path_sep.first()
+} catch (_: Throwable) {
+    '/'
 }
 
-internal actual val PlatformTempDirectory: File by lazy {
-    try {
-        os_tmpdir()
-    } catch (_: Throwable) {
-        "/tmp"
-    }.toFile()
-}
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformTempDirectory(): File = try {
+    os_tmpdir()
+} catch (_: Throwable) {
+    "/tmp"
+}.toFile()
 
 internal actual val IsWindows: Boolean by lazy {
     try {
