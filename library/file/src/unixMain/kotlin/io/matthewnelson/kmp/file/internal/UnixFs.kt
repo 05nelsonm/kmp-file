@@ -25,7 +25,7 @@ import platform.posix.*
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_chmod(path: String, mode: String) {
+internal actual fun fs_chmod(path: Path, mode: String) {
     val modeT = try {
         Mode(value = mode).toModeT()
     } catch (e: IllegalArgumentException) {
@@ -40,7 +40,7 @@ internal actual fun fs_chmod(path: String, mode: String) {
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_remove(path: String): Boolean {
+internal actual fun fs_remove(path: Path): Boolean {
     val result = remove(path)
     if (result != 0) {
         if (errno == ENOENT) return false
@@ -51,7 +51,7 @@ internal actual fun fs_remove(path: String): Boolean {
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_realpath(path: String): String {
+internal actual fun fs_realpath(path: Path): Path {
     val real = realpath(path, null)
         ?: throw errnoToIOException(errno)
 
@@ -63,18 +63,18 @@ internal actual fun fs_realpath(path: String): String {
 }
 
 internal actual fun fs_platform_mkdir(
-    path: String,
+    path: Path,
 ): Int = fs_platform_mkdir(path, Mode("775").toModeT())
 
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun fs_platform_chmod(
-    path: String,
+    path: Path,
     mode: UInt,
 ): Int
 
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun fs_platform_mkdir(
-    path: String,
+    path: Path,
     mode: UInt,
 ): Int
 

@@ -39,11 +39,11 @@ import platform.posix.remove
 import platform.posix.rmdir
 
 @Throws(IOException::class)
-internal actual fun fs_chmod(path: String, mode: String) { /* no-op */ }
+internal actual fun fs_chmod(path: Path, mode: String) { /* no-op */ }
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_remove(path: String): Boolean {
+internal actual fun fs_remove(path: Path): Boolean {
     if (remove(path) == 0) return true
 
     val err = errno
@@ -55,14 +55,12 @@ internal actual fun fs_remove(path: String): Boolean {
 }
 
 internal actual fun fs_platform_mkdir(
-    path: String,
+    path: Path,
 ): Int = mkdir(path)
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_realpath(
-    path: String,
-): String {
+internal actual fun fs_realpath(path: Path): Path {
     val real = _fullpath(null, path, PATH_MAX.toULong())
         ?: throw errnoToIOException(errno)
 
