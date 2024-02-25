@@ -21,55 +21,55 @@ package io.matthewnelson.kmp.file.internal
 
 /** [docs](https://nodejs.org/api/fs.html#fschmodsyncpath-mode) */
 @JsName("chmodSync")
-internal external fun fs_chmodSync(path: String, mode: String)
+internal external fun fs_chmodSync(path: Path, mode: String)
 
 /** [docs](https://nodejs.org/api/fs.html#fsexistssyncpath) */
 @JsName("existsSync")
-internal actual external fun fs_exists(path: String): Boolean
+internal actual external fun fs_exists(path: Path): Boolean
 
 /** [docs](https://nodejs.org/api/fs.html#fsmkdirsyncpath-options) */
 @JsName("mkdirSync")
-internal external fun fs_mkdirSync(path: String, options: dynamic): String?
+internal external fun fs_mkdirSync(path: Path, options: dynamic): String?
 
 /** [docs](https://nodejs.org/api/fs.html#fsreadfilesyncpath-options) */
 @JsName("readFileSync")
-internal external fun fs_readFileSync(path: String): buffer_Buffer
+internal external fun fs_readFileSync(path: Path): buffer_Buffer
 
 /** [docs](https://nodejs.org/api/fs.html#fsrealpathsyncpath-options) */
 @JsName("realpathSync")
-internal external fun fs_realpathSync(path: String): String
+internal external fun fs_realpathSync(path: Path): String
 
 /** [docs](https://nodejs.org/api/fs.html#fsrmsyncpath-options) */
 @JsName("rmSync")
-internal external fun fs_rmSync(path: String, options: dynamic)
+internal external fun fs_rmSync(path: Path, options: dynamic)
 
 /** [docs](https://nodejs.org/api/fs.html#fsrmdirsyncpath-options) */
 @JsName("rmdirSync")
-internal external fun fs_rmdirSync(path: String, options: dynamic)
+internal external fun fs_rmdirSync(path: Path, options: dynamic)
 
 /** [docs](https://nodejs.org/api/fs.html#fsunlinksyncpath) */
 @JsName("unlinkSync")
-internal external fun fs_unlinkSync(path: String)
+internal external fun fs_unlinkSync(path: Path)
 
 /** [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options) */
 @JsName("writeFileSync")
-internal external fun fs_writeFileSync(path: String, data: buffer_Buffer)
+internal external fun fs_writeFileSync(path: Path, data: buffer_Buffer)
 
 /** [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options) */
 @JsName("writeFileSync")
-internal external fun fs_writeFileSync(path: String, data: ByteArray)
+internal external fun fs_writeFileSync(path: Path, data: ByteArray)
 
 /** [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options) */
 @JsName("writeFileSync")
-internal external fun fs_writeFileSync(path: String, data: String)
+internal external fun fs_writeFileSync(path: Path, data: String)
 
 /** [docs](https://nodejs.org/api/fs.html#fslstatsyncpath-options) */
 @JsName("lstatSync")
-internal external fun fs_lstatSync(path: String): fs_Stats
+internal external fun fs_lstatSync(path: Path): fs_Stats
 
 /** [docs](https://nodejs.org/api/fs.html#fsstatsyncpath-options) */
 @JsName("statSync")
-internal external fun fs_statSync(path: String): fs_Stats
+internal external fun fs_statSync(path: Path): fs_Stats
 
 /** [docs](https://nodejs.org/api/fs.html#class-fsstats) */
 @JsName("Stats")

@@ -25,7 +25,7 @@ import platform.posix.FILE
 import platform.posix.access
 import platform.posix.errno
 
-internal actual fun fs_exists(path: String): Boolean {
+internal actual fun fs_exists(path: Path): Boolean {
     val result = access(path, 0)
     return if (result != 0 && errno == ENOENT) {
         false
@@ -34,11 +34,11 @@ internal actual fun fs_exists(path: String): Boolean {
     }
 }
 
-internal actual fun fs_mkdir(path: String): Boolean {
+internal actual fun fs_mkdir(path: Path): Boolean {
     return fs_platform_mkdir(path) == 0
 }
 
-internal expect fun fs_platform_mkdir(path: String): Int
+internal expect fun fs_platform_mkdir(path: Path): Int
 
 @ExperimentalForeignApi
 @Suppress("NOTHING_TO_INLINE")

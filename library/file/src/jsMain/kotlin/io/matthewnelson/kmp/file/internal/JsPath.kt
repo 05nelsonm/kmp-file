@@ -25,12 +25,12 @@ internal external val path_sep: String
 
 /** [docs](https://nodejs.org/api/path.html#pathbasenamepath-suffix) **/
 @JsName("basename")
-internal external fun path_basename(path: String): String
+internal external fun path_basename(path: Path): String
 
 /** [docs](https://nodejs.org/api/path.html#pathdirnamepath) **/
 @JsName("dirname")
-internal external fun path_dirname(path: String): String
+internal external fun path_dirname(path: Path): String
 
 /** [docs](https://nodejs.org/api/path.html#pathisabsolutepath) **/
 @JsName("isAbsolute")
-internal external fun path_isAbsolute(path: String): Boolean
+internal external fun path_isAbsolute(path: Path): Boolean

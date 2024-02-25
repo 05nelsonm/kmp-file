@@ -24,18 +24,14 @@ import kotlin.io.resolve as _resolve
 import kotlin.io.writeBytes as _writeBytes
 import kotlin.io.writeText as _writeText
 
-@JvmField
-@JvmSynthetic
-internal actual val PlatformDirSeparator: Char = File.separatorChar
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformDirSeparator(): Char = File.separatorChar
 
-@JvmField
-@JvmSynthetic
-internal actual val PlatformTempDirectory: File = System
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformTempDirectory(): File = System
     .getProperty("java.io.tmpdir")
     .toFile()
 
-@JvmField
-@JvmSynthetic
 internal actual val IsWindows: Boolean = System.getProperty("os.name")
     ?.ifBlank { null }
     ?.contains("windows", ignoreCase = true)

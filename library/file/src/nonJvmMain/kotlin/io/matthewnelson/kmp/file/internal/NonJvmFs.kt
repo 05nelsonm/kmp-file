@@ -20,7 +20,7 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.IOException
 
 @Throws(IOException::class)
-internal fun fs_canonicalize(path: String): String {
+internal fun fs_canonicalize(path: Path): Path {
     if (path.isEmpty()) return fs_realpath(".")
 
     val resolved = path.absolute().normalize()
@@ -37,13 +37,13 @@ internal fun fs_canonicalize(path: String): String {
 }
 
 @Throws(IOException::class)
-internal expect fun fs_chmod(path: String, mode: String)
+internal expect fun fs_chmod(path: Path, mode: String)
 
-internal expect fun fs_exists(path: String): Boolean
+internal expect fun fs_exists(path: Path): Boolean
 
-internal expect fun fs_mkdir(path: String): Boolean
+internal expect fun fs_mkdir(path: Path): Boolean
 
-internal fun fs_mkdirs(path: String): Boolean {
+internal fun fs_mkdirs(path: Path): Boolean {
     if (fs_mkdir(path)) return true
 
     val dirsToMake = try {
@@ -70,7 +70,7 @@ internal fun fs_mkdirs(path: String): Boolean {
 }
 
 @Throws(IOException::class)
-internal expect fun fs_remove(path: String): Boolean
+internal expect fun fs_remove(path: Path): Boolean
 
 @Throws(IOException::class)
-internal expect fun fs_realpath(path: String): String
+internal expect fun fs_realpath(path: Path): Path

@@ -26,14 +26,14 @@ import platform.posix.*
 @Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal actual inline fun fs_platform_chmod(
-    path: String,
+    path: Path,
     mode: UInt,
 ): Int = chmod(path, mode.convert()).convert()
 
 @Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal actual inline fun fs_platform_mkdir(
-    path: String,
+    path: Path,
     mode: UInt,
 ): Int = mkdir(path, mode.convert()).convert()
 

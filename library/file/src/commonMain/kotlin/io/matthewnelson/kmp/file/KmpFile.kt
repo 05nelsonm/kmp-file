@@ -32,13 +32,13 @@ import kotlin.jvm.JvmName
  *  - Windows: "\\"
  * */
 @JvmField
-public val SysDirSep: Char = PlatformDirSeparator
+public val SysDirSep: Char = PlatformDirSeparator()
 
 /**
  * The system's temporary directory
  * */
 @JvmField
-public val SysTempDir: File = PlatformTempDirectory
+public val SysTempDir: File = PlatformTempDirectory()
 
 @JvmName("get")
 public fun String.toFile(): File = File(this)

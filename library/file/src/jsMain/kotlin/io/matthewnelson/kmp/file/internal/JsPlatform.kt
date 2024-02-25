@@ -19,21 +19,19 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.*
 
-internal actual val PlatformDirSeparator: Char by lazy {
-    try {
-        path_sep.first()
-    } catch (_: Throwable) {
-        '/'
-    }
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformDirSeparator(): Char = try {
+    path_sep.first()
+} catch (_: Throwable) {
+    '/'
 }
 
-internal actual val PlatformTempDirectory: File by lazy {
-    try {
-        os_tmpdir()
-    } catch (_: Throwable) {
-        "/tmp"
-    }.toFile()
-}
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformTempDirectory(): File = try {
+    os_tmpdir()
+} catch (_: Throwable) {
+    "/tmp"
+}.toFile()
 
 internal actual val IsWindows: Boolean by lazy {
     try {
@@ -122,7 +120,7 @@ internal actual inline fun Path.isAbsolute(): Boolean {
 }
 
 // @Throws(IOException::class)
-internal actual fun fs_chmod(path: String, mode: String) {
+internal actual fun fs_chmod(path: Path, mode: String) {
     try {
         fs_chmodSync(path, mode)
     } catch (t: Throwable) {
@@ -131,7 +129,7 @@ internal actual fun fs_chmod(path: String, mode: String) {
 }
 
 // @Throws(IOException::class)
-internal actual fun fs_remove(path: String): Boolean {
+internal actual fun fs_remove(path: Path): Boolean {
     try {
         fs_unlinkSync(path)
         return true
@@ -156,7 +154,7 @@ internal actual fun fs_remove(path: String): Boolean {
     }
 }
 
-internal actual fun fs_mkdir(path: String): Boolean {
+internal actual fun fs_mkdir(path: Path): Boolean {
     return try {
         val options = js("{}")
         options["recursive"] = false
@@ -170,7 +168,7 @@ internal actual fun fs_mkdir(path: String): Boolean {
 }
 
 // @Throws(IOException::class)
-internal actual fun fs_realpath(path: String): String {
+internal actual fun fs_realpath(path: Path): Path {
     return try {
         fs_realpathSync(path)
     } catch (t: Throwable) {

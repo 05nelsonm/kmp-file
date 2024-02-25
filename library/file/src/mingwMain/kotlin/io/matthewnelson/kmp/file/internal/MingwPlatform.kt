@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("KotlinRedundantDiagnosticSuppress")
+
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
@@ -21,12 +23,14 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString
 import platform.posix.getenv
 
-internal actual val PlatformDirSeparator: Char = '\\'
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformDirSeparator(): Char = '\\'
 
-@OptIn(ExperimentalForeignApi::class)
-internal actual val PlatformTempDirectory: File by lazy {
+@Suppress("NOTHING_TO_INLINE", "FunctionName")
+internal actual inline fun PlatformTempDirectory(): File {
     // Windows' built-in APIs check the TEMP, TMP, and USERPROFILE environment variables in order.
     // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-gettemppatha?redirectedfrom=MSDN
+    @OptIn(ExperimentalForeignApi::class)
     val temp = getenv("TEMP")
         ?.toKString()
         ?: getenv("TMP")
@@ -35,7 +39,7 @@ internal actual val PlatformTempDirectory: File by lazy {
             ?.toKString()
         ?: "\\Windows\\TEMP"
 
-    temp.toFile()
+    return temp.toFile()
 }
 
 internal actual val IsWindows: Boolean = true

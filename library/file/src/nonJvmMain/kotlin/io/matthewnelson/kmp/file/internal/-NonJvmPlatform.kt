@@ -27,8 +27,8 @@ internal actual inline fun File.platformResolve(relative: File): File = when {
     // rooted it will be returned instead of concatenating
     // it with the parent path. isAbsolute would return false
     // if the path on windows was relative, like `\Windows`.
-    relative.path.startsWith(PlatformDirSeparator) -> relative
+    relative.path.startsWith(SysDirSep) -> relative
     relative.isAbsolute() -> relative
-    path.endsWith(PlatformDirSeparator) -> File(path + relative.path)
-    else -> File(path + PlatformDirSeparator + relative.path)
+    path.endsWith(SysDirSep) -> File(path + relative.path)
+    else -> File(path + SysDirSep + relative.path)
 }
