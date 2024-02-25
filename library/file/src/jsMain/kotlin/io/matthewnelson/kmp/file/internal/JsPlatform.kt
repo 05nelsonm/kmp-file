@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
+@file:Suppress("FunctionName", "ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT", "KotlinRedundantDiagnosticSuppress")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -43,6 +43,7 @@ internal actual val IsWindows: Boolean by lazy {
     }
 }
 
+// @Throws(IOException::class)
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadBytes(): ByteArray = try {
     val buffer = read()
@@ -60,6 +61,7 @@ internal actual inline fun File.platformReadBytes(): ByteArray = try {
     throw t.toIOException()
 }
 
+// @Throws(IOException::class)
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadUtf8(): String = try {
     val buffer = read()
@@ -77,6 +79,7 @@ internal actual inline fun File.platformReadUtf8(): String = try {
     throw t.toIOException()
 }
 
+// @Throws(IOException::class)
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteBytes(array: ByteArray) {
     try {
@@ -86,6 +89,7 @@ internal actual inline fun File.platformWriteBytes(array: ByteArray) {
     }
 }
 
+// @Throws(IOException::class)
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteUtf8(text: String) {
     try {
@@ -117,6 +121,7 @@ internal actual inline fun Path.isAbsolute(): Boolean {
     return path_isAbsolute(this)
 }
 
+// @Throws(IOException::class)
 internal actual fun fs_chmod(path: String, mode: String) {
     try {
         fs_chmodSync(path, mode)
@@ -125,6 +130,7 @@ internal actual fun fs_chmod(path: String, mode: String) {
     }
 }
 
+// @Throws(IOException::class)
 internal actual fun fs_remove(path: String): Boolean {
     try {
         fs_unlinkSync(path)
@@ -163,6 +169,7 @@ internal actual fun fs_mkdir(path: String): Boolean {
     }
 }
 
+// @Throws(IOException::class)
 internal actual fun fs_realpath(path: String): String {
     return try {
         fs_realpathSync(path)
@@ -171,4 +178,9 @@ internal actual fun fs_realpath(path: String): String {
     }
 }
 
-internal val Throwable.errorCode: dynamic get() = asDynamic().code
+@Suppress("NOTHING_TO_INLINE", "REDUNDANT_NULLABLE")
+internal inline val Throwable.errorCode: String? get() = try {
+    asDynamic().code as String
+} catch (_: Throwable) {
+    null
+}

@@ -16,6 +16,7 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.buffer_Buffer
+import io.matthewnelson.kmp.file.internal.errorCode
 import io.matthewnelson.kmp.file.internal.fs_Stats
 
 /**
@@ -34,22 +35,20 @@ public value class Buffer internal constructor(
     public val length: Long get() = value.length.toLong()
     public fun fill() { value.fill() }
 
-    // @Throws(IOException::class)
+    // @Throws(IndexOutOfBoundsException::class, IllegalArgumentException::class)
     public fun readInt8(index: Number): Byte = try {
         value.readInt8(index) as Byte
     } catch (t: Throwable) {
-        throw t.toIOException()
+        throw when (t.errorCode) {
+            "ERR_OUT_OF_RANGE" -> IndexOutOfBoundsException(t.message)
+            else -> IllegalArgumentException(t)
+        }
     }
 
-    // @Throws(IOException::class)
     public fun toUtf8(
         start: Number = 0,
         end: Number = this.length,
-    ): String = try {
-        value.toString("utf8", start, end)
-    } catch (t: Throwable) {
-        throw t.toIOException()
-    }
+    ): String = value.toString("utf8", start, end)
 
     public fun unwrap(): dynamic = value.asDynamic()
 
@@ -57,10 +56,10 @@ public value class Buffer internal constructor(
 
     public companion object {
 
-        // @Throws(IOException::class)
+        // @Throws(IllegalArgumentException::class)
         public fun wrap(buffer: dynamic): Buffer {
             if (!buffer_Buffer.isBuffer(buffer)) {
-                throw IOException("Not a buffer")
+                throw IllegalArgumentException("Not a buffer")
             }
 
             return Buffer(buffer.unsafeCast<buffer_Buffer>())

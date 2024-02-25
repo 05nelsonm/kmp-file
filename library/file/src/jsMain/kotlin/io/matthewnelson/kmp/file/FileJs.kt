@@ -51,14 +51,8 @@ public fun File.write(data: Buffer) {
 public fun Throwable.toIOException(): IOException {
     if (this is IOException) return this
 
-    val code = try {
-        errorCode
-    } catch (_: Throwable) {
-        null
-    }
-
-    return when (code) {
+    return when (errorCode) {
         "ENOENT" -> FileNotFoundException(message)
-        else -> IOException(message)
+        else -> IOException(this)
     }
 }
