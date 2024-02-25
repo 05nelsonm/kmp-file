@@ -55,12 +55,14 @@ private class TestConfigInject {
 
         core.mkdirs()
 
-        core.resolve("TestConfig.kt").writeText(
-"""package io.matthewnelson.kmp.file
+        val path = projectDir.canonicalPath.replace("\\", "\\\\")
 
-internal const val PROJECT_DIR_PATH: String = "${projectDir.canonicalPath.replace("\\", "\\\\")}"
-"""
-        )
+        core.resolve("TestConfig.kt").writeText("""
+            package io.matthewnelson.kmp.file
+
+            internal const val PROJECT_DIR_PATH: String = "$path"
+
+        """.trimIndent())
 
         kotlinSrcDir
     }
