@@ -31,8 +31,8 @@ if you discover any inconsistencies (e.g. path resolution).
 import io.matthewnelson.kmp.file.*
 
 fun commonMain(f: File) {
-    // System path separator character (`/` or `\`)
-    SysPathSep
+    // System directory separator character (`/` or `\`)
+    SysDirSep
     // System temporary directory
     SysTempDir
 
@@ -77,7 +77,6 @@ fun commonMain(f: File) {
 ```kotlin
 import io.matthewnelson.kmp.file.*
 
-@OptIn(DelicateFileApi::class)
 fun nonJvmMain(f: File) {
     // File permissions (no-op for Windows) for Node.js/Native
     f.chmod("700")
@@ -87,7 +86,6 @@ fun nonJvmMain(f: File) {
 ```kotlin
 import io.matthewnelson.kmp.file.*
 
-@OptIn(DelicateFileApi::class)
 fun jsMain(f1: File, f2: File) {
     // Node.js specific extension functions
 

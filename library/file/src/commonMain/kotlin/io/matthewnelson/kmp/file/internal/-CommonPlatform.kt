@@ -19,12 +19,12 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.SysPathSep
+import io.matthewnelson.kmp.file.SysDirSep
 import kotlin.jvm.JvmSynthetic
 
 internal typealias Path = String
 
-internal expect val PlatformPathSeparator: Char
+internal expect val PlatformDirSeparator: Char
 internal expect val PlatformTempDirectory: File
 
 internal expect val IsWindows: Boolean
@@ -78,7 +78,7 @@ internal fun Path.normalize(): Path {
 
     val segments = mutableListOf<String>()
 
-    subSequence(root.length + drive.length, length).split(SysPathSep).forEach { segment ->
+    subSequence(root.length + drive.length, length).split(SysDirSep).forEach { segment ->
         when (segment) {
             "", "." -> {}
             ".." -> {
@@ -99,13 +99,13 @@ internal fun Path.normalize(): Path {
         }
     }
 
-    val normalized = segments.joinToString("$SysPathSep")
+    val normalized = segments.joinToString("$SysDirSep")
 
     val prefix =  when {
         root.isEmpty() -> drive
-        root.endsWith(SysPathSep) -> root
+        root.endsWith(SysDirSep) -> root
         normalized.isEmpty() -> root
-        else -> root + SysPathSep
+        else -> root + SysDirSep
     }
 
     return prefix + normalized
@@ -120,34 +120,34 @@ internal fun Path.rootOrNull(
         // drive letter with slash (e.g. `C:\`)
         driveRoot != null -> driveRoot
         // Absolute UNC path (e.g. `\\server_name`)
-        startsWith("${SysPathSep}${SysPathSep}") -> {
+        startsWith("${SysDirSep}${SysDirSep}") -> {
             if (normalizing) {
-                val i = indexOf(SysPathSep, startIndex = 2)
+                val i = indexOf(SysDirSep, startIndex = 2)
                 val root = if (i == -1) this else substring(0, i)
                 when (root) {
                     "\\\\.", "\\\\.." -> "\\\\"
                     else -> root
                 }
             } else {
-                "${SysPathSep}${SysPathSep}"
+                "${SysDirSep}${SysDirSep}"
             }
         }
         // Relative path (e.g. `\Windows`)
-        startsWith(SysPathSep) -> "$SysPathSep"
+        startsWith(SysDirSep) -> "$SysDirSep"
         else -> null
     }
 } else {
     // Unix root
     val c = firstOrNull()
-    if (c == SysPathSep) "$c" else null
+    if (c == SysDirSep) "$c" else null
 }
 
 @Suppress("NOTHING_TO_INLINE")
 private inline fun Path.driveRootOrNull(): Path? {
     val drive = driveOrNull() ?: return null
 
-    return if (length > 2 && get(2) == SysPathSep) {
-        "${drive}${SysPathSep}"
+    return if (length > 2 && get(2) == SysDirSep) {
+        "${drive}${SysDirSep}"
     } else {
         null
     }

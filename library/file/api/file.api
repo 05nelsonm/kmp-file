@@ -4,7 +4,7 @@ public final class io/matthewnelson/kmp/file/Exceptions {
 }
 
 public final class io/matthewnelson/kmp/file/KmpFile {
-	public static final field SysPathSep C
+	public static final field SysDirSep C
 	public static final field SysTempDir Ljava/io/File;
 	public static final fun absoluteFileOf (Ljava/io/File;)Ljava/io/File;
 	public static final fun absolutePathOf (Ljava/io/File;)Ljava/lang/String;

@@ -24,9 +24,9 @@ class ResolveUnitTest {
     fun givenFile_whenResolve_thenIsExpected() {
         assertEquals("", "".toFile().resolve("").path)
         assertEquals("c", "".toFile().resolve("c").path)
-        assertEquals("p${SysPathSep}c", "p".toFile().resolve("c").path)
-        assertEquals("p${SysPathSep}..", "p".toFile().resolve("..").path)
-        assertEquals("p${SysPathSep}p2${SysPathSep}..", "p".toFile().resolve("p2").resolve("..").path)
-        assertEquals("${SysPathSep}c", "p".toFile().resolve("${SysPathSep}c").path)
+        assertEquals("p${SysDirSep}c", "p".toFile().resolve("c").path)
+        assertEquals("p${SysDirSep}..", "p".toFile().resolve("..").path)
+        assertEquals("p${SysDirSep}p2${SysDirSep}..", "p".toFile().resolve("p2").resolve("..").path)
+        assertEquals("${SysDirSep}c", "p".toFile().resolve("${SysDirSep}c").path)
     }
 }
