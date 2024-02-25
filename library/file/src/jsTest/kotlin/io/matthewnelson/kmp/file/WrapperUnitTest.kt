@@ -39,7 +39,7 @@ class WrapperUnitTest {
     @Test
     fun givenBuffer_whenFromDynamicAndNotActuallyABuffer_thenThrowsException() {
         val stats = FILE_LOREM_IPSUM.stat().unwrap()
-        assertFailsWith<IOException> { Buffer.wrap(stats) }
+        assertFailsWith<IllegalArgumentException> { Buffer.wrap(stats) }
     }
 
     @Test
