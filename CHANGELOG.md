@@ -1,15 +1,22 @@
 # CHANGELOG
 
-## Version 0.1.0-alpha06 (2023-02-08)
+## Version 0.1.0-beta01 (2024-02-25)
+ - Fixes JS `Buffer.wrap` throwing exception when buffer is empty [[#42]][42]
+ - Downgrades `DelicateFileApi` annotation to warning [[#43]][43]
+     - Also removes the annotation from several APIs
+ - Changes `SysPathSep` name to `SysDirSep` [[#49]][49]
+ - Updates `Kotlin` to `1.9.22` [[#53]][53]
+
+## Version 0.1.0-alpha06 (2024-02-08)
  - Changed `JvmName` for `FileExt` to `KmpFile` [[#37]][37]
  - Added `InterruptedException` [[#39]][39]
 
-## Version 0.1.0-alpha05 (2023-01-03)
+## Version 0.1.0-alpha05 (2024-01-03)
  - Fixes `File.normalize` preservation of `..` when path is not rooted [[#31]][31]
  - Fixes usage of `JvmName` for `File` [[#33]][33]
  - Renames `open` to `fOpen` for native [[#35]][35]
 
-## Version 0.1.0-alpha03 (2023-01-01)
+## Version 0.1.0-alpha03 (2024-01-01)
  - Cleans up API for Java consumers [[#27]][27]
  - Fixes visibility modifiers of `nonJvm` implementation of `File` [[#29]][29]
 
@@ -29,3 +36,7 @@
 [35]: https://github.com/05nelsonm/kmp-file/pull/35
 [37]: https://github.com/05nelsonm/kmp-file/pull/37
 [39]: https://github.com/05nelsonm/kmp-file/pull/39
+[42]: https://github.com/05nelsonm/kmp-file/pull/42
+[43]: https://github.com/05nelsonm/kmp-file/pull/43
+[49]: https://github.com/05nelsonm/kmp-file/pull/49
+[53]: https://github.com/05nelsonm/kmp-file/pull/53
