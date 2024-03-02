@@ -24,11 +24,11 @@ import kotlin.io.resolve as _resolve
 import kotlin.io.writeBytes as _writeBytes
 import kotlin.io.writeText as _writeText
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformDirSeparator(): Char = File.separatorChar
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun platformDirSeparator(): Char = File.separatorChar
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformTempDirectory(): File = System
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun platformTempDirectory(): File = System
     .getProperty("java.io.tmpdir")
     .toFile()
 

@@ -1,3 +1,8 @@
+public final class io/matthewnelson/kmp/file/ANDROID {
+	public static final field INSTANCE Lio/matthewnelson/kmp/file/ANDROID;
+	public static final field SDK_INT Ljava/lang/Integer;
+}
+
 public final class io/matthewnelson/kmp/file/Exceptions {
 	public static final fun wrapIO (Ljava/lang/Throwable;)Ljava/io/IOException;
 	public static final fun wrapIO (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)Ljava/io/IOException;

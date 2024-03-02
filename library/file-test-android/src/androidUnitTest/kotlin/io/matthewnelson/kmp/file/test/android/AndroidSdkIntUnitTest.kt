@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2024 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress")
+package io.matthewnelson.kmp.file.test.android
 
-package io.matthewnelson.kmp.file.internal
+import io.matthewnelson.kmp.file.ANDROID
+import kotlin.test.Test
+import kotlin.test.assertNull
 
-import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.toFile
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.toKString
-import platform.posix.getenv
+class AndroidSdkIntUnitTest {
 
-@OptIn(ExperimentalForeignApi::class)
-@Suppress("NOTHING_TO_INLINE")
-internal actual inline fun platformTempDirectory(): File {
-    val tmpdir = getenv("TMPDIR")
-    return (tmpdir?.toKString() ?: "/tmp").toFile()
+    @Test
+    fun givenAndroidUnitTest_whenSdkInt_thenIsNull() {
+        assertNull(ANDROID.SDK_INT)
+    }
 }

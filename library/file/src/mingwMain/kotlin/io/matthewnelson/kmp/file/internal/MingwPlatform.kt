@@ -23,11 +23,11 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString
 import platform.posix.getenv
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformDirSeparator(): Char = '\\'
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun platformDirSeparator(): Char = '\\'
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformTempDirectory(): File {
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun platformTempDirectory(): File {
     // Windows' built-in APIs check the TEMP, TMP, and USERPROFILE environment variables in order.
     // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-gettemppatha?redirectedfrom=MSDN
     @OptIn(ExperimentalForeignApi::class)

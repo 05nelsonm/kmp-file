@@ -3,6 +3,7 @@ rootProject.name = "kmp-file"
 pluginManagement {
     repositories {
         mavenCentral()
+        google()
         gradlePluginPortal()
     }
 }
@@ -16,4 +17,5 @@ if (CHECK_PUBLICATION != null) {
     include(":tools:check-publication")
 } else {
     include(":library:file")
+    include(":library:file-test-android")
 }

@@ -24,8 +24,8 @@ import kotlinx.cinterop.toKString
 import platform.posix.getenv
 
 @OptIn(ExperimentalForeignApi::class)
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformTempDirectory(): File {
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun platformTempDirectory(): File {
     val tmpdir = getenv("TMPDIR")
     return (tmpdir?.toKString() ?: "/tmp").toFile()
 }
