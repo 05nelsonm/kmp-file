@@ -15,22 +15,60 @@
  **/
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.toFile
 import java.io.File
+import kotlin.io.resolve
 import kotlin.io.readText as _readText
 import kotlin.io.readBytes as _readBytes
 import kotlin.io.resolve as _resolve
 import kotlin.io.writeBytes as _writeBytes
 import kotlin.io.writeText as _writeText
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformDirSeparator(): Char = File.separatorChar
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun platformDirSeparator(): Char = File.separatorChar
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformTempDirectory(): File = System
-    .getProperty("java.io.tmpdir")
-    .toFile()
+@Suppress("NOTHING_TO_INLINE", "SdCardPath")
+internal actual inline fun platformTempDirectory(): File {
+    val jTemp = System
+        .getProperty("java.io.tmpdir")
+        .toFile()
+
+    return ANDROID.SDK_INT?.let { sdk ->
+        if (sdk > 15) return@let null
+
+        // java.io.tmpdir=/sdcard
+        if (
+            !jTemp.path.startsWith("/data")
+            || jTemp.path.startsWith("/sdcard")
+        ) {
+            // dexmaker.dexcache=/data/data/com.example.app/app_dxmaker_cache
+            val parent = System.getProperty("dexmaker.dexcache")
+                ?.toFile()
+                ?.parentFile
+                ?: return@let null
+
+            try {
+                if (!parent.exists()) return@let null
+            } catch (_: Throwable) {
+                return@let null
+            }
+
+            val cacheDir = parent.resolve("cache")
+
+            try {
+                if (!cacheDir.exists() && !cacheDir.mkdirs()) return@let null
+            } catch (_: Throwable) {
+                return@let null
+            }
+
+            cacheDir
+        } else {
+            null
+        }
+    } ?: jTemp
+}
 
 internal actual val IsWindows: Boolean = System.getProperty("os.name")
     ?.ifBlank { null }

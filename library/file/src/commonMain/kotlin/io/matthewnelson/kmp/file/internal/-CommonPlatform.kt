@@ -24,10 +24,10 @@ import kotlin.jvm.JvmSynthetic
 
 internal typealias Path = String
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal expect inline fun PlatformDirSeparator(): Char
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal expect inline fun PlatformTempDirectory(): File
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun platformDirSeparator(): Char
+@Suppress("NOTHING_TO_INLINE")
+internal expect inline fun platformTempDirectory(): File
 
 internal expect val IsWindows: Boolean
 

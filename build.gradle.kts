@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 
 plugins {
+    alias(libs.plugins.android.library) apply(false)
     alias(libs.plugins.binary.compat)
     alias(libs.plugins.kotlin.multiplatform) apply(false)
 }
@@ -49,7 +50,5 @@ plugins.withType<YarnPlugin> {
 apiValidation {
     if (CHECK_PUBLICATION != null) {
         ignoredProjects.add("check-publication")
-    } else {
-        nonPublicMarkers.add("io.matthewnelson.kmp.tor.binary.core.InternalKmpTorBinaryApi")
     }
 }

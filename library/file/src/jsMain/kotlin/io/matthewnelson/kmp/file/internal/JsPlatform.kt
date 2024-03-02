@@ -19,15 +19,15 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.*
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformDirSeparator(): Char = try {
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun platformDirSeparator(): Char = try {
     path_sep.first()
 } catch (_: Throwable) {
     '/'
 }
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformTempDirectory(): File = try {
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun platformTempDirectory(): File = try {
     os_tmpdir()
 } catch (_: Throwable) {
     "/tmp"

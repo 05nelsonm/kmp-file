@@ -17,7 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal
 
-@Suppress("NOTHING_TO_INLINE", "FunctionName")
-internal actual inline fun PlatformDirSeparator(): Char = '/'
+@Suppress("NOTHING_TO_INLINE")
+internal actual inline fun platformDirSeparator(): Char = '/'
 
 internal actual val IsWindows: Boolean = false
