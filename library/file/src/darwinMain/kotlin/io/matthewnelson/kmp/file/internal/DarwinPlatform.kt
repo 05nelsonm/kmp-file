@@ -21,11 +21,15 @@ import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString
+import platform.Foundation.NSTemporaryDirectory
 import platform.posix.getenv
 
 @OptIn(ExperimentalForeignApi::class)
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun platformTempDirectory(): File {
     val tmpdir = getenv("TMPDIR")
-    return (tmpdir?.toKString() ?: "/tmp").toFile()
+        ?.toKString()
+        ?: NSTemporaryDirectory()
+
+    return tmpdir.toFile()
 }
