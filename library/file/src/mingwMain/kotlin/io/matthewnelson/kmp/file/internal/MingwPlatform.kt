@@ -42,4 +42,5 @@ internal actual inline fun platformTempDirectory(): File {
     return temp.toFile()
 }
 
+@PublishedApi
 internal actual val IsWindows: Boolean = true

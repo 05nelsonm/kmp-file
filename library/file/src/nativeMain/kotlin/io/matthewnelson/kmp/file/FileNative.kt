@@ -13,23 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("KotlinRedundantDiagnosticSuppress")
+
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.fs_platform_fread
 import io.matthewnelson.kmp.file.internal.fs_platform_fwrite
 import kotlinx.cinterop.*
-import platform.posix.ENOENT
-import platform.posix.FILE
-import platform.posix.errno
-import platform.posix.fclose
-import platform.posix.fopen
-import platform.posix.strerror
+import platform.posix.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
 /**
  * Opens the [File], closing it automatically once [block] completes.
+ *
+ * **NOTE:** Calling fclose your self on Cpointer<FILE> within [block]
+ * will result in an [IOException] being thrown on [block] closure.
+ * Do **not** call fclose; it is handled for you.
+ *
+ * **NOTE:** The flag `e` for O_CLOEXEC is always added to [flags]
+ * for non-Windows if it is not present.
  *
  * e.g.
  *
@@ -38,7 +43,8 @@ import kotlin.contracts.contract
  *     }
  *
  * @param [flags] fopen arguments (e.g. "rb", "ab", "wb")
- * @throws [IOException] on fopen failure
+ * @throws [IOException] on fopen/fclose failure. Note that any exceptions
+ *   thrown by [block] will **not** be converted to an [IOException].
  * */
 @DelicateFileApi
 @ExperimentalForeignApi
@@ -52,17 +58,35 @@ public inline fun <T: Any?> File.fOpen(
         callsInPlace(block, InvocationKind.AT_MOST_ONCE)
     }
 
-    val ptr = fopen(path, flags) ?: throw errnoToIOException(errno)
+    // Always open with O_CLOEXEC
+    val f = if (!IsWindows && !flags.contains('e')) flags + 'e' else flags
+    val ptr = fopen(path, f) ?: throw errnoToIOException(errno)
+    var threw: Throwable? = null
 
     val result = try {
         block(ptr)
-    } finally {
-        try {
-            fclose(ptr)
-        } catch (_: Throwable) {}
+    } catch (t: Throwable) {
+        threw = t
+        null
     }
 
-    return result
+    if (fclose(ptr) != 0) {
+        val e = errnoToIOException(errno)
+        if (threw != null) {
+            @Suppress("UNNECESSARY_SAFE_CALL")
+            threw?.addSuppressed(e)
+        } else {
+            threw = e
+        }
+    }
+
+    threw?.let { throw it }
+
+    // T is type Any?, so cannot hit with !! b/c
+    // if block DID produce null and no exception
+    // was thrown, that'd be a NPE.
+    @Suppress("UNCHECKED_CAST")
+    return result as T
 }
 
 /**
