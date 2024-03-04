@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## Version 0.1.0-beta02 (2024-03-04)
+ - Fixes `SysTempDir` for Android API 15 and below [[#58]][58]
+     - Adds `ANDROID.SDK_INT` reflection based API for determining when
+       operating on Android, and what `android.os.Build.VERSION.SDK_INT` is.
+ - Falls back to using `NSTemporaryDirectory` when env `TMPDIR` unavailable
+   on darwin [[#59]][59]
+ - `File.fOpen` always adds flag `e` for `O_CLOEXEC` on `UNIX` targets if not
+   present [[#60]][60]
+
 ## Version 0.1.0-beta01 (2024-02-25)
  - Fixes JS `Buffer.wrap` throwing exception when buffer is empty [[#42]][42]
  - Downgrades `DelicateFileApi` annotation to warning [[#43]][43]
@@ -40,3 +49,6 @@
 [43]: https://github.com/05nelsonm/kmp-file/pull/43
 [49]: https://github.com/05nelsonm/kmp-file/pull/49
 [53]: https://github.com/05nelsonm/kmp-file/pull/53
+[58]: https://github.com/05nelsonm/kmp-file/pull/58
+[59]: https://github.com/05nelsonm/kmp-file/pull/59
+[60]: https://github.com/05nelsonm/kmp-file/pull/60
