@@ -70,6 +70,7 @@ internal actual inline fun platformTempDirectory(): File {
     } ?: jTemp
 }
 
+@PublishedApi
 internal actual val IsWindows: Boolean = System.getProperty("os.name")
     ?.ifBlank { null }
     ?.contains("windows", ignoreCase = true)

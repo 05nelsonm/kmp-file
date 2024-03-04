@@ -29,6 +29,7 @@ internal expect inline fun platformDirSeparator(): Char
 @Suppress("NOTHING_TO_INLINE")
 internal expect inline fun platformTempDirectory(): File
 
+@PublishedApi
 internal expect val IsWindows: Boolean
 
 @Throws(IOException::class)
