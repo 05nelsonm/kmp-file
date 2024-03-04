@@ -29,12 +29,12 @@ import kotlin.contracts.contract
 /**
  * Opens the [File], closing it automatically once [block] completes.
  *
- * **NOTE:** Calling fclose your self on Cpointer<FILE> within [block]
- * will result in an [IOException] being thrown on [block] closure.
- * Do **not** call fclose; it is handled for you.
+ * **NOTE:** Calling fclose on [FILE] within [block] will result in
+ * an [IOException] being thrown on [block] closure. Do **not** call
+ * fclose; it is handled on completion.
  *
- * **NOTE:** The flag `e` for O_CLOEXEC is always added to [flags]
- * for non-Windows if it is not present.
+ * **NOTE:** Flag `e` for O_CLOEXEC is always added to [flags] for
+ * non-Windows if it is not present.
  *
  * e.g.
  *
