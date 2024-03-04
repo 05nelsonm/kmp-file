@@ -19,6 +19,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 class FOpenUnitTest {
@@ -39,6 +40,7 @@ class FOpenUnitTest {
             throw errnoToIOException(errno)
         }
 
-        assertEquals(stat, stat or FD_CLOEXEC)
+        val hasCloExec = (stat or FD_CLOEXEC) == stat
+        assertTrue(hasCloExec)
     }
 }
