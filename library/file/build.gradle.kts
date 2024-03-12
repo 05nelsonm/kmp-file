@@ -20,7 +20,7 @@ plugins {
 private val testConfig = TestConfigInject()
 
 kmpConfiguration {
-    configureShared(publish = true) {
+    configureShared(java9ModuleName = "io.matthewnelson.kmp.file", publish = true) {
         common {
             sourceSetTest {
                 kotlin.srcDir(testConfig.testConfigSrcDir)
