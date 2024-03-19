@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 0.1.0-beta03 (2024-03-19)
+ - Adds `JPMS` support via Multi-Release Jar [[#62]][62]
+ - Updates `Kotlin` to `1.9.23`
+
 ## Version 0.1.0-beta02 (2024-03-04)
  - Fixes `SysTempDir` for Android API 15 and below [[#58]][58]
      - Adds `ANDROID.SDK_INT` reflection based API for determining when
@@ -52,3 +56,4 @@
 [58]: https://github.com/05nelsonm/kmp-file/pull/58
 [59]: https://github.com/05nelsonm/kmp-file/pull/59
 [60]: https://github.com/05nelsonm/kmp-file/pull/60
+[62]: https://github.com/05nelsonm/kmp-file/pull/62
