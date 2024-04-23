@@ -42,20 +42,28 @@ public expect open class InterruptedException: Exception {
     public constructor(message: String?)
 }
 
+/**
+ * Ensures that the throwable is an instance of [IOException]. If
+ * it is not, it will encase it in one.
+ * */
 @JvmName("wrapIO")
 public fun Throwable.wrapIOException(): IOException {
     return when (this) {
         is IOException -> this
-        else -> IOException(cause)
+        else -> IOException(this)
     }
 }
 
+/**
+ * Ensures that the throwable is an instance of [IOException]. If
+ * it is not, it will encase it in one with the provided [lazyMessage].
+ * */
 @JvmName("wrapIO")
 public fun Throwable.wrapIOException(
     lazyMessage: () -> String,
 ): IOException {
     return when (this) {
         is IOException -> this
-        else -> IOException(lazyMessage(), cause)
+        else -> IOException(lazyMessage(), this)
     }
 }
