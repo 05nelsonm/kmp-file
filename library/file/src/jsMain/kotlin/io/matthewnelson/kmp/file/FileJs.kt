@@ -16,7 +16,6 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.*
-import io.matthewnelson.kmp.file.internal.errorCode
 
 // @Throws(IOException::class)
 public fun File.lstat(): Stats = try {
@@ -48,10 +47,16 @@ public fun File.write(data: Buffer) {
     }
 }
 
+public val Throwable.errorCodeOrNull: String? get() = try {
+    asDynamic().code as String
+} catch (_: Throwable) {
+    null
+}
+
 public fun Throwable.toIOException(): IOException {
     if (this is IOException) return this
 
-    return when (errorCode) {
+    return when (errorCodeOrNull) {
         "ENOENT" -> FileNotFoundException(message)
         else -> IOException(this)
     }

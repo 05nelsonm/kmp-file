@@ -15,6 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.toNotLong
 import kotlin.test.*
 
 class WrapperUnitTest {
@@ -47,5 +48,22 @@ class WrapperUnitTest {
         val buf = js("Buffer").alloc(0)
         val string = Buffer.wrap(buf).toUtf8()
         assertTrue(string.isEmpty())
+    }
+
+    @Test
+    fun givenBufferAlloc_whenExceedsIntMax_thenConvertsToDoubleUnderTheHood() {
+        val long = Int.MAX_VALUE.toLong()
+        val number = (long + 1000).toNotLong()
+        assertIs<Double>(number)
+
+        // Should be fine b/c I do not think Kotlin supports 32-bit
+        // arch, so max value will always be 9007199254740991
+        Buffer.alloc(number)
+    }
+
+    @Test
+    fun givenBuffer_whenMAXLENGTH_thenIsDefined() {
+        // would throw exception if undefined
+        Buffer.MAX_LENGTH.toLong()
     }
 }

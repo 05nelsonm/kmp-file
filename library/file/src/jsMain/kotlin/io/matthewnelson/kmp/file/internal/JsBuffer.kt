@@ -19,15 +19,22 @@
 
 package io.matthewnelson.kmp.file.internal
 
+/** [docs](https://nodejs.org/api/buffer.html#bufferconstantsmax_length) */
+internal external val kMaxLength: Number
+
 /** [docs](https://nodejs.org/api/buffer.html#class-buffer) */
 @JsName("Buffer")
 internal external class buffer_Buffer {
+
     internal val length: Number
+
     internal fun fill()
     internal fun readInt8(offset: Number): Number
     internal fun toString(encoding: String, start: Number, end: Number): String
 
     internal companion object {
+
+        internal fun alloc(size: Number): buffer_Buffer
         internal fun isBuffer(obj: dynamic): Boolean
     }
 }

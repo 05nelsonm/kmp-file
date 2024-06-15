@@ -47,13 +47,13 @@ internal actual val IsWindows: Boolean by lazy {
 internal actual inline fun File.platformReadBytes(): ByteArray = try {
     val buffer = read()
 
-    // Max buffer size for Node.js 16 can be larger than the
-    // maximum size of the ByteArray capacity
-    if (buffer.length >= Int.MAX_VALUE.toLong()) {
+    // Max buffer size for Node.js 16+ can be larger than the
+    // maximum size of the ByteArray capacity when on 64-bit
+    if (buffer.length !in 0..Int.MAX_VALUE) {
         throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
     }
 
-    val bytes = ByteArray(buffer.length.toInt()) { buffer.readInt8(it) }
+    val bytes = ByteArray(buffer.length.toInt()) { i -> buffer.readInt8(i) }
     buffer.fill()
     bytes
 } catch (t: Throwable) {
@@ -65,9 +65,9 @@ internal actual inline fun File.platformReadBytes(): ByteArray = try {
 internal actual inline fun File.platformReadUtf8(): String = try {
     val buffer = read()
 
-    // Max buffer size for Node.js 16 can be larger than the
-    // maximum size of the ByteArray capacity
-    if (buffer.length >= Int.MAX_VALUE.toLong()) {
+    // Max buffer size for Node.js 16+ can be larger than the
+    // maximum size of the ByteArray capacity when on 64-bit
+    if (buffer.length !in 0..Int.MAX_VALUE) {
         throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
     }
 
@@ -135,7 +135,7 @@ internal actual fun fs_remove(path: Path): Boolean {
         fs_unlinkSync(path)
         return true
     } catch (t: Throwable) {
-        if (t.errorCode == "ENOENT") return false
+        if (t.errorCodeOrNull == "ENOENT") return false
     }
 
     val options = js("{}")
@@ -177,9 +177,14 @@ internal actual fun fs_realpath(path: Path): Path {
     }
 }
 
-@Suppress("NOTHING_TO_INLINE", "REDUNDANT_NULLABLE")
-internal inline val Throwable.errorCode: String? get() = try {
-    asDynamic().code as String
-} catch (_: Throwable) {
-    null
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun Number.toNotLong(): Number {
+    if (this !is Long) return this
+
+    // Long
+    return if (this in Int.MIN_VALUE..Int.MAX_VALUE) {
+        toInt()
+    } else {
+        toDouble()
+    }
 }
