@@ -135,7 +135,7 @@ internal actual fun fs_remove(path: Path): Boolean {
         fs_unlinkSync(path)
         return true
     } catch (t: Throwable) {
-        if (t.errorCode == "ENOENT") return false
+        if (t.errorCodeOrNull == "ENOENT") return false
     }
 
     val options = js("{}")
@@ -187,11 +187,4 @@ internal inline fun Number.toNotLong(): Number {
     } else {
         toDouble()
     }
-}
-
-@Suppress("NOTHING_TO_INLINE", "REDUNDANT_NULLABLE")
-internal inline val Throwable.errorCode: String? get() = try {
-    asDynamic().code as String
-} catch (_: Throwable) {
-    null
 }

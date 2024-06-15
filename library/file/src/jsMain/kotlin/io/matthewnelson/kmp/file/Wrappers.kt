@@ -17,7 +17,6 @@ package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.*
 import io.matthewnelson.kmp.file.internal.buffer_Buffer
-import io.matthewnelson.kmp.file.internal.errorCode
 import io.matthewnelson.kmp.file.internal.fs_Stats
 import io.matthewnelson.kmp.file.internal.toNotLong
 
@@ -39,7 +38,7 @@ public value class Buffer internal constructor(internal val value: buffer_Buffer
     public fun readInt8(index: Number): Byte = try {
         value.readInt8(index.toNotLong()) as Byte
     } catch (t: Throwable) {
-        throw when (t.errorCode) {
+        throw when (t.errorCodeOrNull) {
             "ERR_OUT_OF_RANGE" -> IndexOutOfBoundsException(t.message)
             else -> IllegalArgumentException(t)
         }
