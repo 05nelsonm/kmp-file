@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## Version 0.1.0 (2024-06-15)
+ - Fixes `Throwable.wrapIOException` extension function
+     - If `Throwable` is not an instance of `IOException`, it is used as the
+       `cause` for the newly created `IOException` [[#68]][68]
+ - Updates `Kotlin` to `1.9.24` [[#69]][69]
+ - Refactors `Buffer` wrapper internals for `Node.js` [[#70]][70]
+     - **Minor API breaking change**
+         - `Buffer.length` now returns `Number` instead of `Long`
+     - Adds `Buffer.alloc` and `Buffer.MAX_LENGTH`
+     - `Number` types that `Node.js` accepts are now properly checked
+       to **not** be of type `Long` (which is not a thing in JS). If
+       the `Number` passed to `Buffer` functions are of type `Long`, they
+       are automatically converted to `Int` (if within range), or `Double`.
+
 ## Version 0.1.0-beta03 (2024-03-19)
  - Adds `JPMS` support via Multi-Release Jar [[#62]][62]
  - Updates `Kotlin` to `1.9.23`
@@ -57,3 +71,6 @@
 [59]: https://github.com/05nelsonm/kmp-file/pull/59
 [60]: https://github.com/05nelsonm/kmp-file/pull/60
 [62]: https://github.com/05nelsonm/kmp-file/pull/62
+[68]: https://github.com/05nelsonm/kmp-file/pull/68
+[69]: https://github.com/05nelsonm/kmp-file/pull/69
+[70]: https://github.com/05nelsonm/kmp-file/pull/70
