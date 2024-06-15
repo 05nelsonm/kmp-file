@@ -21,8 +21,8 @@ kmpConfiguration {
     configure {
         androidLibrary {
             android {
-                buildToolsVersion = "33.0.2"
-                compileSdk = 33
+                buildToolsVersion = "34.0.0"
+                compileSdk = 34
                 namespace = "io.matthewnelson.kmp.file.test.android"
 
                 defaultConfig {
