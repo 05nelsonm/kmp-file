@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version 0.1.1 (2024-08-30)
+ - Fixes multiplatform metadata manifest `unique_name` parameter for
+   all source sets to be truly unique. [[#73]][73]
+ - Updates jvm `.kotlin_module` with truly unique file name. [[#73]][73]
+
 ## Version 0.1.0 (2024-06-15)
  - Fixes `Throwable.wrapIOException` extension function
      - If `Throwable` is not an instance of `IOException`, it is used as the
@@ -74,3 +79,4 @@
 [68]: https://github.com/05nelsonm/kmp-file/pull/68
 [69]: https://github.com/05nelsonm/kmp-file/pull/69
 [70]: https://github.com/05nelsonm/kmp-file/pull/70
+[73]: https://github.com/05nelsonm/kmp-file/pull/73
