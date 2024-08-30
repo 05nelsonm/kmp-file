@@ -23,6 +23,10 @@ private val testConfig = TestConfigInject()
 
 kmpConfiguration {
     configureShared(publish = true) {
+        options {
+            useUniqueModuleNames = true
+        }
+
         jvm {
             @OptIn(ExperimentalKmpConfigurationApi::class)
             java9ModuleInfoName = "io.matthewnelson.kmp.file"
