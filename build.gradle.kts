@@ -24,21 +24,17 @@ plugins {
 }
 
 allprojects {
-
     findProperty("GROUP")?.let { group = it }
     findProperty("VERSION_NAME")?.let { version = it }
     findProperty("POM_DESCRIPTION")?.let { description = it.toString() }
 
     repositories {
         mavenCentral()
-        google()
-        gradlePluginPortal()
     }
-
 }
 
 @Suppress("PropertyName")
-val CHECK_PUBLICATION = findProperty("CHECK_PUBLICATION") as? String
+val CHECK_PUBLICATION = findProperty("CHECK_PUBLICATION")
 
 plugins.withType<YarnPlugin> {
     the<YarnRootExtension>().lockFileDirectory = rootDir.resolve(".kotlin-js-store")
@@ -48,6 +44,11 @@ plugins.withType<YarnPlugin> {
 }
 
 apiValidation {
+    // Only enable when selectively enabled targets are not being passed via cli.
+    // See https://github.com/Kotlin/binary-compatibility-validator/issues/269
+    @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
+    klib.enabled = findProperty("KMP_TARGETS") == null
+
     if (CHECK_PUBLICATION != null) {
         ignoredProjects.add("check-publication")
     }

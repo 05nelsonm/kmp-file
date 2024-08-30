@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import io.matthewnelson.kmp.configuration.ExperimentalKmpConfigurationApi
-
 plugins {
     id("configuration")
 }
@@ -22,16 +20,7 @@ plugins {
 private val testConfig = TestConfigInject()
 
 kmpConfiguration {
-    configureShared(publish = true) {
-        options {
-            useUniqueModuleNames = true
-        }
-
-        jvm {
-            @OptIn(ExperimentalKmpConfigurationApi::class)
-            java9ModuleInfoName = "io.matthewnelson.kmp.file"
-        }
-
+    configureShared(java9ModuleName = "io.matthewnelson.kmp.file", publish = true) {
         common {
             sourceSetTest {
                 kotlin.srcDir(testConfig.testConfigSrcDir)

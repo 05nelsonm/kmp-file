@@ -1,0 +1,171 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, tvosArm64, tvosSimulatorArm64, tvosX64, watchosArm32, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64, watchosX64]
+// Alias: native => [iosArm64, iosSimulatorArm64, iosX64, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, tvosArm64, tvosSimulatorArm64, tvosX64, watchosArm32, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64, watchosX64]
+// Alias: apple => [iosArm64, iosSimulatorArm64, iosX64, macosArm64, macosX64, tvosArm64, tvosSimulatorArm64, tvosX64, watchosArm32, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64, watchosX64]
+// Alias: linux => [linuxArm64, linuxX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.matthewnelson.kmp-file:file>
+open annotation class io.matthewnelson.kmp.file/DelicateFileApi : kotlin/Annotation { // io.matthewnelson.kmp.file/DelicateFileApi|null[0]
+    constructor <init>() // io.matthewnelson.kmp.file/DelicateFileApi.<init>|<init>(){}[0]
+}
+
+final class io.matthewnelson.kmp.file/File : kotlin/Comparable<io.matthewnelson.kmp.file/File> { // io.matthewnelson.kmp.file/File|null[0]
+    constructor <init>(kotlin/String) // io.matthewnelson.kmp.file/File.<init>|<init>(kotlin.String){}[0]
+
+    final fun chmod(kotlin/String) // io.matthewnelson.kmp.file/File.chmod|chmod(kotlin.String){}[0]
+    final fun compareTo(io.matthewnelson.kmp.file/File): kotlin/Int // io.matthewnelson.kmp.file/File.compareTo|compareTo(io.matthewnelson.kmp.file.File){}[0]
+    final fun delete(): kotlin/Boolean // io.matthewnelson.kmp.file/File.delete|delete(){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.matthewnelson.kmp.file/File.equals|equals(kotlin.Any?){}[0]
+    final fun exists(): kotlin/Boolean // io.matthewnelson.kmp.file/File.exists|exists(){}[0]
+    final fun hashCode(): kotlin/Int // io.matthewnelson.kmp.file/File.hashCode|hashCode(){}[0]
+    final fun isAbsolute(): kotlin/Boolean // io.matthewnelson.kmp.file/File.isAbsolute|isAbsolute(){}[0]
+    final fun mkdir(): kotlin/Boolean // io.matthewnelson.kmp.file/File.mkdir|mkdir(){}[0]
+    final fun mkdirs(): kotlin/Boolean // io.matthewnelson.kmp.file/File.mkdirs|mkdirs(){}[0]
+    final fun toString(): kotlin/String // io.matthewnelson.kmp.file/File.toString|toString(){}[0]
+}
+
+open class io.matthewnelson.kmp.file/EOFException : io.matthewnelson.kmp.file/IOException { // io.matthewnelson.kmp.file/EOFException|null[0]
+    constructor <init>() // io.matthewnelson.kmp.file/EOFException.<init>|<init>(){}[0]
+    constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/EOFException.<init>|<init>(kotlin.String?){}[0]
+}
+
+open class io.matthewnelson.kmp.file/FileNotFoundException : io.matthewnelson.kmp.file/IOException { // io.matthewnelson.kmp.file/FileNotFoundException|null[0]
+    constructor <init>() // io.matthewnelson.kmp.file/FileNotFoundException.<init>|<init>(){}[0]
+    constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/FileNotFoundException.<init>|<init>(kotlin.String?){}[0]
+}
+
+open class io.matthewnelson.kmp.file/IOException : kotlin/Exception { // io.matthewnelson.kmp.file/IOException|null[0]
+    constructor <init>() // io.matthewnelson.kmp.file/IOException.<init>|<init>(){}[0]
+    constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/IOException.<init>|<init>(kotlin.String?){}[0]
+    constructor <init>(kotlin/String?, kotlin/Throwable?) // io.matthewnelson.kmp.file/IOException.<init>|<init>(kotlin.String?;kotlin.Throwable?){}[0]
+    constructor <init>(kotlin/Throwable?) // io.matthewnelson.kmp.file/IOException.<init>|<init>(kotlin.Throwable?){}[0]
+}
+
+open class io.matthewnelson.kmp.file/InterruptedException : kotlin/Exception { // io.matthewnelson.kmp.file/InterruptedException|null[0]
+    constructor <init>() // io.matthewnelson.kmp.file/InterruptedException.<init>|<init>(){}[0]
+    constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/InterruptedException.<init>|<init>(kotlin.String?){}[0]
+}
+
+final val io.matthewnelson.kmp.file.internal/IsWindows // io.matthewnelson.kmp.file.internal/IsWindows|{}IsWindows[0]
+    final fun <get-IsWindows>(): kotlin/Boolean // io.matthewnelson.kmp.file.internal/IsWindows.<get-IsWindows>|<get-IsWindows>(){}[0]
+final val io.matthewnelson.kmp.file/SysDirSep // io.matthewnelson.kmp.file/SysDirSep|{}SysDirSep[0]
+    final fun <get-SysDirSep>(): kotlin/Char // io.matthewnelson.kmp.file/SysDirSep.<get-SysDirSep>|<get-SysDirSep>(){}[0]
+final val io.matthewnelson.kmp.file/SysTempDir // io.matthewnelson.kmp.file/SysTempDir|{}SysTempDir[0]
+    final fun <get-SysTempDir>(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/SysTempDir.<get-SysTempDir>|<get-SysTempDir>(){}[0]
+final val io.matthewnelson.kmp.file/absoluteFile // io.matthewnelson.kmp.file/absoluteFile|@io.matthewnelson.kmp.file.File{}absoluteFile[0]
+    final fun (io.matthewnelson.kmp.file/File).<get-absoluteFile>(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/absoluteFile.<get-absoluteFile>|<get-absoluteFile>@io.matthewnelson.kmp.file.File(){}[0]
+final val io.matthewnelson.kmp.file/absolutePath // io.matthewnelson.kmp.file/absolutePath|@io.matthewnelson.kmp.file.File{}absolutePath[0]
+    final fun (io.matthewnelson.kmp.file/File).<get-absolutePath>(): kotlin/String // io.matthewnelson.kmp.file/absolutePath.<get-absolutePath>|<get-absolutePath>@io.matthewnelson.kmp.file.File(){}[0]
+final val io.matthewnelson.kmp.file/name // io.matthewnelson.kmp.file/name|@io.matthewnelson.kmp.file.File{}name[0]
+    final fun (io.matthewnelson.kmp.file/File).<get-name>(): kotlin/String // io.matthewnelson.kmp.file/name.<get-name>|<get-name>@io.matthewnelson.kmp.file.File(){}[0]
+final val io.matthewnelson.kmp.file/parentFile // io.matthewnelson.kmp.file/parentFile|@io.matthewnelson.kmp.file.File{}parentFile[0]
+    final fun (io.matthewnelson.kmp.file/File).<get-parentFile>(): io.matthewnelson.kmp.file/File? // io.matthewnelson.kmp.file/parentFile.<get-parentFile>|<get-parentFile>@io.matthewnelson.kmp.file.File(){}[0]
+final val io.matthewnelson.kmp.file/parentPath // io.matthewnelson.kmp.file/parentPath|@io.matthewnelson.kmp.file.File{}parentPath[0]
+    final fun (io.matthewnelson.kmp.file/File).<get-parentPath>(): kotlin/String? // io.matthewnelson.kmp.file/parentPath.<get-parentPath>|<get-parentPath>@io.matthewnelson.kmp.file.File(){}[0]
+final val io.matthewnelson.kmp.file/path // io.matthewnelson.kmp.file/path|@io.matthewnelson.kmp.file.File{}path[0]
+    final fun (io.matthewnelson.kmp.file/File).<get-path>(): kotlin/String // io.matthewnelson.kmp.file/path.<get-path>|<get-path>@io.matthewnelson.kmp.file.File(){}[0]
+
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/canonicalFile(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/canonicalFile|canonicalFile@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/canonicalPath(): kotlin/String // io.matthewnelson.kmp.file/canonicalPath|canonicalPath@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/normalize(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/normalize|normalize@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/readBytes(): kotlin/ByteArray // io.matthewnelson.kmp.file/readBytes|readBytes@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/readUtf8(): kotlin/String // io.matthewnelson.kmp.file/readUtf8|readUtf8@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/resolve(io.matthewnelson.kmp.file/File): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/resolve|resolve@io.matthewnelson.kmp.file.File(io.matthewnelson.kmp.file.File){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/resolve(kotlin/String): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/resolve|resolve@io.matthewnelson.kmp.file.File(kotlin.String){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/writeBytes(kotlin/ByteArray) // io.matthewnelson.kmp.file/writeBytes|writeBytes@io.matthewnelson.kmp.file.File(kotlin.ByteArray){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/writeUtf8(kotlin/String) // io.matthewnelson.kmp.file/writeUtf8|writeUtf8@io.matthewnelson.kmp.file.File(kotlin.String){}[0]
+final fun (kotlin/String).io.matthewnelson.kmp.file/toFile(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/toFile|toFile@kotlin.String(){}[0]
+final fun (kotlin/Throwable).io.matthewnelson.kmp.file/wrapIOException(): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/wrapIOException|wrapIOException@kotlin.Throwable(){}[0]
+final fun (kotlin/Throwable).io.matthewnelson.kmp.file/wrapIOException(kotlin/Function0<kotlin/String>): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/wrapIOException|wrapIOException@kotlin.Throwable(kotlin.Function0<kotlin.String>){}[0]
+
+// Targets: [native]
+final fun io.matthewnelson.kmp.file/errnoToIOException(kotlin/Int): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/errnoToIOException|errnoToIOException(kotlin.Int){}[0]
+
+// Targets: [apple]
+final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray){}[0]
+
+// Targets: [apple]
+final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int =..., kotlin/Int =...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+
+// Targets: [apple]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [linux]
+final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray){}[0]
+
+// Targets: [linux]
+final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int =..., kotlin/Int =...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+
+// Targets: [linux]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [js]
+final value class io.matthewnelson.kmp.file/Buffer { // io.matthewnelson.kmp.file/Buffer|null[0]
+    final val length // io.matthewnelson.kmp.file/Buffer.length|{}length[0]
+        final fun <get-length>(): kotlin/Number // io.matthewnelson.kmp.file/Buffer.length.<get-length>|<get-length>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.matthewnelson.kmp.file/Buffer.equals|equals(kotlin.Any?){}[0]
+    final fun fill() // io.matthewnelson.kmp.file/Buffer.fill|fill(){}[0]
+    final fun hashCode(): kotlin/Int // io.matthewnelson.kmp.file/Buffer.hashCode|hashCode(){}[0]
+    final fun readInt8(kotlin/Number): kotlin/Byte // io.matthewnelson.kmp.file/Buffer.readInt8|readInt8(kotlin.Number){}[0]
+    final fun toString(): kotlin/String // io.matthewnelson.kmp.file/Buffer.toString|toString(){}[0]
+    final fun toUtf8(kotlin/Number =..., kotlin/Number =...): kotlin/String // io.matthewnelson.kmp.file/Buffer.toUtf8|toUtf8(kotlin.Number;kotlin.Number){}[0]
+    final fun unwrap(): dynamic // io.matthewnelson.kmp.file/Buffer.unwrap|unwrap(){}[0]
+
+    final object Companion { // io.matthewnelson.kmp.file/Buffer.Companion|null[0]
+        final val MAX_LENGTH // io.matthewnelson.kmp.file/Buffer.Companion.MAX_LENGTH|{}MAX_LENGTH[0]
+            final fun <get-MAX_LENGTH>(): kotlin/Number // io.matthewnelson.kmp.file/Buffer.Companion.MAX_LENGTH.<get-MAX_LENGTH>|<get-MAX_LENGTH>(){}[0]
+
+        final fun alloc(kotlin/Number): io.matthewnelson.kmp.file/Buffer // io.matthewnelson.kmp.file/Buffer.Companion.alloc|alloc(kotlin.Number){}[0]
+        final fun wrap(dynamic): io.matthewnelson.kmp.file/Buffer // io.matthewnelson.kmp.file/Buffer.Companion.wrap|wrap(<dynamic>){}[0]
+    }
+}
+
+// Targets: [js]
+final value class io.matthewnelson.kmp.file/Stats { // io.matthewnelson.kmp.file/Stats|null[0]
+    final val isDirectory // io.matthewnelson.kmp.file/Stats.isDirectory|{}isDirectory[0]
+        final fun <get-isDirectory>(): kotlin/Boolean // io.matthewnelson.kmp.file/Stats.isDirectory.<get-isDirectory>|<get-isDirectory>(){}[0]
+    final val isFile // io.matthewnelson.kmp.file/Stats.isFile|{}isFile[0]
+        final fun <get-isFile>(): kotlin/Boolean // io.matthewnelson.kmp.file/Stats.isFile.<get-isFile>|<get-isFile>(){}[0]
+    final val isSymbolicLink // io.matthewnelson.kmp.file/Stats.isSymbolicLink|{}isSymbolicLink[0]
+        final fun <get-isSymbolicLink>(): kotlin/Boolean // io.matthewnelson.kmp.file/Stats.isSymbolicLink.<get-isSymbolicLink>|<get-isSymbolicLink>(){}[0]
+    final val mode // io.matthewnelson.kmp.file/Stats.mode|{}mode[0]
+        final fun <get-mode>(): kotlin/Int // io.matthewnelson.kmp.file/Stats.mode.<get-mode>|<get-mode>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.matthewnelson.kmp.file/Stats.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.matthewnelson.kmp.file/Stats.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.matthewnelson.kmp.file/Stats.toString|toString(){}[0]
+    final fun unwrap(): dynamic // io.matthewnelson.kmp.file/Stats.unwrap|unwrap(){}[0]
+}
+
+// Targets: [js]
+final val io.matthewnelson.kmp.file/errorCodeOrNull // io.matthewnelson.kmp.file/errorCodeOrNull|@kotlin.Throwable{}errorCodeOrNull[0]
+    final fun (kotlin/Throwable).<get-errorCodeOrNull>(): kotlin/String? // io.matthewnelson.kmp.file/errorCodeOrNull.<get-errorCodeOrNull>|<get-errorCodeOrNull>@kotlin.Throwable(){}[0]
+
+// Targets: [js]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/lstat(): io.matthewnelson.kmp.file/Stats // io.matthewnelson.kmp.file/lstat|lstat@io.matthewnelson.kmp.file.File(){}[0]
+
+// Targets: [js]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/read(): io.matthewnelson.kmp.file/Buffer // io.matthewnelson.kmp.file/read|read@io.matthewnelson.kmp.file.File(){}[0]
+
+// Targets: [js]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/stat(): io.matthewnelson.kmp.file/Stats // io.matthewnelson.kmp.file/stat|stat@io.matthewnelson.kmp.file.File(){}[0]
+
+// Targets: [js]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/write(io.matthewnelson.kmp.file/Buffer) // io.matthewnelson.kmp.file/write|write@io.matthewnelson.kmp.file.File(io.matthewnelson.kmp.file.Buffer){}[0]
+
+// Targets: [js]
+final fun (kotlin/Throwable).io.matthewnelson.kmp.file/toIOException(): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/toIOException|toIOException@kotlin.Throwable(){}[0]
+
+// Targets: [mingwX64]
+final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray){}[0]
+
+// Targets: [mingwX64]
+final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int =..., kotlin/Int =...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+
+// Targets: [mingwX64]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]
