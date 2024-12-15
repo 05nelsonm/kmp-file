@@ -51,6 +51,7 @@ public value class Buffer internal constructor(internal val value: buffer_Buffer
 
     public fun unwrap(): dynamic = value.asDynamic()
 
+    /** @suppress */
     override fun toString(): String = "Buffer@${hashCode()}"
 
     public companion object {
@@ -81,5 +82,6 @@ public value class Stats internal constructor(private val value: fs_Stats) {
 
     public fun unwrap(): dynamic = value.asDynamic()
 
+    /** @suppress */
     override fun toString(): String = "Stats@${hashCode()}"
 }
