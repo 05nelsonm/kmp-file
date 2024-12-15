@@ -100,10 +100,14 @@ public actual class File: Comparable<File> {
         return File(path, direct = null)
     }
 
+    /** @suppress */    
     public override fun compareTo(other: File): Int = realPath.compareTo(other.realPath)
 
+    /** @suppress */    
     public override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
+    /** @suppress */    
     public override fun hashCode(): Int = realPath.hashCode() xor 1234321
+    /** @suppress */    
     public override fun toString(): String = realPath
 }
 

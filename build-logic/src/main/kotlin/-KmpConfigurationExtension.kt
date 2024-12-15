@@ -61,7 +61,7 @@ fun KmpConfigurationExtension.configureShared(
         watchosAll()
 
         common {
-            if (publish) pluginIds("publication")
+            if (publish) pluginIds("publication", "dokka")
 
             sourceSetTest {
                 dependencies {
