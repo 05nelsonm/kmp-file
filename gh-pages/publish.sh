@@ -29,6 +29,8 @@ cd ..
 cp -aR build/dokka/htmlMultiModule/* gh-pages/kmp-file
 
 cd "$DIR_SCRIPT/kmp-file"
+sed -i "s|module:file|module:library/file|g" "package-list"
+
 git add --all
 git commit -S --message "Update dokka docs"
 git push
