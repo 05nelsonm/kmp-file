@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 @file:JvmName("KmpFile")
 
 package io.matthewnelson.kmp.file
@@ -41,7 +42,7 @@ public val SysDirSep: Char = platformDirSeparator()
 public val SysTempDir: File = platformTempDirectory()
 
 @JvmName("get")
-public fun String.toFile(): File = File(this)
+public inline fun String.toFile(): File = File(this)
 
 /**
  * The name of the file or directory. The last segment
@@ -52,7 +53,7 @@ public fun String.toFile(): File = File(this)
  *     assertEquals("world", "hello/world".toFile().name)
  * */
 @get:JvmName("nameOf")
-public val File.name: String get() = getName()
+public inline val File.name: String get() = getName()
 
 /**
  * The [path] parent. If no parent is available, null
@@ -64,7 +65,7 @@ public val File.name: String get() = getName()
  *     assertNull("world".toFile().parentPath)
  * */
 @get:JvmName("parentPathOf")
-public val File.parentPath: String? get() = getParent()
+public inline val File.parentPath: String? get() = getParent()
 
 /**
  * The [path] parent. If no parent is available, null
@@ -76,13 +77,13 @@ public val File.parentPath: String? get() = getParent()
  *     assertNull("world".toFile().parentFile)
  * */
 @get:JvmName("parentFileOf")
-public val File.parentFile: File? get() = getParentFile()
+public inline val File.parentFile: File? get() = getParentFile()
 
 /**
  * The abstract path to a directory or file
  * */
 @get:JvmName("pathOf")
-public val File.path: String get() = getPath()
+public inline val File.path: String get() = getPath()
 
 /**
  * Returns the absolute pathname string of this abstract pathname.
@@ -95,13 +96,13 @@ public val File.path: String get() = getPath()
  * Otherwise, this pathname is resolved in a system-dependent way.
  * */
 @get:JvmName("absolutePathOf")
-public val File.absolutePath: String get() = getAbsolutePath()
+public inline val File.absolutePath: String get() = getAbsolutePath()
 
 /**
  * [absolutePath] but returns a file
  * */
 @get:JvmName("absoluteFileOf")
-public val File.absoluteFile: File get() = getAbsoluteFile()
+public inline val File.absoluteFile: File get() = getAbsoluteFile()
 
 /**
  * Returns the canonical pathname string of this abstract pathname.
@@ -118,14 +119,14 @@ public val File.absoluteFile: File get() = getAbsoluteFile()
  * */
 @Throws(IOException::class)
 @JvmName("canonicalPathOf")
-public fun File.canonicalPath(): String = getCanonicalPath()
+public inline fun File.canonicalPath(): String = getCanonicalPath()
 
 /**
  * [canonicalPath] but returns a file
  * */
 @Throws(IOException::class)
 @JvmName("canonicalFileOf")
-public fun File.canonicalFile(): File = getCanonicalFile()
+public inline fun File.canonicalFile(): File = getCanonicalFile()
 
 /**
  * Removes all `.` and resolves all possible `..` for

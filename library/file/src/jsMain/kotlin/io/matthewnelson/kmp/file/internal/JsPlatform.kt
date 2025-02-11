@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT", "KotlinRedundantDiagnosticSuppress")
+@file:Suppress("FunctionName", "ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.*
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun platformDirSeparator(): Char = try {
     path_sep.first()
 } catch (_: Throwable) {
     '/'
 }
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun platformTempDirectory(): File = try {
     os_tmpdir()
 } catch (_: Throwable) {
@@ -43,7 +41,6 @@ internal actual val IsWindows: Boolean by lazy {
 }
 
 // @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadBytes(): ByteArray = try {
     val buffer = read()
 
@@ -61,7 +58,6 @@ internal actual inline fun File.platformReadBytes(): ByteArray = try {
 }
 
 // @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadUtf8(): String = try {
     val buffer = read()
 
@@ -79,7 +75,6 @@ internal actual inline fun File.platformReadUtf8(): String = try {
 }
 
 // @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteBytes(array: ByteArray) {
     try {
         fs_writeFileSync(path, array)
@@ -89,7 +84,6 @@ internal actual inline fun File.platformWriteBytes(array: ByteArray) {
 }
 
 // @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteUtf8(text: String) {
     try {
         fs_writeFileSync(path, text)
@@ -98,13 +92,10 @@ internal actual inline fun File.platformWriteUtf8(text: String) {
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun Path.basename(): String = path_basename(this)
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun Path.dirname(): Path = path_dirname(this)
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun Path.isAbsolute(): Boolean {
     if (IsWindows) {
         // Node.js windows implementation declares
@@ -177,7 +168,6 @@ internal actual fun fs_realpath(path: Path): Path {
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
 internal inline fun Number.toNotLong(): Number {
     if (this !is Long) return this
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -41,7 +41,6 @@ internal actual fun fs_mkdir(path: Path): Boolean {
 internal expect fun fs_platform_mkdir(path: Path): Int
 
 @ExperimentalForeignApi
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun fs_platform_fread(
     file: CPointer<FILE>,
     buf: CPointer<ByteVar>,
@@ -49,7 +48,6 @@ internal expect inline fun fs_platform_fread(
 ): Int
 
 @ExperimentalForeignApi
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun fs_platform_fwrite(
     file: CPointer<FILE>,
     buf: CPointer<ByteVar>,

@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.DelicateFileApi
 import io.matthewnelson.kmp.file.errnoToIOException
 import kotlinx.cinterop.*
 import platform.posix.*
@@ -66,13 +65,11 @@ internal actual fun fs_platform_mkdir(
     path: Path,
 ): Int = fs_platform_mkdir(path, Mode("775").toModeT())
 
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun fs_platform_chmod(
     path: Path,
     mode: UInt,
 ): Int
 
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun fs_platform_mkdir(
     path: Path,
     mode: UInt,

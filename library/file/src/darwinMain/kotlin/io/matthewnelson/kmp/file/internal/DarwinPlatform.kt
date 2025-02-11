@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress")
+@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -25,7 +25,6 @@ import platform.Foundation.NSTemporaryDirectory
 import platform.posix.getenv
 
 @OptIn(ExperimentalForeignApi::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun platformTempDirectory(): File {
     val tmpdir = getenv("TMPDIR")
         ?.toKString()

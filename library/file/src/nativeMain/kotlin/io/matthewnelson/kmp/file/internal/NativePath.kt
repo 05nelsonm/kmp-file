@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
 import kotlinx.cinterop.*
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun Path.basename(): String {
     if (isEmpty()) return this
 
@@ -29,7 +28,6 @@ internal actual inline fun Path.basename(): String {
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun Path.dirname(): Path {
     @OptIn(ExperimentalForeignApi::class)
     return memScoped {
@@ -37,13 +35,11 @@ internal actual inline fun Path.dirname(): Path {
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal expect inline fun MemScope.platformBasename(
     path: Path,
 ): CPointer<ByteVar>?
 
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal expect inline fun MemScope.platformDirname(
     path: Path,

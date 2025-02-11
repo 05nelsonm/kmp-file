@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress")
+@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -22,7 +22,6 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.errno
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 internal actual inline fun File.platformReadBytes(): ByteArray = fOpen(flags = "rb") { file ->
     val bufferedBytes = mutableListOf<ByteArray>()
@@ -57,11 +56,9 @@ internal actual inline fun File.platformReadBytes(): ByteArray = fOpen(flags = "
 }
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadUtf8(): String = readBytes().decodeToString()
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 internal actual inline fun File.platformWriteBytes(array: ByteArray) {
     fOpen("wb") { file ->
@@ -77,5 +74,4 @@ internal actual inline fun File.platformWriteBytes(array: ByteArray) {
 }
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteUtf8(text: String) { writeBytes(text.encodeToByteArray()) }

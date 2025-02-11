@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -28,7 +28,6 @@ import platform.posix.dirname
 import platform.windows.FALSE
 import platform.windows.PathIsRelativeA
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun Path.isAbsolute(): Boolean {
     if (isEmpty()) return false
     if (get(0) == SysDirSep) {
@@ -48,13 +47,11 @@ internal actual inline fun Path.isAbsolute(): Boolean {
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal actual inline fun MemScope.platformBasename(
     path: Path,
 ): CPointer<ByteVar>? = basename(path.cstr.ptr)
 
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal actual inline fun MemScope.platformDirname(
     path: Path,

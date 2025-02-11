@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -45,16 +45,12 @@ internal fun Path.absolute(): Path {
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.basename(): String
 
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.dirname(): Path
 
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun Path.isAbsolute(): Boolean
 
-@Suppress("NOTHING_TO_INLINE")
 internal inline fun Path.parentOrNull(): Path? {
     if (!contains(SysDirSep)) return null
 
