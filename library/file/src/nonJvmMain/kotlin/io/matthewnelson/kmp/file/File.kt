@@ -68,21 +68,27 @@ public actual class File: Comparable<File> {
     public actual fun mkdirs(): Boolean = fs_mkdirs(realPath)
 
     // use .name
+    @PublishedApi
     internal actual fun getName(): String = realPath.basename()
     // use .parentPath
+    @PublishedApi
     internal actual fun getParent(): String? = realPath.parentOrNull()
     // use .parentFile
+    @PublishedApi
     internal actual fun getParentFile(): File? {
         val path = getParent() ?: return null
         if (path == realPath) return this
         return File(path, direct = null)
     }
     // use .path
+    @PublishedApi
     internal actual fun getPath(): String = realPath
 
     // use .absolutePath
+    @PublishedApi
     internal actual fun getAbsolutePath(): String = realPath.absolute()
     // use .absoluteFile
+    @PublishedApi
     internal actual fun getAbsoluteFile(): File {
         val path = getAbsolutePath()
         if (path == realPath) return this
@@ -90,8 +96,10 @@ public actual class File: Comparable<File> {
     }
 
     // use .canonicalPath
+    @PublishedApi
     internal actual fun getCanonicalPath(): String = fs_canonicalize(realPath)
     // use .canonicalFile
+    @PublishedApi
     internal actual fun getCanonicalFile(): File {
         val path = getCanonicalPath()
         if (path == realPath) return this

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.ANDROID
@@ -26,10 +28,9 @@ import kotlin.io.resolve as _resolve
 import kotlin.io.writeBytes as _writeBytes
 import kotlin.io.writeText as _writeText
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun platformDirSeparator(): Char = File.separatorChar
 
-@Suppress("NOTHING_TO_INLINE", "SdCardPath")
+@Suppress("SdCardPath")
 internal actual inline fun platformTempDirectory(): File {
     val jTemp = System
         .getProperty("java.io.tmpdir")
@@ -77,20 +78,15 @@ internal actual val IsWindows: Boolean = System.getProperty("os.name")
     ?: (File.separatorChar == '\\')
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadBytes(): ByteArray = _readBytes()
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadUtf8(): String = _readText()
 
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformResolve(relative: File): File = _resolve(relative)
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteBytes(array: ByteArray) { _writeBytes(array) }
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteUtf8(text: String) { _writeText(text) }

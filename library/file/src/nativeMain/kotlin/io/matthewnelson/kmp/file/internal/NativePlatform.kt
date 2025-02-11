@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress")
+@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -22,34 +22,37 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.errno
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 internal actual inline fun File.platformReadBytes(): ByteArray = fOpen(flags = "rb") { file ->
-    val bufferedBytes = mutableListOf<ByteArray>()
-    val buf = ByteArray(4096)
+    val bytes = ArrayDeque<ByteArray>(4)
+    val buf = ByteArray(8192)
 
-    var fileSize = 0L
+    var size = 0L
     while (true) {
         val read = file.fRead(buf)
 
         if (read < 0) throw errnoToIOException(errno)
         if (read == 0) break
-        fileSize += read
-        if (fileSize >= Int.MAX_VALUE.toLong()) {
+        size += read
+        if (size >= Int.MAX_VALUE.toLong()) {
             throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
         }
-        bufferedBytes.add(buf.copyOf(read))
+        bytes.add(buf.copyOf(read))
     }
 
     buf.fill(0)
-    // would have already thrown exception, so we know it does not exceed Int.MAX_VALUE
-    val final = ByteArray(fileSize.toInt())
 
-    var finalOffset = 0
-    while (bufferedBytes.isNotEmpty()) {
-        val b = bufferedBytes.removeAt(0)
-        b.copyInto(final, finalOffset)
-        finalOffset += b.size
+    if (bytes.isEmpty()) return@fOpen ByteArray(0)
+    if (bytes.size == 1) return@fOpen bytes.removeFirst()
+
+    // would have already thrown exception, so we know it does not exceed Int.MAX_VALUE
+    val final = ByteArray(size.toInt())
+
+    var offset = 0
+    while (bytes.isNotEmpty()) {
+        val b = bytes.removeFirst()
+        b.copyInto(final, offset)
+        offset += b.size
         b.fill(0)
     }
 
@@ -57,11 +60,9 @@ internal actual inline fun File.platformReadBytes(): ByteArray = fOpen(flags = "
 }
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformReadUtf8(): String = readBytes().decodeToString()
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 internal actual inline fun File.platformWriteBytes(array: ByteArray) {
     fOpen("wb") { file ->
@@ -77,5 +78,4 @@ internal actual inline fun File.platformWriteBytes(array: ByteArray) {
 }
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun File.platformWriteUtf8(text: String) { writeBytes(text.encodeToByteArray()) }

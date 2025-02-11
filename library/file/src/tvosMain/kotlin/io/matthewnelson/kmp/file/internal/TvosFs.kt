@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -26,7 +26,6 @@ import platform.posix.fread
 import platform.posix.fwrite
 
 @ExperimentalForeignApi
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun fs_platform_fread(
     file: CPointer<FILE>,
     buf: CPointer<ByteVar>,
@@ -34,7 +33,6 @@ internal actual inline fun fs_platform_fread(
 ): Int = fread(buf, 1u, numBytes.toUInt().convert(), file).convert()
 
 @ExperimentalForeignApi
-@Suppress("NOTHING_TO_INLINE")
 internal actual inline fun fs_platform_fwrite(
     file: CPointer<FILE>,
     buf: CPointer<ByteVar>,

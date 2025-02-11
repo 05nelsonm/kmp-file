@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -22,14 +22,12 @@ import kotlinx.cinterop.convert
 import platform.posix.chmod
 import platform.posix.mkdir
 
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal actual inline fun fs_platform_chmod(
     path: Path,
     mode: UInt,
 ): Int = chmod(path, mode.convert()).convert()
 
-@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal actual inline fun fs_platform_mkdir(
     path: Path,

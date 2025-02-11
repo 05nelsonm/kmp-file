@@ -98,25 +98,31 @@ public expect class File(pathname: String): Comparable<File> {
      * */
     public fun mkdirs(): Boolean
 
-
-
     /** Use [name] */
+    @PublishedApi
     internal fun getName(): String
     /** Use [parentPath] */
+    @PublishedApi
     internal fun getParent(): String?
     /** Use [parentFile] */
+    @PublishedApi
     internal fun getParentFile(): File?
     /** Use [path] */
+    @PublishedApi
     internal fun getPath(): String
 
     /** Use [absolutePath] */
+    @PublishedApi
     internal fun getAbsolutePath(): String
     /** Use [absoluteFile] */
+    @PublishedApi
     internal fun getAbsoluteFile(): File
 
     /** Use [canonicalPath] */
+    @PublishedApi
     internal fun getCanonicalPath(): String
     /** Use [canonicalFile] */
+    @PublishedApi
     internal fun getCanonicalFile(): File
 
     public override fun compareTo(other: File): Int

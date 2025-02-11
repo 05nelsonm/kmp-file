@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 @file:JvmName("Exceptions")
 
 package io.matthewnelson.kmp.file
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.jvm.JvmName
 
 public expect open class IOException: Exception {
@@ -47,11 +50,9 @@ public expect open class InterruptedException: Exception {
  * it is not, it will encase it in one.
  * */
 @JvmName("wrapIO")
-public fun Throwable.wrapIOException(): IOException {
-    return when (this) {
-        is IOException -> this
-        else -> IOException(this)
-    }
+public inline fun Throwable.wrapIOException(): IOException = when (this) {
+    is IOException -> this
+    else -> IOException(this)
 }
 
 /**
@@ -59,9 +60,14 @@ public fun Throwable.wrapIOException(): IOException {
  * it is not, it will encase it in one with the provided [lazyMessage].
  * */
 @JvmName("wrapIO")
-public fun Throwable.wrapIOException(
+@OptIn(ExperimentalContracts::class)
+public inline fun Throwable.wrapIOException(
     lazyMessage: () -> String,
 ): IOException {
+    contract {
+        callsInPlace(lazyMessage, InvocationKind.AT_MOST_ONCE)
+    }
+
     return when (this) {
         is IOException -> this
         else -> IOException(lazyMessage(), this)

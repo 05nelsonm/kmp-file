@@ -13,49 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress")
+@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.SysDirSep
-import kotlin.jvm.JvmSynthetic
 
 internal typealias Path = String
 
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun platformDirSeparator(): Char
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun platformTempDirectory(): File
 
 @PublishedApi
 internal expect val IsWindows: Boolean
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun File.platformReadBytes(): ByteArray
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun File.platformReadUtf8(): String
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun File.platformWriteBytes(array: ByteArray)
 
 @Throws(IOException::class)
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun File.platformWriteUtf8(text: String)
 
-@Suppress("NOTHING_TO_INLINE")
 internal expect inline fun File.platformResolve(relative: File): File
 
 /**
  * returns something like `C:`
  * */
-@JvmSynthetic
-@Suppress("NOTHING_TO_INLINE")
 internal inline fun Path.driveOrNull(): Path? {
     if (!IsWindows) return null
 
@@ -70,8 +60,7 @@ internal inline fun Path.driveOrNull(): Path? {
     }
 }
 
-@JvmSynthetic
-internal fun Path.normalize(): Path {
+internal inline fun Path.normalize(): Path {
     if (isEmpty()) return this
 
     val root = rootOrNull(normalizing = true) ?: ""
@@ -114,8 +103,7 @@ internal fun Path.normalize(): Path {
     return prefix + normalized
 }
 
-@JvmSynthetic
-internal fun Path.rootOrNull(
+internal inline fun Path.rootOrNull(
     normalizing: Boolean
 ): Path? = if (IsWindows) {
     val driveRoot = driveRootOrNull()
@@ -145,7 +133,6 @@ internal fun Path.rootOrNull(
     if (c == SysDirSep) "$c" else null
 }
 
-@Suppress("NOTHING_TO_INLINE")
 private inline fun Path.driveRootOrNull(): Path? {
     val drive = driveOrNull() ?: return null
 
