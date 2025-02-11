@@ -98,7 +98,7 @@ final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewne
 final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray){}[0]
 
 // Targets: [linux]
-final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int =..., kotlin/Int =...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [linux]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
@@ -113,7 +113,7 @@ final value class io.matthewnelson.kmp.file/Buffer { // io.matthewnelson.kmp.fil
     final fun hashCode(): kotlin/Int // io.matthewnelson.kmp.file/Buffer.hashCode|hashCode(){}[0]
     final fun readInt8(kotlin/Number): kotlin/Byte // io.matthewnelson.kmp.file/Buffer.readInt8|readInt8(kotlin.Number){}[0]
     final fun toString(): kotlin/String // io.matthewnelson.kmp.file/Buffer.toString|toString(){}[0]
-    final fun toUtf8(kotlin/Number =..., kotlin/Number =...): kotlin/String // io.matthewnelson.kmp.file/Buffer.toUtf8|toUtf8(kotlin.Number;kotlin.Number){}[0]
+    final fun toUtf8(kotlin/Number = ..., kotlin/Number = ...): kotlin/String // io.matthewnelson.kmp.file/Buffer.toUtf8|toUtf8(kotlin.Number;kotlin.Number){}[0]
     final fun unwrap(): dynamic // io.matthewnelson.kmp.file/Buffer.unwrap|unwrap(){}[0]
 
     final object Companion { // io.matthewnelson.kmp.file/Buffer.Companion|null[0]
@@ -165,7 +165,7 @@ final fun (kotlin/Throwable).io.matthewnelson.kmp.file/toIOException(): io.matth
 final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray){}[0]
 
 // Targets: [mingwX64]
-final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int =..., kotlin/Int =...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [mingwX64]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "KotlinRedundantDiagnosticSuppress")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file
 
@@ -90,18 +90,15 @@ public actual class File: Comparable<File> {
     }
 
     // use .canonicalPath
-    @Throws(IOException::class)
     internal actual fun getCanonicalPath(): String = fs_canonicalize(realPath)
     // use .canonicalFile
-    @Throws(IOException::class)
     internal actual fun getCanonicalFile(): File {
         val path = getCanonicalPath()
         if (path == realPath) return this
         return File(path, direct = null)
     }
 
-    /** @suppress */    
-    public override fun compareTo(other: File): Int = realPath.compareTo(other.realPath)
+    public actual override fun compareTo(other: File): Int = realPath.compareTo(other.realPath)
 
     /** @suppress */    
     public override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
@@ -111,11 +108,9 @@ public actual class File: Comparable<File> {
     public override fun toString(): String = realPath
 }
 
-@Suppress("NOTHING_TO_INLINE")
-private inline fun Path.toUTF8(): Path = encodeToByteArray()
-    .decodeToString()
+private inline fun Path.toUTF8(): Path = encodeToByteArray().decodeToString()
 
-private fun Path.resolveSlashes(): Path {
+private inline fun Path.resolveSlashes(): Path {
     if (isEmpty()) return this
     var result = this
 

@@ -115,9 +115,9 @@ public expect class File(pathname: String): Comparable<File> {
     internal fun getAbsoluteFile(): File
 
     /** Use [canonicalPath] */
-    @Throws(IOException::class)
     internal fun getCanonicalPath(): String
     /** Use [canonicalFile] */
-    @Throws(IOException::class)
     internal fun getCanonicalFile(): File
+
+    public override fun compareTo(other: File): Int
 }
