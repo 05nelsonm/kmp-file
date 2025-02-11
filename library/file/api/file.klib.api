@@ -89,7 +89,7 @@ final fun io.matthewnelson.kmp.file/errnoToIOException(kotlin/Int): io.matthewne
 final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray){}[0]
 
 // Targets: [apple]
-final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int =..., kotlin/Int =...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [apple]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
