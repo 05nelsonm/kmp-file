@@ -29,9 +29,7 @@ allprojects {
     findProperty("VERSION_NAME")?.let { version = it }
     findProperty("POM_DESCRIPTION")?.let { description = it.toString() }
 
-    repositories {
-        mavenCentral()
-    }
+    repositories { mavenCentral() }
 }
 
 @Suppress("PropertyName")

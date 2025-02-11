@@ -17,9 +17,7 @@ plugins {
     id("configuration")
 }
 
-repositories {
-    google()
-}
+repositories { google() }
 
 kmpConfiguration {
     configure {
@@ -30,7 +28,7 @@ kmpConfiguration {
                 namespace = "io.matthewnelson.kmp.file.test.android"
 
                 defaultConfig {
-                    minSdk = 15
+                    minSdk = 19
 
                     testInstrumentationRunnerArguments["disableAnalytics"] = true.toString()
                     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

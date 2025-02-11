@@ -73,7 +73,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [ 15, 17, 21, 24, 29 ]
+        api-level: [ 19, 21, 24, 29 ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo

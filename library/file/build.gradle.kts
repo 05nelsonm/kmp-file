@@ -27,7 +27,7 @@ kmpConfiguration {
 
                 dependencies {
                     implementation(libs.encoding.base16)
-                    implementation(libs.kotlincrypto.hash.sha2)
+                    implementation(kotlincrypto.hash.sha2)
                 }
             }
         }
