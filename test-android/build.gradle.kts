@@ -28,7 +28,7 @@ kmpConfiguration {
                 namespace = "io.matthewnelson.kmp.file.test.android"
 
                 defaultConfig {
-                    minSdk = 19
+                    minSdk = 15
 
                     testInstrumentationRunnerArguments["disableAnalytics"] = true.toString()
                     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
