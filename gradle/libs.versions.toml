@@ -1,8 +1,10 @@
 [versions]
-androidx-test-core          = "1.6.1"
-androidx-test-runner        = "1.6.2"
+#noinspection GradleDependency
+androidx-test-core          = "1.5.0" # Do not upgrade. Tests run for API 15+, where next version requires minSdk 19+
+#noinspection GradleDependency
+androidx-test-runner        = "1.5.2" # Do not upgrade. Tests run for API 15+, where next version requires minSdk 19+
 
-encoding                    = "2.3.1"
+encoding                    = "2.4.0"
 
 gradle-android              = "8.7.3"
 gradle-binary-compat        = "0.17.0"
