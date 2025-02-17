@@ -25,6 +25,19 @@ import kotlin.test.fail
 class WriteUnitTest {
 
     @Test
+    fun givenFile_whenWriteEmptyBytes_thenIsSuccessful() {
+        val tmp = randomTemp()
+
+        val bytes = ByteArray(0)
+        try {
+            tmp.writeBytes(bytes)
+            assertEquals(bytes.sha256(), tmp.readBytes().sha256())
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
     fun givenFile_whenWriteBytes_thenIsSuccessful() {
         val tmp = randomTemp()
 
@@ -38,12 +51,23 @@ class WriteUnitTest {
     }
 
     @Test
+    fun givenFile_whenWriteEmptyString_thenIsSuccessful() {
+        val tmp = randomTemp()
+
+        val text = ""
+        try {
+            tmp.writeUtf8(text)
+            assertEquals(ByteArray(0).sha256(), tmp.readBytes().sha256())
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
     fun givenFile_whenWriteUtf8_thenIsSuccessful() {
         val tmp = randomTemp()
 
-        val text = Random.Default.nextBytes(20_000)
-            .encodeToString(Base16)
-
+        val text = Random.Default.nextBytes(20_000).encodeToString(Base16)
         try {
             tmp.writeUtf8(text)
             assertEquals(text, tmp.readUtf8())

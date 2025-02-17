@@ -26,29 +26,9 @@ val DIR_TEST_SUPPORT by lazy {
         .resolve("test_support")
 }
 
-val DIR_TEST_SYM by lazy {
-    DIR_TEST_SUPPORT
-        .resolve("dir_sym")
-}
-
-val DIR_TEST_SYM_ACTUAL by lazy {
-    DIR_TEST_SUPPORT
-        .resolve("test/support/sym")
-}
-
-val DIR_TEST_DIR_SYM by lazy {
-    DIR_TEST_SUPPORT
-        .resolve("test_dir_sym")
-}
-
 val FILE_LOREM_IPSUM by lazy {
     DIR_TEST_SUPPORT
         .resolve("lorem_ipsum")
-}
-
-val FILE_SYM_LINK_1 by lazy {
-    DIR_TEST_SUPPORT
-        .resolve("sym_link1")
 }
 
 val FILE_SYM_LINK_2 by lazy {
@@ -56,12 +36,9 @@ val FILE_SYM_LINK_2 by lazy {
         .resolve("sym_link2")
 }
 
-val BASE_16_LC = Base16 { encodeToLowercase = true }
+private val BASE_16_LC = Base16 { encodeToLowercase = true }
 
-expect val isJvm: Boolean
-expect val isNative: Boolean
-expect val isNodejs: Boolean
-expect val isSimulator: Boolean
+expect val IS_SIMULATOR: Boolean
 
 fun randomName(): String = Random
     .Default

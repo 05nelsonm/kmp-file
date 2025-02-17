@@ -15,7 +15,4 @@
  **/
 package io.matthewnelson.kmp.file
 
-actual val isJvm: Boolean = true
-actual val isNative: Boolean = false
-actual val isNodejs: Boolean = false
-actual val isSimulator: Boolean = false
+actual val IS_SIMULATOR: Boolean = false
