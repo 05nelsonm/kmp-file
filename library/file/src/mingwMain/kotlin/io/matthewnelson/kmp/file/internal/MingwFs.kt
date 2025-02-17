@@ -20,23 +20,8 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.errnoToIOException
-import kotlinx.cinterop.ByteVar
-import kotlinx.cinterop.CPointer
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.convert
-import kotlinx.cinterop.toKStringFromUtf8
-import platform.posix.EACCES
-import platform.posix.ENOENT
-import platform.posix.FILE
-import platform.posix.PATH_MAX
-import platform.posix.errno
-import platform.posix._fullpath
-import platform.posix.fread
-import platform.posix.free
-import platform.posix.fwrite
-import platform.posix.mkdir
-import platform.posix.remove
-import platform.posix.rmdir
+import kotlinx.cinterop.*
+import platform.posix.*
 
 @Throws(IOException::class)
 internal actual fun fs_chmod(path: Path, mode: String) { /* no-op */ }
@@ -57,6 +42,16 @@ internal actual fun fs_remove(path: Path): Boolean {
 internal actual fun fs_platform_mkdir(
     path: Path,
 ): Int = mkdir(path)
+
+@ExperimentalForeignApi
+@Throws(IOException::class)
+internal actual inline fun MemScope.fs_platform_file_size(
+    path: Path,
+): Long {
+    val stat = alloc<_stat64>()
+    if (_stat64(path, stat.ptr) != 0) throw errnoToIOException(errno)
+    return stat.st_size
+}
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)

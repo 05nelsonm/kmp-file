@@ -42,34 +42,38 @@ internal actual val IsWindows: Boolean by lazy {
 
 // @Throws(IOException::class)
 internal actual inline fun File.platformReadBytes(): ByteArray = try {
+    if (fs_statSync(path).size.toLong() > Int.MAX_VALUE.toLong()) {
+        throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
+    }
+
     val buffer = read()
 
     // Max buffer size for Node.js 16+ can be larger than the
     // maximum size of the ByteArray capacity when on 64-bit
-    if (buffer.length !in 0..Int.MAX_VALUE) {
+    if (buffer.length.toLong() > Int.MAX_VALUE.toLong()) {
         throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
     }
 
-    val bytes = ByteArray(buffer.length.toInt()) { i -> buffer.readInt8(i) }
-    buffer.fill()
-    bytes
+    ByteArray(buffer.length.toInt()) { i -> buffer.readInt8(i) }
 } catch (t: Throwable) {
     throw t.toIOException()
 }
 
 // @Throws(IOException::class)
 internal actual inline fun File.platformReadUtf8(): String = try {
+    if (fs_statSync(path).size.toLong() > Int.MAX_VALUE.toLong()) {
+        throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
+    }
+
     val buffer = read()
 
     // Max buffer size for Node.js 16+ can be larger than the
     // maximum size of the ByteArray capacity when on 64-bit
-    if (buffer.length !in 0..Int.MAX_VALUE) {
+    if (buffer.length.toLong() > Int.MAX_VALUE.toLong()) {
         throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
     }
 
-    val text = buffer.toUtf8()
-    buffer.fill()
-    text
+    buffer.toUtf8()
 } catch (t: Throwable) {
     throw t.toIOException()
 }

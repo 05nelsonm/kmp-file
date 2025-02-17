@@ -18,10 +18,7 @@ package io.matthewnelson.kmp.file
 import platform.posix.access
 import kotlin.experimental.ExperimentalNativeApi
 
-actual val isJvm: Boolean = false
-actual val isNative: Boolean = true
-actual val isNodejs: Boolean = false
-actual val isSimulator: Boolean by lazy {
+actual val IS_SIMULATOR: Boolean by lazy {
     @OptIn(ExperimentalNativeApi::class)
     when (Platform.osFamily) {
         OsFamily.IOS,

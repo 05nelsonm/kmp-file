@@ -63,7 +63,17 @@ internal actual fun fs_realpath(path: Path): Path {
 
 internal actual fun fs_platform_mkdir(
     path: Path,
-): Int = fs_platform_mkdir(path, Mode("775").toModeT())
+): Int = fs_platform_mkdir(path, Mode._775)
+
+@ExperimentalForeignApi
+@Throws(IOException::class)
+internal actual inline fun MemScope.fs_platform_file_size(
+    path: Path,
+): Long {
+    val stat = alloc<stat>()
+    if (stat(path, stat.ptr) != 0) throw errnoToIOException(errno)
+    return stat.st_size
+}
 
 internal expect inline fun fs_platform_chmod(
     path: Path,
@@ -78,6 +88,11 @@ internal expect inline fun fs_platform_mkdir(
 private value class Mode
 @Throws(IllegalArgumentException::class)
 constructor(private val value: String) {
+
+    companion object {
+        @Suppress("ObjectPropertyName")
+        val _775: UInt by lazy { Mode("775").toModeT() }
+    }
 
     init {
         require(value.length == 3) { "Invalid mode[$value] (e.g. 764)" }

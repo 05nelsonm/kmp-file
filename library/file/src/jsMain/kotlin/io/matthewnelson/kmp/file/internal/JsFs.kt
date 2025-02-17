@@ -75,6 +75,7 @@ internal external fun fs_statSync(path: Path): fs_Stats
 @JsName("Stats")
 internal external class fs_Stats {
     internal val mode: Number
+    internal val size: Number
     internal fun isFile(): Boolean
     internal fun isDirectory(): Boolean
     internal fun isSymbolicLink(): Boolean

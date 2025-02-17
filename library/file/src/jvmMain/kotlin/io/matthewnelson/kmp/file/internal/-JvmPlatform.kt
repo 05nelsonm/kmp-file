@@ -20,6 +20,7 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.toFile
+import io.matthewnelson.kmp.file.wrapIOException
 import java.io.File
 import kotlin.io.resolve
 import kotlin.io.readText as _readText
@@ -78,10 +79,18 @@ internal actual val IsWindows: Boolean = System.getProperty("os.name")
     ?: (File.separatorChar == '\\')
 
 @Throws(IOException::class)
-internal actual inline fun File.platformReadBytes(): ByteArray = _readBytes()
+internal actual inline fun File.platformReadBytes(): ByteArray = try {
+    _readBytes()
+} catch (e: OutOfMemoryError) {
+    throw e.wrapIOException()
+}
 
 @Throws(IOException::class)
-internal actual inline fun File.platformReadUtf8(): String = _readText()
+internal actual inline fun File.platformReadUtf8(): String = try {
+    _readText()
+} catch (e: OutOfMemoryError) {
+    throw e.wrapIOException()
+}
 
 internal actual inline fun File.platformResolve(relative: File): File = _resolve(relative)
 

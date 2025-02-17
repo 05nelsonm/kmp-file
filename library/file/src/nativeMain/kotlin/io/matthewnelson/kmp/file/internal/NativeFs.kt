@@ -17,9 +17,11 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.IOException
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.MemScope
 import platform.posix.ENOENT
 import platform.posix.FILE
 import platform.posix.access
@@ -39,6 +41,12 @@ internal actual fun fs_mkdir(path: Path): Boolean {
 }
 
 internal expect fun fs_platform_mkdir(path: Path): Int
+
+@ExperimentalForeignApi
+@Throws(IOException::class)
+internal expect inline fun MemScope.fs_platform_file_size(
+    path: Path,
+): Long
 
 @ExperimentalForeignApi
 internal expect inline fun fs_platform_fread(

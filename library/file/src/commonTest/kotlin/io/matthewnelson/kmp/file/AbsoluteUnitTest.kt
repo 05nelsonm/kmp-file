@@ -58,7 +58,7 @@ class AbsoluteUnitTest {
         // Do not run in simulators. The CWD will
         // register as whatever the simulators environment
         // is using, not that of the host machine.
-        if (isSimulator) return
+        if (IS_SIMULATOR) return
 
         val projectRoot = projectRootDir()
 
