@@ -80,7 +80,7 @@ public inline val File.parentPath: String? get() = getParent()
 public inline val File.parentFile: File? get() = getParentFile()
 
 /**
- * The abstract path to a directory or file
+ * The abstract path to a directory or file.
  * */
 @get:JvmName("pathOf")
 public inline val File.path: String get() = getPath()
@@ -99,7 +99,7 @@ public inline val File.path: String get() = getPath()
 public inline val File.absolutePath: String get() = getAbsolutePath()
 
 /**
- * [absolutePath] but returns a file
+ * [absolutePath] but returns a file.
  * */
 @get:JvmName("absoluteFileOf")
 public inline val File.absoluteFile: File get() = getAbsoluteFile()
@@ -112,8 +112,8 @@ public inline val File.absoluteFile: File get() = getAbsoluteFile()
  *
  * This method first converts this pathname to absolute form if
  * necessary and then maps it to its unique form in a system-dependent
- * way. This typically involves removing redundant names such as "."
- * and ".." from the pathname, resolving symbolic links (on Unix
+ * way. This typically involves removing redundant names such as `.`
+ * and `..` from the pathname, resolving symbolic links (on Unix
  * platforms), and converting drive letters to a standard case
  * (on Windows platforms).
  * */
@@ -122,7 +122,7 @@ public inline val File.absoluteFile: File get() = getAbsoluteFile()
 public inline fun File.canonicalPath(): String = getCanonicalPath()
 
 /**
- * [canonicalPath] but returns a file
+ * [canonicalPath] but returns a file.
  * */
 @Throws(IOException::class)
 @JvmName("canonicalFileOf")
@@ -142,7 +142,8 @@ public fun File.normalize(): File {
 /**
  * Read the full contents of the file (as bytes).
  *
- * Should only be utilized for smallish files.
+ * **NOTE:** This function is not recommended for large files. There
+ * is an internal limitation of 2GB file size.
  * */
 @Throws(IOException::class)
 @JvmName("readBytesFrom")
@@ -151,21 +152,22 @@ public fun File.readBytes(): ByteArray = platformReadBytes()
 /**
  * Read the full contents of the file (as UTF-8 text).
  *
- * Should only be utilized for smallish files.
+ * **NOTE:** This function is not recommended for large files. There
+ * is an internal limitation of 2GB file size.
  * */
 @Throws(IOException::class)
 @JvmName("readUtf8From")
 public fun File.readUtf8(): String = platformReadUtf8()
 
 /**
- * Writes the full contents of [array] to the file
+ * Writes the full contents of [array] to the file.
  * */
 @Throws(IOException::class)
 @JvmName("writeBytesTo")
 public fun File.writeBytes(array: ByteArray) { platformWriteBytes(array) }
 
 /**
- * Writes the full contents of [text] to the file (as UTF-8)
+ * Writes the full contents of [text] to the file (as UTF-8).
  * */
 @Throws(IOException::class)
 @JvmName("writeUtf8To")
