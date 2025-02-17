@@ -19,48 +19,54 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.*
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.memScoped
 import platform.posix.errno
 
 @Throws(IOException::class)
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-internal actual inline fun File.platformReadBytes(): ByteArray = fOpen(flags = "rb") { file ->
-    val bytes = ArrayDeque<ByteArray>(4)
-    val buf = ByteArray(8192)
+internal actual inline fun File.platformReadBytes(): ByteArray {
+    val fileSize = memScoped { fs_platform_file_size(path) }
 
-    var size = 0L
-    while (true) {
-        val read = file.fRead(buf)
-
-        if (read < 0) throw errnoToIOException(errno)
-        if (read == 0) break
-        size += read
-        if (size >= Int.MAX_VALUE.toLong()) {
-            throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
-        }
-        bytes.add(buf.copyOf(read))
+    if (fileSize > Int.MAX_VALUE.toLong()) {
+        throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
     }
 
-    buf.fill(0)
+    val buf = ByteArray(8192)
+    val chunks = ArrayDeque<ByteArray>((fileSize.toInt() / buf.size).coerceAtLeast(1))
+    var size = 0
 
-    if (bytes.isEmpty()) return@fOpen ByteArray(0)
-    if (bytes.size == 1) return@fOpen bytes.removeFirst()
+    fOpen(flags = "rb") { file ->
+        while (true) {
+            val read = file.fRead(buf)
 
-    // would have already thrown exception, so we know it does not exceed Int.MAX_VALUE
-    val final = ByteArray(size.toInt())
+            if (read < 0) throw errnoToIOException(errno)
+            if (read == 0) break
+            size += read
+            if (size < 0) {
+                // size rolled over and went negative.
+                throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
+            }
+            chunks.add(buf.copyOf(read))
+        }
+    }
+
+    if (chunks.isEmpty()) return ByteArray(0)
+    if (chunks.size == 1) return chunks.removeFirst()
+
+    val result = ByteArray(size)
 
     var offset = 0
-    while (bytes.isNotEmpty()) {
-        val b = bytes.removeFirst()
-        b.copyInto(final, offset)
-        offset += b.size
-        b.fill(0)
+    while (chunks.isNotEmpty()) {
+        val chunk = chunks.removeFirst()
+        chunk.copyInto(result, offset)
+        offset += chunk.size
     }
 
-    final
+    return result
 }
 
 @Throws(IOException::class)
-internal actual inline fun File.platformReadUtf8(): String = readBytes().decodeToString()
+internal actual inline fun File.platformReadUtf8(): String = platformReadBytes().decodeToString()
 
 @Throws(IOException::class)
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
@@ -78,4 +84,12 @@ internal actual inline fun File.platformWriteBytes(array: ByteArray) {
 }
 
 @Throws(IOException::class)
-internal actual inline fun File.platformWriteUtf8(text: String) { writeBytes(text.encodeToByteArray()) }
+internal actual inline fun File.platformWriteUtf8(text: String) {
+    val encoded = try {
+        text.encodeToByteArray()
+    } catch (t: Throwable) {
+        throw t.wrapIOException()
+    }
+
+    platformWriteBytes(encoded)
+}
