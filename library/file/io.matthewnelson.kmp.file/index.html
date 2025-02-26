@@ -25,44 +25,104 @@
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
 <link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
 <script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script>
 <script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
     <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
+    <nav class="navigation theme-dark" id="navigation-wrapper">
 <a class="library-name--link" href="../../../index.html">
-                            kmp-file
-                    </a>            </div>
-            <div class="library-version">0.1.1
+                    kmp-file
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">0.2.0
+        </div>
+        <div class="navigation-controls">
+        <div class="filter-section filter-section_loading" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/commonMain">common</button>
+                <button class="platform-tag platform-selector js-like" data-active="" data-filter=":library:file/jsMain">js</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:file/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/nativeMain">native</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/nonJvmMain">nonJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
+                    <div class="dropdown--header"><span>Platform filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close platform filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/commonMain" data-filter=":library:file/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option js-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/jsMain" data-filter=":library:file/jsMain">
+                                <span class="checkbox--icon"></span>
+                                js
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/jvmMain" data-filter=":library:file/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/nativeMain" data-filter=":library:file/nativeMain">
+                                <span class="checkbox--icon"></span>
+                                native
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/nonJvmMain" data-filter=":library:file/nonJvmMain">
+                                <span class="checkbox--icon"></span>
+                                nonJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
         </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file:dokkaHtmlPartial/commonMain">common</button>
-                <button class="platform-tag platform-selector js-like" data-active="" data-filter=":library:file:dokkaHtmlPartial/jsMain">js</button>
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:file:dokkaHtmlPartial/jvmMain">jvm</button>
-                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file:dokkaHtmlPartial/nativeMain">native</button>
-                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file:dokkaHtmlPartial/nonJvmMain">nonJvm</button>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
         </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
+    </nav>
         <div id="container">
             <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+                <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                    <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox">
+                        <div class="dropdown--header">
+                            <span>
+                                    kmp-file
+                            </span>
+                            <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                                <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                            </button>
+                        </div>
+                        <div class="sidebar--inner" id="sideMenu"></div>
+                    </ul>
+                    <div class="dropdown--overlay"></div>
+                </div>
             </div>
             <div id="main">
-<div class="main-content" data-page-type="package" id="content" pageids="file::io.matthewnelson.kmp.file////PointingToDeclaration//1473672352">
+<div class="main-content" data-page-type="package" id="content" pageids="file::io.matthewnelson.kmp.file////PointingToDeclaration//-242802">
   <div class="breadcrumbs"><a href="../index.html">file</a><span class="delimiter">/</span><span class="current">io.matthewnelson.kmp.file</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -72,155 +132,155 @@
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
         <h2 class="">Types</h2>
-        <div class="table"><a data-name="-2136915902%2FClasslikes%2F-532025314" anchor-label="ANDROID" id="-2136915902%2FClasslikes%2F-532025314" data-filterable-set=":library:file:dokkaHtmlPartial/jvmMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/jvmMain">
+        <div class="table"><a data-name="-2136915902%2FClasslikes%2F590721040" anchor-label="ANDROID" id="-2136915902%2FClasslikes%2F590721040" data-filterable-set=":library:file/jvmMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-a-n-d-r-o-i-d/index.html"><span><span>ANDROID</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2136915902%2FClasslikes%2F-532025314"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2136915902%2FClasslikes%2F590721040"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/jvmMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/jvmMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-a-n-d-r-o-i-d/index.html">ANDROID</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain" data-active="" data-toggle=":library:file/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jvmMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-a-n-d-r-o-i-d/index.html">ANDROID</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1353616465%2FClasslikes%2F667386746" anchor-label="Buffer" id="1353616465%2FClasslikes%2F667386746" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain">
+<a data-name="1353616465%2FClasslikes%2F1272649928" anchor-label="Buffer" id="1353616465%2FClasslikes%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-buffer/index.html"><span><span>Buffer</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1353616465%2FClasslikes%2F667386746"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1353616465%2FClasslikes%2F1272649928"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">value </span><span class="token keyword">class </span><a href="-buffer/index.html">Buffer</a></div><div class="brief "><p class="paragraph">If printing to console, use <a href="-buffer/unwrap.html">unwrap</a> beforehand, otherwise will not print the contents of <span data-unresolved-link="io.matthewnelson.kmp.file.internal/buffer_Buffer///PointingToDeclaration/">buffer_Buffer</span>.</p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">value </span><span class="token keyword">class </span><a href="-buffer/index.html">Buffer</a></div><div class="brief "><p class="paragraph">If printing to console, use <a href="-buffer/unwrap.html">unwrap</a> beforehand, otherwise will not print the contents of <span data-unresolved-link="io.matthewnelson.kmp.file.internal/buffer_Buffer///PointingToDeclaration/">buffer_Buffer</span>.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="337242304%2FClasslikes%2F-588274376" anchor-label="DelicateFileApi" id="337242304%2FClasslikes%2F-588274376" data-filterable-set=":library:file:dokkaHtmlPartial/nonJvmMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/nonJvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/nonJvmMain">
+<a data-name="337242304%2FClasslikes%2F1798813062" anchor-label="DelicateFileApi" id="337242304%2FClasslikes%2F1798813062" data-filterable-set=":library:file/nonJvmMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-delicate-file-api/index.html"><span>Delicate</span><wbr><span>File</span><wbr><span><span>Api</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="337242304%2FClasslikes%2F-588274376"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="337242304%2FClasslikes%2F1798813062"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nonJvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/nonJvmMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/nonJvmMain">nonJvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/nonJvmMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.annotation/Target///PointingToDeclaration/"><span class="token annotation builtin">Target</span></span><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.CLASS///PointingToDeclaration/">AnnotationTarget.CLASS</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.ANNOTATION_CLASS///PointingToDeclaration/">AnnotationTarget.ANNOTATION_CLASS</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.PROPERTY///PointingToDeclaration/">AnnotationTarget.PROPERTY</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.FIELD///PointingToDeclaration/">AnnotationTarget.FIELD</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.LOCAL_VARIABLE///PointingToDeclaration/">AnnotationTarget.LOCAL_VARIABLE</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.VALUE_PARAMETER///PointingToDeclaration/">AnnotationTarget.VALUE_PARAMETER</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.CONSTRUCTOR///PointingToDeclaration/">AnnotationTarget.CONSTRUCTOR</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.FUNCTION///PointingToDeclaration/">AnnotationTarget.FUNCTION</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.PROPERTY_GETTER///PointingToDeclaration/">AnnotationTarget.PROPERTY_GETTER</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.PROPERTY_SETTER///PointingToDeclaration/">AnnotationTarget.PROPERTY_SETTER</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.TYPEALIAS///PointingToDeclaration/">AnnotationTarget.TYPEALIAS</span></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">annotation class </span><a href="-delicate-file-api/index.html">DelicateFileApi</a></div><div class="brief "><p class="paragraph">Denotes an api as being delicate. Probably shouldn't use it.</p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-active="" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.annotation/Target///PointingToDeclaration/"><span class="token annotation builtin">Target</span></span><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.CLASS///PointingToDeclaration/">AnnotationTarget.CLASS</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.ANNOTATION_CLASS///PointingToDeclaration/">AnnotationTarget.ANNOTATION_CLASS</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.PROPERTY///PointingToDeclaration/">AnnotationTarget.PROPERTY</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.FIELD///PointingToDeclaration/">AnnotationTarget.FIELD</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.LOCAL_VARIABLE///PointingToDeclaration/">AnnotationTarget.LOCAL_VARIABLE</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.VALUE_PARAMETER///PointingToDeclaration/">AnnotationTarget.VALUE_PARAMETER</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.CONSTRUCTOR///PointingToDeclaration/">AnnotationTarget.CONSTRUCTOR</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.FUNCTION///PointingToDeclaration/">AnnotationTarget.FUNCTION</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.PROPERTY_GETTER///PointingToDeclaration/">AnnotationTarget.PROPERTY_GETTER</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.PROPERTY_SETTER///PointingToDeclaration/">AnnotationTarget.PROPERTY_SETTER</span><span class="token punctuation">, </span></span><wbr><span><span data-unresolved-link="kotlin.annotation/AnnotationTarget.TYPEALIAS///PointingToDeclaration/">AnnotationTarget.TYPEALIAS</span></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">annotation class </span><a href="-delicate-file-api/index.html">DelicateFileApi</a></div><div class="brief "><p class="paragraph">Denotes an api as being delicate. Probably shouldn't use it.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1553782466%2FClasslikes%2F-454389222" anchor-label="EOFException" id="-1553782466%2FClasslikes%2F-454389222" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain">
+<a data-name="-1553782466%2FClasslikes%2F1005533232" anchor-label="EOFException" id="-1553782466%2FClasslikes%2F1005533232" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-e-o-f-exception/index.html"><span><span>EOFException</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1553782466%2FClasslikes%2F-454389222"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1553782466%2FClasslikes%2F1005533232"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/jvmMain" data-toggle=":library:file:dokkaHtmlPartial/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nonJvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/nonJvmMain" data-toggle=":library:file:dokkaHtmlPartial/nonJvmMain">nonJvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-e-o-f-exception/index.html">EOFException</a> : <a href="-i-o-exception/index.html">IOException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-e-o-f-exception/index.html">EOFException</a><span class="token operator"> = </span><a href="https://docs.oracle.com/javase/8/docs/api/java/io/EOFException.html">java.io.EOFException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-e-o-f-exception/index.html">EOFException</a> : <a href="-i-o-exception/index.html">IOException</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain" data-toggle=":library:file/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-e-o-f-exception/index.html">EOFException</a> : <a href="-i-o-exception/index.html">IOException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-e-o-f-exception/index.html">EOFException</a><span class="token operator"> = </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/EOFException.html">java.io.EOFException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-e-o-f-exception/index.html">EOFException</a> : <a href="-i-o-exception/index.html">IOException</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1548082837%2FClasslikes%2F-454389222" anchor-label="File" id="1548082837%2FClasslikes%2F-454389222" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain">
+<a data-name="1548082837%2FClasslikes%2F1005533232" anchor-label="File" id="1548082837%2FClasslikes%2F1005533232" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-file/index.html"><span><span>File</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1548082837%2FClasslikes%2F-454389222"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1548082837%2FClasslikes%2F1005533232"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/jvmMain" data-toggle=":library:file:dokkaHtmlPartial/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nonJvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/nonJvmMain" data-toggle=":library:file:dokkaHtmlPartial/nonJvmMain">nonJvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">class </span><a href="-file/index.html">File</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pathname<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span> : <span data-unresolved-link="kotlin/Comparable///PointingToDeclaration/">Comparable</span><span class="token operator">&lt;</span><a href="-file/index.html">File</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A File</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-file/index.html">File</a><span class="token operator"> = </span><a href="https://docs.oracle.com/javase/8/docs/api/java/io/File.html">java.io.File</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">class </span><a href="-file/index.html">File</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pathname<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span> : <span data-unresolved-link="kotlin/Comparable///PointingToDeclaration/">Comparable</span><span class="token operator">&lt;</span><a href="-file/index.html">File</a><span class="token operator">&gt; </span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain" data-toggle=":library:file/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">class </span><a href="-file/index.html">File</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pathname<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span> : <span data-unresolved-link="kotlin/Comparable///PointingToDeclaration/">Comparable</span><span class="token operator">&lt;</span><a href="-file/index.html">File</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A File</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-file/index.html">File</a><span class="token operator"> = </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/File.html">java.io.File</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">class </span><a href="-file/index.html">File</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pathname<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span> : <span data-unresolved-link="kotlin/Comparable///PointingToDeclaration/">Comparable</span><span class="token operator">&lt;</span><a href="-file/index.html">File</a><span class="token operator">&gt; </span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1162428979%2FClasslikes%2F-454389222" anchor-label="FileNotFoundException" id="-1162428979%2FClasslikes%2F-454389222" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain">
+<a data-name="-1162428979%2FClasslikes%2F1005533232" anchor-label="FileNotFoundException" id="-1162428979%2FClasslikes%2F1005533232" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-file-not-found-exception/index.html"><span>File</span><wbr><span>Not</span><wbr><span>Found</span><wbr><span><span>Exception</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1162428979%2FClasslikes%2F-454389222"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1162428979%2FClasslikes%2F1005533232"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/jvmMain" data-toggle=":library:file:dokkaHtmlPartial/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nonJvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/nonJvmMain" data-toggle=":library:file:dokkaHtmlPartial/nonJvmMain">nonJvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-file-not-found-exception/index.html">FileNotFoundException</a> : <a href="-i-o-exception/index.html">IOException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-file-not-found-exception/index.html">FileNotFoundException</a><span class="token operator"> = </span><a href="https://docs.oracle.com/javase/8/docs/api/java/io/FileNotFoundException.html">java.io.FileNotFoundException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-file-not-found-exception/index.html">FileNotFoundException</a> : <a href="-i-o-exception/index.html">IOException</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain" data-toggle=":library:file/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-file-not-found-exception/index.html">FileNotFoundException</a> : <a href="-i-o-exception/index.html">IOException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-file-not-found-exception/index.html">FileNotFoundException</a><span class="token operator"> = </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/FileNotFoundException.html">java.io.FileNotFoundException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-file-not-found-exception/index.html">FileNotFoundException</a> : <a href="-i-o-exception/index.html">IOException</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1832165636%2FClasslikes%2F-454389222" anchor-label="InterruptedException" id="1832165636%2FClasslikes%2F-454389222" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain">
+<a data-name="1832165636%2FClasslikes%2F1005533232" anchor-label="InterruptedException" id="1832165636%2FClasslikes%2F1005533232" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-interrupted-exception/index.html"><span>Interrupted</span><wbr><span><span>Exception</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1832165636%2FClasslikes%2F-454389222"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1832165636%2FClasslikes%2F1005533232"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/jvmMain" data-toggle=":library:file:dokkaHtmlPartial/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nonJvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/nonJvmMain" data-toggle=":library:file:dokkaHtmlPartial/nonJvmMain">nonJvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-interrupted-exception/index.html">InterruptedException</a> : <span data-unresolved-link="kotlin/Exception///PointingToDeclaration/">Exception</span></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-interrupted-exception/index.html">InterruptedException</a><span class="token operator"> = </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/InterruptedException.html">java.lang.InterruptedException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-interrupted-exception/index.html">InterruptedException</a> : <span data-unresolved-link="kotlin/Exception///PointingToDeclaration/">Exception</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain" data-toggle=":library:file/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-interrupted-exception/index.html">InterruptedException</a> : <span data-unresolved-link="kotlin/Exception///PointingToDeclaration/">Exception</span></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-interrupted-exception/index.html">InterruptedException</a><span class="token operator"> = </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/InterruptedException.html">java.lang.InterruptedException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-interrupted-exception/index.html">InterruptedException</a> : <span data-unresolved-link="kotlin/Exception///PointingToDeclaration/">Exception</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="979627528%2FClasslikes%2F-454389222" anchor-label="IOException" id="979627528%2FClasslikes%2F-454389222" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain,:library:file:dokkaHtmlPartial/nonJvmMain,:library:file:dokkaHtmlPartial/jvmMain">
+<a data-name="979627528%2FClasslikes%2F1005533232" anchor-label="IOException" id="979627528%2FClasslikes%2F1005533232" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain,:library:file/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-i-o-exception/index.html"><span><span>IOException</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="979627528%2FClasslikes%2F-454389222"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="979627528%2FClasslikes%2F1005533232"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/jvmMain" data-toggle=":library:file:dokkaHtmlPartial/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nonJvmMain" data-filterable-set=":library:file:dokkaHtmlPartial/nonJvmMain" data-toggle=":library:file:dokkaHtmlPartial/nonJvmMain">nonJvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-i-o-exception/index.html">IOException</a> : <span data-unresolved-link="kotlin/Exception///PointingToDeclaration/">Exception</span></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-i-o-exception/index.html">IOException</a><span class="token operator"> = </span><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html">java.io.IOException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file:dokkaHtmlPartial/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-i-o-exception/index.html">IOException</a> : <span data-unresolved-link="kotlin/Exception///PointingToDeclaration/">Exception</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain" data-toggle=":library:file/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-i-o-exception/index.html">IOException</a> : <span data-unresolved-link="kotlin/Exception///PointingToDeclaration/">Exception</span></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-i-o-exception/index.html">IOException</a><span class="token operator"> = </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/IOException.html">java.io.IOException</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-i-o-exception/index.html">IOException</a> : <span data-unresolved-link="kotlin/Exception///PointingToDeclaration/">Exception</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-107453422%2FClasslikes%2F667386746" anchor-label="Stats" id="-107453422%2FClasslikes%2F667386746" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain">
+<a data-name="-107453422%2FClasslikes%2F1272649928" anchor-label="Stats" id="-107453422%2FClasslikes%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-stats/index.html"><span><span>Stats</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-107453422%2FClasslikes%2F667386746"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-107453422%2FClasslikes%2F1272649928"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">value </span><span class="token keyword">class </span><a href="-stats/index.html">Stats</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">value </span><span class="token keyword">class </span><a href="-stats/index.html">Stats</a></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -229,139 +289,139 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="">Properties</h2>
-        <div class="table"><a data-name="-987050986%2FProperties%2F410236888" anchor-label="absoluteFile" id="-987050986%2FProperties%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+        <div class="table"><a data-name="-987050986%2FProperties%2F-1497642970" anchor-label="absoluteFile" id="-987050986%2FProperties%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="absolute-file.html"><span>absolute</span><wbr><span><span>File</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-987050986%2FProperties%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-987050986%2FProperties%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"absoluteFileOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="absolute-file.html">absoluteFile</a><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph"><a href="absolute-path.html">absolutePath</a> but returns a file</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"absoluteFileOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="absolute-file.html">absoluteFile</a><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph"><a href="absolute-path.html">absolutePath</a> but returns a file.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="891245389%2FProperties%2F410236888" anchor-label="absolutePath" id="891245389%2FProperties%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="891245389%2FProperties%2F-1497642970" anchor-label="absolutePath" id="891245389%2FProperties%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="absolute-path.html"><span>absolute</span><wbr><span><span>Path</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="891245389%2FProperties%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="891245389%2FProperties%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"absolutePathOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="absolute-path.html">absolutePath</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">Returns the absolute pathname string of this abstract pathname.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"absolutePathOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="absolute-path.html">absolutePath</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">Returns the absolute pathname string of this abstract pathname.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-975344832%2FProperties%2F667386746" anchor-label="errorCodeOrNull" id="-975344832%2FProperties%2F667386746" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain">
+<a data-name="-975344832%2FProperties%2F1272649928" anchor-label="errorCodeOrNull" id="-975344832%2FProperties%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="error-code-or-null.html"><span>error</span><wbr><span>Code</span><wbr><span>Or</span><wbr><span><span>Null</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-975344832%2FProperties%2F667386746"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-975344832%2FProperties%2F1272649928"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">val </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="error-code-or-null.html">errorCodeOrNull</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">val </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="error-code-or-null.html">errorCodeOrNull</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="350633758%2FProperties%2F410236888" anchor-label="name" id="350633758%2FProperties%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="350633758%2FProperties%2F-1497642970" anchor-label="name" id="350633758%2FProperties%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="name.html"><span><span>name</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="350633758%2FProperties%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="350633758%2FProperties%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"nameOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="name.html">name</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">The name of the file or directory. The last segment of the <a href="path.html">path</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"nameOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="name.html">name</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">The name of the file or directory. The last segment of the <a href="path.html">path</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-862618301%2FProperties%2F410236888" anchor-label="parentFile" id="-862618301%2FProperties%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="-862618301%2FProperties%2F-1497642970" anchor-label="parentFile" id="-862618301%2FProperties%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="parent-file.html"><span>parent</span><wbr><span><span>File</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-862618301%2FProperties%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-862618301%2FProperties%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"parentFileOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="parent-file.html">parentFile</a><span class="token operator">: </span><a href="-file/index.html">File</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The <a href="path.html">path</a> parent. If no parent is available, null is returned.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"parentFileOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="parent-file.html">parentFile</a><span class="token operator">: </span><a href="-file/index.html">File</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The <a href="path.html">path</a> parent. If no parent is available, null is returned.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1015678074%2FProperties%2F410236888" anchor-label="parentPath" id="1015678074%2FProperties%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="1015678074%2FProperties%2F-1497642970" anchor-label="parentPath" id="1015678074%2FProperties%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="parent-path.html"><span>parent</span><wbr><span><span>Path</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1015678074%2FProperties%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1015678074%2FProperties%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"parentPathOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="parent-path.html">parentPath</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The <a href="path.html">path</a> parent. If no parent is available, null is returned.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"parentPathOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="parent-path.html">parentPath</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The <a href="path.html">path</a> parent. If no parent is available, null is returned.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1090588740%2FProperties%2F410236888" anchor-label="path" id="1090588740%2FProperties%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="1090588740%2FProperties%2F-1497642970" anchor-label="path" id="1090588740%2FProperties%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="path.html"><span><span>path</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1090588740%2FProperties%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1090588740%2FProperties%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"pathOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="path.html">path</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">The abstract path to a directory or file</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"pathOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="path.html">path</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">The abstract path to a directory or file.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="668007118%2FProperties%2F410236888" anchor-label="SysDirSep" id="668007118%2FProperties%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="668007118%2FProperties%2F-1497642970" anchor-label="SysDirSep" id="668007118%2FProperties%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-sys-dir-sep.html"><span>Sys</span><wbr><span>Dir</span><wbr><span><span>Sep</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="668007118%2FProperties%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="668007118%2FProperties%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmField///PointingToDeclaration/"><span class="token annotation builtin">JvmField</span></span></div></div><span class="token keyword">val </span><a href="-sys-dir-sep.html">SysDirSep</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Char///PointingToDeclaration/">Char</span></div><div class="brief "><p class="paragraph">The operating system's directory separator character.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmField///PointingToDeclaration/"><span class="token annotation builtin">JvmField</span></span></div></div><span class="token keyword">val </span><a href="-sys-dir-sep.html">SysDirSep</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Char///PointingToDeclaration/">Char</span></div><div class="brief "><p class="paragraph">The operating system's directory separator character.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1807036290%2FProperties%2F410236888" anchor-label="SysTempDir" id="1807036290%2FProperties%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="1807036290%2FProperties%2F-1497642970" anchor-label="SysTempDir" id="1807036290%2FProperties%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-sys-temp-dir.html"><span>Sys</span><wbr><span>Temp</span><wbr><span><span>Dir</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1807036290%2FProperties%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1807036290%2FProperties%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmField///PointingToDeclaration/"><span class="token annotation builtin">JvmField</span></span></div></div><span class="token keyword">val </span><a href="-sys-temp-dir.html">SysTempDir</a><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph">The system's temporary directory</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmField///PointingToDeclaration/"><span class="token annotation builtin">JvmField</span></span></div></div><span class="token keyword">val </span><a href="-sys-temp-dir.html">SysTempDir</a><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph">The system's temporary directory</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -370,305 +430,305 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="">Functions</h2>
-        <div class="table"><a data-name="532073143%2FFunctions%2F410236888" anchor-label="canonicalFile" id="532073143%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+        <div class="table"><a data-name="532073143%2FFunctions%2F-1497642970" anchor-label="canonicalFile" id="532073143%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="canonical-file.html"><span>canonical</span><wbr><span><span>File</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="532073143%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="532073143%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"canonicalFileOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="canonical-file.html"><span class="token function">canonicalFile</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph"><a href="canonical-path.html">canonicalPath</a> but returns a file</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"canonicalFileOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">inline </span><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="canonical-file.html"><span class="token function">canonicalFile</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph"><a href="canonical-path.html">canonicalPath</a> but returns a file.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1884597778%2FFunctions%2F410236888" anchor-label="canonicalPath" id="-1884597778%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="-1884597778%2FFunctions%2F-1497642970" anchor-label="canonicalPath" id="-1884597778%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="canonical-path.html"><span>canonical</span><wbr><span><span>Path</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1884597778%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1884597778%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"canonicalPathOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="canonical-path.html"><span class="token function">canonicalPath</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">Returns the canonical pathname string of this abstract pathname.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"canonicalPathOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">inline </span><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="canonical-path.html"><span class="token function">canonicalPath</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">Returns the canonical pathname string of this abstract pathname.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1602383012%2FFunctions%2F1959899224" anchor-label="errnoToIOException" id="1602383012%2FFunctions%2F1959899224" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain"></a>
-          <div class="table-row" data-filterable-current=":library:file:dokkaHtmlPartial/nativeMain" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain">
+<a data-name="1602383012%2FFunctions%2F52019366" anchor-label="errnoToIOException" id="1602383012%2FFunctions%2F52019366" data-filterable-set=":library:file/nativeMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="errno-to-i-o-exception.html"><span>errno</span><wbr><span>To</span><wbr><span><span>IOException</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1602383012%2FFunctions%2F1959899224"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1602383012%2FFunctions%2F52019366"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nativeMain" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/nativeMain">native</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="errno-to-i-o-exception.html"><span class="token function">errnoToIOException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">errno<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-i-o-exception/index.html">IOException</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain" data-active="" data-toggle=":library:file/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/nativeMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="errno-to-i-o-exception.html"><span class="token function">errnoToIOException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">errno<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-i-o-exception/index.html">IOException</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2038442113%2FFunctions%2F1959899224" anchor-label="fOpen" id="2038442113%2FFunctions%2F1959899224" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/nativeMain" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain">
+<a data-name="478081147%2FFunctions%2F52019366" anchor-label="fOpen" id="478081147%2FFunctions%2F52019366" data-filterable-set=":library:file/nativeMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="f-open.html"><span>f</span><wbr><span><span>Open</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2038442113%2FFunctions%2F1959899224"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="478081147%2FFunctions%2F52019366"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nativeMain" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/nativeMain">native</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="-delicate-file-api/index.html"><span class="token annotation builtin">DelicateFileApi</span></a></div></div><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="f-open.html">T</a><span class="token operator">&gt; </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="f-open.html"><span class="token function">fOpen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">flags<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span>file<span class="token operator">: </span><span data-unresolved-link="kotlinx.cinterop/CPointer///PointingToDeclaration/">CPointer</span><span class="token operator">&lt;</span><span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="f-open.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="f-open.html">T</a></div><div class="brief "><p class="paragraph">Opens the <a href="-file/index.html">File</a>, closing it automatically once <a href="f-open.html">block</a> completes.</p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain" data-active="" data-toggle=":library:file/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/nativeMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="-delicate-file-api/index.html"><span class="token annotation builtin">DelicateFileApi</span></a></div></div><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="f-open.html">T</a><span class="token operator">&gt; </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="f-open.html"><span class="token function">fOpen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">flags<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span>file<span class="token operator">: </span><span data-unresolved-link="kotlinx.cinterop/CPointer///PointingToDeclaration/">CPointer</span><span class="token operator">&lt;</span><span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="f-open.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="f-open.html">T</a></div><div class="brief "><p class="paragraph">Opens the <a href="-file/index.html">File</a>, closing it automatically once <a href="f-open.html">block</a> completes.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="971178833%2FFunctions%2F1959899224" anchor-label="fRead" id="971178833%2FFunctions%2F1959899224" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/nativeMain" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain">
+<a data-name="-118327221%2FFunctions%2F52019366" anchor-label="fRead" id="-118327221%2FFunctions%2F52019366" data-filterable-set=":library:file/nativeMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="f-read.html"><span>f</span><wbr><span><span>Read</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="971178833%2FFunctions%2F1959899224"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-118327221%2FFunctions%2F52019366"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nativeMain" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/nativeMain">native</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="-delicate-file-api/index.html"><span class="token annotation builtin">DelicateFileApi</span></a></div></div><span class="token keyword">fun </span><span data-unresolved-link="kotlinx.cinterop/CPointer///PointingToDeclaration/">CPointer</span><span class="token operator">&lt;</span><span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="f-read.html"><span class="token function">fRead</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="brief "><p class="paragraph">Reads the contents of <span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span> into provided ByteArray.</p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain" data-active="" data-toggle=":library:file/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/nativeMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="-delicate-file-api/index.html"><span class="token annotation builtin">DelicateFileApi</span></a></div></div><span class="token keyword">fun </span><span data-unresolved-link="kotlinx.cinterop/CPointer///PointingToDeclaration/">CPointer</span><span class="token operator">&lt;</span><span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="f-read.html"><span class="token function">fRead</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="brief "><p class="paragraph">Reads the contents of <span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span> into provided ByteArray.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="391338262%2FFunctions%2F1959899224" anchor-label="fWrite" id="391338262%2FFunctions%2F1959899224" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/nativeMain" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain">
+<a data-name="1529975056%2FFunctions%2F52019366" anchor-label="fWrite" id="1529975056%2FFunctions%2F52019366" data-filterable-set=":library:file/nativeMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="f-write.html"><span>f</span><wbr><span><span>Write</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="391338262%2FFunctions%2F1959899224"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1529975056%2FFunctions%2F52019366"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/nativeMain" data-filterable-set=":library:file:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/nativeMain">native</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="-delicate-file-api/index.html"><span class="token annotation builtin">DelicateFileApi</span></a></div></div><span class="token keyword">fun </span><span data-unresolved-link="kotlinx.cinterop/CPointer///PointingToDeclaration/">CPointer</span><span class="token operator">&lt;</span><span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="f-write.html"><span class="token function">fWrite</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token operator"> = </span>buf.size</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="brief "><p class="paragraph">Writes <a href="f-write.html">buf</a> to <span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span></p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain" data-active="" data-toggle=":library:file/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/nativeMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="-delicate-file-api/index.html"><span class="token annotation builtin">DelicateFileApi</span></a></div></div><span class="token keyword">fun </span><span data-unresolved-link="kotlinx.cinterop/CPointer///PointingToDeclaration/">CPointer</span><span class="token operator">&lt;</span><span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="f-write.html"><span class="token function">fWrite</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token operator"> = </span>buf.size</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="brief "><p class="paragraph">Writes <a href="f-write.html">buf</a> to <span data-unresolved-link="platform.posix/FILE///PointingToDeclaration/">FILE</span></p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="676460423%2FFunctions%2F667386746" anchor-label="lstat" id="676460423%2FFunctions%2F667386746" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain">
+<a data-name="676460423%2FFunctions%2F1272649928" anchor-label="lstat" id="676460423%2FFunctions%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="lstat.html"><span><span>lstat</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="676460423%2FFunctions%2F667386746"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="676460423%2FFunctions%2F1272649928"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="lstat.html"><span class="token function">lstat</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-stats/index.html">Stats</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="lstat.html"><span class="token function">lstat</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-stats/index.html">Stats</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-2004351206%2FFunctions%2F410236888" anchor-label="normalize" id="-2004351206%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="-2004351206%2FFunctions%2F-1497642970" anchor-label="normalize" id="-2004351206%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="normalize.html"><span><span>normalize</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2004351206%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2004351206%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"normalizedFileOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="normalize.html"><span class="token function">normalize</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph">Removes all <code class="lang-kotlin">.</code> and resolves all possible <code class="lang-kotlin">..</code> for the provided <a href="path.html">path</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"normalizedFileOf"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="normalize.html"><span class="token function">normalize</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph">Removes all <code class="lang-kotlin">.</code> and resolves all possible <code class="lang-kotlin">..</code> for the provided <a href="path.html">path</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-951382093%2FFunctions%2F667386746" anchor-label="read" id="-951382093%2FFunctions%2F667386746" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain">
+<a data-name="-951382093%2FFunctions%2F1272649928" anchor-label="read" id="-951382093%2FFunctions%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="read.html"><span><span>read</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-951382093%2FFunctions%2F667386746"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-951382093%2FFunctions%2F1272649928"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="read.html"><span class="token function">read</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-buffer/index.html">Buffer</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="read.html"><span class="token function">read</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-buffer/index.html">Buffer</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1057854286%2FFunctions%2F410236888" anchor-label="readBytes" id="-1057854286%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="-1057854286%2FFunctions%2F-1497642970" anchor-label="readBytes" id="-1057854286%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="read-bytes.html"><span>read</span><wbr><span><span>Bytes</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1057854286%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1057854286%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"readBytesFrom"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="read-bytes.html"><span class="token function">readBytes</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></div><div class="brief "><p class="paragraph">Read the full contents of the file (as bytes).</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"readBytesFrom"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="read-bytes.html"><span class="token function">readBytes</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></div><div class="brief "><p class="paragraph">Read the full contents of the file (as bytes).</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1847326594%2FFunctions%2F410236888" anchor-label="readUtf8" id="1847326594%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="1847326594%2FFunctions%2F-1497642970" anchor-label="readUtf8" id="1847326594%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="read-utf8.html"><span>read</span><wbr><span><span>Utf8</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1847326594%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1847326594%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"readUtf8From"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="read-utf8.html"><span class="token function">readUtf8</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">Read the full contents of the file (as UTF-8 text).</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"readUtf8From"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="read-utf8.html"><span class="token function">readUtf8</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">Read the full contents of the file (as UTF-8 text).</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1430675421%2FFunctions%2F410236888" anchor-label="resolve" id="1430675421%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="1430675421%2FFunctions%2F-1497642970" anchor-label="resolve" id="1430675421%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="resolve.html"><span><span>resolve</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1430675421%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1430675421%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="resolve.html"><span class="token function">resolve</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">relative<span class="token operator">: </span><a href="-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph">Resolves the <a href="-file/index.html">File</a> for provided <a href="resolve.html">relative</a>. If <a href="resolve.html">relative</a> is absolute, returns <a href="resolve.html">relative</a>, otherwise will concatenate the <a href="path.html">File.path</a>s.</p></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="resolve.html"><span class="token function">resolve</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">relative<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="resolve.html"><span class="token function">resolve</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">relative<span class="token operator">: </span><a href="-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div><div class="brief "><p class="paragraph">Resolves the <a href="-file/index.html">File</a> for provided <a href="resolve.html">relative</a>. If <a href="resolve.html">relative</a> is absolute, returns <a href="resolve.html">relative</a>, otherwise will concatenate the <a href="path.html">File.path</a>s.</p></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="resolve.html"><span class="token function">resolve</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">relative<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="759850293%2FFunctions%2F667386746" anchor-label="stat" id="759850293%2FFunctions%2F667386746" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain">
+<a data-name="759850293%2FFunctions%2F1272649928" anchor-label="stat" id="759850293%2FFunctions%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="stat.html"><span><span>stat</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="759850293%2FFunctions%2F667386746"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="759850293%2FFunctions%2F1272649928"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="stat.html"><span class="token function">stat</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-stats/index.html">Stats</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="stat.html"><span class="token function">stat</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-stats/index.html">Stats</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1648772867%2FFunctions%2F410236888" anchor-label="toFile" id="1648772867%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="1648772867%2FFunctions%2F-1497642970" anchor-label="toFile" id="1648772867%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="to-file.html"><span>to</span><wbr><span><span>File</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1648772867%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1648772867%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"get"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token punctuation">.</span><a href="to-file.html"><span class="token function">toFile</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"get"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">inline </span><span class="token keyword">fun </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token punctuation">.</span><a href="to-file.html"><span class="token function">toFile</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-file/index.html">File</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1664130575%2FFunctions%2F667386746" anchor-label="toIOException" id="-1664130575%2FFunctions%2F667386746" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain">
+<a data-name="-1664130575%2FFunctions%2F1272649928" anchor-label="toIOException" id="-1664130575%2FFunctions%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="to-i-o-exception.html"><span>to</span><wbr><span><span>IOException</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1664130575%2FFunctions%2F667386746"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1664130575%2FFunctions%2F1272649928"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="to-i-o-exception.html"><span class="token function">toIOException</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-i-o-exception/index.html">IOException</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="to-i-o-exception.html"><span class="token function">toIOException</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-i-o-exception/index.html">IOException</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-465098681%2FFunctions%2F410236888" anchor-label="wrapIOException" id="-465098681%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="-465098681%2FFunctions%2F-1497642970" anchor-label="wrapIOException" id="-465098681%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="wrap-i-o-exception.html"><span>wrap</span><wbr><span><span>IOException</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-465098681%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-465098681%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"wrapIO"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="wrap-i-o-exception.html"><span class="token function">wrapIOException</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-i-o-exception/index.html">IOException</a></div><div class="brief "><p class="paragraph">Ensures that the throwable is an instance of <a href="-i-o-exception/index.html">IOException</a>. If it is not, it will encase it in one.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"wrapIO"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="wrap-i-o-exception.html"><span class="token function">wrapIOException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lazyMessage<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-i-o-exception/index.html">IOException</a></div><div class="brief "><p class="paragraph">Ensures that the throwable is an instance of <a href="-i-o-exception/index.html">IOException</a>. If it is not, it will encase it in one with the provided <a href="wrap-i-o-exception.html">lazyMessage</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"wrapIO"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">inline </span><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="wrap-i-o-exception.html"><span class="token function">wrapIOException</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-i-o-exception/index.html">IOException</a></div><div class="brief "><p class="paragraph">Ensures that the throwable is an instance of <a href="-i-o-exception/index.html">IOException</a>. If it is not, it will encase it in one.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"wrapIO"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">inline </span><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="wrap-i-o-exception.html"><span class="token function">wrapIOException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lazyMessage<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-i-o-exception/index.html">IOException</a></div><div class="brief "><p class="paragraph">Ensures that the throwable is an instance of <a href="-i-o-exception/index.html">IOException</a>. If it is not, it will encase it in one with the provided <a href="wrap-i-o-exception.html">lazyMessage</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2136387593%2FFunctions%2F667386746" anchor-label="write" id="2136387593%2FFunctions%2F667386746" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain">
+<a data-name="2136387593%2FFunctions%2F1272649928" anchor-label="write" id="2136387593%2FFunctions%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="write.html"><span><span>write</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2136387593%2FFunctions%2F667386746"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2136387593%2FFunctions%2F1272649928"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file:dokkaHtmlPartial/jsMain" data-filterable-set=":library:file:dokkaHtmlPartial/jsMain" data-active="" data-toggle=":library:file:dokkaHtmlPartial/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="write.html"><span class="token function">write</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="-buffer/index.html">Buffer</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="write.html"><span class="token function">write</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="-buffer/index.html">Buffer</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1321799143%2FFunctions%2F410236888" anchor-label="writeBytes" id="-1321799143%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="-1321799143%2FFunctions%2F-1497642970" anchor-label="writeBytes" id="-1321799143%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="write-bytes.html"><span>write</span><wbr><span><span>Bytes</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1321799143%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1321799143%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"writeBytesTo"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="write-bytes.html"><span class="token function">writeBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">array<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes the full contents of <a href="write-bytes.html">array</a> to the file</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"writeBytesTo"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="write-bytes.html"><span class="token function">writeBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">array<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes the full contents of <a href="write-bytes.html">array</a> to the file.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="798586765%2FFunctions%2F410236888" anchor-label="writeUtf8" id="798586765%2FFunctions%2F410236888" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file:dokkaHtmlPartial/commonMain" data-filterable-set=":library:file:dokkaHtmlPartial/commonMain">
+<a data-name="798586765%2FFunctions%2F-1497642970" anchor-label="writeUtf8" id="798586765%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="write-utf8.html"><span>write</span><wbr><span><span>Utf8</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="798586765%2FFunctions%2F410236888"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="798586765%2FFunctions%2F-1497642970"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"writeUtf8To"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="write-utf8.html"><span class="token function">writeUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">text<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes the full contents of <a href="write-utf8.html">text</a> to the file (as UTF-8)</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"writeUtf8To"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="-file/index.html">File</a><span class="token punctuation">.</span><a href="write-utf8.html"><span class="token function">writeUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">text<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes the full contents of <a href="write-utf8.html">text</a> to the file (as UTF-8).</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -678,12 +738,18 @@
     </div>
   </div>
 </div>
-      <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-      </div>
+    <div class="footer">
+        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+        <span>© 2023-2025 Copyright Matthew Nelson</span>
+        <span class="pull-right">
+            <span>Generated by </span>
+            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                <span>dokka</span>
+            </a>
+        </span>
+    </div>
             </div>
         </div>
     </div>
 </body>
 </html>
-
