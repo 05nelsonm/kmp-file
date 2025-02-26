@@ -13,7 +13,7 @@ gradle-kmp-configuration    = "0.4.0"
 gradle-kotlin               = "2.1.10"
 gradle-publish-maven        = "0.30.0"
 
-kotlincrypto-catalog        = "0.6.1" # Utilized from settings.gradle.kts
+kotlincrypto-catalog        = "0.7.0" # Utilized from settings.gradle.kts
 
 [libraries]
 gradle-dokka                = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "gradle-dokka" }
