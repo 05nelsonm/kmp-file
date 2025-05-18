@@ -24,10 +24,13 @@ import kotlinx.cinterop.pointed
 import kotlinx.cinterop.toKString
 import platform.posix.*
 
-@OptIn(ExperimentalForeignApi::class)
-internal actual inline fun platformTempDirectory(): File {
+internal actual inline fun platformTempDirectory(): File = __TempDir
+
+@Suppress("ObjectPropertyName")
+private val __TempDir: File by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
     // Android API 33+
-    getenv("TMPDIR")?.let { return it.toKString().toFile() }
+    @OptIn(ExperimentalForeignApi::class)
+    getenv("TMPDIR")?.let { return@lazy it.toKString().toFile() }
 
     // Android API 32-
     val packageName: String? = try {
@@ -48,12 +51,12 @@ internal actual inline fun platformTempDirectory(): File {
     val tmpdir = locateCacheDirOrNull(packageName)
         ?: "/data/local/tmp"
 
-    return tmpdir.toFile()
+    tmpdir.toFile()
 }
 
 @Throws(Exception::class)
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-internal fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile().fOpen("rb") { file ->
+private fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile().fOpen("rb") { file ->
     val buf = ByteArray(512)
     val read = file.fRead(buf)
     if (read == -1) throw errnoToIOException(errno)
@@ -63,28 +66,41 @@ internal fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile(
 
     // https://developer.android.com/build/configure-app-module#set-application-id
     check(iZero in 3..read) { "iZero[$iZero], read[$read]" }
-    val name = buf.decodeToString(startIndex = 0, endIndex = iZero)
+    var name = buf.decodeToString(startIndex = 0, endIndex = iZero)
 
     if (name.contains(SysDirSep)) {
         // Running as an executable
-        //
-        //   If application packaged executable in jniLibs and is running from
-        //   Context.applicationInfo.nativeLibraryDir, path will look like one
-        //   of the following (depending on API level):
-        //
-        //     /data/app/{package name}-1/lib/{arch}/lib{executable name}.so
-        //     /data/app/~~w_T0bBuf3Hm9PfT4BUUoMw==/{package name}-AUNlVKyFxRnUDRt5NajCVA==/lib/{arch}/lib{executable name}.so
-        //
-        //   Otherwise, application's target SDK is 28 or below such that the
-        //   executable file can be run from its /data/data directory, or some
-        //   other location on the filesystem where it unpacked or downloaded
-        //   it to.
-        //
-        //   Either way, reading cmdline file should always start with the
-        //   application id and contain no filesystem separators.
-        //
-        // Throw exception so can retry with parent process id
-        throw UnsupportedOperationException()
+
+        when {
+            // Throw exception so can retry with parent process id
+            pid == "self" -> throw UnsupportedOperationException()
+
+            // If application packaged executable in jniLibs and is running from
+            // Context.applicationInfo.nativeLibraryDir, path will look like one
+            // of the following (depending on API level):
+            //
+            //   /data/app/{package name}-1/lib/{arch}/lib{executable name}.so
+            //   /data/app/~~w_T0bBuf3Hm9PfT4BUUoMw==/{package name}-AUNlVKyFxRnUDRt5NajCVA==/lib/{arch}/lib{executable name}.so
+            name.startsWith("/data/app/") -> {
+                name = name.substringBeforeLast(SysDirSep)
+                    .split(SysDirSep, limit = 5)
+                    .first { segment -> segment.contains('.') }
+                    .substringBefore('-')
+            }
+
+            // If application's target SDK is 28 or below, can run executables
+            // from anywhere it has access to on the filesystem (e.g. Termux).
+            // Check for if it's running from the application's /data/data dir
+            //
+            //   /data/user/{uid}/{package name}/{executable}
+            //   /data/data/{package name}/{executable}
+            name.startsWith("/data/") -> {
+                name = name.substringBeforeLast(SysDirSep)
+                    .split(SysDirSep, limit = 5)
+                    .first { segment -> segment.contains('.') }
+            }
+            else -> throw UnsupportedOperationException()
+        }
     }
 
     check(name.contains('.')) { "Invalid packageName[$name]. does not contain ." }
@@ -92,7 +108,7 @@ internal fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile(
     name
 }
 
-internal fun locateCacheDirOrNull(packageName: String?): String? {
+private fun locateCacheDirOrNull(packageName: String?): Path? {
     if (packageName.isNullOrBlank()) return null
 
     val mode = R_OK or W_OK or X_OK
@@ -123,9 +139,9 @@ internal fun locateCacheDirOrNull(packageName: String?): String? {
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-internal inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> String?): String? {
+private inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path? {
     val dir = opendir("/mnt/user") ?: throw errnoToIOException(errno)
-    var path: String? = null
+    var path: Path? = null
     try {
         var entry: CPointer<dirent>? = readdir(dir)
         while (entry != null) {
@@ -143,13 +159,13 @@ internal inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> String?): St
 }
 
 @Throws(IOException::class)
-internal inline fun parseProcSelfMountsFile(checkAccess: (uid: Int) -> String?): String? {
+private inline fun parseProcSelfMountsFile(checkAccess: (uid: Int) -> Path?): Path? {
     val lines = "/proc/self/mounts".toFile().readUtf8().lines()
 
     // Looking for the following entry
-    //   /dev/block/{device} /data/user/0 ext4 ...
+    //   /dev/block/{device} /data/user/{uid} ext4 ...
     var i = 0
-    var path: String? = null
+    var path: Path? = null
     while (path == null && i < lines.size) {
         var line = lines[i++]
         if (!line.startsWith("/dev/block/")) continue

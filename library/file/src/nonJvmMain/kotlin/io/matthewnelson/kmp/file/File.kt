@@ -24,7 +24,7 @@ public actual class File: Comparable<File> {
     private val realPath: Path
 
     public actual constructor(pathname: String) {
-        realPath = pathname.toUTF8().resolveSlashes()
+        realPath = pathname.resolveSlashes()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -115,8 +115,6 @@ public actual class File: Comparable<File> {
     /** @suppress */    
     public override fun toString(): String = realPath
 }
-
-private inline fun Path.toUTF8(): Path = encodeToByteArray().decodeToString()
 
 private inline fun Path.resolveSlashes(): Path {
     if (isEmpty()) return this
