@@ -86,7 +86,7 @@ public actual class File: Comparable<File> {
 
     // use .absolutePath
     @PublishedApi
-    internal actual fun getAbsolutePath(): String = realPath.absolute()
+    internal actual fun getAbsolutePath(): String = realPath.absolute().resolveSlashes()
     // use .absoluteFile
     @PublishedApi
     internal actual fun getAbsoluteFile(): File {
