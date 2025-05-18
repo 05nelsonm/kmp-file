@@ -92,7 +92,7 @@ internal fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile(
     name
 }
 
-internal fun locateCacheDirOrNull(packageName: String?): String? {
+internal fun locateCacheDirOrNull(packageName: String?): Path? {
     if (packageName.isNullOrBlank()) return null
 
     val mode = R_OK or W_OK or X_OK
@@ -123,9 +123,9 @@ internal fun locateCacheDirOrNull(packageName: String?): String? {
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-internal inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> String?): String? {
+internal inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path? {
     val dir = opendir("/mnt/user") ?: throw errnoToIOException(errno)
-    var path: String? = null
+    var path: Path? = null
     try {
         var entry: CPointer<dirent>? = readdir(dir)
         while (entry != null) {
@@ -143,13 +143,13 @@ internal inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> String?): St
 }
 
 @Throws(IOException::class)
-internal inline fun parseProcSelfMountsFile(checkAccess: (uid: Int) -> String?): String? {
+internal inline fun parseProcSelfMountsFile(checkAccess: (uid: Int) -> Path?): Path? {
     val lines = "/proc/self/mounts".toFile().readUtf8().lines()
 
     // Looking for the following entry
     //   /dev/block/{device} /data/user/0 ext4 ...
     var i = 0
-    var path: String? = null
+    var path: Path? = null
     while (path == null && i < lines.size) {
         var line = lines[i++]
         if (!line.startsWith("/dev/block/")) continue
