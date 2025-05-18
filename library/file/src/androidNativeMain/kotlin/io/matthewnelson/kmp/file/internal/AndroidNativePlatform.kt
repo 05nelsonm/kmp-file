@@ -63,28 +63,41 @@ internal fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile(
 
     // https://developer.android.com/build/configure-app-module#set-application-id
     check(iZero in 3..read) { "iZero[$iZero], read[$read]" }
-    val name = buf.decodeToString(startIndex = 0, endIndex = iZero)
+    var name = buf.decodeToString(startIndex = 0, endIndex = iZero)
 
     if (name.contains(SysDirSep)) {
         // Running as an executable
-        //
-        //   If application packaged executable in jniLibs and is running from
-        //   Context.applicationInfo.nativeLibraryDir, path will look like one
-        //   of the following (depending on API level):
-        //
-        //     /data/app/{package name}-1/lib/{arch}/lib{executable name}.so
-        //     /data/app/~~w_T0bBuf3Hm9PfT4BUUoMw==/{package name}-AUNlVKyFxRnUDRt5NajCVA==/lib/{arch}/lib{executable name}.so
-        //
-        //   Otherwise, application's target SDK is 28 or below such that the
-        //   executable file can be run from its /data/data directory, or some
-        //   other location on the filesystem where it unpacked or downloaded
-        //   it to.
-        //
-        //   Either way, reading cmdline file should always start with the
-        //   application id and contain no filesystem separators.
-        //
-        // Throw exception so can retry with parent process id
-        throw UnsupportedOperationException()
+
+        when {
+            // Throw exception so can retry with parent process id
+            pid == "self" -> throw UnsupportedOperationException()
+
+            // If application packaged executable in jniLibs and is running from
+            // Context.applicationInfo.nativeLibraryDir, path will look like one
+            // of the following (depending on API level):
+            //
+            //   /data/app/{package name}-1/lib/{arch}/lib{executable name}.so
+            //   /data/app/~~w_T0bBuf3Hm9PfT4BUUoMw==/{package name}-AUNlVKyFxRnUDRt5NajCVA==/lib/{arch}/lib{executable name}.so
+            name.startsWith("/data/app/") -> {
+                name = name.substringBeforeLast(SysDirSep)
+                    .split(SysDirSep, limit = 5)
+                    .first { segment -> segment.contains('.') }
+                    .substringBefore('-')
+            }
+
+            // If application's target SDK is 28 or below, can run executables
+            // from anywhere it has access to on the filesystem (e.g. Termux).
+            // Check for if it's running from the application's /data/data dir
+            //
+            //   /data/user/{uid}/{package name}/{executable}
+            //   /data/data/{package name}/{executable}
+            name.startsWith("/data/") -> {
+                name = name.substringBeforeLast(SysDirSep)
+                    .split(SysDirSep, limit = 5)
+                    .first { segment -> segment.contains('.') }
+            }
+            else -> throw UnsupportedOperationException()
+        }
     }
 
     check(name.contains('.')) { "Invalid packageName[$name]. does not contain ." }
