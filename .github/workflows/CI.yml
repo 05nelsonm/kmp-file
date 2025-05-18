@@ -20,6 +20,13 @@ jobs:
       - name: Validate Gradle Wrapper
         uses: gradle/actions/wrapper-validation@v3
 
+      - name: Setup JDK 8
+        if: matrix.os == 'macos-latest' || matrix.os == 'windows-latest'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 8
+
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
@@ -79,7 +86,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [ 21, 24, 27, 29, 30, 31, 32, 33 ]
+        api-level: [ 21, 24, 27, 29, 30, 31, 32, 33, 34, 35 ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo

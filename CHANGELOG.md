@@ -3,7 +3,7 @@
 ## Version 0.2.0 (2025-02-26)
  - Updates `kotlin` to `2.1.10` [[#79]][79]
  - `File` extension functions are now inlined [[#81]][81]
- - `File.readBytes()` and `File.readUtf8()` for non-Jvm source sets now properly
+ - `File.readBytes()` and `File.readUtf8()` for non-Jvm targets now properly
    check file size for less than `Int.MAX_VALUE` before opening the file [[#84]][84]
 
 ## Version 0.1.1 (2024-08-30)

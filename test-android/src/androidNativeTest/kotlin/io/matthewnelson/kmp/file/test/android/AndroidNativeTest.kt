@@ -22,9 +22,7 @@ import platform.posix.*
 import kotlin.test.*
 
 /**
- * Test is for android native, but this compilation gets compiled and
- * slung in jniLibs such that androidInstrumentedTest can run the
- * executable via java.lang.Process
+ * Test executable is compiled, packaged into jniLibs, then run via androidInstrumentedTest
  * */
 @OptIn(ExperimentalForeignApi::class)
 class AndroidNativeTest {

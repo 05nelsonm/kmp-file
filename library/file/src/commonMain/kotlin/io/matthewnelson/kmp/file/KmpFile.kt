@@ -29,14 +29,31 @@ import kotlin.jvm.JvmName
 /**
  * The operating system's directory separator character.
  *
- *  - Unix: "/"
- *  - Windows: "\\"
+ *  - Unix: `/`
+ *  - Windows: `\`
  * */
 @JvmField
 public val SysDirSep: Char = platformDirSeparator()
 
 /**
- * The system's temporary directory
+ * The system's temporary directory.
+ *
+ * - Jvm/Android: `java.io.tmpdir` from [System.getProperty](https://docs.oracle.com/javase/8/docs/api/java/lang/System.html#getProperty-java.lang.String-)
+ * - Js:
+ *     - Node: [os.tmpdir](https://nodejs.org/api/os.html#ostmpdir)
+ * - Native:
+ *     - Android Native targets: `TMPDIR` environment variable when available
+ *       (Android API 33+), with a fallback to retrieving application package name
+ *       from `/proc/self/cmdline` and uid from either `/mnt/user` directory names
+ *       or parsing `/proc/self/mounts` in order to reconstruct the application
+ *       cache directory of `/data/user/{uid}/{package name}/cache`. If accessibility
+ *       check fails, will then fall back to `/data/local/tmp`.
+ *     - Apple targets: `TMPDIR` environment variable when available, with a
+ *       fallback to [NSTemporaryDirectory](https://developer.apple.com/documentation/foundation/nstemporarydirectory()?language=objc).
+ *     - Linux targets: `TMPDIR` environment variable when available, with a
+ *       fallback to `/tmp`.
+ *     - Windows targets: The first non-null `TEMP`, `TMP`, `USERPROFILE` environment
+ *       variable, with a fallback to `\Windows\TEMP`.
  * */
 @JvmField
 public val SysTempDir: File = platformTempDirectory()
