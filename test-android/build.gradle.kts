@@ -19,6 +19,11 @@ plugins {
 
 repositories { google() }
 
+private val jniLibs = project.projectDir
+    .resolve("src")
+    .resolve("androidMain")
+    .resolve("jniLibs")
+
 kmpConfiguration {
     configure {
         androidLibrary {
@@ -32,6 +37,17 @@ kmpConfiguration {
 
                     testInstrumentationRunnerArguments["disableAnalytics"] = true.toString()
                     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+                    packaging {
+                        jniLibs.useLegacyPackaging = true
+                    }
+
+                    ndk {
+                        abiFilters.add("arm64-v8a")
+                        abiFilters.add("armeabi-v7a")
+                        abiFilters.add("x86")
+                        abiFilters.add("x86_64")
+                    }
                 }
             }
 
@@ -39,11 +55,6 @@ kmpConfiguration {
             compileSourceCompatibility = JavaVersion.VERSION_1_8
             compileTargetCompatibility = JavaVersion.VERSION_1_8
 
-            sourceSetMain {
-                dependencies {
-                    implementation(project(":library:file"))
-                }
-            }
             sourceSetTestInstrumented {
                 dependencies {
                     implementation(libs.androidx.test.core)
@@ -52,12 +63,61 @@ kmpConfiguration {
             }
         }
 
+        androidNativeAll()
+
         common {
+            sourceSetMain {
+                dependencies {
+                    implementation(project(":library:file"))
+                }
+            }
             sourceSetTest {
                 dependencies {
                     implementation(kotlin("test"))
                 }
             }
         }
+
+        kotlin {
+            val buildDir = project.layout
+                .buildDirectory
+                .get()
+                .asFile
+
+            val nativeTestBinaryTasks = listOf(
+                "Arm32" to "armeabi-v7a",
+                "Arm64" to "arm64-v8a",
+                "X64" to "x86_64",
+                "X86" to "x86",
+            ).mapNotNull { (arch, abi) ->
+                val nativeTestBinariesTask = project
+                    .tasks
+                    .findByName("androidNative${arch}TestBinaries")
+                    ?: return@mapNotNull null
+
+                val abiDir = jniLibs.resolve(abi)
+                if (!abiDir.exists() && !abiDir.mkdirs()) throw RuntimeException("mkdirs[$abiDir]")
+
+                val testExecutable = buildDir
+                    .resolve("bin")
+                    .resolve("androidNative$arch")
+                    .resolve("debugTest")
+                    .resolve("test.kexe")
+
+                nativeTestBinariesTask.doLast {
+                    testExecutable.copyTo(abiDir.resolve("libTestExec.so"), overwrite = true)
+                }
+
+                nativeTestBinariesTask
+            }
+
+            project.tasks.all {
+                if (!name.startsWith("merge")) return@all
+                if (!name.endsWith("JniLibFolders")) return@all
+                nativeTestBinaryTasks.forEach { t -> dependsOn(t) }
+            }
+        }
     }
 }
+
+tasks.findByName("clean")?.apply { jniLibs.deleteRecursively() }
