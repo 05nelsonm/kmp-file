@@ -24,10 +24,13 @@ import kotlinx.cinterop.pointed
 import kotlinx.cinterop.toKString
 import platform.posix.*
 
-@OptIn(ExperimentalForeignApi::class)
-internal actual inline fun platformTempDirectory(): File {
+internal actual inline fun platformTempDirectory(): File = __TempDir
+
+@Suppress("ObjectPropertyName")
+private val __TempDir: File by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
     // Android API 33+
-    getenv("TMPDIR")?.let { return it.toKString().toFile() }
+    @OptIn(ExperimentalForeignApi::class)
+    getenv("TMPDIR")?.let { return@lazy it.toKString().toFile() }
 
     // Android API 32-
     val packageName: String? = try {
@@ -48,12 +51,12 @@ internal actual inline fun platformTempDirectory(): File {
     val tmpdir = locateCacheDirOrNull(packageName)
         ?: "/data/local/tmp"
 
-    return tmpdir.toFile()
+    tmpdir.toFile()
 }
 
 @Throws(Exception::class)
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-internal fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile().fOpen("rb") { file ->
+private fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile().fOpen("rb") { file ->
     val buf = ByteArray(512)
     val read = file.fRead(buf)
     if (read == -1) throw errnoToIOException(errno)
@@ -105,7 +108,7 @@ internal fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile(
     name
 }
 
-internal fun locateCacheDirOrNull(packageName: String?): Path? {
+private fun locateCacheDirOrNull(packageName: String?): Path? {
     if (packageName.isNullOrBlank()) return null
 
     val mode = R_OK or W_OK or X_OK
@@ -136,7 +139,7 @@ internal fun locateCacheDirOrNull(packageName: String?): Path? {
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-internal inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path? {
+private inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path? {
     val dir = opendir("/mnt/user") ?: throw errnoToIOException(errno)
     var path: Path? = null
     try {
@@ -156,11 +159,11 @@ internal inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path
 }
 
 @Throws(IOException::class)
-internal inline fun parseProcSelfMountsFile(checkAccess: (uid: Int) -> Path?): Path? {
+private inline fun parseProcSelfMountsFile(checkAccess: (uid: Int) -> Path?): Path? {
     val lines = "/proc/self/mounts".toFile().readUtf8().lines()
 
     // Looking for the following entry
-    //   /dev/block/{device} /data/user/0 ext4 ...
+    //   /dev/block/{device} /data/user/{uid} ext4 ...
     var i = 0
     var path: Path? = null
     while (path == null && i < lines.size) {
