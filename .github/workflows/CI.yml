@@ -79,7 +79,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [ 15, 17, 19, 21, 24, 27, 29, 30, 31, 32, 33 ]
+        api-level: [ 21, 24, 27, 29, 30, 31, 32, 33 ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -105,6 +105,7 @@ jobs:
         with:
           emulator-boot-timeout: 300 # 5 minutes
           api-level: ${{ matrix.api-level }}
+          arch: x86_64
           script: ./gradlew connectedCheck -PKMP_TARGETS="ANDROID_ARM32,ANDROID_ARM64,ANDROID_X64,ANDROID_X86,ANDROID,JVM"
 
       - name: Upload Test Reports
