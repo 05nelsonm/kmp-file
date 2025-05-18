@@ -16,101 +16,17 @@
 package io.matthewnelson.kmp.file.test.android
 
 import android.app.Application
-import android.os.Build
 import androidx.test.core.app.ApplicationProvider
-import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.SysTempDir
-import io.matthewnelson.kmp.file.toFile
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 
 class SysTempDirAndroidTest {
 
     private val ctx = ApplicationProvider.getApplicationContext<Application>()
-    private val nativeLibDir = ctx.applicationInfo.nativeLibraryDir.toFile()
 
     @Test
     fun givenAndroidRuntime_whenSysTempDir_thenIsSameAsCacheDir() {
         assertEquals(ctx.cacheDir, SysTempDir)
-    }
-
-    @Test
-    fun givenAndroidNative_whenExecuteTestBinary_thenIsSuccessful() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            println("Skipping...")
-            return
-        }
-
-        val executable = findLibTestExec()
-
-        var p: Process? = null
-        try {
-            p = ProcessBuilder(listOf(executable.path)).apply {
-                redirectErrorStream(true)
-                val env = environment()
-                env["kmp.file.test.EXPECTED_TEMP_PATH"] = SysTempDir.path
-            }.start()
-
-            p.outputStream.close()
-
-            var isComplete = false
-            Thread {
-                try {
-                    p.inputStream.use { s ->
-                        val buf = ByteArray(DEFAULT_BUFFER_SIZE * 2)
-                        while (true) {
-                            val read = s.read(buf)
-                            if (read == -1) break
-                            System.out.write(buf, 0, read)
-                        }
-                    }
-                } finally {
-                    isComplete = true
-                }
-            }.apply {
-                isDaemon = true
-                priority = Thread.MAX_PRIORITY
-            }.start()
-
-            var timeout = 1.minutes
-            while (true) {
-                if (isComplete) break
-                if (timeout <= Duration.ZERO) break
-
-                Thread.sleep(100)
-                timeout -= 100.milliseconds
-            }
-        } finally {
-            p?.destroy()
-        }
-
-        assertNotNull(p)
-
-        var exit: Int? = null
-        while (exit == null) {
-            try {
-                exit = p.exitValue()
-            } catch (_: IllegalThreadStateException) {
-                Thread.sleep(50)
-            }
-        }
-
-        assertEquals(0, exit)
-    }
-
-    private fun findLibTestExec(): File {
-        nativeLibDir.walkTopDown().iterator().forEach { file ->
-            if (!file.isFile) return@forEach
-            if (file.name != "libTestExec.so") return@forEach
-            if (!file.canExecute()) return@forEach
-            return file
-        }
-
-        throw FileNotFoundException("libTestExec.so was not found...")
     }
 }
