@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.toFile
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.toKString
-import platform.posix.getenv
+import kotlinx.cinterop.MemScope
+import platform.posix.__posix_basename
+import platform.posix.dirname
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual inline fun platformTempDirectory(): File {
-    val tmpdir = getenv("TMPDIR")
-        ?.toKString()
-        ?: "/tmp"
+internal actual inline fun MemScope.platformBasename(
+    path: Path,
+): CPointer<ByteVar>? = __posix_basename(path)
 
-    return tmpdir.toFile()
-}
+@OptIn(ExperimentalForeignApi::class)
+internal actual inline fun MemScope.platformDirname(
+    path: Path,
+): CPointer<ByteVar>? = dirname(path)

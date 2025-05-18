@@ -20,7 +20,6 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-@OptIn(DelicateFileApi::class)
 abstract class ChmodBaseTest {
 
     @Test

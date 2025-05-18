@@ -55,7 +55,7 @@ fun KmpConfigurationExtension.configureShared(
             }
         }
 
-//        androidNativeAll()
+        androidNativeAll()
         iosAll()
         linuxAll()
         macosAll()
