@@ -51,7 +51,29 @@ class AndroidNativeTest {
         }
     }
 
+    @Test
+    fun givenEmptyFilePath_whenAbsolutePath_thenMatchesExpected() {
+        assertEquals(requireEnv("kmp.file.test.EXPECTED_ABSOLUTE_PATH_EMPTY"), "".toFile().absolutePath)
+    }
+
+    @Test
+    fun givenDotFilePath_whenAbsolutePath_thenMatchesExpected() {
+        assertEquals(requireEnv("kmp.file.test.EXPECTED_ABSOLUTE_PATH_DOT"), ".".toFile().absolutePath)
+    }
+
+
+    @Test
+    fun givenEmptyFilePath_whenCanonicalPath_thenMatchesExpected() {
+        assertEquals(requireEnv("kmp.file.test.EXPECTED_CANONICAL_PATH_EMPTY"), "".toFile().canonicalPath())
+    }
+
+    @Test
+    fun givenDotFilePath_whenCanonicalPath_thenMatchesExpected() {
+        assertEquals(requireEnv("kmp.file.test.EXPECTED_CANONICAL_PATH_DOT"), ".".toFile().canonicalPath())
+    }
+
     private fun requireEnv(key: String): String = getenv(key)
         ?.toKString()
+        ?.ifBlank { null }
         ?: throw IllegalStateException("Environment variable does not exist for key[$key]")
 }

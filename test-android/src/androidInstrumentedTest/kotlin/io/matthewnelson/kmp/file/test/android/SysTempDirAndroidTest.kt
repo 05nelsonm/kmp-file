@@ -54,6 +54,10 @@ class SysTempDirAndroidTest {
                 redirectErrorStream(true)
                 val env = environment()
                 env["kmp.file.test.EXPECTED_TEMP_PATH"] = SysTempDir.path
+                env["kmp.file.test.EXPECTED_ABSOLUTE_PATH_EMPTY"] = "".toFile().absolutePath
+                env["kmp.file.test.EXPECTED_ABSOLUTE_PATH_DOT"] = ".".toFile().absolutePath
+                env["kmp.file.test.EXPECTED_CANONICAL_PATH_EMPTY"] = "".toFile().canonicalPath
+                env["kmp.file.test.EXPECTED_CANONICAL_PATH_DOT"] = ".".toFile().canonicalPath
             }.start()
 
             p.outputStream.close()
