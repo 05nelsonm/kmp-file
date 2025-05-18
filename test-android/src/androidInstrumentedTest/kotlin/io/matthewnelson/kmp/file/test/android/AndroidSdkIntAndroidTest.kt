@@ -23,7 +23,6 @@ class AndroidSdkIntAndroidTest {
 
     @Test
     fun givenAndroidRuntime_whenSdkInt_thenIsAsExpected() {
-        val expected = android.os.Build.VERSION.SDK_INT
-        assertEquals(expected, ANDROID.SDK_INT)
+        assertEquals(android.os.Build.VERSION.SDK_INT, ANDROID.SDK_INT)
     }
 }

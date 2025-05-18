@@ -29,7 +29,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
-class AndroidNativeExecutableAndroidTest {
+class AndroidNativeExecutableTest {
 
     private val ctx = ApplicationProvider.getApplicationContext<Application>()
     private val nativeLibDir = ctx.applicationInfo.nativeLibraryDir.toFile()
