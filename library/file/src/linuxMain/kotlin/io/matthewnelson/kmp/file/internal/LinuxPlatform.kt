@@ -26,5 +26,8 @@ import platform.posix.getenv
 @OptIn(ExperimentalForeignApi::class)
 internal actual inline fun platformTempDirectory(): File {
     val tmpdir = getenv("TMPDIR")
-    return (tmpdir?.toKString() ?: "/tmp").toFile()
+        ?.toKString()
+        ?: "/tmp"
+
+    return tmpdir.toFile()
 }
