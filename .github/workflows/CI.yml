@@ -86,7 +86,47 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [ 21, 24, 27, 29, 30, 31, 32, 33, 34, 35 ]
+        include:
+          - api-level: 15
+            arch: x86
+          - api-level: 17
+            arch: x86
+          - api-level: 19
+            arch: x86
+#          - api-level: 21
+#            arch: arm64-v8a
+          - api-level: 21
+            arch: x86
+          - api-level: 21
+            arch: x86_64
+#          - api-level: 24
+#            arch: arm64-v8a
+          - api-level: 24
+            arch: x86
+          - api-level: 24
+            arch: x86_64
+          - api-level: 27
+            arch: x86_64
+#          - api-level: 29
+#            arch: arm64-v8a
+          - api-level: 29
+            arch: x86
+          - api-level: 29
+            arch: x86_64
+#          - api-level: 30
+#            arch: arm64-v8a
+          - api-level: 30
+            arch: x86_64
+          - api-level: 31
+            arch: x86_64
+          - api-level: 32
+            arch: x86_64
+          - api-level: 33
+            arch: x86_64
+          - api-level: 34
+            arch: x86_64
+          - api-level: 35
+            arch: x86_64
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -112,13 +152,13 @@ jobs:
         with:
           emulator-boot-timeout: 300 # 5 minutes
           api-level: ${{ matrix.api-level }}
-          arch: x86_64
+          arch: ${{ matrix.arch }}
           script: ./gradlew connectedCheck -PKMP_TARGETS="ANDROID_ARM32,ANDROID_ARM64,ANDROID_X64,ANDROID_X86,ANDROID,JVM"
 
       - name: Upload Test Reports
         uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
-          name: test-report-android-${{ matrix.api-level }}
+          name: test-report-android-${{ matrix.api-level }}-${{ matrix.arch }}
           path: '**/build/reports/androidTests/**'
           retention-days: 1
