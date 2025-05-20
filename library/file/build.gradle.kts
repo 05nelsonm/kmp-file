@@ -31,7 +31,6 @@ kmpConfiguration {
                 }
             }
         }
-        kotlin { jvmToolchain(8) }
     }
 }
 
