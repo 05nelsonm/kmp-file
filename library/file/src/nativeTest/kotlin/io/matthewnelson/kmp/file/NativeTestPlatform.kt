@@ -27,6 +27,10 @@ actual val IS_SIMULATOR: Boolean by lazy {
         else -> false
     }
 }
+actual val IS_ANDROID: Boolean by lazy {
+    @OptIn(ExperimentalNativeApi::class)
+    Platform.osFamily == OsFamily.ANDROID
+}
 
 @Throws(IOException::class, IndexOutOfBoundsException::class)
 fun File.checkAccess(vararg access: Int): Boolean {

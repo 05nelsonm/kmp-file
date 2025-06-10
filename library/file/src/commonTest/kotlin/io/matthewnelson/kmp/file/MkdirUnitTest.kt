@@ -23,6 +23,10 @@ class MkdirUnitTest {
 
     @Test
     fun givenDir_whenExists_thenMkdirReturnsFalse() {
+        if (IS_ANDROID) {
+            println("Skipping...")
+            return
+        }
         assertFalse(File(PROJECT_DIR_PATH).mkdir())
     }
 

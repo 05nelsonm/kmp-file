@@ -153,5 +153,7 @@ jobs:
         if: ${{ always() }}
         with:
           name: test-report-android-${{ matrix.api-level }}-${{ matrix.arch }}
-          path: '**/build/reports/androidTests/**'
+          path: |
+            **/build/reports/androidTests/**
+            **/build/outputs/androidTest-results/connected/debug/*/logcat-*.txt
           retention-days: 1

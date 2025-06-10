@@ -13,16 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import com.android.build.gradle.tasks.MergeSourceSetFolders
+import java.io.FileNotFoundException
+
 plugins {
     id("configuration")
 }
 
 repositories { google() }
 
-private val jniLibs = project.projectDir
+private val jniLibsDir = project.projectDir
     .resolve("src")
-    .resolve("androidMain")
+    .resolve("androidInstrumentedTest")
     .resolve("jniLibs")
+
+tasks.all {
+    if (name != "clean") return@all
+    doLast { jniLibsDir.deleteRecursively() }
+}
 
 kmpConfiguration {
     configure {
@@ -48,6 +56,12 @@ kmpConfiguration {
                         abiFilters.add("x86")
                         abiFilters.add("x86_64")
                     }
+                }
+
+                sourceSets["androidTest"].jniLibs.srcDir(jniLibsDir)
+
+                testOptions {
+                    targetSdk = compileSdk
                 }
             }
 
@@ -79,45 +93,66 @@ kmpConfiguration {
         }
 
         kotlin {
-            val buildDir = project.layout
-                .buildDirectory
-                .get()
-                .asFile
+            if (!project.plugins.hasPlugin("com.android.base")) return@kotlin
 
-            val nativeTestBinaryTasks = listOf(
-                "Arm32" to "armeabi-v7a",
-                "Arm64" to "arm64-v8a",
-                "X64" to "x86_64",
-                "X86" to "x86",
-            ).mapNotNull { (arch, abi) ->
-                val nativeTestBinariesTask = project
-                    .tasks
-                    .findByName("androidNative${arch}TestBinaries")
-                    ?: return@mapNotNull null
-
-                val abiDir = jniLibs.resolve(abi)
-                if (!abiDir.exists() && !abiDir.mkdirs()) throw RuntimeException("mkdirs[$abiDir]")
-
-                val testExecutable = buildDir
-                    .resolve("bin")
-                    .resolve("androidNative$arch")
-                    .resolve("debugTest")
-                    .resolve("test.kexe")
-
-                nativeTestBinariesTask.doLast {
-                    testExecutable.copyTo(abiDir.resolve("libTestExec.so"), overwrite = true)
+            val projectTests = arrayOf(
+                ":library:file" to "libTestFile.so",
+                null to "libTestAndroid.so"
+            ).map { (path, libName) ->
+                val p = if (path != null) {
+                    try {
+                        project.evaluationDependsOn(path)
+                    } catch (_: Throwable) {}
+                    project(path)
+                } else {
+                    project
                 }
 
-                nativeTestBinariesTask
+                p to libName
             }
 
-            project.tasks.all {
-                if (!name.startsWith("merge")) return@all
-                if (!name.endsWith("JniLibFolders")) return@all
-                nativeTestBinaryTasks.forEach { t -> dependsOn(t) }
+            project.afterEvaluate {
+                val nativeTestBinaryTasks = projectTests.flatMap { (proj, libName) ->
+                    val projBuildDir = proj
+                        .layout
+                        .buildDirectory
+                        .asFile.get()
+
+                    arrayOf(
+                        "Arm32" to "armeabi-v7a",
+                        "Arm64" to "arm64-v8a",
+                        "X64" to "x86_64",
+                        "X86" to "x86",
+                    ).mapNotNull { (arch, abi) ->
+                        val nativeBinaryTask = proj
+                            .tasks
+                            .findByName("androidNative${arch}TestBinaries")
+                            ?: return@mapNotNull null
+
+                        val abiDir = jniLibsDir.resolve(abi)
+                        if (!abiDir.exists() && !abiDir.mkdirs()) {
+                            throw FileNotFoundException("mkdirs[$abiDir]")
+                        }
+
+                        val executable = projBuildDir
+                            .resolve("bin")
+                            .resolve("androidNative${arch}")
+                            .resolve("debugTest")
+                            .resolve("test.kexe")
+
+                        nativeBinaryTask.doLast {
+                            executable.copyTo(abiDir.resolve(libName), overwrite = true)
+                        }
+
+                        nativeBinaryTask
+                    }
+                }
+
+                project.tasks.withType(MergeSourceSetFolders::class.java).all {
+                    if (name != "mergeDebugAndroidTestJniLibFolders") return@all
+                    nativeTestBinaryTasks.forEach { task -> this.dependsOn(task) }
+                }
             }
         }
     }
 }
-
-tasks.findByName("clean")?.apply { jniLibs.deleteRecursively() }

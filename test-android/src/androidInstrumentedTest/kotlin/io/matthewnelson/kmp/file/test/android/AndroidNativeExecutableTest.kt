@@ -17,8 +17,10 @@ package io.matthewnelson.kmp.file.test.android
 
 import android.app.Application
 import android.os.Build
+import android.system.Os
 import androidx.test.core.app.ApplicationProvider
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.SysTempDir
 import io.matthewnelson.kmp.file.toFile
 import java.io.File
@@ -35,24 +37,49 @@ class AndroidNativeExecutableTest {
     private val nativeLibDir = ctx.applicationInfo.nativeLibraryDir.toFile()
 
     @Test
-    fun givenAndroidNative_whenExecuteTestBinary_thenIsSuccessful() {
+    fun givenAndroidNative_whenExecuteTestAndroidBinary_thenIsSuccessful() {
+        run(executable = "libTestAndroid.so") {
+            this[ENV_KEY_EXPECTED_TEMP_PATH] = SysTempDir.path
+            this[ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY] = "".toFile().absolutePath
+            this[ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT] = ".".toFile().absolutePath
+            this[ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY] = "".toFile().canonicalPath
+            this[ENV_KEY_EXPECTED_CANONICAL_PATH_DOT] = ".".toFile().canonicalPath
+        }
+    }
+
+    @Test
+    fun givenAndroidNative_whenExecuteFileTestBinary_thenIsSuccessful() {
+        run(executable = "libTestFile.so")
+    }
+
+    private fun run(executable: String, configureEnv: MutableMap<String, String>.() -> Unit = {}) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             println("Skipping...")
             return
         }
 
-        val executable = findLibTestExec()
+        val exec = findTestExecutable(executable)
 
         var p: Process? = null
         try {
-            p = ProcessBuilder(listOf(executable.path)).apply {
+            p = ProcessBuilder(listOf(exec.path)).apply {
                 redirectErrorStream(true)
                 val env = environment()
-                env["kmp.file.test.EXPECTED_TEMP_PATH"] = SysTempDir.path
-                env["kmp.file.test.EXPECTED_ABSOLUTE_PATH_EMPTY"] = "".toFile().absolutePath
-                env["kmp.file.test.EXPECTED_ABSOLUTE_PATH_DOT"] = ".".toFile().absolutePath
-                env["kmp.file.test.EXPECTED_CANONICAL_PATH_EMPTY"] = "".toFile().canonicalPath
-                env["kmp.file.test.EXPECTED_CANONICAL_PATH_DOT"] = ".".toFile().canonicalPath
+
+                // https://github.com/05nelsonm/kmp-process/issues/149
+                if (Build.VERSION.SDK_INT in 24..32) {
+                    val envOs = Os.environ()
+                    if (!envOs.isNullOrEmpty()) {
+                        env.clear()
+                        envOs.forEach { line ->
+                            val i = line.indexOf('=')
+                            if (i == -1) return@forEach
+                            env[line.substring(0, i)] = line.substring(i + 1, line.length)
+                        }
+                    }
+                }
+
+                configureEnv(env)
             }.start()
 
             p.outputStream.close()
@@ -102,14 +129,11 @@ class AndroidNativeExecutableTest {
         assertEquals(0, exit)
     }
 
-    private fun findLibTestExec(): File {
-        nativeLibDir.walkTopDown().iterator().forEach { file ->
-            if (!file.isFile) return@forEach
-            if (file.name != "libTestExec.so") return@forEach
-            if (!file.canExecute()) return@forEach
-            return file
-        }
-
-        throw FileNotFoundException("libTestExec.so was not found...")
+    private fun findTestExecutable(name: String): File {
+        val f = nativeLibDir.resolve(name)
+        if (!f.exists()) throw FileNotFoundException(f.path)
+        if (!f.isFile) throw IOException("${f.name} is not a regular file")
+        if (!f.canExecute()) throw IOException("${f.name} cannot execute")
+        return f
     }
 }

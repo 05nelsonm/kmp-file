@@ -36,7 +36,7 @@ class AndroidNativeTest {
         }
 
         assertNotEquals("/data/local/tmp", SysTempDir.path)
-        assertEquals(requireEnv("kmp.file.test.EXPECTED_TEMP_PATH"), SysTempDir.path)
+        assertEquals(requireEnv(ENV_KEY_EXPECTED_TEMP_PATH), SysTempDir.path)
 
         val pid = getpid()
         val tmpFile = SysTempDir.resolve("write_$pid.txt")
@@ -51,23 +51,22 @@ class AndroidNativeTest {
 
     @Test
     fun givenEmptyFilePath_whenAbsolutePath_thenMatchesExpected() {
-        assertEquals(requireEnv("kmp.file.test.EXPECTED_ABSOLUTE_PATH_EMPTY"), "".toFile().absolutePath)
+        assertEquals(requireEnv(ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY), "".toFile().absolutePath)
     }
 
     @Test
     fun givenDotFilePath_whenAbsolutePath_thenMatchesExpected() {
-        assertEquals(requireEnv("kmp.file.test.EXPECTED_ABSOLUTE_PATH_DOT"), ".".toFile().absolutePath)
+        assertEquals(requireEnv(ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT), ".".toFile().absolutePath)
     }
-
 
     @Test
     fun givenEmptyFilePath_whenCanonicalPath_thenMatchesExpected() {
-        assertEquals(requireEnv("kmp.file.test.EXPECTED_CANONICAL_PATH_EMPTY"), "".toFile().canonicalPath())
+        assertEquals(requireEnv(ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY), "".toFile().canonicalPath())
     }
 
     @Test
     fun givenDotFilePath_whenCanonicalPath_thenMatchesExpected() {
-        assertEquals(requireEnv("kmp.file.test.EXPECTED_CANONICAL_PATH_DOT"), ".".toFile().canonicalPath())
+        assertEquals(requireEnv(ENV_KEY_EXPECTED_CANONICAL_PATH_DOT), ".".toFile().canonicalPath())
     }
 
     private fun requireEnv(key: String): String = getenv(key)
