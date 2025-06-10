@@ -6,3 +6,13 @@
 // - Show declarations: true
 
 // Library unique name: <io.matthewnelson.kmp-file:test-android>
+final const val io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT|{}ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT[0]
+    final fun <get-ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT>(): kotlin/String // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT.<get-ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT>|<get-ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT>(){}[0]
+final const val io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY|{}ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY[0]
+    final fun <get-ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY>(): kotlin/String // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY.<get-ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY>|<get-ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY>(){}[0]
+final const val io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_CANONICAL_PATH_DOT // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_CANONICAL_PATH_DOT|{}ENV_KEY_EXPECTED_CANONICAL_PATH_DOT[0]
+    final fun <get-ENV_KEY_EXPECTED_CANONICAL_PATH_DOT>(): kotlin/String // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_CANONICAL_PATH_DOT.<get-ENV_KEY_EXPECTED_CANONICAL_PATH_DOT>|<get-ENV_KEY_EXPECTED_CANONICAL_PATH_DOT>(){}[0]
+final const val io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY|{}ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY[0]
+    final fun <get-ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY>(): kotlin/String // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY.<get-ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY>|<get-ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY>(){}[0]
+final const val io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_TEMP_PATH // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_TEMP_PATH|{}ENV_KEY_EXPECTED_TEMP_PATH[0]
+    final fun <get-ENV_KEY_EXPECTED_TEMP_PATH>(): kotlin/String // io.matthewnelson.kmp.file.test.android/ENV_KEY_EXPECTED_TEMP_PATH.<get-ENV_KEY_EXPECTED_TEMP_PATH>|<get-ENV_KEY_EXPECTED_TEMP_PATH>(){}[0]
