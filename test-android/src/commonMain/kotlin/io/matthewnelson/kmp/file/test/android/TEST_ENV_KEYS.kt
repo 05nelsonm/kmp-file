@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,4 +15,8 @@
  **/
 package io.matthewnelson.kmp.file.test.android
 
-internal fun stub() { /* no-op */ }
+const val ENV_KEY_EXPECTED_TEMP_PATH = "kmp.file.test.EXPECTED_TEMP_PATH"
+const val ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY = "kmp.file.test.EXPECTED_ABSOLUTE_PATH_EMPTY"
+const val ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT = "kmp.file.test.EXPECTED_ABSOLUTE_PATH_DOT"
+const val ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY = "kmp.file.test.EXPECTED_CANONICAL_PATH_EMPTY"
+const val ENV_KEY_EXPECTED_CANONICAL_PATH_DOT = "kmp.file.test.EXPECTED_CANONICAL_PATH_DOT"
