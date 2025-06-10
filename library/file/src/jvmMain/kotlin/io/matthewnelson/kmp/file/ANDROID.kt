@@ -20,17 +20,14 @@ public object ANDROID {
     /**
      * Reflection based retrieval of android.os.Build.VERSION.SDK_INT
      *
-     * Will be null if not android runtime (i.e. not an emulator or device)
+     * Will be either:
+     *  - `null`: NOT Android Runtime (i.e. not an emulator or device)
+     *  - 1 or greater: Android Runtime
      * */
     @JvmField
     public val SDK_INT: Int? = run {
-        val isAndroidRuntime = System.getProperty("java.runtime.name")
-            ?.contains("android", ignoreCase = true) == true
-
-        if (!isAndroidRuntime) return@run null
-
-        try {
-            val clazz = Class.forName("android.os.Build\$VERSION")
+        val sdk = try {
+            val clazz: Class<*>? = Class.forName("android.os.Build\$VERSION")
 
             try {
                 clazz?.getField("SDK_INT")?.getInt(null)
@@ -39,6 +36,11 @@ public object ANDROID {
             }
         } catch (_: Throwable) {
             null
-        }
+        } ?: return@run null
+
+        // Will be 0 for Android Unit tests
+        if (sdk <= 0) return@run null
+
+        sdk
     }
 }
