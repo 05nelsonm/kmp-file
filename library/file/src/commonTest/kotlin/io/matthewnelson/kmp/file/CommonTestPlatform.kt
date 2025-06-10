@@ -39,6 +39,7 @@ val FILE_SYM_LINK_2 by lazy {
 private val BASE_16_LC = Base16 { encodeToLowercase = true }
 
 expect val IS_SIMULATOR: Boolean
+expect val IS_ANDROID: Boolean
 
 fun randomName(): String = Random
     .Default

@@ -16,3 +16,4 @@
 package io.matthewnelson.kmp.file
 
 actual val IS_SIMULATOR: Boolean = false
+actual val IS_ANDROID: Boolean = ANDROID.SDK_INT != null

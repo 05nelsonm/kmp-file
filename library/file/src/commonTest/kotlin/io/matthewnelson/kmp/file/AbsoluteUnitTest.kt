@@ -48,6 +48,11 @@ class AbsoluteUnitTest {
 
     @Test
     fun givenFile_whenPathEmpty_thenResolvesCWD() {
+        if (IS_ANDROID) {
+            println("Skipping..")
+            return
+        }
+
         val absolute = "".toFile().absolutePath
         assertTrue(!absolute.endsWith(SysDirSep))
         assertTrue(absolute.isNotBlank())
@@ -57,8 +62,12 @@ class AbsoluteUnitTest {
     fun givenFile_whenRelativePath_thenResolvesCWD() {
         // Do not run in simulators. The CWD will
         // register as whatever the simulators environment
-        // is using, not that of the host machine.
-        if (IS_SIMULATOR) return
+        // is using, not that of the host machine and android
+        // will use CWD of `/`
+        if (IS_SIMULATOR || IS_ANDROID) {
+            println("Skipping...")
+            return
+        }
 
         val projectRoot = projectRootDir()
 
@@ -78,7 +87,10 @@ class AbsoluteUnitTest {
 
     @Test
     fun givenWindows_whenRelativeDrivePath_thenResolvesToCurrentWorkingDirectory() {
-        if (!IsWindows) return
+        if (!IsWindows) {
+            println("Skipping...")
+            return
+        }
 
         val projectRoot = projectRootDir()
 

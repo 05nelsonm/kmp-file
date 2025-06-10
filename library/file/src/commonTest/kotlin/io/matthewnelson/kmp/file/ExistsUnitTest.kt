@@ -23,6 +23,10 @@ class ExistsUnitTest {
 
     @Test
     fun givenFile_whenExists_thenReturnsTrue() {
+        if (IS_ANDROID) {
+            println("Skipping...")
+            return
+        }
         assertTrue(FILE_LOREM_IPSUM.exists())
     }
 

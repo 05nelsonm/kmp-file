@@ -24,8 +24,12 @@ class CanonicalUnitTest {
 
     @Test
     fun givenFile_whenPathHasSymlink_thenReturnsActualPath() {
-        // windows doesn't do sym links
-        if (IsWindows) return
+        // windows doesn't do symbolic links.
+        // Android emulator won't have access to project directory.
+        if (IsWindows || IS_ANDROID) {
+            println("Skipping..")
+            return
+        }
 
         assertEquals(FILE_LOREM_IPSUM, FILE_SYM_LINK_2.canonicalFile())
     }

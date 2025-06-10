@@ -18,13 +18,17 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 class ReadUnitTest {
 
     @Test
     fun givenFile_whenReadBytes_thenSha256MatchesExpected() {
+        if (IS_ANDROID) {
+            println("Skipping...")
+            return
+        }
         val expected = if (IsWindows) {
             // Windows will produce a different result because of its
             // EOL value.
@@ -41,6 +45,10 @@ class ReadUnitTest {
 
     @Test
     fun givenFile_whenReadUtf8_thenSomethingIsReturned() {
+        if (IS_ANDROID) {
+            println("Skipping...")
+            return
+        }
         assertTrue(FILE_LOREM_IPSUM.readUtf8().isNotBlank())
     }
 
@@ -48,18 +56,7 @@ class ReadUnitTest {
     fun givenFile_whenDoesNotExist_thenThrowsFileNotFoundException() {
         val doesNotExist = randomTemp()
 
-        try {
-            doesNotExist.readBytes()
-            fail()
-        } catch (_: FileNotFoundException) {
-            // pass
-        }
-
-        try {
-            doesNotExist.readUtf8()
-            fail()
-        } catch (_: FileNotFoundException) {
-            // pass
-        }
+        assertFailsWith<FileNotFoundException> { doesNotExist.readBytes() }
+        assertFailsWith<FileNotFoundException> { doesNotExist.readUtf8() }
     }
 }
