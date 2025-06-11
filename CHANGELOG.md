@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## Version 0.3.0 (2025-06-11)
+ - Updates `kotlin` to `2.1.21` [[#89]][89]
+ - Adds support for the following targets [[#85]][85]:
+     - `androidNativeArm32`
+     - `androidNativeArm64`
+     - `androidNativeX64`
+     - `androidNativeX86`
+ - Fixes potential multi-slash result for non-jvm `File.absolutePath` when that
+   platform has no CWD [[#88]][88]
+ - Removes unnecessary `System.getProperty` check for Jvm's `ANDROID.SDK_INT` [[#94]][94]
+
 ## Version 0.2.0 (2025-02-26)
  - Updates `kotlin` to `2.1.10` [[#79]][79]
  - `File` extension functions are now inlined [[#81]][81]
@@ -89,3 +100,7 @@
 [79]: https://github.com/05nelsonm/kmp-file/pull/79
 [81]: https://github.com/05nelsonm/kmp-file/pull/81
 [84]: https://github.com/05nelsonm/kmp-file/pull/84
+[85]: https://github.com/05nelsonm/kmp-file/pull/85
+[88]: https://github.com/05nelsonm/kmp-file/pull/88
+[89]: https://github.com/05nelsonm/kmp-file/pull/89
+[94]: https://github.com/05nelsonm/kmp-file/pull/94

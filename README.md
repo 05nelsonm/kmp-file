@@ -157,12 +157,12 @@ fun nativeMain(f1: File, f2: File) {
 <!-- TAG_VERSION -->
 ```kotlin
 dependencies {
-    implementation("io.matthewnelson.kmp-file:file:0.2.0")
+    implementation("io.matthewnelson.kmp-file:file:0.3.0")
 }
 ```
 
 <!-- TAG_VERSION -->
-[badge-latest-release]: https://img.shields.io/badge/latest--release-0.2.0-blue.svg?style=flat
+[badge-latest-release]: https://img.shields.io/badge/latest--release-0.3.0-blue.svg?style=flat
 [badge-license]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
 
 <!-- TAG_DEPENDENCIES -->
