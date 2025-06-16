@@ -26,7 +26,6 @@ internal typealias Path = String
 internal expect inline fun platformDirSeparator(): Char
 internal expect inline fun platformTempDirectory(): File
 
-@PublishedApi
 internal expect val IsWindows: Boolean
 
 @Throws(IOException::class)
