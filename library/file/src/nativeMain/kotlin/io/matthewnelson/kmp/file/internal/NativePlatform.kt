@@ -35,7 +35,7 @@ internal actual inline fun File.platformReadBytes(): ByteArray {
     val chunks = ArrayDeque<ByteArray>((fileSize.toInt() / buf.size).coerceAtLeast(1))
     var size = 0
 
-    fOpen(flags = "rb") { file ->
+    fOpenR(only = true, b = true) { file ->
         while (true) {
             val read = file.fRead(buf)
 
@@ -71,7 +71,7 @@ internal actual inline fun File.platformReadUtf8(): String = platformReadBytes()
 @Throws(IOException::class)
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 internal actual inline fun File.platformWriteBytes(array: ByteArray) {
-    fOpen("wb") { file ->
+    fOpenW(only = true, b = true) { file ->
         var written = 0
 
         while (written < array.size) {
@@ -93,3 +93,5 @@ internal actual inline fun File.platformWriteUtf8(text: String) {
 
     platformWriteBytes(encoded)
 }
+
+internal expect inline fun Int.orOCLOEXEC(): Int

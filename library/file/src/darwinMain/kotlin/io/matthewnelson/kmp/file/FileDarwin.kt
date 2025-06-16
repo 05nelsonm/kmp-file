@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.matthewnelson.kmp.file
 
 import kotlinx.cinterop.CPointer
@@ -26,7 +28,7 @@ import platform.posix.fileno
 
 @PublishedApi
 @ExperimentalForeignApi
-@Suppress("NOTHING_TO_INLINE")
+@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
 internal actual inline fun CPointer<FILE>.setCLOEXEC(): Int {
     val fd = fileno(this)
     if (fd == -1) return fd
@@ -36,5 +38,5 @@ internal actual inline fun CPointer<FILE>.setCLOEXEC(): Int {
 }
 
 @PublishedApi
-@Suppress("NOTHING_TO_INLINE")
+@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
 internal actual inline fun String.appendCLOEXEC(): String = this

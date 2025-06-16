@@ -59,8 +59,6 @@ open class io.matthewnelson.kmp.file/InterruptedException : kotlin/Exception { /
     constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/InterruptedException.<init>|<init>(kotlin.String?){}[0]
 }
 
-final val io.matthewnelson.kmp.file.internal/IsWindows // io.matthewnelson.kmp.file.internal/IsWindows|{}IsWindows[0]
-    final fun <get-IsWindows>(): kotlin/Boolean // io.matthewnelson.kmp.file.internal/IsWindows.<get-IsWindows>|<get-IsWindows>(){}[0]
 final val io.matthewnelson.kmp.file/SysDirSep // io.matthewnelson.kmp.file/SysDirSep|{}SysDirSep[0]
     final fun <get-SysDirSep>(): kotlin/Char // io.matthewnelson.kmp.file/SysDirSep.<get-SysDirSep>|<get-SysDirSep>(){}[0]
 final val io.matthewnelson.kmp.file/SysTempDir // io.matthewnelson.kmp.file/SysTempDir|{}SysTempDir[0]
@@ -98,6 +96,9 @@ final fun io.matthewnelson.kmp.file/errnoToIOException(kotlin/Int): io.matthewne
 final inline fun (kotlin/String).io.matthewnelson.kmp.file/appendCLOEXEC(): kotlin/String // io.matthewnelson.kmp.file/appendCLOEXEC|appendCLOEXEC@kotlin.String(){}[0]
 
 // Targets: [androidNative, apple]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fdOpen(kotlin/Int, kotlin/String, kotlin/Boolean): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/fdOpen|fdOpen@io.matthewnelson.kmp.file.File(kotlin.Int;kotlin.String;kotlin.Boolean){}[0]
+
+// Targets: [androidNative, apple]
 final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray){}[0]
 
 // Targets: [androidNative, apple]
@@ -111,6 +112,21 @@ final inline fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewn
 
 // Targets: [androidNative, apple]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [androidNative, apple]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenA(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fOpenA|fOpenA@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [androidNative, apple]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fOpenR|fOpenR@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [androidNative, apple]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [androidNative, apple]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fdOpen(kotlin/Int, kotlin/String, kotlin/Boolean, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fdOpen|fdOpen@io.matthewnelson.kmp.file.File(kotlin.Int;kotlin.String;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [linux]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fdOpen(kotlin/Int, kotlin/String, kotlin/Boolean): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/fdOpen|fdOpen@io.matthewnelson.kmp.file.File(kotlin.Int;kotlin.String;kotlin.Boolean){}[0]
 
 // Targets: [linux]
 final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray){}[0]
@@ -126,6 +142,18 @@ final inline fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthew
 
 // Targets: [linux]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [linux]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenA(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fOpenA|fOpenA@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [linux]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fOpenR|fOpenR@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [linux]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [linux]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fdOpen(kotlin/Int, kotlin/String, kotlin/Boolean, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fdOpen|fdOpen@io.matthewnelson.kmp.file.File(kotlin.Int;kotlin.String;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
 
 // Targets: [js]
 final value class io.matthewnelson.kmp.file/Buffer { // io.matthewnelson.kmp.file/Buffer|null[0]
@@ -186,6 +214,9 @@ final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/write(io.ma
 final fun (kotlin/Throwable).io.matthewnelson.kmp.file/toIOException(): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/toIOException|toIOException@kotlin.Throwable(){}[0]
 
 // Targets: [mingwX64]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fdOpen(kotlin/Int, kotlin/String, kotlin/Boolean): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/fdOpen|fdOpen@io.matthewnelson.kmp.file.File(kotlin.Int;kotlin.String;kotlin.Boolean){}[0]
+
+// Targets: [mingwX64]
 final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray){}[0]
 
 // Targets: [mingwX64]
@@ -199,3 +230,15 @@ final inline fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewne
 
 // Targets: [mingwX64]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [mingwX64]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenA(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpenA|fOpenA@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [mingwX64]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpenR|fOpenR@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [mingwX64]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [mingwX64]
+final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fdOpen(kotlin/Int, kotlin/String, kotlin/Boolean, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fdOpen|fdOpen@io.matthewnelson.kmp.file.File(kotlin.Int;kotlin.String;kotlin.Boolean;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]

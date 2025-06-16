@@ -17,7 +17,10 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import platform.posix.O_CLOEXEC
+
 internal actual inline fun platformDirSeparator(): Char = '/'
 
-@PublishedApi
 internal actual val IsWindows: Boolean = false
+
+internal actual inline fun Int.orOCLOEXEC(): Int = this or O_CLOEXEC

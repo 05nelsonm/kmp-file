@@ -32,6 +32,7 @@ class FOpenUnixUnitTest {
         val tmp = randomTemp()
 
         try {
+            @Suppress("DEPRECATION")
             tmp.fOpen("wb") { file ->
                 val fd = fileno(file)
                 val stat = fcntl(fd, F_GETFD)

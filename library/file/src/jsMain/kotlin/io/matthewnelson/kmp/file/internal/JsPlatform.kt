@@ -31,7 +31,6 @@ internal actual inline fun platformTempDirectory(): File = try {
     "/tmp"
 }.toFile()
 
-@PublishedApi
 internal actual val IsWindows: Boolean by lazy {
     try {
         os_platform() == "win32"

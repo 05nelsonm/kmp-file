@@ -26,6 +26,8 @@ internal typealias Path = String
 internal expect inline fun platformDirSeparator(): Char
 internal expect inline fun platformTempDirectory(): File
 
+// NOTE: Do not move or modify. Used to be a part of NativeFile.fOpen
+//  inline API and annotated with @PublishedApi.
 internal expect val IsWindows: Boolean
 
 @Throws(IOException::class)

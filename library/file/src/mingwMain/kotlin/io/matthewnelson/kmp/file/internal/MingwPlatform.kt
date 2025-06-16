@@ -37,5 +37,6 @@ internal actual inline fun platformTempDirectory(): File {
     return tmpdir.toFile()
 }
 
-@PublishedApi
 internal actual val IsWindows: Boolean = true
+
+internal actual inline fun Int.orOCLOEXEC(): Int = this
