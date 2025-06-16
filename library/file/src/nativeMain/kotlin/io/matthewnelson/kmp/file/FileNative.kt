@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress")
+@file:Suppress("KotlinRedundantDiagnosticSuppress", "VariableInitializerIsRedundant")
 
 package io.matthewnelson.kmp.file
 
@@ -35,6 +35,9 @@ import kotlin.contracts.contract
  *
  * **NOTE:** Flag `e` for O_CLOEXEC is always added to [flags] for
  * non-Windows if it is not present.
+ *
+ * **NOTE:** Underlying [fopen] and [fclose] calls are always retried in
+ * the event of a failure result when [errno] is [EINTR].
  *
  * e.g.
  *
@@ -60,7 +63,16 @@ public inline fun <T: Any?> File.fOpen(
 
     // Always open with O_CLOEXEC
     val f = if (!IsWindows && !flags.contains('e')) flags + 'e' else flags
-    val ptr = fopen(path, f) ?: throw errnoToIOException(errno)
+
+    var ptr: CPointer<FILE>? = null
+    while (true) {
+        ptr = fopen(path, f)
+        if (ptr != null) break
+        val errno = errno
+        if (errno == EINTR) continue
+        throw errnoToIOException(errno)
+    }
+
     var threw: Throwable? = null
 
     val result = try {
@@ -70,14 +82,17 @@ public inline fun <T: Any?> File.fOpen(
         null
     }
 
-    if (fclose(ptr) != 0) {
+    while (true) {
+        if (fclose(ptr) == 0) break
+        val errno = errno
+        if (errno == EINTR) continue
         val e = errnoToIOException(errno)
         if (threw != null) {
-            @Suppress("UNNECESSARY_SAFE_CALL")
-            threw?.addSuppressed(e)
+            threw.addSuppressed(e)
         } else {
             threw = e
         }
+        break
     }
 
     threw?.let { throw it }
@@ -92,6 +107,9 @@ public inline fun <T: Any?> File.fOpen(
 /**
  * Reads the contents of [FILE] into provided ByteArray.
  *
+ * **NOTE:** Underlying [fread] call is always retried in
+ * the event of a failure result when [errno] is [EINTR].
+ *
  * When return value is:
  *  - Negative: error, check [errno]
  *  - 0: no more data to read (break)
@@ -102,11 +120,20 @@ public inline fun <T: Any?> File.fOpen(
 public fun CPointer<FILE>.fRead(
     buf: ByteArray,
 ): Int = buf.usePinned { pinned ->
-    fs_platform_fread(this, pinned.addressOf(0), buf.size)
+    var ret = -1
+    while (true) {
+        ret = fs_platform_fread(this, pinned.addressOf(0), buf.size)
+        if (ret == -1 && errno == EINTR) continue
+        break
+    }
+    ret
 }
 
 /**
  * Writes [buf] to [FILE]
+ *
+ * **NOTE:** Underlying [fwrite] call is always retried in
+ * the event of a failure result when [errno] is [EINTR].
  *
  * When return value is:
  *  - Negative: error, check [errno]
@@ -118,9 +145,15 @@ public fun CPointer<FILE>.fRead(
 public fun CPointer<FILE>.fWrite(
     buf: ByteArray,
     offset: Int = 0,
-    len: Int = buf.size
+    len: Int = buf.size,
 ): Int = buf.usePinned { pinned ->
-    fs_platform_fwrite(this, pinned.addressOf(offset), len)
+    var ret = -1
+    while (true) {
+        ret = fs_platform_fwrite(this, pinned.addressOf(offset), len)
+        if (ret == -1 && errno == EINTR) continue
+        break
+    }
+    ret
 }
 
 @ExperimentalForeignApi
