@@ -15,14 +15,16 @@
  **/
 package io.matthewnelson.kmp.file
 
+import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.FD_CLOEXEC
+import platform.posix.FILE
 import platform.posix.F_GETFD
 import platform.posix.errno
 import platform.posix.fcntl
 import platform.posix.fileno
 import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 class FOpenUnixUnitTest {
@@ -33,14 +35,48 @@ class FOpenUnixUnitTest {
 
         try {
             @Suppress("DEPRECATION")
-            tmp.fOpen("wb") { file ->
-                val fd = fileno(file)
-                val stat = fcntl(fd, F_GETFD)
-                if (stat == -1) throw errnoToIOException(errno)
-                assertEquals(stat, stat or FD_CLOEXEC)
-            }
+            tmp.fOpen("wb") { file -> assertTrue(file.hasFD_CLOEXEC()) }
         } finally {
             tmp.delete()
         }
+    }
+
+    @Test
+    fun givenFile_whenFOpenR_thenHasCLOEXEC() {
+        val tmp = randomTemp()
+        tmp.writeUtf8("Hello World!")
+
+        try {
+            tmp.fOpenR { file -> assertTrue(file.hasFD_CLOEXEC()) }
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
+    fun givenFile_whenFOpenW_thenHasCLOEXEC() {
+        val tmp = randomTemp()
+        try {
+            tmp.fOpenW { file -> assertTrue(file.hasFD_CLOEXEC()) }
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
+    fun givenFile_whenFOpenA_thenHasCLOEXEC() {
+        val tmp = randomTemp()
+        try {
+            tmp.fOpenA { file -> assertTrue(file.hasFD_CLOEXEC()) }
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    private fun CPointer<FILE>.hasFD_CLOEXEC(): Boolean {
+        val fd = fileno(this)
+        val stat = fcntl(fd, F_GETFD)
+        if (stat == -1) throw errnoToIOException(errno)
+        return (stat or FD_CLOEXEC) == stat
     }
 }

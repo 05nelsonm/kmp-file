@@ -39,8 +39,8 @@ public inline fun <T: Any?> File.fOpenR(
         callsInPlace(block, InvocationKind.AT_MOST_ONCE)
     }
     val flags = if (only) O_RDONLY else O_RDWR
-    val mode = if (only) "r" else "r+"
-    return fdOpen(flags, mode, b, block)
+    val format = if (only) "r" else "r+"
+    return fdOpen(flags, format, b, block)
 }
 
 @DelicateFileApi
@@ -57,8 +57,8 @@ public inline fun <T: Any?> File.fOpenW(
     }
     var flags = if (only) O_WRONLY else O_RDWR
     flags = flags or O_CREAT or O_TRUNC
-    val mode = if (only) "w" else "w+"
-    return fdOpen(flags, mode, b, block)
+    val format = if (only) "w" else "w+"
+    return fdOpen(flags, format, b, block)
 }
 
 @DelicateFileApi
@@ -75,8 +75,8 @@ public inline fun <T: Any?> File.fOpenA(
     }
     var flags = if (only) O_WRONLY else O_RDWR
     flags = flags or O_CREAT or O_APPEND
-    val mode = if (only) "a" else "a+"
-    return fdOpen(flags, mode, b, block)
+    val format = if (only) "a" else "a+"
+    return fdOpen(flags, format, b, block)
 }
 
 /**
