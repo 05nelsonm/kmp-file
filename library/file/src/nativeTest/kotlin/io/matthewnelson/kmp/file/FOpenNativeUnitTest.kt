@@ -60,7 +60,7 @@ class FOpenNativeUnitTest {
         tmp.writeUtf8("Hello World!")
 
         try {
-            tmp.fOpenA(b = true).use { file ->
+            tmp.fOpenA().use { file ->
                 // Should all go in single shot.
                 file.fWrite("Hello World2!".encodeToByteArray())
             }
@@ -76,7 +76,7 @@ class FOpenNativeUnitTest {
         val tmp = randomTemp()
 
         try {
-            tmp.fOpenA(b = true).use { file ->
+            tmp.fOpenA().use { file ->
                 // Should all go in single shot.
                 file.fWrite("Hello World!".encodeToByteArray())
             }

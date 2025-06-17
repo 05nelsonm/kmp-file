@@ -36,7 +36,7 @@ import kotlin.contracts.contract
 @Throws(IllegalArgumentException::class, IOException::class)
 public fun File.fOpenR(
     only: Boolean = true,
-    b: Boolean = false,
+    b: Boolean = true,
     e: Boolean = true,
     mode: OpenMode = OpenMode.MustExist,
 ): CPointer<FILE> {
@@ -58,7 +58,7 @@ public fun File.fOpenR(
 @Throws(IllegalArgumentException::class, IOException::class)
 public fun File.fOpenW(
     only: Boolean = true,
-    b: Boolean = false,
+    b: Boolean = true,
     e: Boolean = true,
     mode: OpenMode = OpenMode.MaybeCreate.DEFAULT,
 ): CPointer<FILE> {
@@ -76,7 +76,7 @@ public fun File.fOpenW(
 @Throws(IllegalArgumentException::class, IOException::class)
 public fun File.fOpenA(
     only: Boolean = true,
-    b: Boolean = false,
+    b: Boolean = true,
     e: Boolean = true,
     mode: OpenMode = OpenMode.MaybeCreate.DEFAULT,
 ): CPointer<FILE> {
