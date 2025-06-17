@@ -93,35 +93,24 @@ internal actual inline fun File.fs_platform_fopen(
     if (e) flags = flags or O_CLOEXEC
     val format = if (b) "${format}b" else format
 
-    var fd: Int = -1
-    while (true) {
-        fd = open(path, flags, modet)
-        if (fd != -1) break
-        val errno = errno
-        if (errno == EINTR) continue
-        throw errnoToIllegalArgumentOrIOException(errno)
-    }
+    val fd = ignoreEINTR { open(path, flags, modet) }
+    if (fd == -1) throw errnoToIllegalArgumentOrIOException(errno)
 
 //    if ((flags or O_APPEND) == flags && (flags or O_RDWR) == flags) {
-//        // TODO: Set reading file position to beginning of file
+//        // TODO: Set reading file position to beginning of file?
 //    }
 
     var ptr: CPointer<FILE>? = null
-
     while (true) {
         ptr = fdopen(fd, format)
         if (ptr != null) break
         val errno1 = errno
         if (errno1 == EINTR) continue
+
         val e = errnoToIllegalArgumentOrIOException(errno1)
-
-        while (true) {
-            if (close(fd) == 0) break
-            val errno2 = errno
-            if (errno2 == EINTR) continue
-            e.addSuppressed(errnoToIOException(errno2))
+        if (ignoreEINTR { close(fd) } == -1) {
+            e.addSuppressed(errnoToIOException(errno))
         }
-
         throw e
     }
 

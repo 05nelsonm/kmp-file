@@ -21,6 +21,7 @@ import io.matthewnelson.kmp.file.internal.errnoToString
 import io.matthewnelson.kmp.file.internal.fs_platform_fopen
 import io.matthewnelson.kmp.file.internal.fs_platform_fread
 import io.matthewnelson.kmp.file.internal.fs_platform_fwrite
+import io.matthewnelson.kmp.file.internal.ignoreEINTR
 import kotlinx.cinterop.*
 import platform.posix.*
 import kotlin.contracts.ExperimentalContracts
@@ -101,13 +102,9 @@ public fun File.fOpenA(
 public fun CPointer<FILE>.fRead(
     buf: ByteArray,
 ): Int = buf.usePinned { pinned ->
-    var ret = -1
-    while (true) {
-        ret = fs_platform_fread(this, pinned.addressOf(0), buf.size)
-        if (ret == -1 && errno == EINTR) continue
-        break
+    ignoreEINTR {
+        fs_platform_fread(this, pinned.addressOf(0), buf.size)
     }
-    ret
 }
 
 /**
@@ -128,13 +125,20 @@ public fun CPointer<FILE>.fWrite(
     offset: Int = 0,
     len: Int = buf.size,
 ): Int = buf.usePinned { pinned ->
-    var ret = -1
-    while (true) {
-        ret = fs_platform_fwrite(this, pinned.addressOf(offset), len)
-        if (ret == -1 && errno == EINTR) continue
-        break
+    ignoreEINTR {
+        fs_platform_fwrite(this, pinned.addressOf(offset), len)
     }
-    ret
+}
+
+/**
+ * TODO
+ * */
+@DelicateFileApi
+@ExperimentalForeignApi
+@Throws(IOException::class)
+public fun CPointer<FILE>.close() {
+    if (ignoreEINTR { fclose(this) } == 0) return
+    throw errnoToIOException(errno)
 }
 
 /**
@@ -156,13 +160,17 @@ public inline fun <T: Any?> CPointer<FILE>.use(block: (CPointer<FILE>) -> T): T 
         threw = t
         null
     }
-    close { t ->
+
+    try {
+        close()
+    } catch (t: IOException) {
         if (threw != null) {
             threw.addSuppressed(t)
         } else {
             threw = t
         }
     }
+
     threw?.let { throw it }
 
     // T is type Any?, so cannot hit with !! b/c
@@ -182,25 +190,6 @@ public fun errnoToIOException(errno: Int): IOException {
         ENOENT -> FileNotFoundException(message)
         else -> IOException(message)
     }
-}
-
-@PublishedApi
-@ExperimentalForeignApi
-@OptIn(ExperimentalContracts::class)
-internal inline fun <T: Any> CPointer<FILE>.close(onError: (IOException) -> T): T? {
-    contract {
-        callsInPlace(onError, InvocationKind.AT_MOST_ONCE)
-    }
-
-    var e: IOException? = null
-    while (e == null) {
-        if (fclose(this) == 0) break
-        val errno = errno
-        if (errno == EINTR) continue
-        e = errnoToIOException(errno)
-    }
-    if (e == null) return null
-    return onError(e)
 }
 
 /**

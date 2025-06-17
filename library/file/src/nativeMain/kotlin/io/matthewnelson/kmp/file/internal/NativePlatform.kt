@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE", "VariableInitializerIsRedundant")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -21,9 +21,13 @@ import io.matthewnelson.kmp.file.*
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKString
+import platform.posix.EINTR
 import platform.posix.EINVAL
 import platform.posix.errno
 import platform.posix.strerror
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 @Throws(IOException::class)
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
@@ -110,4 +114,22 @@ internal inline fun errnoToIllegalArgumentOrIOException(errno: Int): Exception {
     } else {
         errnoToIOException(errno)
     }
+}
+
+// action must be something that returns -1 and sets errno
+@ExperimentalForeignApi
+@OptIn(ExperimentalContracts::class)
+internal inline fun ignoreEINTR(action: () -> Int): Int {
+    contract {
+        callsInPlace(action, InvocationKind.UNKNOWN)
+    }
+
+    var ret = -1
+    while (true) {
+        ret = action()
+        if (ret != -1) break
+        if (errno == EINTR) continue
+        break
+    }
+    return ret
 }

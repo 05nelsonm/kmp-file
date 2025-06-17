@@ -138,6 +138,9 @@ final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotl
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [androidNative, apple]
+final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/close() // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(){}[0]
+
+// Targets: [androidNative, apple]
 final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray){}[0]
 
 // Targets: [androidNative, apple]
@@ -145,9 +148,6 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.k
 
 // Targets: [androidNative, apple]
 final inline fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(){}[0]
-
-// Targets: [androidNative, apple]
-final inline fun <#A: kotlin/Any> (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/close(kotlin/Function1<io.matthewnelson.kmp.file/IOException, #A>): #A? // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.Function1<io.matthewnelson.kmp.file.IOException,0:0>){0§<kotlin.Any>}[0]
 
 // Targets: [androidNative, apple]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
@@ -165,6 +165,9 @@ final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotl
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [linux]
+final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/close() // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(){}[0]
+
+// Targets: [linux]
 final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray){}[0]
 
 // Targets: [linux]
@@ -172,9 +175,6 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.
 
 // Targets: [linux]
 final inline fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(){}[0]
-
-// Targets: [linux]
-final inline fun <#A: kotlin/Any> (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/close(kotlin/Function1<io.matthewnelson.kmp.file/IOException, #A>): #A? // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.Function1<io.matthewnelson.kmp.file.IOException,0:0>){0§<kotlin.Any>}[0]
 
 // Targets: [linux]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
@@ -250,6 +250,9 @@ final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotl
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [mingwX64]
+final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/close() // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix._iobuf>(){}[0]
+
+// Targets: [mingwX64]
 final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray){}[0]
 
 // Targets: [mingwX64]
@@ -257,9 +260,6 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.km
 
 // Targets: [mingwX64]
 final inline fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._iobuf>(){}[0]
-
-// Targets: [mingwX64]
-final inline fun <#A: kotlin/Any> (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/close(kotlin/Function1<io.matthewnelson.kmp.file/IOException, #A>): #A? // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.Function1<io.matthewnelson.kmp.file.IOException,0:0>){0§<kotlin.Any>}[0]
 
 // Targets: [mingwX64]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]

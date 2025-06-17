@@ -119,6 +119,7 @@ internal actual fun fs_chmod(path: Path, mode: String) {
     try {
         fs_chmodSync(path, mode)
     } catch (t: Throwable) {
+        // t.errorCodeOrNull >> ERR_INVALID_ARG_VALUE >> IllegalArgumentException
         throw t.toIOException()
     }
 }

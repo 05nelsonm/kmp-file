@@ -47,6 +47,11 @@ internal actual inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE> {
     }
 
     val e = errnoToIOException(errno)
-    close { t -> e.addSuppressed(t) }
+    try {
+        @OptIn(DelicateFileApi::class)
+        close()
+    } catch (t: IOException) {
+        e.addSuppressed(t)
+    }
     throw e
 }
