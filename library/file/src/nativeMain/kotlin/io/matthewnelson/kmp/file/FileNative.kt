@@ -28,7 +28,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-
 /**
  * TODO
  * */
@@ -219,6 +218,7 @@ public fun errnoToIOException(errno: Int): IOException {
  * platforms. The new functions are designed to supplement the
  * behavior in as atomic a manner as possible.
  *
+ * @see [open]
  * @see [openR]
  * @see [openW]
  * @see [openA]

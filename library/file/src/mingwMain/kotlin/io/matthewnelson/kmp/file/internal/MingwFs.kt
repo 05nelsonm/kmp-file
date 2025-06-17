@@ -92,14 +92,8 @@ internal actual inline fun File.fs_platform_fopen(
         is OpenMode.MustCreate -> if (exists()) throw IOException("$mode && exists[$this]")
     }
 
-    var ptr: CPointer<FILE>? = null
-    while (true) {
-        ptr = fopen(path, format)
-        if (ptr != null) break
-        val errno = errno
-        if (errno == EINTR) continue
-        throw errnoToIOException(errno)
-    }
+    val ptr = ignoreEINTR<FILE> { fopen(path, format) }
+    if (ptr == null) throw errnoToIOException(errno)
     return ptr
 }
 

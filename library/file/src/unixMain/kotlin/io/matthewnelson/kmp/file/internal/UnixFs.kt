@@ -100,20 +100,14 @@ internal actual inline fun File.fs_platform_fopen(
 //        // TODO: Set reading file position to beginning of file?
 //    }
 
-    var ptr: CPointer<FILE>? = null
-    while (true) {
-        ptr = fdopen(fd, format)
-        if (ptr != null) break
-        val errno1 = errno
-        if (errno1 == EINTR) continue
-
-        val e = errnoToIllegalArgumentOrIOException(errno1)
+    val ptr = ignoreEINTR<FILE> { fdopen(fd, format) }
+    if (ptr == null) {
+        val e = errnoToIllegalArgumentOrIOException(errno)
         if (ignoreEINTR { close(fd) } == -1) {
             e.addSuppressed(errnoToIOException(errno))
         }
         throw e
     }
-
     return ptr
 }
 
