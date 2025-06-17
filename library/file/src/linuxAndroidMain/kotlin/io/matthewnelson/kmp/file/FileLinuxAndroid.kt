@@ -22,13 +22,13 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.FILE
 
 @PublishedApi
-@ExperimentalForeignApi
-@Throws(IOException::class)
-@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
-internal actual inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE> = this // no-op
-
-@PublishedApi
 @Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
 internal actual inline fun String.appendFlagCLOEXEC(): String {
     return if (contains('e')) this else this + 'e'
 }
+
+@PublishedApi
+@ExperimentalForeignApi
+@Throws(IOException::class)
+@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
+internal actual inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE> = this // no-op

@@ -90,13 +90,35 @@ final inline fun (kotlin/Throwable).io.matthewnelson.kmp.file/wrapIOException():
 final inline fun (kotlin/Throwable).io.matthewnelson.kmp.file/wrapIOException(kotlin/Function0<kotlin/String>): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/wrapIOException|wrapIOException@kotlin.Throwable(kotlin.Function0<kotlin.String>){}[0]
 
 // Targets: [native]
-final class io.matthewnelson.kmp.file/FOpen { // io.matthewnelson.kmp.file/FOpen|null[0]
-    final object Companion { // io.matthewnelson.kmp.file/FOpen.Companion|null[0]
-        final val MustExist // io.matthewnelson.kmp.file/FOpen.Companion.MustExist|{}MustExist[0]
-            final fun <get-MustExist>(): io.matthewnelson.kmp.file/FOpen // io.matthewnelson.kmp.file/FOpen.Companion.MustExist.<get-MustExist>|<get-MustExist>(){}[0]
+abstract class io.matthewnelson.kmp.file/OpenMode { // io.matthewnelson.kmp.file/OpenMode|null[0]
+    abstract fun toString(): kotlin/String // io.matthewnelson.kmp.file/OpenMode.toString|toString(){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.matthewnelson.kmp.file/OpenMode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.matthewnelson.kmp.file/OpenMode.hashCode|hashCode(){}[0]
 
-        final fun MaybeCreate(kotlin/String = ...): io.matthewnelson.kmp.file/FOpen // io.matthewnelson.kmp.file/FOpen.Companion.MaybeCreate|MaybeCreate(kotlin.String){}[0]
-        final fun MustCreate(kotlin/String = ...): io.matthewnelson.kmp.file/FOpen // io.matthewnelson.kmp.file/FOpen.Companion.MustCreate|MustCreate(kotlin.String){}[0]
+    final class MaybeCreate : io.matthewnelson.kmp.file/OpenMode { // io.matthewnelson.kmp.file/OpenMode.MaybeCreate|null[0]
+        final fun toString(): kotlin/String // io.matthewnelson.kmp.file/OpenMode.MaybeCreate.toString|toString(){}[0]
+
+        final object Companion { // io.matthewnelson.kmp.file/OpenMode.MaybeCreate.Companion|null[0]
+            final val DEFAULT // io.matthewnelson.kmp.file/OpenMode.MaybeCreate.Companion.DEFAULT|{}DEFAULT[0]
+                final fun <get-DEFAULT>(): io.matthewnelson.kmp.file/OpenMode.MaybeCreate // io.matthewnelson.kmp.file/OpenMode.MaybeCreate.Companion.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
+
+            final fun invoke(kotlin/String = ...): io.matthewnelson.kmp.file/OpenMode.MaybeCreate // io.matthewnelson.kmp.file/OpenMode.MaybeCreate.Companion.invoke|invoke(kotlin.String){}[0]
+        }
+    }
+
+    final class MustCreate : io.matthewnelson.kmp.file/OpenMode { // io.matthewnelson.kmp.file/OpenMode.MustCreate|null[0]
+        final fun toString(): kotlin/String // io.matthewnelson.kmp.file/OpenMode.MustCreate.toString|toString(){}[0]
+
+        final object Companion { // io.matthewnelson.kmp.file/OpenMode.MustCreate.Companion|null[0]
+            final val DEFAULT // io.matthewnelson.kmp.file/OpenMode.MustCreate.Companion.DEFAULT|{}DEFAULT[0]
+                final fun <get-DEFAULT>(): io.matthewnelson.kmp.file/OpenMode.MustCreate // io.matthewnelson.kmp.file/OpenMode.MustCreate.Companion.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
+
+            final fun invoke(kotlin/String = ...): io.matthewnelson.kmp.file/OpenMode.MustCreate // io.matthewnelson.kmp.file/OpenMode.MustCreate.Companion.invoke|invoke(kotlin.String){}[0]
+        }
+    }
+
+    final object MustExist : io.matthewnelson.kmp.file/OpenMode { // io.matthewnelson.kmp.file/OpenMode.MustExist|null[0]
+        final fun toString(): kotlin/String // io.matthewnelson.kmp.file/OpenMode.MustExist.toString|toString(){}[0]
     }
 }
 
@@ -107,13 +129,13 @@ final fun io.matthewnelson.kmp.file/errnoToIOException(kotlin/Int): io.matthewne
 final inline fun (kotlin/String).io.matthewnelson.kmp.file/appendFlagCLOEXEC(): kotlin/String // io.matthewnelson.kmp.file/appendFlagCLOEXEC|appendFlagCLOEXEC@kotlin.String(){}[0]
 
 // Targets: [androidNative, apple]
-final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenA(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/FOpen = ...): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/fOpenA|fOpenA@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.FOpen){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenA(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/fOpenA|fOpenA@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [androidNative, apple]
-final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/FOpen = ...): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/fOpenR|fOpenR@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.FOpen){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/fOpenR|fOpenR@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [androidNative, apple]
-final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/FOpen = ...): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.FOpen){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [androidNative, apple]
 final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray){}[0]
@@ -134,13 +156,13 @@ final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewne
 final inline fun <#A: kotlin/Any?> (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/use(kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/use|use@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
 
 // Targets: [linux]
-final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenA(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/FOpen = ...): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/fOpenA|fOpenA@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.FOpen){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenA(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/fOpenA|fOpenA@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [linux]
-final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/FOpen = ...): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/fOpenR|fOpenR@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.FOpen){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/fOpenR|fOpenR@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [linux]
-final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/FOpen = ...): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.FOpen){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [linux]
 final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray){}[0]
@@ -219,13 +241,13 @@ final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/write(io.ma
 final fun (kotlin/Throwable).io.matthewnelson.kmp.file/toIOException(): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/toIOException|toIOException@kotlin.Throwable(){}[0]
 
 // Targets: [mingwX64]
-final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenA(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/FOpen = ...): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/fOpenA|fOpenA@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.FOpen){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenA(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/fOpenA|fOpenA@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [mingwX64]
-final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/FOpen = ...): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/fOpenR|fOpenR@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.FOpen){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenR(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/fOpenR|fOpenR@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [mingwX64]
-final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/FOpen = ...): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.FOpen){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpenW(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenMode = ...): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/fOpenW|fOpenW@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenMode){}[0]
 
 // Targets: [mingwX64]
 final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fRead(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/fRead|fRead@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray){}[0]

@@ -26,7 +26,7 @@ import platform.posix.*
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun fs_chmod(path: Path, mode: String) {
     val modeT = try {
-        Mode(value = mode).toModeT()
+        ModeT.get(mode)
     } catch (e: IllegalArgumentException) {
         throw IOException(e)
     }
@@ -63,7 +63,7 @@ internal actual fun fs_realpath(path: Path): Path {
 
 internal actual fun fs_platform_mkdir(
     path: Path,
-): Int = fs_platform_mkdir(path, Mode._775)
+): Int = fs_platform_mkdir(path, ModeT._775)
 
 @ExperimentalForeignApi
 @Throws(IOException::class)

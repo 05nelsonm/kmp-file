@@ -17,10 +17,10 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.errnoToString
+import io.matthewnelson.kmp.file.internal.platformFOpen
 import io.matthewnelson.kmp.file.internal.fs_platform_fread
 import io.matthewnelson.kmp.file.internal.fs_platform_fwrite
-import io.matthewnelson.kmp.file.internal.orOCLOEXEC
 import kotlinx.cinterop.*
 import platform.posix.*
 import kotlin.contracts.ExperimentalContracts
@@ -37,16 +37,16 @@ public fun File.fOpenR(
     only: Boolean = true,
     b: Boolean = false,
     e: Boolean = true,
-    create: FOpen = FOpen.MustExist,
+    mode: OpenMode = OpenMode.MustExist,
 ): CPointer<FILE> {
     if (only) {
-        require(create.flags == FOpen.MustExist.flags) {
-            "Illegal flag combination (O_RDONLY | O_CREAT)"
+        require(mode is OpenMode.MustExist) {
+            "only == true && mode !is OpenMode.MustExist >> Illegal combination flags[O_RDONLY | O_CREAT]"
         }
     }
     val flags = if (only) O_RDONLY else O_RDWR
     val format = if (only) "r" else "r+"
-    return fdOpen(flags, format, b, e, create)
+    return platformFOpen(flags, format, b, e, mode)
 }
 
 /**
@@ -59,12 +59,12 @@ public fun File.fOpenW(
     only: Boolean = true,
     b: Boolean = false,
     e: Boolean = true,
-    create: FOpen = FOpen.DefaultMaybeCreate,
+    mode: OpenMode = OpenMode.MaybeCreate.DEFAULT,
 ): CPointer<FILE> {
     var flags = if (only) O_WRONLY else O_RDWR
     flags = flags or O_TRUNC
     val format = if (only) "w" else "w+"
-    return fdOpen(flags, format, b, e, create)
+    return platformFOpen(flags, format, b, e, mode)
 }
 
 /**
@@ -77,12 +77,12 @@ public fun File.fOpenA(
     only: Boolean = true,
     b: Boolean = false,
     e: Boolean = true,
-    create: FOpen = FOpen.DefaultMaybeCreate,
+    mode: OpenMode = OpenMode.MaybeCreate.DEFAULT,
 ): CPointer<FILE> {
     var flags = if (only) O_WRONLY else O_RDWR
     flags = flags or O_APPEND
     val format = if (only) "a" else "a+"
-    return fdOpen(flags, format, b, e, create)
+    return platformFOpen(flags, format, b, e, mode)
 }
 
 /**
@@ -137,6 +137,9 @@ public fun CPointer<FILE>.fWrite(
     ret
 }
 
+/**
+ * TODO
+ * */
 @DelicateFileApi
 @ExperimentalForeignApi
 @Throws(IOException::class)
@@ -169,6 +172,9 @@ public inline fun <T: Any?> CPointer<FILE>.use(block: (CPointer<FILE>) -> T): T 
     return result as T
 }
 
+/**
+ * TODO
+ * */
 @ExperimentalForeignApi
 public fun errnoToIOException(errno: Int): IOException {
     val message = errnoToString(errno)
@@ -197,75 +203,12 @@ internal inline fun CPointer<FILE>.close(onError: (IOException) -> Unit) {
     onError(e)
 }
 
-@ExperimentalForeignApi
-@Throws(IllegalArgumentException::class, IOException::class)
-private inline fun File.fdOpen(
-    flags: Int,
-    format: String,
-    b: Boolean,
-    e: Boolean,
-    create: FOpen,
-): CPointer<FILE> {
-    val mode = Mode(create.mode).toModeT()
-    var flags = flags or create.flags
-    if (e) flags = flags.orOCLOEXEC()
-    val format = if (b) "${format}b" else format
-
-    var fd: Int = -1
-    while (true) {
-        fd = open(path, flags, mode)
-        if (fd != -1) break
-        val errno = errno
-        if (errno == EINTR) continue
-        throw errnoToIllegalArgumentOrIOException(errno)
-    }
-
-//    if ((flags or O_APPEND) == flags && (flags or O_RDWR) == flags) {
-//        // TODO: Set reading file position to beginning of file
-//    }
-
-    var ptr: CPointer<FILE>? = null
-
-    while (true) {
-        ptr = fdopen(fd, format)
-        if (ptr != null) break
-        val errno1 = errno
-        if (errno1 == EINTR) continue
-        val e = errnoToIllegalArgumentOrIOException(errno1)
-
-        while (true) {
-            if (close(fd) == 0) break
-            val errno2 = errno
-            if (errno2 == EINTR) continue
-            e.addSuppressed(errnoToIOException(errno2))
-        }
-
-        throw e
-    }
-
-    return ptr
-}
-
-@ExperimentalForeignApi
-private inline fun errnoToString(errno: Int): String {
-    return strerror(errno)?.toKString() ?: "errno: $errno"
-}
-
-@ExperimentalForeignApi
-private inline fun errnoToIllegalArgumentOrIOException(errno: Int): Exception {
-    return if (errno == EINVAL) {
-        val message = errnoToString(errno)
-        IllegalArgumentException(message)
-    } else {
-        errnoToIOException(errno)
-    }
-}
-
 /**
  * This has been DEPRECATED and replaced by the [fOpenR], [fOpenW],
- * [fOpenA], and [use] functions. Some flags (such as e, or x) are
- * not recognized via [fopen] on certain platforms. The new functions
- *
+ * [fOpenA], and [use] function combinations. Some flags (such as e,
+ * or x) are not recognized via [fopen] on certain platforms. The
+ * new functions are designed to supplement the behavior an as atomic
+ * a manner as possible.
  *
  * @see [fOpenR]
  * @see [fOpenW]
@@ -307,14 +250,14 @@ public inline fun <T: Any?> File.fOpen(
     return ptr.setFDCLOEXEC().use(block)
 }
 
+// Linux/AndroidNative targets only. All other platforms this is a no-op
+@PublishedApi
+@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
+internal expect inline fun String.appendFlagCLOEXEC(): String
+
 // Darwin targets only. All other platforms this is a no-op
 @PublishedApi
 @ExperimentalForeignApi
 @Throws(IOException::class)
 @Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
 internal expect inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE>
-
-// Linux/AndroidNative targets only. All other platforms this is a no-op
-@PublishedApi
-@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
-internal expect inline fun String.appendFlagCLOEXEC(): String

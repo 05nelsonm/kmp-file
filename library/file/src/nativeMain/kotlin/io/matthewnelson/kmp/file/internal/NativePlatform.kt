@@ -18,9 +18,13 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.*
+import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.toKString
+import platform.posix.FILE
 import platform.posix.errno
+import platform.posix.strerror
 
 @Throws(IOException::class)
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
@@ -94,4 +98,17 @@ internal actual inline fun File.platformWriteUtf8(text: String) {
     platformWriteBytes(encoded)
 }
 
-internal expect inline fun Int.orOCLOEXEC(): Int
+@ExperimentalForeignApi
+internal inline fun errnoToString(errno: Int): String {
+    return strerror(errno)?.toKString() ?: "errno: $errno"
+}
+
+@ExperimentalForeignApi
+@Throws(IllegalArgumentException::class, IOException::class)
+internal expect inline fun File.platformFOpen(
+    flags: Int,
+    format: String,
+    b: Boolean,
+    e: Boolean,
+    mode: OpenMode,
+): CPointer<FILE>

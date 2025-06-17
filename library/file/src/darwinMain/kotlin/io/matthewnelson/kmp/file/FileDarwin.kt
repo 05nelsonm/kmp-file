@@ -28,6 +28,10 @@ import platform.posix.fcntl
 import platform.posix.fileno
 
 @PublishedApi
+@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
+internal actual inline fun String.appendFlagCLOEXEC(): String = this // no-op
+
+@PublishedApi
 @ExperimentalForeignApi
 @Throws(IOException::class)
 @Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
@@ -46,7 +50,3 @@ internal actual inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE> {
     close { t -> e.addSuppressed(t) }
     throw e
 }
-
-@PublishedApi
-@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
-internal actual inline fun String.appendFlagCLOEXEC(): String = this

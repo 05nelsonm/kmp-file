@@ -25,27 +25,27 @@ import platform.posix.S_IXGRP
 import platform.posix.S_IXOTH
 import platform.posix.S_IXUSR
 
-internal value class Mode
-@Throws(IllegalArgumentException::class)
-constructor(private val value: String) {
+internal value class ModeT private constructor(private val value: String) {
 
     internal companion object {
+
         @Suppress("ObjectPropertyName")
-        internal val _775: UInt by lazy { Mode("775").toModeT() }
+        internal val _775: UInt by lazy { get("775") }
+
+        @Throws(IllegalArgumentException::class)
+        internal fun get(mode: String): UInt {
+            val m = ModeT(mode)
+            val mask =
+                Mask.Owner.from(m.value[0]) or
+                Mask.Group.from(m.value[1]) or
+                Mask.Other.from(m.value[2])
+
+            return mask.toUInt()
+        }
     }
 
     init {
-        require(value.length == 3) { "Invalid mode[$value] (e.g. 764)" }
-    }
-
-    @Throws(IllegalArgumentException::class)
-    internal fun toModeT(): UInt {
-        val mask =
-            Mask.Owner.from(value[0]) or
-            Mask.Group.from(value[1]) or
-            Mask.Other.from(value[2])
-
-        return mask.toUInt()
+        require(value.length == 3) { "Invalid mode.length[${value.length}]. Must be 3 digits[0-7] (e.g. 764)" }
     }
 
     private class Mask private constructor(

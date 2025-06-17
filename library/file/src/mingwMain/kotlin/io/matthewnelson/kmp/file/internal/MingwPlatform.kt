@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE", "VariableInitializerIsRedundant")
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.OpenMode
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
+import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString
+import platform.posix.EINTR
+import platform.posix.FILE
+import platform.posix.errno
+import platform.posix.fopen
 import platform.posix.getenv
 
 internal actual inline fun platformDirSeparator(): Char = '\\'
@@ -39,4 +49,33 @@ internal actual inline fun platformTempDirectory(): File {
 
 internal actual val IsWindows: Boolean = true
 
-internal actual inline fun Int.orOCLOEXEC(): Int = this
+@ExperimentalForeignApi
+@Throws(IllegalArgumentException::class, IOException::class)
+internal actual inline fun File.platformFOpen(
+    flags: Int,
+    format: String,
+    b: Boolean,
+    e: Boolean,
+    mode: OpenMode,
+): CPointer<FILE> {
+    // Not used. Still verify though to ensure arguments are consistent
+    // with Unix implementation
+    ModeT.get(mode.mode)
+    val format = if (b) "${format}b" else format
+
+    // Unfortunately, cannot check atomically like with Unix.
+    when (mode) {
+        is OpenMode.MustExist -> if (!exists()) throw FileNotFoundException("!exists[$this]")
+        is OpenMode.MustCreate -> if (exists()) throw IOException("exists[$this]")
+    }
+
+    var ptr: CPointer<FILE>? = null
+    while (true) {
+        ptr = fopen(path, format)
+        if (ptr != null) break
+        val errno = errno
+        if (errno == EINTR) continue
+        throw errnoToIOException(errno)
+    }
+    return ptr
+}
