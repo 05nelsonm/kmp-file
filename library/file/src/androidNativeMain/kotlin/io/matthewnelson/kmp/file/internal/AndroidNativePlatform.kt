@@ -56,7 +56,7 @@ private val __TempDir: File by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
 
 @Throws(Exception::class)
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-private fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile().fOpenR().use { file ->
+private fun readPackageName(pid: String): String = "/proc/$pid/cmdline".toFile().openR().use { file ->
     val buf = ByteArray(512)
     val read = file.fRead(buf)
     if (read == -1) throw errnoToIOException(errno)

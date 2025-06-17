@@ -22,15 +22,15 @@ import kotlin.test.assertFailsWith
 import kotlin.test.fail
 
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-class FOpenNativeUnitTest {
+class OpenNativeUnitTest {
 
     @Test
-    fun givenFOpen_whenOpenModeMustCreate_thenFailsWhenFileExists() {
+    fun givenOpen_whenOpenModeMustCreate_thenFailsWhenFileExists() {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
 
         try {
-            tmp.fOpenW(mode = OpenMode.MustCreate.DEFAULT).use {}
+            tmp.openW(mode = OpenMode.MustCreate.DEFAULT).use {}
             fail("file existed, but OpenMode.MustCreate did not throw exception")
         } catch (t: IOException) {
             // pass
@@ -41,11 +41,11 @@ class FOpenNativeUnitTest {
     }
 
     @Test
-    fun givenFOpen_whenOpenModeMustExist_thenFailsWhenFileDoesNotExists() {
+    fun givenOpen_whenOpenModeMustExist_thenFailsWhenFileDoesNotExists() {
         val tmp = randomTemp()
 
         try {
-            tmp.fOpenW(mode = OpenMode.MustExist).use {}
+            tmp.openW(mode = OpenMode.MustExist).use {}
             fail("file does not exist, but OpenMode.MustExist did not throw exception")
         } catch (_: FileNotFoundException) {
             // pass
@@ -55,12 +55,12 @@ class FOpenNativeUnitTest {
     }
 
     @Test
-    fun givenFOpenA_whenFileExists_thenIsAppended() {
+    fun givenOpenA_whenFileExists_thenIsAppended() {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
 
         try {
-            tmp.fOpenA().use { file ->
+            tmp.openA().use { file ->
                 // Should all go in single shot.
                 file.fWrite("Hello World2!".encodeToByteArray())
             }
@@ -72,11 +72,11 @@ class FOpenNativeUnitTest {
     }
 
     @Test
-    fun givenFOpenA_whenFileDoesNotExists_thenIsWritten() {
+    fun givenOpenA_whenFileDoesNotExists_thenIsWritten() {
         val tmp = randomTemp()
 
         try {
-            tmp.fOpenA().use { file ->
+            tmp.openA().use { file ->
                 // Should all go in single shot.
                 file.fWrite("Hello World!".encodeToByteArray())
             }
@@ -88,11 +88,11 @@ class FOpenNativeUnitTest {
     }
 
     @Test
-    fun givenFOpen_whenInvalidMode_thenThrowsException() {
+    fun givenOpen_whenInvalidModeMask_thenThrowsException() {
         val tmp = randomTemp()
         try {
             assertFailsWith<IllegalArgumentException> {
-                tmp.fOpenA(mode = OpenMode.MaybeCreate("888"))
+                tmp.openA(mode = OpenMode.MaybeCreate("888"))
             }
         } finally {
             tmp.delete()
@@ -100,11 +100,11 @@ class FOpenNativeUnitTest {
     }
 
     @Test
-    fun givenFOpenR_whenOnlyIsTrueAndOpenModeNotMustExist_thenThrowsException() {
+    fun givenOpenR_whenOnlyIsTrueAndOpenModeIsNotMustExist_thenThrowsException() {
         val tmp = randomTemp()
         try {
             assertFailsWith<IllegalArgumentException> {
-                tmp.fOpenR(mode = OpenMode.MaybeCreate.DEFAULT).use {}
+                tmp.openR(mode = OpenMode.MaybeCreate.DEFAULT).use {}
             }
         } finally {
             tmp.delete()

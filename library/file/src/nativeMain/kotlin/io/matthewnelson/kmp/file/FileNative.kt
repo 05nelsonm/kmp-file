@@ -28,13 +28,33 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+
 /**
  * TODO
  * */
 @DelicateFileApi
 @ExperimentalForeignApi
 @Throws(IllegalArgumentException::class, IOException::class)
-public fun File.fOpenR(
+public fun File.open(
+    op: Char,
+    only: Boolean = true,
+    b: Boolean = true,
+    e: Boolean = true,
+    mode: OpenMode = if (op == 'r') OpenMode.MustExist else OpenMode.MaybeCreate.DEFAULT,
+): CPointer<FILE> = when (op) {
+    'r' -> openR(only, b, e, mode)
+    'w' -> openW(only, b, e, mode)
+    'a' -> openA(only, b, e, mode)
+    else -> throw IllegalArgumentException("Unknown op[$op]. Must be 'r', 'w', or 'a'")
+}
+
+/**
+ * TODO
+ * */
+@DelicateFileApi
+@ExperimentalForeignApi
+@Throws(IllegalArgumentException::class, IOException::class)
+public fun File.openR(
     only: Boolean = true,
     b: Boolean = true,
     e: Boolean = true,
@@ -56,7 +76,7 @@ public fun File.fOpenR(
 @DelicateFileApi
 @ExperimentalForeignApi
 @Throws(IllegalArgumentException::class, IOException::class)
-public fun File.fOpenW(
+public fun File.openW(
     only: Boolean = true,
     b: Boolean = true,
     e: Boolean = true,
@@ -74,7 +94,7 @@ public fun File.fOpenW(
 @DelicateFileApi
 @ExperimentalForeignApi
 @Throws(IllegalArgumentException::class, IOException::class)
-public fun File.fOpenA(
+public fun File.openA(
     only: Boolean = true,
     b: Boolean = true,
     e: Boolean = true,
@@ -193,15 +213,15 @@ public fun errnoToIOException(errno: Int): IOException {
 }
 
 /**
- * This has been DEPRECATED and replaced by the [fOpenR], [fOpenW],
- * [fOpenA], and [use] function combinations. Some flags (such as e,
- * or x) are not recognized via [fopen] on certain platforms. The
- * new functions are designed to supplement the behavior an as atomic
- * a manner as possible.
+ * This has been DEPRECATED and replaced by the [open], [openR],
+ * [openW], [openA], and [use] function combinations. Some flags
+ * (such as e, or x) are not recognized via [fopen] on certain
+ * platforms. The new functions are designed to supplement the
+ * behavior in as atomic a manner as possible.
  *
- * @see [fOpenR]
- * @see [fOpenW]
- * @see [fOpenA]
+ * @see [openR]
+ * @see [openW]
+ * @see [openA]
  * @see [use]
  * @suppress
  * */
@@ -209,7 +229,7 @@ public fun errnoToIOException(errno: Int): IOException {
 @ExperimentalForeignApi
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
-@Deprecated("Replaced by (fOpenR, fOpenW, fOpenA).use {} functionality.")
+@Deprecated("Replaced by (open, openR, openW, openA).use {} functionality.")
 public inline fun <T: Any?> File.fOpen(
     flags: String,
     block: (file: CPointer<FILE>) -> T,
