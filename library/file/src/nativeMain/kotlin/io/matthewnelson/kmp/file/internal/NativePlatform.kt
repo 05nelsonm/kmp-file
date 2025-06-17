@@ -18,11 +18,10 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.*
-import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKString
-import platform.posix.FILE
+import platform.posix.EINVAL
 import platform.posix.errno
 import platform.posix.strerror
 
@@ -104,11 +103,11 @@ internal inline fun errnoToString(errno: Int): String {
 }
 
 @ExperimentalForeignApi
-@Throws(IllegalArgumentException::class, IOException::class)
-internal expect inline fun File.platformFOpen(
-    flags: Int,
-    format: String,
-    b: Boolean,
-    e: Boolean,
-    mode: OpenMode,
-): CPointer<FILE>
+internal inline fun errnoToIllegalArgumentOrIOException(errno: Int): Exception {
+    return if (errno == EINVAL) {
+        val message = errnoToString(errno)
+        IllegalArgumentException(message)
+    } else {
+        errnoToIOException(errno)
+    }
+}

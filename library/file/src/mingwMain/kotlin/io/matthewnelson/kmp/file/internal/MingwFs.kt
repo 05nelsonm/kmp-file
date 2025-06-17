@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE", "VariableInitializerIsRedundant")
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenMode
 import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.path
 import kotlinx.cinterop.*
 import platform.posix.*
 
@@ -68,6 +71,36 @@ internal actual fun fs_realpath(path: Path): Path {
     } finally {
         free(real)
     }
+}
+
+@ExperimentalForeignApi
+@Throws(IllegalArgumentException::class, IOException::class)
+internal actual inline fun File.fs_platform_fopen(
+    flags: Int,
+    format: String,
+    b: Boolean,
+    e: Boolean,
+    mode: OpenMode,
+): CPointer<FILE> {
+    // Not used. Still verify though to ensure arguments are consistent with Unix implementation
+    ModeT.get(mode.mode)
+    val format = if (b) "${format}b" else format
+
+    // Unfortunately, cannot check atomically like with Unix.
+    when (mode) {
+        is OpenMode.MustExist -> if (!exists()) throw FileNotFoundException("$mode && !exists[$this]")
+        is OpenMode.MustCreate -> if (exists()) throw IOException("$mode && exists[$this]")
+    }
+
+    var ptr: CPointer<FILE>? = null
+    while (true) {
+        ptr = fopen(path, format)
+        if (ptr != null) break
+        val errno = errno
+        if (errno == EINTR) continue
+        throw errnoToIOException(errno)
+    }
+    return ptr
 }
 
 @ExperimentalForeignApi

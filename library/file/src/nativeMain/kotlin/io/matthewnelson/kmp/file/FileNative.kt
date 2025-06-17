@@ -18,7 +18,7 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.errnoToString
-import io.matthewnelson.kmp.file.internal.platformFOpen
+import io.matthewnelson.kmp.file.internal.fs_platform_fopen
 import io.matthewnelson.kmp.file.internal.fs_platform_fread
 import io.matthewnelson.kmp.file.internal.fs_platform_fwrite
 import kotlinx.cinterop.*
@@ -46,7 +46,7 @@ public fun File.fOpenR(
     }
     val flags = if (only) O_RDONLY else O_RDWR
     val format = if (only) "r" else "r+"
-    return platformFOpen(flags, format, b, e, mode)
+    return fs_platform_fopen(flags, format, b, e, mode)
 }
 
 /**
@@ -64,7 +64,7 @@ public fun File.fOpenW(
     var flags = if (only) O_WRONLY else O_RDWR
     flags = flags or O_TRUNC
     val format = if (only) "w" else "w+"
-    return platformFOpen(flags, format, b, e, mode)
+    return fs_platform_fopen(flags, format, b, e, mode)
 }
 
 /**
@@ -82,7 +82,7 @@ public fun File.fOpenA(
     var flags = if (only) O_WRONLY else O_RDWR
     flags = flags or O_APPEND
     val format = if (only) "a" else "a+"
-    return platformFOpen(flags, format, b, e, mode)
+    return fs_platform_fopen(flags, format, b, e, mode)
 }
 
 /**
@@ -187,7 +187,7 @@ public fun errnoToIOException(errno: Int): IOException {
 @PublishedApi
 @ExperimentalForeignApi
 @OptIn(ExperimentalContracts::class)
-internal inline fun CPointer<FILE>.close(onError: (IOException) -> Unit) {
+internal inline fun <T: Any> CPointer<FILE>.close(onError: (IOException) -> T): T? {
     contract {
         callsInPlace(onError, InvocationKind.AT_MOST_ONCE)
     }
@@ -199,8 +199,8 @@ internal inline fun CPointer<FILE>.close(onError: (IOException) -> Unit) {
         if (errno == EINTR) continue
         e = errnoToIOException(errno)
     }
-    if (e == null) return
-    onError(e)
+    if (e == null) return null
+    return onError(e)
 }
 
 /**

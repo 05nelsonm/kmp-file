@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName")
-
 package io.matthewnelson.kmp.file
 
 import platform.posix.O_CREAT
@@ -35,14 +33,15 @@ public abstract class OpenMode private constructor(internal val flags: Int, inte
             /**
              * TODO
              * */
-            public val DEFAULT: MaybeCreate = MaybeCreate(O_CREAT, "666")
+            public val DEFAULT: MaybeCreate = MaybeCreate(flags = O_CREAT, mode = "666")
 
             public operator fun invoke(mode: String = DEFAULT.mode): MaybeCreate {
                 if (mode == DEFAULT.mode) return DEFAULT
-                return MaybeCreate(DEFAULT.flags, mode)
+                return MaybeCreate(flags = DEFAULT.flags, mode)
             }
         }
 
+        /** @suppress */
         public override fun toString(): String = "OpenMode.MaybeCreate[flags=O_CREAT, mode=$mode]"
     }
 
@@ -56,11 +55,11 @@ public abstract class OpenMode private constructor(internal val flags: Int, inte
             /**
              * TODO
              * */
-            public val DEFAULT: MustCreate = MustCreate(O_CREAT or O_EXCL, "666")
+            public val DEFAULT: MustCreate = MustCreate(flags = O_CREAT or O_EXCL, mode = "666")
 
             public operator fun invoke(mode: String = DEFAULT.mode): MustCreate {
                 if (mode == DEFAULT.mode) return DEFAULT
-                return MustCreate(DEFAULT.flags, mode)
+                return MustCreate(flags = DEFAULT.flags, mode)
             }
         }
 
@@ -71,7 +70,7 @@ public abstract class OpenMode private constructor(internal val flags: Int, inte
     /**
      * TODO
      * */
-    public data object MustExist: OpenMode(0, "000") {
+    public data object MustExist: OpenMode(flags = 0, mode = "000") {
         /** @suppress */
         public override fun toString(): String = "OpenMode.MustExist"
     }

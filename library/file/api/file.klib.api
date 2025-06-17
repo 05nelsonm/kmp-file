@@ -144,10 +144,10 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.k
 final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [androidNative, apple]
-final inline fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/close(kotlin/Function1<io.matthewnelson.kmp.file/IOException, kotlin/Unit>) // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.Function1<io.matthewnelson.kmp.file.IOException,kotlin.Unit>){}[0]
+final inline fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(){}[0]
 
 // Targets: [androidNative, apple]
-final inline fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(){}[0]
+final inline fun <#A: kotlin/Any> (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/close(kotlin/Function1<io.matthewnelson.kmp.file/IOException, #A>): #A? // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.Function1<io.matthewnelson.kmp.file.IOException,0:0>){0§<kotlin.Any>}[0]
 
 // Targets: [androidNative, apple]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
@@ -171,10 +171,10 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.
 final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [linux]
-final inline fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/close(kotlin/Function1<io.matthewnelson.kmp.file/IOException, kotlin/Unit>) // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.Function1<io.matthewnelson.kmp.file.IOException,kotlin.Unit>){}[0]
+final inline fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(){}[0]
 
 // Targets: [linux]
-final inline fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(){}[0]
+final inline fun <#A: kotlin/Any> (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/close(kotlin/Function1<io.matthewnelson.kmp.file/IOException, #A>): #A? // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.Function1<io.matthewnelson.kmp.file.IOException,0:0>){0§<kotlin.Any>}[0]
 
 // Targets: [linux]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
@@ -256,10 +256,10 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.km
 final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [mingwX64]
-final inline fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/close(kotlin/Function1<io.matthewnelson.kmp.file/IOException, kotlin/Unit>) // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.Function1<io.matthewnelson.kmp.file.IOException,kotlin.Unit>){}[0]
+final inline fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._iobuf>(){}[0]
 
 // Targets: [mingwX64]
-final inline fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._iobuf>(){}[0]
+final inline fun <#A: kotlin/Any> (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/close(kotlin/Function1<io.matthewnelson.kmp.file/IOException, #A>): #A? // io.matthewnelson.kmp.file/close|close@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.Function1<io.matthewnelson.kmp.file.IOException,0:0>){0§<kotlin.Any>}[0]
 
 // Targets: [mingwX64]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]

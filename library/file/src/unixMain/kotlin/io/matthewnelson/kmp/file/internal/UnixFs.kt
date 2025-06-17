@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE", "VariableInitializerIsRedundant")
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenMode
 import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.path
+import io.matthewnelson.kmp.file.wrapIOException
 import kotlinx.cinterop.*
 import platform.posix.*
 
@@ -28,7 +32,7 @@ internal actual fun fs_chmod(path: Path, mode: String) {
     val modeT = try {
         ModeT.get(mode)
     } catch (e: IllegalArgumentException) {
-        throw IOException(e)
+        throw e.wrapIOException()
     }
 
     val result = fs_platform_chmod(path, modeT)
@@ -73,6 +77,55 @@ internal actual inline fun MemScope.fs_platform_file_size(
     val stat = alloc<stat>()
     if (stat(path, stat.ptr) != 0) throw errnoToIOException(errno)
     return stat.st_size
+}
+
+@ExperimentalForeignApi
+@Throws(IllegalArgumentException::class, IOException::class)
+internal actual inline fun File.fs_platform_fopen(
+    flags: Int,
+    format: String,
+    b: Boolean,
+    e: Boolean,
+    mode: OpenMode,
+): CPointer<FILE> {
+    val modet = ModeT.get(mode.mode)
+    var flags = flags or mode.flags
+    if (e) flags = flags or O_CLOEXEC
+    val format = if (b) "${format}b" else format
+
+    var fd: Int = -1
+    while (true) {
+        fd = open(path, flags, modet)
+        if (fd != -1) break
+        val errno = errno
+        if (errno == EINTR) continue
+        throw errnoToIllegalArgumentOrIOException(errno)
+    }
+
+//    if ((flags or O_APPEND) == flags && (flags or O_RDWR) == flags) {
+//        // TODO: Set reading file position to beginning of file
+//    }
+
+    var ptr: CPointer<FILE>? = null
+
+    while (true) {
+        ptr = fdopen(fd, format)
+        if (ptr != null) break
+        val errno1 = errno
+        if (errno1 == EINTR) continue
+        val e = errnoToIllegalArgumentOrIOException(errno1)
+
+        while (true) {
+            if (close(fd) == 0) break
+            val errno2 = errno
+            if (errno2 == EINTR) continue
+            e.addSuppressed(errnoToIOException(errno2))
+        }
+
+        throw e
+    }
+
+    return ptr
 }
 
 internal expect inline fun fs_platform_chmod(
