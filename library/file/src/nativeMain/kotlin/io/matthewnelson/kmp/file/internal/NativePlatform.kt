@@ -117,7 +117,6 @@ internal inline fun errnoToIllegalArgumentOrIOException(errno: Int): Exception {
 }
 
 // action must be something that returns -1 and sets errno
-@ExperimentalForeignApi
 @OptIn(ExperimentalContracts::class)
 internal inline fun ignoreEINTR(action: () -> Int): Int {
     contract {
