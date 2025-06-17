@@ -23,20 +23,30 @@ import platform.posix.FD_CLOEXEC
 import platform.posix.FILE
 import platform.posix.F_GETFD
 import platform.posix.F_SETFD
+import platform.posix.errno
 import platform.posix.fcntl
 import platform.posix.fileno
 
 @PublishedApi
 @ExperimentalForeignApi
+@Throws(IOException::class)
 @Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
-internal actual inline fun CPointer<FILE>.setCLOEXEC(): Int {
+internal actual inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE> {
     val fd = fileno(this)
-    if (fd == -1) return fd
-    val stat = fcntl(fd, F_GETFD)
-    if (stat == -1) return stat
-    return fcntl(fd, F_SETFD, stat or FD_CLOEXEC)
+    run {
+        if (fd == -1) return@run
+        val stat = fcntl(fd, F_GETFD)
+        if (stat == -1) return@run
+        if (fcntl(fd, F_SETFD, stat or FD_CLOEXEC) == 0) {
+            return this
+        }
+    }
+
+    val e = errnoToIOException(errno)
+    close { t -> e.addSuppressed(t) }
+    throw e
 }
 
 @PublishedApi
 @Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
-internal actual inline fun String.appendCLOEXEC(): String = this
+internal actual inline fun String.appendFlagCLOEXEC(): String = this

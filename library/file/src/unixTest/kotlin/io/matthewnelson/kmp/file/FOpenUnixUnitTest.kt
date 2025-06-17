@@ -24,6 +24,7 @@ import platform.posix.errno
 import platform.posix.fcntl
 import platform.posix.fileno
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
@@ -42,32 +43,64 @@ class FOpenUnixUnitTest {
     }
 
     @Test
-    fun givenFile_whenFOpenR_thenHasCLOEXEC() {
+    fun givenFile_whenFOpenRAndETrue_thenHasCLOEXEC() {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
 
         try {
-            tmp.fOpenR { file -> assertTrue(file.hasFD_CLOEXEC()) }
+            tmp.fOpenR().use { file -> assertTrue(file.hasFD_CLOEXEC()) }
         } finally {
             tmp.delete()
         }
     }
 
     @Test
-    fun givenFile_whenFOpenW_thenHasCLOEXEC() {
+    fun givenFile_whenFOpenRAndEFalse_thenDoesNotHaveCLOEXEC() {
         val tmp = randomTemp()
+        tmp.writeUtf8("Hello World!")
+
         try {
-            tmp.fOpenW { file -> assertTrue(file.hasFD_CLOEXEC()) }
+            tmp.fOpenR(e = false).use { file -> assertFalse(file.hasFD_CLOEXEC()) }
         } finally {
             tmp.delete()
         }
     }
 
     @Test
-    fun givenFile_whenFOpenA_thenHasCLOEXEC() {
+    fun givenFile_whenFOpenWAndETrue_thenHasCLOEXEC() {
         val tmp = randomTemp()
         try {
-            tmp.fOpenA { file -> assertTrue(file.hasFD_CLOEXEC()) }
+            tmp.fOpenW().use { file -> assertTrue(file.hasFD_CLOEXEC()) }
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
+    fun givenFile_whenFOpenWAndEFalse_thenDoesNotHaveCLOEXEC() {
+        val tmp = randomTemp()
+        try {
+            tmp.fOpenW(e = false).use { file -> assertFalse(file.hasFD_CLOEXEC()) }
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
+    fun givenFile_whenFOpenAAndETrue_thenHasCLOEXEC() {
+        val tmp = randomTemp()
+        try {
+            tmp.fOpenA().use { file -> assertTrue(file.hasFD_CLOEXEC()) }
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
+    fun givenFile_whenFOpenAAndEFalse_thenDoesNotHaveCLOEXEC() {
+        val tmp = randomTemp()
+        try {
+            tmp.fOpenA(e = false).use { file -> assertFalse(file.hasFD_CLOEXEC()) }
         } finally {
             tmp.delete()
         }

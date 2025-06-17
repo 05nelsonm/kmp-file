@@ -23,11 +23,12 @@ import platform.posix.FILE
 
 @PublishedApi
 @ExperimentalForeignApi
+@Throws(IOException::class)
 @Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
-internal actual inline fun CPointer<FILE>.setCLOEXEC(): Int = 0 // no-op
+internal actual inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE> = this // no-op
 
 @PublishedApi
 @Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
-internal actual inline fun String.appendCLOEXEC(): String {
+internal actual inline fun String.appendFlagCLOEXEC(): String {
     return if (contains('e')) this else this + 'e'
 }
