@@ -22,7 +22,7 @@ import platform.posix.O_EXCL
  * [File] open exclusivity. On Unix-like systems this is done atomically
  * by passing combinations of [O_CREAT], [O_EXCL], or neither to the
  * [platform.posix.open] function, whereas on MinGW it is done in a
- * non-atomic manner by checking [File.exists] due to platform limitations.
+ * non-atomic manner due to platform limitations by checking [File.exists].
  *
  * @see [open]
  * @see [openR]

@@ -121,11 +121,12 @@ class OpenNativeUnitTest {
             tmp.openR(only = false, excl = OpenExcl.MustCreate.DEFAULT).use { file ->
                 val buf = "Hello World!".encodeToByteArray()
                 val expected = buf.copyOf()
+                val actual = ByteArray(buf.size + 10)
                 file.fWrite(buf)
-                buf.fill(0)
                 fseek(file, 0, SEEK_SET)
-                file.fRead(buf)
-                assertContentEquals(expected, buf)
+                val read = file.fRead(actual)
+                assertEquals(expected.size, read)
+                assertContentEquals(expected, actual.copyOf(expected.size))
             }
             assertEquals("Hello World!", tmp.readUtf8())
         } finally {
