@@ -17,7 +17,11 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.wrapIOException
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -26,6 +30,21 @@ import platform.posix.ENOENT
 import platform.posix.FILE
 import platform.posix.access
 import platform.posix.errno
+
+@Throws(IOException::class)
+@OptIn(ExperimentalForeignApi::class)
+internal actual fun fs_chmod(path: Path, mode: String) {
+    val modeT = try {
+        ModeT.get(mode)
+    } catch (e: IllegalArgumentException) {
+        throw e.wrapIOException()
+    }
+
+    val result = fs_platform_chmod(path, modeT)
+    if (result != 0) {
+        throw errnoToIOException(errno)
+    }
+}
 
 internal actual fun fs_exists(path: Path): Boolean {
     val result = access(path, 0)
@@ -40,13 +59,30 @@ internal actual fun fs_mkdir(path: Path): Boolean {
     return fs_platform_mkdir(path) == 0
 }
 
-internal expect fun fs_platform_mkdir(path: Path): Int
+internal expect inline fun fs_platform_chmod(
+    path: Path,
+    mode: UInt,
+): Int
+
+internal expect inline fun fs_platform_mkdir(
+    path: Path,
+): Int
 
 @ExperimentalForeignApi
 @Throws(IOException::class)
 internal expect inline fun MemScope.fs_platform_file_size(
     path: Path,
 ): Long
+
+@ExperimentalForeignApi
+@Throws(IllegalArgumentException::class, IOException::class)
+internal expect inline fun File.fs_platform_fopen(
+    flags: Int,
+    mode: String,
+    b: Boolean,
+    e: Boolean,
+    excl: OpenExcl,
+): CPointer<FILE>
 
 @ExperimentalForeignApi
 internal expect inline fun fs_platform_fread(

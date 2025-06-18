@@ -58,6 +58,9 @@ public val SysDirSep: Char = platformDirSeparator()
 @JvmField
 public val SysTempDir: File = platformTempDirectory()
 
+/**
+ * Syntactic sugar for `File("/some/path")`
+ * */
 @JvmName("get")
 public inline fun String.toFile(): File = File(this)
 
@@ -162,8 +165,8 @@ public fun File.normalize(): File {
  * **NOTE:** This function is not recommended for large files. There
  * is an internal limitation of 2GB file size.
  * */
-@Throws(IOException::class)
 @JvmName("readBytesFrom")
+@Throws(IOException::class)
 public fun File.readBytes(): ByteArray = platformReadBytes()
 
 /**
@@ -172,22 +175,22 @@ public fun File.readBytes(): ByteArray = platformReadBytes()
  * **NOTE:** This function is not recommended for large files. There
  * is an internal limitation of 2GB file size.
  * */
-@Throws(IOException::class)
 @JvmName("readUtf8From")
+@Throws(IOException::class)
 public fun File.readUtf8(): String = platformReadUtf8()
 
 /**
  * Writes the full contents of [array] to the file.
  * */
-@Throws(IOException::class)
 @JvmName("writeBytesTo")
+@Throws(IOException::class)
 public fun File.writeBytes(array: ByteArray) { platformWriteBytes(array) }
 
 /**
  * Writes the full contents of [text] to the file (as UTF-8).
  * */
-@Throws(IOException::class)
 @JvmName("writeUtf8To")
+@Throws(IOException::class)
 public fun File.writeUtf8(text: String) { platformWriteUtf8(text) }
 
 /**

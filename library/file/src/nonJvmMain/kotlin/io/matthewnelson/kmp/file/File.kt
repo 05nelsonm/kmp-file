@@ -36,13 +36,14 @@ public actual class File: Comparable<File> {
     /**
      * Changes POSIX file/directory permissions.
      *
-     * [mode] must be 3 digits, each being between 0 and 7
-     *
-     * See https://nodejs.org/api/fs.html#fschmodsyncpath-mode
-     *
      * e.g.
      *
      *     file.chmod("775")
+     *
+     * See [Node.js#fschmod](https://nodejs.org/api/fs.html#fschmodpath-mode-callback)
+     *
+     * @param [mode] The permissions to set. Must be 3 digits, each
+     *   being between `0` and `7` (inclusive).
      *
      * @throws [IOException] if [mode] is inappropriate
      * @throws [FileNotFoundException] if the file does not exist

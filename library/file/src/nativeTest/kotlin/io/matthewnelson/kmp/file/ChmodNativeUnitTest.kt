@@ -25,7 +25,10 @@ class ChmodNativeUnitTest: ChmodBaseTest() {
 
     @Test
     fun givenFile_whenChmod_thenReturnsExpected() {
-        if (IsWindows) return
+        if (IsWindows) {
+            println("Skipping...")
+            return
+        }
 
         val tmpDir = randomTemp()
         assertTrue(tmpDir.mkdir())
@@ -76,7 +79,10 @@ class ChmodNativeUnitTest: ChmodBaseTest() {
 
     @Test
     fun givenFile_whenCheckAccess_thenReturnsExpected() {
-        if (IsWindows) return
+        if (IsWindows) {
+            println("Skipping...")
+            return
+        }
 
         // simple test for our helper function
         val tmp = randomTemp()

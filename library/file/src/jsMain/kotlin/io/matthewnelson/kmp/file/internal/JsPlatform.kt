@@ -31,7 +31,6 @@ internal actual inline fun platformTempDirectory(): File = try {
     "/tmp"
 }.toFile()
 
-@PublishedApi
 internal actual val IsWindows: Boolean by lazy {
     try {
         os_platform() == "win32"
@@ -120,6 +119,7 @@ internal actual fun fs_chmod(path: Path, mode: String) {
     try {
         fs_chmodSync(path, mode)
     } catch (t: Throwable) {
+        // t.errorCodeOrNull >> ERR_INVALID_ARG_VALUE >> IllegalArgumentException
         throw t.toIOException()
     }
 }

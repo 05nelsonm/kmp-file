@@ -13,29 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE", "VariableInitializerIsRedundant")
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.path
 import kotlinx.cinterop.*
 import platform.posix.*
-
-@Throws(IOException::class)
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_chmod(path: Path, mode: String) {
-    val modeT = try {
-        Mode(value = mode).toModeT()
-    } catch (e: IllegalArgumentException) {
-        throw IOException(e)
-    }
-
-    val result = fs_platform_chmod(path, modeT)
-    if (result != 0) {
-        throw errnoToIOException(errno)
-    }
-}
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
@@ -61,9 +49,9 @@ internal actual fun fs_realpath(path: Path): Path {
     }
 }
 
-internal actual fun fs_platform_mkdir(
+internal actual inline fun fs_platform_mkdir(
     path: Path,
-): Int = fs_platform_mkdir(path, Mode._775)
+): Int = fs_platform_mkdir(path, ModeT._775)
 
 @ExperimentalForeignApi
 @Throws(IOException::class)
@@ -75,67 +63,39 @@ internal actual inline fun MemScope.fs_platform_file_size(
     return stat.st_size
 }
 
-internal expect inline fun fs_platform_chmod(
-    path: Path,
-    mode: UInt,
-): Int
+@ExperimentalForeignApi
+@Throws(IllegalArgumentException::class, IOException::class)
+internal actual inline fun File.fs_platform_fopen(
+    flags: Int,
+    mode: String,
+    b: Boolean,
+    e: Boolean,
+    excl: OpenExcl,
+): CPointer<FILE> {
+    val modet = ModeT.get(excl.mode)
+    var flags = flags or excl.flags
+    if (e) flags = flags or O_CLOEXEC
+    val mode = if (b) "${mode}b" else mode
+
+    val fd = ignoreEINTR { open(path, flags, modet) }
+    if (fd == -1) throw errnoToIllegalArgumentOrIOException(errno)
+
+//    if ((flags or O_APPEND) == flags && (flags or O_RDWR) == flags) {
+//        // TODO: Set reading file position to beginning of file?
+//    }
+
+    val ptr = ignoreEINTR<FILE> { fdopen(fd, mode) }
+    if (ptr == null) {
+        val e = errnoToIllegalArgumentOrIOException(errno)
+        if (ignoreEINTR { close(fd) } == -1) {
+            e.addSuppressed(errnoToIOException(errno))
+        }
+        throw e
+    }
+    return ptr
+}
 
 internal expect inline fun fs_platform_mkdir(
     path: Path,
     mode: UInt,
 ): Int
-
-private value class Mode
-@Throws(IllegalArgumentException::class)
-constructor(private val value: String) {
-
-    companion object {
-        @Suppress("ObjectPropertyName")
-        val _775: UInt by lazy { Mode("775").toModeT() }
-    }
-
-    init {
-        require(value.length == 3) { "Invalid mode[$value] (e.g. 764)" }
-    }
-
-    @Throws(IllegalArgumentException::class)
-    fun toModeT(): UInt {
-        val mask =
-            Mask.Owner.from(value[0]) or
-            Mask.Group.from(value[1]) or
-            Mask.Other.from(value[2])
-
-        return mask.toUInt()
-    }
-
-    private class Mask private constructor(
-        private val read: Int,
-        private val write: Int,
-        private val execute: Int,
-    ) {
-
-        @Throws(IllegalArgumentException::class)
-        fun from(char: Char): Int {
-            val digit = char.digitToIntOrNull()
-                ?: throw IllegalArgumentException("Unknown mode digit[$char]. Acceptable digits >> 0-7")
-
-            return when (digit) {
-                7 -> read or write or execute
-                6 -> read or write
-                5 -> read or execute
-                4 -> read
-                3 -> write or execute
-                2 -> write
-                1 -> execute
-                0 -> 0
-                else -> throw IllegalArgumentException("Unknown mode digit[$digit]. Acceptable digits >> 0-7")
-            }
-        }
-
-        companion object {
-            val Owner = Mask(S_IRUSR, S_IWUSR, S_IXUSR)
-            val Group = Mask(S_IRGRP, S_IWGRP, S_IXGRP)
-            val Other = Mask(S_IROTH, S_IWOTH, S_IXOTH)
-        }
-    }
-}

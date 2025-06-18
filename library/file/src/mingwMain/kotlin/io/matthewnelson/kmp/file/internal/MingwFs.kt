@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE", "VariableInitializerIsRedundant")
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.DelicateFileApi
+import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.close
 import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.path
 import kotlinx.cinterop.*
 import platform.posix.*
-
-@Throws(IOException::class)
-internal actual fun fs_chmod(path: Path, mode: String) { /* no-op */ }
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
@@ -39,7 +41,12 @@ internal actual fun fs_remove(path: Path): Boolean {
     throw errnoToIOException(err)
 }
 
-internal actual fun fs_platform_mkdir(
+internal actual inline fun fs_platform_chmod(
+    path: Path,
+    mode: UInt,
+): Int = 0 // TODO
+
+internal actual inline fun fs_platform_mkdir(
     path: Path,
 ): Int = mkdir(path)
 
@@ -68,6 +75,69 @@ internal actual fun fs_realpath(path: Path): Path {
     } finally {
         free(real)
     }
+}
+
+@ExperimentalForeignApi
+@Throws(IllegalArgumentException::class, IOException::class)
+internal actual inline fun File.fs_platform_fopen(
+    flags: Int,
+    mode: String,
+    b: Boolean,
+    e: Boolean,
+    excl: OpenExcl,
+): CPointer<FILE> {
+    // Always check argument correctness here for consistency between
+    // implementations, even if not utilized right away.
+    ModeT.get(excl.mode)
+    var mode = if (b) "${mode}b" else mode
+
+    val exists = exists()
+
+    // Unfortunately, cannot check atomically like with Unix.
+    when (excl) {
+        is OpenExcl.MustExist -> if (!exists) throw FileNotFoundException("$excl && !exists[$this]")
+        is OpenExcl.MustCreate -> if (exists) throw IOException("$excl && exists[$this]")
+    }
+
+    val setSeek0 = if (!exists && mode.startsWith("r+")) {
+        // Hacks. Stream will be O_RDRW, but Windows always requires the file
+        // to exist with mode r, regardless of r+ or not. So, use appending instead.
+        mode = mode.replace('r', 'a')
+
+        // In the rare event that a file WAS created between the time
+        // File.exists() was checked, and when fopen gets called, fseek
+        // gets set back to the beginning of the file.
+        true
+    } else {
+        false
+    }
+
+    val ptr = ignoreEINTR<FILE> { fopen(path, mode) }
+    if (ptr == null) throw errnoToIOException(errno)
+
+    if (!exists && excl.mode != OpenExcl.MODE_666) {
+        // Configure non-default open permissions.
+        try {
+            chmod(excl.mode)
+        } catch (t: IOException) {
+            try {
+                @OptIn(DelicateFileApi::class)
+                ptr.close()
+            } catch (tt: IOException) {
+                t.addSuppressed(tt)
+            }
+            try {
+                fs_remove(path)
+            } catch (tt: IOException) {
+                t.addSuppressed(tt)
+            }
+            throw t
+        }
+    }
+
+    if (setSeek0) fseek(ptr, 0, SEEK_SET)
+
+    return ptr
 }
 
 @ExperimentalForeignApi
