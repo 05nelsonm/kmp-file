@@ -36,7 +36,7 @@ internal fun fs_canonicalize(path: Path): Path {
     return resolved.replaceFirst(existingPath, fs_realpath(existingPath))
 }
 
-@Throws(IOException::class)
+@Throws(IllegalArgumentException::class, IOException::class)
 internal expect fun fs_chmod(path: Path, mode: String)
 
 internal expect fun fs_exists(path: Path): Boolean

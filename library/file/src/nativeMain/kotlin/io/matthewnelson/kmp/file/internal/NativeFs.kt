@@ -21,7 +21,6 @@ import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errnoToIOException
-import io.matthewnelson.kmp.file.wrapIOException
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -31,17 +30,11 @@ import platform.posix.FILE
 import platform.posix.access
 import platform.posix.errno
 
-@Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
+@Throws(IllegalArgumentException::class, IOException::class)
 internal actual fun fs_chmod(path: Path, mode: String) {
-    val modeT = try {
-        ModeT.get(mode)
-    } catch (e: IllegalArgumentException) {
-        throw e.wrapIOException()
-    }
-
-    val result = fs_platform_chmod(path, modeT)
-    if (result != 0) {
+    val modeT = ModeT.get(mode)
+    if (fs_platform_chmod(path, modeT) != 0) {
         throw errnoToIOException(errno)
     }
 }

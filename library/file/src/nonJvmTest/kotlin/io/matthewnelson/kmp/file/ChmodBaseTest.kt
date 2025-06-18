@@ -23,7 +23,7 @@ import kotlin.test.fail
 abstract class ChmodBaseTest {
 
     @Test
-    fun givenFile_whenIllegalMode_thenThrowsIOException() {
+    fun givenFile_whenIllegalMode_thenThrowsIllegalArgumentException() {
         if (IsWindows) return
 
         val tmp = randomTemp()
@@ -39,7 +39,7 @@ abstract class ChmodBaseTest {
                 try {
                     tmp.chmod(mode)
                     fail(message = mode)
-                } catch (_: IOException) {
+                } catch (_: IllegalArgumentException) {
                     // pass
                 }
             }

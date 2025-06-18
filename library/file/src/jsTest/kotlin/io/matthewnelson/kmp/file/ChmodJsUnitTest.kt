@@ -15,4 +15,5 @@
  **/
 package io.matthewnelson.kmp.file
 
+@Suppress("UNUSED")
 class ChmodJsUnitTest: ChmodBaseTest()
