@@ -114,13 +114,18 @@ internal actual inline fun Path.isAbsolute(): Boolean {
     return path_isAbsolute(this)
 }
 
-// @Throws(IOException::class)
+// @Throws(IllegalArgumentException::class, IOException::class)
 internal actual fun fs_chmod(path: Path, mode: String) {
     try {
         fs_chmodSync(path, mode)
     } catch (t: Throwable) {
-        // t.errorCodeOrNull >> ERR_INVALID_ARG_VALUE >> IllegalArgumentException
-        throw t.toIOException()
+        val code = t.errorCodeOrNull
+        throw when {
+            code == null -> IOException(t)
+            code == "ENOENT" -> FileNotFoundException(t.message)
+            code.contains("INVALID_ARG") -> IllegalArgumentException(t)
+            else -> IOException(t)
+        }
     }
 }
 

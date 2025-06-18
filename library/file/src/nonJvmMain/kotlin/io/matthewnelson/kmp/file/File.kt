@@ -45,8 +45,9 @@ public actual class File: Comparable<File> {
      * @param [mode] The permissions to set. Must be 3 digits, each
      *   being between `0` and `7` (inclusive).
      *
-     * @throws [IOException] if [mode] is inappropriate
-     * @throws [FileNotFoundException] if the file does not exist
+     * @throws [IllegalArgumentException] if [mode] is inappropriate.
+     * @throws [FileNotFoundException] if the file does not exist.
+     * @throws [IOException] if there was a failure to apply desired permissions.
      * */
     @Throws(IOException::class)
     public fun chmod(mode: String) { fs_chmod(realPath, mode) }
