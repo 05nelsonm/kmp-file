@@ -99,17 +99,23 @@ internal actual inline fun File.fs_platform_fopen(
         is OpenExcl.MustCreate -> if (exists) throw IOException("$excl && exists[$this]")
     }
 
-    if (!exists && mode.startsWith("r+")) {
+    val setSeek0 = if (!exists && mode.startsWith("r+")) {
         // Hacks. Stream will be O_RDRW, but Windows always requires the file
-        // to exist with mode r, regardless of r+ or not. Position will be 0
-        // because new file, so.
-        mode = mode.replace('r', 'w')
+        // to exist with mode r, regardless of r+ or not. So, use appending instead.
+        mode = mode.replace('r', 'a')
+
+        // In the rare event that a file WAS created between the time
+        // File.exists() was checked, and when fopen gets called, fseek
+        // gets set back to the beginning of the file.
+        true
+    } else {
+        false
     }
 
     val ptr = ignoreEINTR<FILE> { fopen(path, mode) }
     if (ptr == null) throw errnoToIOException(errno)
 
-    if (!exists && excl.mode != OpenExcl.MustCreate.DEFAULT.mode) {
+    if (!exists && excl.mode != OpenExcl.MODE_666) {
         // Configure non-default open permissions.
         try {
             chmod(excl.mode)
@@ -128,6 +134,8 @@ internal actual inline fun File.fs_platform_fopen(
             throw t
         }
     }
+
+    if (setSeek0) fseek(ptr, 0, SEEK_SET)
 
     return ptr
 }
