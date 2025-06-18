@@ -25,13 +25,13 @@ import kotlin.test.fail
 class OpenNativeUnitTest {
 
     @Test
-    fun givenOpen_whenOpenModeMustCreate_thenFailsWhenFileExists() {
+    fun givenOpen_whenOpenExclMustCreate_thenFailsWhenFileExists() {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
 
         try {
-            tmp.openW(mode = OpenMode.MustCreate.DEFAULT).use {}
-            fail("file existed, but OpenMode.MustCreate did not throw exception")
+            tmp.openW(excl = OpenExcl.MustCreate.DEFAULT).use {}
+            fail("file existed, but OpenExcl.MustCreate did not throw exception")
         } catch (t: IOException) {
             // pass
             assertEquals(true, t.message?.contains("exists"))
@@ -41,12 +41,12 @@ class OpenNativeUnitTest {
     }
 
     @Test
-    fun givenOpen_whenOpenModeMustExist_thenFailsWhenFileDoesNotExists() {
+    fun givenOpen_whenOpenExclMustExist_thenFailsWhenFileDoesNotExists() {
         val tmp = randomTemp()
 
         try {
-            tmp.openW(mode = OpenMode.MustExist).use {}
-            fail("file does not exist, but OpenMode.MustExist did not throw exception")
+            tmp.openW(excl = OpenExcl.MustExist).use {}
+            fail("file does not exist, but OpenExcl.MustExist did not throw exception")
         } catch (_: FileNotFoundException) {
             // pass
         } finally {
@@ -92,7 +92,7 @@ class OpenNativeUnitTest {
         val tmp = randomTemp()
         try {
             assertFailsWith<IllegalArgumentException> {
-                tmp.openA(mode = OpenMode.MaybeCreate("888"))
+                tmp.openA(excl = OpenExcl.MaybeCreate("888"))
             }
         } finally {
             tmp.delete()
@@ -100,12 +100,25 @@ class OpenNativeUnitTest {
     }
 
     @Test
-    fun givenOpenR_whenOnlyIsTrueAndOpenModeIsNotMustExist_thenThrowsException() {
+    fun givenOpenR_whenOnlyIsTrueAndOpenExclIsNotMustExist_thenThrowsException() {
         val tmp = randomTemp()
         try {
             assertFailsWith<IllegalArgumentException> {
-                tmp.openR(mode = OpenMode.MaybeCreate.DEFAULT).use {}
+                tmp.openR(excl = OpenExcl.MaybeCreate.DEFAULT).use {}
             }
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    @Test
+    fun givenOpenR_whenOnlyIsFalseAndOpenExclIsCreate_thenIsCreated() {
+        val tmp = randomTemp()
+        try {
+            tmp.openR(only = false, excl = OpenExcl.MustCreate.DEFAULT).use { file ->
+                file.fWrite("Hello World!".encodeToByteArray())
+            }
+            assertEquals("Hello World!", tmp.readUtf8())
         } finally {
             tmp.delete()
         }

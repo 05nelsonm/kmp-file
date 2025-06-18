@@ -19,7 +19,7 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.OpenMode
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.wrapIOException
@@ -83,15 +83,15 @@ internal actual inline fun MemScope.fs_platform_file_size(
 @Throws(IllegalArgumentException::class, IOException::class)
 internal actual inline fun File.fs_platform_fopen(
     flags: Int,
-    format: String,
+    mode: String,
     b: Boolean,
     e: Boolean,
-    mode: OpenMode,
+    excl: OpenExcl,
 ): CPointer<FILE> {
-    val modet = ModeT.get(mode.mode)
-    var flags = flags or mode.flags
+    val modet = ModeT.get(excl.mode)
+    var flags = flags or excl.flags
     if (e) flags = flags or O_CLOEXEC
-    val format = if (b) "${format}b" else format
+    val mode = if (b) "${mode}b" else mode
 
     val fd = ignoreEINTR { open(path, flags, modet) }
     if (fd == -1) throw errnoToIllegalArgumentOrIOException(errno)
@@ -100,7 +100,7 @@ internal actual inline fun File.fs_platform_fopen(
 //        // TODO: Set reading file position to beginning of file?
 //    }
 
-    val ptr = ignoreEINTR<FILE> { fdopen(fd, format) }
+    val ptr = ignoreEINTR<FILE> { fdopen(fd, mode) }
     if (ptr == null) {
         val e = errnoToIllegalArgumentOrIOException(errno)
         if (ignoreEINTR { close(fd) } == -1) {

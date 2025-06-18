@@ -20,7 +20,7 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.OpenMode
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.path
 import kotlinx.cinterop.*
@@ -77,22 +77,22 @@ internal actual fun fs_realpath(path: Path): Path {
 @Throws(IllegalArgumentException::class, IOException::class)
 internal actual inline fun File.fs_platform_fopen(
     flags: Int,
-    format: String,
+    mode: String,
     b: Boolean,
     e: Boolean,
-    mode: OpenMode,
+    excl: OpenExcl,
 ): CPointer<FILE> {
     // Not used. Still verify though to ensure arguments are consistent with Unix implementation
-    ModeT.get(mode.mode)
-    val format = if (b) "${format}b" else format
+    ModeT.get(excl.mode)
+    val mode = if (b) "${mode}b" else mode
 
     // Unfortunately, cannot check atomically like with Unix.
-    when (mode) {
-        is OpenMode.MustExist -> if (!exists()) throw FileNotFoundException("$mode && !exists[$this]")
-        is OpenMode.MustCreate -> if (exists()) throw IOException("$mode && exists[$this]")
+    when (excl) {
+        is OpenExcl.MustExist -> if (!exists()) throw FileNotFoundException("$excl && !exists[$this]")
+        is OpenExcl.MustCreate -> if (exists()) throw IOException("$excl && exists[$this]")
     }
 
-    val ptr = ignoreEINTR<FILE> { fopen(path, format) }
+    val ptr = ignoreEINTR<FILE> { fopen(path, mode) }
     if (ptr == null) throw errnoToIOException(errno)
     return ptr
 }

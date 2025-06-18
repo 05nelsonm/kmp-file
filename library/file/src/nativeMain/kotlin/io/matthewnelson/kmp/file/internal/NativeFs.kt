@@ -19,7 +19,7 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.OpenMode
+import io.matthewnelson.kmp.file.OpenExcl
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -54,10 +54,10 @@ internal expect inline fun MemScope.fs_platform_file_size(
 @Throws(IllegalArgumentException::class, IOException::class)
 internal expect inline fun File.fs_platform_fopen(
     flags: Int,
-    format: String,
+    mode: String,
     b: Boolean,
     e: Boolean,
-    mode: OpenMode,
+    excl: OpenExcl,
 ): CPointer<FILE>
 
 @ExperimentalForeignApi
