@@ -101,7 +101,8 @@ internal actual inline fun File.fs_platform_fopen(
 
     if (!exists && mode.startsWith("r+")) {
         // Hacks. Stream will be O_RDRW, but Windows always requires the file
-        // to exist with mode r, regardless of r+ or not.
+        // to exist with mode r, regardless of r+ or not. Position will be 0
+        // because new file, so.
         mode = mode.replace('r', 'w')
     }
 

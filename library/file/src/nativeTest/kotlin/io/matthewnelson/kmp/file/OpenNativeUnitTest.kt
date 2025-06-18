@@ -122,6 +122,7 @@ class OpenNativeUnitTest {
                 val buf = "Hello World!".encodeToByteArray()
                 val expected = buf.copyOf()
                 file.fWrite(buf)
+                buf.fill(0)
                 fseek(file, 0, SEEK_SET)
                 file.fRead(buf)
                 assertContentEquals(expected, buf)
