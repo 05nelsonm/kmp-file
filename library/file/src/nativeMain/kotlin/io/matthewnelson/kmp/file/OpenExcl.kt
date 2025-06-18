@@ -45,7 +45,7 @@ public abstract class OpenExcl private constructor(internal val flags: Int, inte
             /**
              * The default [MaybeCreate] value with permissions `666`.
              * */
-            public val DEFAULT: MaybeCreate = MaybeCreate(flags = O_CREAT, mode = MODE_666)
+            public val DEFAULT: MaybeCreate = MaybeCreate(flags = O_CREAT, mode = "666")
 
             /**
              * Creates a new instance of [MaybeCreate] with provided [mode], or
@@ -80,7 +80,7 @@ public abstract class OpenExcl private constructor(internal val flags: Int, inte
             /**
              * The default [MustCreate] value with permissions `666`.
              * */
-            public val DEFAULT: MustCreate = MustCreate(flags = O_CREAT or O_EXCL, mode = MODE_666)
+            public val DEFAULT: MustCreate = MustCreate(flags = O_CREAT or O_EXCL, mode = "666")
 
             /**
              * Creates a new instance of [MustCreate] with provided [mode], or
@@ -130,8 +130,4 @@ public abstract class OpenExcl private constructor(internal val flags: Int, inte
 
     /** @suppress */
     public abstract override fun toString(): String
-
-    internal companion object {
-        internal const val MODE_666: String = "666"
-    }
 }
