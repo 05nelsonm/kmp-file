@@ -15,7 +15,6 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -24,8 +23,6 @@ abstract class ChmodBaseTest {
 
     @Test
     fun givenFile_whenIllegalMode_thenThrowsIllegalArgumentException() {
-        if (IsWindows) return
-
         val tmp = randomTemp()
         assertTrue(tmp.mkdir())
 
