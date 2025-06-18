@@ -17,17 +17,16 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.DelicateFileApi
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.close
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.path
 import kotlinx.cinterop.*
 import platform.posix.*
-
-@Throws(IOException::class)
-internal actual fun fs_chmod(path: Path, mode: String) { /* no-op */ }
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
@@ -42,7 +41,12 @@ internal actual fun fs_remove(path: Path): Boolean {
     throw errnoToIOException(err)
 }
 
-internal actual fun fs_platform_mkdir(
+internal actual inline fun fs_platform_chmod(
+    path: Path,
+    mode: UInt,
+): Int = 0 // TODO
+
+internal actual inline fun fs_platform_mkdir(
     path: Path,
 ): Int = mkdir(path)
 
@@ -82,18 +86,48 @@ internal actual inline fun File.fs_platform_fopen(
     e: Boolean,
     excl: OpenExcl,
 ): CPointer<FILE> {
-    // Not used. Still verify though to ensure arguments are consistent with Unix implementation
+    // Always check argument correctness here for consistency between
+    // implementations, even if not utilized right away.
     ModeT.get(excl.mode)
-    val mode = if (b) "${mode}b" else mode
+    var mode = if (b) "${mode}b" else mode
+
+    val exists = exists()
 
     // Unfortunately, cannot check atomically like with Unix.
     when (excl) {
-        is OpenExcl.MustExist -> if (!exists()) throw FileNotFoundException("$excl && !exists[$this]")
-        is OpenExcl.MustCreate -> if (exists()) throw IOException("$excl && exists[$this]")
+        is OpenExcl.MustExist -> if (!exists) throw FileNotFoundException("$excl && !exists[$this]")
+        is OpenExcl.MustCreate -> if (exists) throw IOException("$excl && exists[$this]")
+    }
+
+    if (!exists && mode.startsWith("r+")) {
+        // Hacks. Stream will be O_RDRW, but Windows always requires the file
+        // to exist with mode r, regardless of r+ or not.
+        mode = mode.replace('r', 'w')
     }
 
     val ptr = ignoreEINTR<FILE> { fopen(path, mode) }
     if (ptr == null) throw errnoToIOException(errno)
+
+    if (!exists && excl.mode != OpenExcl.MustCreate.DEFAULT.mode) {
+        // Configure non-default open permissions.
+        try {
+            chmod(excl.mode)
+        } catch (t: IOException) {
+            try {
+                @OptIn(DelicateFileApi::class)
+                ptr.close()
+            } catch (tt: IOException) {
+                t.addSuppressed(tt)
+            }
+            try {
+                fs_remove(path)
+            } catch (tt: IOException) {
+                t.addSuppressed(tt)
+            }
+            throw t
+        }
+    }
+
     return ptr
 }
 

@@ -22,24 +22,8 @@ import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.path
-import io.matthewnelson.kmp.file.wrapIOException
 import kotlinx.cinterop.*
 import platform.posix.*
-
-@Throws(IOException::class)
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_chmod(path: Path, mode: String) {
-    val modeT = try {
-        ModeT.get(mode)
-    } catch (e: IllegalArgumentException) {
-        throw e.wrapIOException()
-    }
-
-    val result = fs_platform_chmod(path, modeT)
-    if (result != 0) {
-        throw errnoToIOException(errno)
-    }
-}
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
@@ -65,7 +49,7 @@ internal actual fun fs_realpath(path: Path): Path {
     }
 }
 
-internal actual fun fs_platform_mkdir(
+internal actual inline fun fs_platform_mkdir(
     path: Path,
 ): Int = fs_platform_mkdir(path, ModeT._775)
 
@@ -110,11 +94,6 @@ internal actual inline fun File.fs_platform_fopen(
     }
     return ptr
 }
-
-internal expect inline fun fs_platform_chmod(
-    path: Path,
-    mode: UInt,
-): Int
 
 internal expect inline fun fs_platform_mkdir(
     path: Path,

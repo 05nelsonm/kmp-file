@@ -16,7 +16,10 @@
 package io.matthewnelson.kmp.file
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import platform.posix.SEEK_SET
+import platform.posix.fseek
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.fail
@@ -116,7 +119,12 @@ class OpenNativeUnitTest {
         val tmp = randomTemp()
         try {
             tmp.openR(only = false, excl = OpenExcl.MustCreate.DEFAULT).use { file ->
-                file.fWrite("Hello World!".encodeToByteArray())
+                val buf = "Hello World!".encodeToByteArray()
+                val expected = buf.copyOf()
+                file.fWrite(buf)
+                fseek(file, 0, SEEK_SET)
+                file.fRead(buf)
+                assertContentEquals(expected, buf)
             }
             assertEquals("Hello World!", tmp.readUtf8())
         } finally {
