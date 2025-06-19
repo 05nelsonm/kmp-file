@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,8 @@
  **/
 package io.matthewnelson.kmp.file
 
-import kotlin.experimental.ExperimentalNativeApi
+import io.matthewnelson.kmp.file.internal.fs_file_attributes
 
-actual val IS_SIMULATOR: Boolean by lazy {
-    @OptIn(ExperimentalNativeApi::class)
-    when (Platform.osFamily) {
-        OsFamily.IOS,
-        OsFamily.TVOS,
-        OsFamily.WATCHOS -> true
-        else -> false
-    }
-}
-actual val IS_ANDROID: Boolean by lazy {
-    @OptIn(ExperimentalNativeApi::class)
-    Platform.osFamily == OsFamily.ANDROID
+fun File.isReadOnly(): Boolean {
+    return fs_file_attributes(path).second
 }

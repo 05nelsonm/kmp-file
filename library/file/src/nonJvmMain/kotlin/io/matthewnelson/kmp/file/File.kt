@@ -34,13 +34,34 @@ public actual class File: Comparable<File> {
     }
 
     /**
-     * Changes POSIX file/directory permissions.
+     * Modifies file or directory permissiveness.
+     *
+     * **NOTE:** On Windows this only modifies the `read-only` file
+     * attribute. If [mode] contains any write permissions, then the
+     * `read-only` flag is removed. If [mode] does **not** contain
+     * any write permissions, the `read-only` flag is applied.
      *
      * e.g.
      *
+     *     // The default POSIX permissiveness for a directory
      *     file.chmod("775")
      *
-     * See [Node.js#fschmod](https://nodejs.org/api/fs.html#fschmodpath-mode-callback)
+     * **POSIX permissions:**
+     * - 7: READ | WRITE | EXECUTE
+     * - 6: READ | WRITE
+     * - 5: READ | EXECUTE
+     * - 4: READ
+     * - 3: WRITE | EXECUTE
+     * - 2: WRITE
+     * - 1: EXECUTE
+     * - 0: NONE
+     *
+     * **Mode char index (e.g. "740" >> i0 is 7, i1 is 4, i2 is 0):**
+     * - index 0: Owner
+     * - index 1: Group
+     * - index 2: Others
+     *
+     * See [chmod(2)](https://www.man7.org/linux/man-pages/man2/chmod.2.html)
      *
      * @param [mode] The permissions to set. Must be 3 digits, each
      *   being between `0` and `7` (inclusive).

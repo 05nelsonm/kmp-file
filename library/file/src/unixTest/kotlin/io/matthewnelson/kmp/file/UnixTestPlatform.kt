@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,17 @@
  **/
 package io.matthewnelson.kmp.file
 
-import kotlin.experimental.ExperimentalNativeApi
+import platform.posix.access
 
-actual val IS_SIMULATOR: Boolean by lazy {
-    @OptIn(ExperimentalNativeApi::class)
-    when (Platform.osFamily) {
-        OsFamily.IOS,
-        OsFamily.TVOS,
-        OsFamily.WATCHOS -> true
-        else -> false
+@Throws(IOException::class, IndexOutOfBoundsException::class)
+fun File.checkAccess(vararg access: Int): Boolean {
+    if (!exists()) throw FileNotFoundException()
+
+    var final = access.first()
+    for (i in 1 until access.size) {
+        final = final or access[i]
     }
-}
-actual val IS_ANDROID: Boolean by lazy {
-    @OptIn(ExperimentalNativeApi::class)
-    Platform.osFamily == OsFamily.ANDROID
+
+    // Will be -1 Permission Denied if false
+    return access(path, final) == 0
 }

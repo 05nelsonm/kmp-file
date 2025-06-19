@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,24 @@
  **/
 package io.matthewnelson.kmp.file
 
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
-abstract class ChmodBaseTest {
+@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
+class OpenMingwUnitTest {
 
     @Test
-    fun givenFile_whenIllegalMode_thenThrowsIllegalArgumentException() {
+    fun givenOpen_whenNewFileWithReadOnlyPermissions_thenFileIsReadOnly() {
         val tmp = randomTemp()
-        assertTrue(tmp.mkdir())
 
         try {
-            listOf(
-                "855",
-                "75a",
-                "787",
-                "b64"
-            ).forEach { mode ->
-                try {
-                    tmp.chmod(mode)
-                    fail(message = mode)
-                } catch (_: IllegalArgumentException) {
-                    // pass
-                }
+            tmp.openW(excl = OpenExcl.MustCreate("400")).use { file ->
+                file.fWrite("Hello World!".encodeToByteArray())
             }
+            assertTrue(tmp.isReadOnly())
+            assertEquals("Hello World!", tmp.readUtf8())
         } finally {
             tmp.delete()
         }

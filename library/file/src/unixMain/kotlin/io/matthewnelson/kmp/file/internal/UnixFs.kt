@@ -25,6 +25,14 @@ import io.matthewnelson.kmp.file.path
 import kotlinx.cinterop.*
 import platform.posix.*
 
+@OptIn(ExperimentalForeignApi::class)
+@Throws(IllegalArgumentException::class, IOException::class)
+internal actual fun fs_chmod(path: Path, mode: String) {
+    val modet = ModeT.get(mode)
+    if (fs_platform_chmod(path, modet) == 0) return
+    throw errnoToIOException(errno)
+}
+
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun fs_remove(path: Path): Boolean {
@@ -94,6 +102,11 @@ internal actual inline fun File.fs_platform_fopen(
     }
     return ptr
 }
+
+internal expect inline fun fs_platform_chmod(
+    path: Path,
+    mode: UInt,
+): Int
 
 internal expect inline fun fs_platform_mkdir(
     path: Path,

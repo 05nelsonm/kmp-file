@@ -20,7 +20,6 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
-import io.matthewnelson.kmp.file.errnoToIOException
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -29,15 +28,6 @@ import platform.posix.ENOENT
 import platform.posix.FILE
 import platform.posix.access
 import platform.posix.errno
-
-@OptIn(ExperimentalForeignApi::class)
-@Throws(IllegalArgumentException::class, IOException::class)
-internal actual fun fs_chmod(path: Path, mode: String) {
-    val modeT = ModeT.get(mode)
-    if (fs_platform_chmod(path, modeT) != 0) {
-        throw errnoToIOException(errno)
-    }
-}
 
 internal actual fun fs_exists(path: Path): Boolean {
     val result = access(path, 0)
@@ -51,11 +41,6 @@ internal actual fun fs_exists(path: Path): Boolean {
 internal actual fun fs_mkdir(path: Path): Boolean {
     return fs_platform_mkdir(path) == 0
 }
-
-internal expect inline fun fs_platform_chmod(
-    path: Path,
-    mode: UInt,
-): Int
 
 internal expect inline fun fs_platform_mkdir(
     path: Path,
