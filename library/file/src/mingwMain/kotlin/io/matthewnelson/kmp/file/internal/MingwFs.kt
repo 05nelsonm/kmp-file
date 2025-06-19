@@ -185,6 +185,8 @@ internal actual inline fun File.fs_platform_fopen(
                 t.addSuppressed(tt)
             }
             try {
+                // call this instead of File.delete so any error
+                // can be added as a suppressed exception.
                 fs_remove(path)
             } catch (tt: IOException) {
                 t.addSuppressed(tt)
