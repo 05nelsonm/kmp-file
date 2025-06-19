@@ -83,4 +83,18 @@ class ChmodMingwUnitTest: ChmodBaseTest() {
             tmp.delete()
         }
     }
+
+    @Test
+    fun givenDir_whenIsSetReadOnly_thenDeleteReturnsTrue() {
+        val tmp = randomTemp()
+        assertTrue(tmp.mkdir())
+        try {
+            tmp.chmod("500")
+            assertTrue(tmp.isReadOnly(), "read-only")
+            assertTrue(tmp.delete(), "delete")
+            assertFalse(tmp.exists(), "exists")
+        } finally {
+            tmp.delete()
+        }
+    }
 }

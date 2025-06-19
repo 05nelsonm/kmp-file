@@ -54,9 +54,6 @@ internal actual fun fs_remove(path: Path): Boolean {
 
     var err = errno
     if (err == EACCES) {
-        // Could be a directory
-        if (rmdir(path) == 0) return true
-
         // Check if file's read-only flag needs to be cleared
         run {
             val (attrs, isReadOnly) = try {
@@ -69,6 +66,9 @@ internal actual fun fs_remove(path: Path): Boolean {
             if (remove(path) == 0) return true
             err = errno
         }
+
+        // Could be a directory (if was read-only, is not anymore)
+        if (rmdir(path) == 0) return true
     }
     if (err == ENOENT) return false
     throw errnoToIOException(err)
