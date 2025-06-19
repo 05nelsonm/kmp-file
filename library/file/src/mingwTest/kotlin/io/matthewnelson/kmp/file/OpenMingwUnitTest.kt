@@ -17,6 +17,7 @@ package io.matthewnelson.kmp.file
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
@@ -31,6 +32,7 @@ class OpenMingwUnitTest {
                 file.fWrite("Hello World!".encodeToByteArray())
             }
             assertTrue(tmp.isReadOnly())
+            assertEquals("Hello World!", tmp.readUtf8())
         } finally {
             tmp.delete()
         }
