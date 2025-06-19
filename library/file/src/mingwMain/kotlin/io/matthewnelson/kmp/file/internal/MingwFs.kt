@@ -37,20 +37,12 @@ import platform.windows.TRUE
 @Throws(IllegalArgumentException::class, IOException::class)
 internal actual fun fs_chmod(path: Path, mode: String) {
     val canWrite = ModeT.containsWritePermissions(mode)
-    val (attrsOld, isReadOnly) = fs_file_attributes(path)
+    val (attrs, isReadOnly) = fs_file_attributes(path)
 
     // No modification needed
     if (isReadOnly == !canWrite) return
 
-    val attrsNew = if (isReadOnly) {
-        // Clear read-only flag
-        (attrsOld.toInt() and FILE_ATTRIBUTE_READONLY.inv())
-    } else {
-        // Apply read-only flag
-        (attrsOld.toInt() or FILE_ATTRIBUTE_READONLY)
-    }.toUInt()
-
-    if (SetFileAttributesA(path, attrsNew) == 0) {
+    if (fs_file_toggle_readonly(path, attrs, isReadOnly) == 0) {
         throw lastErrorToIOException()
     }
 }
@@ -60,9 +52,23 @@ internal actual fun fs_chmod(path: Path, mode: String) {
 internal actual fun fs_remove(path: Path): Boolean {
     if (remove(path) == 0) return true
 
-    val err = errno
+    var err = errno
     if (err == EACCES) {
+        // Could be a directory
         if (rmdir(path) == 0) return true
+
+        // Check if file's read-only flag needs to be cleared
+        run {
+            val (attrs, isReadOnly) = try {
+                fs_file_attributes(path)
+            } catch (_: IOException) {
+                return@run
+            }
+            if (!isReadOnly) return@run
+            if (fs_file_toggle_readonly(path, attrs, isReadOnly) == 0) return@run
+            if (remove(path) == 0) return true
+            err = errno
+        }
     }
     if (err == ENOENT) return false
     throw errnoToIOException(err)
@@ -108,6 +114,20 @@ internal inline fun fs_file_attributes(path: Path): Pair<UInt, Boolean> {
     }
     val isReadOnly = (attrs.toInt() and FILE_ATTRIBUTE_READONLY) == TRUE
     return attrs to isReadOnly
+}
+
+// Returns 0 on failure
+@Throws(IOException::class)
+private inline fun fs_file_toggle_readonly(path: Path, attrs: UInt, currentReadOnly: Boolean): Int {
+    val attrsNew = if (currentReadOnly) {
+        // Clear read-only flag
+        (attrs.toInt() and FILE_ATTRIBUTE_READONLY.inv())
+    } else {
+        // Apply read-only flag
+        (attrs.toInt() or FILE_ATTRIBUTE_READONLY)
+    }.toUInt()
+
+    return SetFileAttributesA(path, attrsNew)
 }
 
 @ExperimentalForeignApi

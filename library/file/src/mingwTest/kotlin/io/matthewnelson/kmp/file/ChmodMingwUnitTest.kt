@@ -70,7 +70,17 @@ class ChmodMingwUnitTest: ChmodBaseTest() {
         }
     }
 
-    private fun File.isReadOnly(): Boolean {
-        return fs_file_attributes(path).second
+    @Test
+    fun givenFile_whenIsSetReadOnly_thenDeleteReturnsTrue() {
+        val tmp = randomTemp()
+        tmp.writeUtf8("Hello World!")
+        try {
+            tmp.chmod("400")
+            assertTrue(tmp.isReadOnly(), "read-only")
+            assertTrue(tmp.delete(), "delete")
+            assertFalse(tmp.exists(), "exists")
+        } finally {
+            tmp.delete()
+        }
     }
 }
