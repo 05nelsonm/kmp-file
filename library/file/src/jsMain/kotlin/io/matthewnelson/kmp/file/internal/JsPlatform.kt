@@ -25,6 +25,12 @@ internal actual inline fun platformDirSeparator(): Char = try {
     '/'
 }
 
+internal actual inline fun platformPathSeparator(): Char = try {
+    path_delimiter.first()
+} catch (_: Throwable) {
+    if (platformDirSeparator() == '/') ':' else ';'
+}
+
 internal actual inline fun platformTempDirectory(): File = try {
     os_tmpdir()
 } catch (_: Throwable) {

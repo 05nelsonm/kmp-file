@@ -19,4 +19,6 @@ package io.matthewnelson.kmp.file.internal
 
 internal actual inline fun platformDirSeparator(): Char = '/'
 
+internal actual inline fun platformPathSeparator(): Char = ':'
+
 internal actual val IsWindows: Boolean = false

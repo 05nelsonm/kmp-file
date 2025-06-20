@@ -25,6 +25,8 @@ import platform.posix.getenv
 
 internal actual inline fun platformDirSeparator(): Char = '\\'
 
+internal actual inline fun platformPathSeparator(): Char = ';'
+
 internal actual inline fun platformTempDirectory(): File {
     // Windows' built-in APIs check the TEMP, TMP, and USERPROFILE environment variables in order.
     // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-gettemppatha?redirectedfrom=MSDN

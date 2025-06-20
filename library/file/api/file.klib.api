@@ -61,6 +61,8 @@ open class io.matthewnelson.kmp.file/InterruptedException : kotlin/Exception { /
 
 final val io.matthewnelson.kmp.file/SysDirSep // io.matthewnelson.kmp.file/SysDirSep|{}SysDirSep[0]
     final fun <get-SysDirSep>(): kotlin/Char // io.matthewnelson.kmp.file/SysDirSep.<get-SysDirSep>|<get-SysDirSep>(){}[0]
+final val io.matthewnelson.kmp.file/SysPathSep // io.matthewnelson.kmp.file/SysPathSep|{}SysPathSep[0]
+    final fun <get-SysPathSep>(): kotlin/Char // io.matthewnelson.kmp.file/SysPathSep.<get-SysPathSep>|<get-SysPathSep>(){}[0]
 final val io.matthewnelson.kmp.file/SysTempDir // io.matthewnelson.kmp.file/SysTempDir|{}SysTempDir[0]
     final fun <get-SysTempDir>(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/SysTempDir.<get-SysTempDir>|<get-SysTempDir>(){}[0]
 final val io.matthewnelson.kmp.file/absoluteFile // io.matthewnelson.kmp.file/absoluteFile|@io.matthewnelson.kmp.file.File{}absoluteFile[0]

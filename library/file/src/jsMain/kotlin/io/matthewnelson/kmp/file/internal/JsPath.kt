@@ -23,6 +23,10 @@ package io.matthewnelson.kmp.file.internal
 @JsName("sep")
 internal external val path_sep: String
 
+/** [docs](https://nodejs.org/api/path.html#pathdelimiter) */
+@JsName("delimiter")
+internal external val path_delimiter: String
+
 /** [docs](https://nodejs.org/api/path.html#pathbasenamepath-suffix) **/
 @JsName("basename")
 internal external fun path_basename(path: Path): String
