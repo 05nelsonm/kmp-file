@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+package io.matthewnelson.kmp.file
 
-package io.matthewnelson.kmp.file.internal
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-internal actual inline fun platformDirSeparator(): Char = '/'
+abstract class SysSepBaseTest {
 
-internal actual inline fun platformPathSeparator(): Char = ':'
+    abstract fun getenvPATH(): String?
 
-internal actual val IsWindows: Boolean = false
+    @Test
+    fun givenSysDirSep_whenEnvironmentVariablePATH_thenContainsSysDirSep() {
+        assertEquals(true, getenvPATH()?.contains(SysDirSep))
+    }
+
+    @Test
+    fun givenSysPathSep_whenEnvironmentVariablePATH_thenContainsSysPathSep() {
+        assertEquals(true, getenvPATH()?.contains(SysPathSep))
+    }
+}

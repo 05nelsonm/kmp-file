@@ -36,6 +36,16 @@ import kotlin.jvm.JvmName
 public val SysDirSep: Char = platformDirSeparator()
 
 /**
+ * The operating system's `PATH` environment variable (and others such
+ * as `LD_LIBRARY_PATH`, etc.) delimiter character.
+ *
+ *  - Unix: `:`
+ *  - Windows: `;`
+ * */
+@JvmField
+public val SysPathSep: Char = platformPathSeparator()
+
+/**
  * The system's temporary directory.
  *
  * - Jvm/Android: `java.io.tmpdir` from [System.getProperty](https://docs.oracle.com/javase/8/docs/api/java/lang/System.html#getProperty-java.lang.String-)

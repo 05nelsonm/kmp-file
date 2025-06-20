@@ -31,6 +31,8 @@ import kotlin.io.writeText as _writeText
 
 internal actual inline fun platformDirSeparator(): Char = File.separatorChar
 
+internal actual inline fun platformPathSeparator(): Char = File.pathSeparatorChar
+
 @Suppress("SdCardPath")
 internal actual inline fun platformTempDirectory(): File {
     val jTemp = System
