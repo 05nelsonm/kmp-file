@@ -15,8 +15,6 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.ModeT
-import io.matthewnelson.kmp.file.internal.fs_file_attributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -29,7 +27,6 @@ class ChmodMingwUnitTest: ChmodBaseTest() {
         val tmpDir = randomTemp()
         assertTrue(tmpDir.mkdir())
 
-        ModeT
         try {
             listOf(
                 "100" to true,
