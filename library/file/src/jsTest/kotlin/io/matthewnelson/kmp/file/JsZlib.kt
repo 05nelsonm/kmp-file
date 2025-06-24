@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:JsModule("zlib")
-@file:JsNonModule
-@file:Suppress("FunctionName", "SpellCheckingInspection")
 
 package io.matthewnelson.kmp.file
 
-@JsName("gzipSync")
-external fun zlib_gzipSync(data: dynamic): dynamic
+import kotlin.js.unsafeCast
+
+internal external interface ModuleZlib {
+    fun gzipSync(data: dynamic): dynamic
+}
+
+internal fun moduleZlib(): ModuleZlib = js("eval('require')('zlib')").unsafeCast<ModuleZlib>()

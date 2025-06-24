@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "UNUSED")
 
 package io.matthewnelson.kmp.file
 
@@ -59,45 +59,6 @@ public expect class File(pathname: String): Comparable<File> {
      * */
     public fun isAbsolute(): Boolean
 
-    /**
-     * Tests whether the file or directory denoted by this abstract
-     * pathname exists.
-     *
-     * @return `true` if and only if the file or directory denoted
-     *   by this abstract pathname exists; `false` otherwise.
-     * */
-    public fun exists(): Boolean
-
-    /**
-     * Deletes the file or directory denoted by this abstract pathname.
-     *
-     * If this pathname denotes a directory, then the directory must
-     * be empty in order to be deleted.
-     *
-     * @return `true` if and only if the file or directory is
-     *   successfully deleted; `false` otherwise.
-     * */
-    public fun delete(): Boolean
-
-    /**
-     * Creates the directory named by this abstract pathname.
-     *
-     * @return `true` if and only if the directory was created; `false`
-     *   otherwise.
-     * */
-    public fun mkdir(): Boolean
-
-    /**
-     * Creates the directory named by this abstract pathname, including
-     * any necessary but nonexistent parent directories. Note that if
-     * this operation fails it may have succeeded in creating some of
-     * the necessary parent directories.
-     *
-     * @return `true` if and only if the directory was created, along
-     *   with all necessary parent directories; `false` otherwise.
-     * */
-    public fun mkdirs(): Boolean
-
     /** Use [name] */
     @PublishedApi
     internal fun getName(): String
@@ -111,19 +72,88 @@ public expect class File(pathname: String): Comparable<File> {
     @PublishedApi
     internal fun getPath(): String
 
-    /** Use [absolutePath] */
+    public override fun compareTo(other: File): Int
+
+
+
+    // --- DEPRECATED ---
+
+    /** Use [absolutePath2] */
     @PublishedApi
+    // @Throws(java.lang.SecurityException::class)
     internal fun getAbsolutePath(): String
-    /** Use [absoluteFile] */
+    /** Use [absoluteFile2] */
     @PublishedApi
+    // @Throws(java.lang.SecurityException::class)
     internal fun getAbsoluteFile(): File
 
-    /** Use [canonicalPath] */
+    /** Use [canonicalPath2] */
     @PublishedApi
+    // @Throws(IOException::class, java.lang.SecurityException::class)
     internal fun getCanonicalPath(): String
-    /** Use [canonicalFile] */
+    /** Use [canonicalFile2] */
     @PublishedApi
+    // @Throws(IOException::class, java.lang.SecurityException::class)
     internal fun getCanonicalFile(): File
 
-    public override fun compareTo(other: File): Int
+    /**
+     * DEPRECATED
+     * @see [delete2]
+     * @throws `java.lang.SecurityException`
+     * @suppress
+     * */
+    @Deprecated(
+        message = "Missing throws annotation for java.lang.SecurityException.",
+        replaceWith = ReplaceWith(
+            expression = "this.delete2(ignoreReadOnly = true)",
+            "io.matthewnelson.kmp.file.delete2"
+        )
+    )
+    public fun delete(): Boolean
+
+    /**
+     * DEPRECATED
+     * @see [exists2]
+     * @throws [IOException]
+     * @throws `java.lang.SecurityException`
+     * @suppress
+     * */
+    @Deprecated(
+        message = "Missing throws annotation for java.lang.SecurityException and IOException.",
+        replaceWith = ReplaceWith(
+            expression = "this.exists2()",
+            "io.matthewnelson.kmp.file.exists2"
+        )
+    )
+    public fun exists(): Boolean
+
+    /**
+     * DEPRECATED
+     * @see [mkdir2]
+     * @throws `java.lang.SecurityException`
+     * @suppress
+     * */
+    @Deprecated(
+        message = "Missing throws annotation for java.lang.SecurityException.",
+        replaceWith = ReplaceWith(
+            expression = "this.mkdir2(mode = null)",
+            "io.matthewnelson.kmp.file.mkdir2"
+        )
+    )
+    public fun mkdir(): Boolean
+
+    /**
+     * DEPRECATED
+     * @see [mkdirs2]
+     * @throws `java.lang.SecurityException`
+     * @suppress
+     * */
+    @Deprecated(
+        message = "Missing throws annotation for java.lang.SecurityException.",
+        replaceWith = ReplaceWith(
+            expression = "this.mkdirs2(mode = null)",
+            "io.matthewnelson.kmp.file.mkdirs2"
+        )
+    )
+    public fun mkdirs(): Boolean
 }

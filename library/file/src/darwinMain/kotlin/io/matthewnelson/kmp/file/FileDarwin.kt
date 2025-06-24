@@ -28,14 +28,14 @@ import platform.posix.fcntl
 import platform.posix.fileno
 
 @PublishedApi
-@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
+@Deprecated("Strictly for deprecated File.fOpen function. Do not use.", level = DeprecationLevel.ERROR)
 internal actual inline fun String.appendFlagCLOEXEC(): String = this // no-op
 
 @PublishedApi
 @ExperimentalForeignApi
 @Throws(IOException::class)
-@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
-internal actual inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE> {
+@Deprecated("Strictly for deprecated File.fOpen function. Do not use.", level = DeprecationLevel.ERROR)
+internal actual inline fun CPointer<FILE>.setFDCLOEXEC(file: File): CPointer<FILE> {
     val fd = fileno(this)
     run {
         if (fd == -1) return@run
@@ -46,7 +46,7 @@ internal actual inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE> {
         }
     }
 
-    val e = errnoToIOException(errno)
+    val e = errnoToIOException(errno, file)
     try {
         @OptIn(DelicateFileApi::class)
         close()

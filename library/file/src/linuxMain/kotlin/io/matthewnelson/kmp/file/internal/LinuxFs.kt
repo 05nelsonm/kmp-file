@@ -23,18 +23,6 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.convert
 import platform.posix.*
 
-@OptIn(ExperimentalForeignApi::class)
-internal actual inline fun fs_platform_chmod(
-    path: Path,
-    mode: UInt,
-): Int = chmod(path, mode.convert()).convert()
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual inline fun fs_platform_mkdir(
-    path: Path,
-    mode: UInt,
-): Int = mkdir(path, mode.convert()).convert()
-
 @ExperimentalForeignApi
 internal actual inline fun fs_platform_fread(
     file: CPointer<FILE>,

@@ -21,7 +21,7 @@ import kotlin.test.assertEquals
 class ResolveUnitTest {
 
     @Test
-    fun givenFile_whenResolve_thenIsExpected() {
+    fun givenFile_whenResolve_thenIsAsExpected() {
         assertEquals("", "".toFile().resolve("").path)
         assertEquals("c", "".toFile().resolve("c").path)
         assertEquals("p${SysDirSep}c", "p".toFile().resolve("c").path)

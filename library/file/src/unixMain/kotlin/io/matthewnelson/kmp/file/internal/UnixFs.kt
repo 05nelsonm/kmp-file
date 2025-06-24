@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE", "VariableInitializerIsRedundant")
+@file:Suppress("FunctionName", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -21,45 +21,12 @@ import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
+import io.matthewnelson.kmp.file.internal.fs.FsPosix.MODE_MASK
 import io.matthewnelson.kmp.file.path
+import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.*
 import platform.posix.*
-
-@OptIn(ExperimentalForeignApi::class)
-@Throws(IllegalArgumentException::class, IOException::class)
-internal actual fun fs_chmod(path: Path, mode: String) {
-    val modet = ModeT.get(mode)
-    if (fs_platform_chmod(path, modet) == 0) return
-    throw errnoToIOException(errno)
-}
-
-@Throws(IOException::class)
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_remove(path: Path): Boolean {
-    val result = remove(path)
-    if (result != 0) {
-        if (errno == ENOENT) return false
-        throw errnoToIOException(errno)
-    }
-    return true
-}
-
-@Throws(IOException::class)
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_realpath(path: Path): Path {
-    val real = realpath(path, null)
-        ?: throw errnoToIOException(errno)
-
-    return try {
-        real.toKString()
-    } finally {
-        free(real)
-    }
-}
-
-internal actual inline fun fs_platform_mkdir(
-    path: Path,
-): Int = fs_platform_mkdir(path, ModeT._775)
 
 @ExperimentalForeignApi
 @Throws(IOException::class)
@@ -67,7 +34,7 @@ internal actual inline fun MemScope.fs_platform_file_size(
     path: Path,
 ): Long {
     val stat = alloc<stat>()
-    if (stat(path, stat.ptr) != 0) throw errnoToIOException(errno)
+    if (stat(path, stat.ptr) != 0) throw errnoToIOException(errno, path.toFile())
     return stat.st_size
 }
 
@@ -80,13 +47,18 @@ internal actual inline fun File.fs_platform_fopen(
     e: Boolean,
     excl: OpenExcl,
 ): CPointer<FILE> {
-    val modet = ModeT.get(excl.mode)
-    var flags = flags or excl.flags
+    val modet = MODE_MASK.convert(excl._mode).toUInt()
+    var flags = flags or when (excl) {
+        is OpenExcl.MaybeCreate -> O_CREAT
+        is OpenExcl.MustCreate -> O_CREAT or O_EXCL
+        is OpenExcl.MustExist -> 0
+    }
     if (e) flags = flags or O_CLOEXEC
     val mode = if (b) "${mode}b" else mode
 
-    val fd = ignoreEINTR { open(path, flags, modet) }
-    if (fd == -1) throw errnoToIllegalArgumentOrIOException(errno)
+    @Suppress("RemoveRedundantQualifierName")
+    val fd = ignoreEINTR { platform.posix.open(path, flags, modet) }
+    if (fd == -1) throw errnoToIllegalArgumentOrIOException(errno, this)
 
 //    if ((flags or O_APPEND) == flags && (flags or O_RDWR) == flags) {
 //        // TODO: Set reading file position to beginning of file?
@@ -94,21 +66,11 @@ internal actual inline fun File.fs_platform_fopen(
 
     val ptr = ignoreEINTR<FILE> { fdopen(fd, mode) }
     if (ptr == null) {
-        val e = errnoToIllegalArgumentOrIOException(errno)
+        val e = errnoToIllegalArgumentOrIOException(errno, this)
         if (ignoreEINTR { close(fd) } == -1) {
-            e.addSuppressed(errnoToIOException(errno))
+            e.addSuppressed(errnoToIOException(errno, this))
         }
         throw e
     }
     return ptr
 }
-
-internal expect inline fun fs_platform_chmod(
-    path: Path,
-    mode: UInt,
-): Int
-
-internal expect inline fun fs_platform_mkdir(
-    path: Path,
-    mode: UInt,
-): Int

@@ -22,10 +22,14 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
 class OpenNativeUnitTest {
+
+    private val checker = permissionChecker()
 
     @Test
     fun givenOpen_whenOpenExclMustCreate_thenFailsWhenFileExists() {
@@ -39,7 +43,7 @@ class OpenNativeUnitTest {
             // pass
             assertEquals(true, t.message?.contains("exists"))
         } finally {
-            tmp.delete()
+            tmp.delete2()
         }
     }
 
@@ -53,7 +57,7 @@ class OpenNativeUnitTest {
         } catch (_: FileNotFoundException) {
             // pass
         } finally {
-            tmp.delete()
+            tmp.delete2()
         }
     }
 
@@ -70,7 +74,7 @@ class OpenNativeUnitTest {
 
             assertEquals("Hello World!Hello World2!", tmp.readUtf8())
         } finally {
-            tmp.delete()
+            tmp.delete2()
         }
     }
 
@@ -86,19 +90,7 @@ class OpenNativeUnitTest {
 
             assertEquals("Hello World!", tmp.readUtf8())
         } finally {
-            tmp.delete()
-        }
-    }
-
-    @Test
-    fun givenOpen_whenInvalidModeMask_thenThrowsException() {
-        val tmp = randomTemp()
-        try {
-            assertFailsWith<IllegalArgumentException> {
-                tmp.openA(excl = OpenExcl.MaybeCreate("888"))
-            }
-        } finally {
-            tmp.delete()
+            tmp.delete2()
         }
     }
 
@@ -110,7 +102,7 @@ class OpenNativeUnitTest {
                 tmp.openR(excl = OpenExcl.MaybeCreate.DEFAULT).use {}
             }
         } finally {
-            tmp.delete()
+            tmp.delete2()
         }
     }
 
@@ -130,7 +122,50 @@ class OpenNativeUnitTest {
             }
             assertEquals("Hello World!", tmp.readUtf8())
         } finally {
-            tmp.delete()
+            tmp.delete2()
+        }
+    }
+
+    @Test
+    fun givenFile_whenOpenWindows_thenReadOnlyIsSetAsExpected() {
+        val checker = checker
+        if (checker !is PermissionChecker.Windows) {
+            println("Skipping...")
+            return
+        }
+
+        val tmp = randomTemp()
+        try {
+            tmp.openW(excl = OpenExcl.MustCreate.of(mode = "400")).use { file ->
+                assertTrue(checker.isReadOnly(tmp), "is read-only")
+                file.fWrite("Hello World!".encodeToByteArray())
+            }
+            assertEquals("Hello World!", tmp.readUtf8())
+        } finally {
+            tmp.delete2(ignoreReadOnly = true)
+        }
+    }
+
+    @Test
+    fun givenFile_whenOpenPosix_thenPermissionsAreAsExpected() {
+        val checker = checker
+        if (checker !is PermissionChecker.Posix) {
+            println("Skipping...")
+            return
+        }
+
+        val tmp = randomTemp()
+        try {
+            tmp.openW(excl = OpenExcl.MustCreate.of(mode = "400")).use { file ->
+                assertTrue(checker.canRead(tmp), "read")
+                assertFalse(checker.canWrite(tmp), "write")
+                assertFalse(checker.canExecute(tmp), "execute")
+
+                file.fWrite("Hello World!".encodeToByteArray())
+            }
+            assertEquals("Hello World!", tmp.readUtf8())
+        } finally {
+            tmp.delete2(ignoreReadOnly = true)
         }
     }
 }

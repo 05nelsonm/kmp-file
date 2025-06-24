@@ -17,6 +17,9 @@
 
 package io.matthewnelson.kmp.file
 
+/**
+ * TODO
+ * */
 public actual open class IOException: Exception {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)
@@ -24,16 +27,69 @@ public actual open class IOException: Exception {
     public actual constructor(cause: Throwable?): super(cause)
 }
 
+/**
+ * TODO
+ * */
 public actual open class EOFException: IOException {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)
 }
 
+/**
+ * TODO
+ * */
 public actual open class FileNotFoundException: IOException {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)
 }
 
+/**
+ * TODO
+ * */
+public actual open class FileSystemException(
+    public actual val file: File,
+    public actual val other: File? = null,
+    public actual val reason: String? = null,
+): IOException(StringBuilder(file.toString()).apply {
+    if (other != null) append(" -> ").append(other.toString())
+    if (reason != null) append(": ").append(reason)
+}.toString())
+
+/**
+ * TODO
+ * */
+public actual class FileAlreadyExistsException(
+    file: File,
+    other: File? = null,
+    reason: String? = null,
+): FileSystemException(file, other, reason)
+
+/**
+ * TODO
+ * */
+public actual class AccessDeniedException(
+    file: File,
+    other: File? = null,
+    reason: String? = null,
+): FileSystemException(file, other, reason)
+
+/**
+ * TODO
+ * */
+public actual class NotDirectoryException(
+    file: File,
+): FileSystemException(file, null, "Not a directory")
+
+/**
+ * TODO
+ * */
+public actual class DirectoryNotEmptyException(
+    file: File,
+): FileSystemException(file, null, "Directory is not empty")
+
+/**
+ * TODO
+ * */
 public actual open class InterruptedException: Exception {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)

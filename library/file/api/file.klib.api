@@ -14,6 +14,14 @@ open annotation class io.matthewnelson.kmp.file/DelicateFileApi : kotlin/Annotat
     constructor <init>() // io.matthewnelson.kmp.file/DelicateFileApi.<init>|<init>(){}[0]
 }
 
+final class io.matthewnelson.kmp.file/AccessDeniedException : io.matthewnelson.kmp.file/FileSystemException { // io.matthewnelson.kmp.file/AccessDeniedException|null[0]
+    constructor <init>(io.matthewnelson.kmp.file/File, io.matthewnelson.kmp.file/File? = ..., kotlin/String? = ...) // io.matthewnelson.kmp.file/AccessDeniedException.<init>|<init>(io.matthewnelson.kmp.file.File;io.matthewnelson.kmp.file.File?;kotlin.String?){}[0]
+}
+
+final class io.matthewnelson.kmp.file/DirectoryNotEmptyException : io.matthewnelson.kmp.file/FileSystemException { // io.matthewnelson.kmp.file/DirectoryNotEmptyException|null[0]
+    constructor <init>(io.matthewnelson.kmp.file/File) // io.matthewnelson.kmp.file/DirectoryNotEmptyException.<init>|<init>(io.matthewnelson.kmp.file.File){}[0]
+}
+
 final class io.matthewnelson.kmp.file/File : kotlin/Comparable<io.matthewnelson.kmp.file/File> { // io.matthewnelson.kmp.file/File|null[0]
     constructor <init>(kotlin/String) // io.matthewnelson.kmp.file/File.<init>|<init>(kotlin.String){}[0]
 
@@ -37,6 +45,14 @@ final class io.matthewnelson.kmp.file/File : kotlin/Comparable<io.matthewnelson.
     final fun toString(): kotlin/String // io.matthewnelson.kmp.file/File.toString|toString(){}[0]
 }
 
+final class io.matthewnelson.kmp.file/FileAlreadyExistsException : io.matthewnelson.kmp.file/FileSystemException { // io.matthewnelson.kmp.file/FileAlreadyExistsException|null[0]
+    constructor <init>(io.matthewnelson.kmp.file/File, io.matthewnelson.kmp.file/File? = ..., kotlin/String? = ...) // io.matthewnelson.kmp.file/FileAlreadyExistsException.<init>|<init>(io.matthewnelson.kmp.file.File;io.matthewnelson.kmp.file.File?;kotlin.String?){}[0]
+}
+
+final class io.matthewnelson.kmp.file/NotDirectoryException : io.matthewnelson.kmp.file/FileSystemException { // io.matthewnelson.kmp.file/NotDirectoryException|null[0]
+    constructor <init>(io.matthewnelson.kmp.file/File) // io.matthewnelson.kmp.file/NotDirectoryException.<init>|<init>(io.matthewnelson.kmp.file.File){}[0]
+}
+
 open class io.matthewnelson.kmp.file/EOFException : io.matthewnelson.kmp.file/IOException { // io.matthewnelson.kmp.file/EOFException|null[0]
     constructor <init>() // io.matthewnelson.kmp.file/EOFException.<init>|<init>(){}[0]
     constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/EOFException.<init>|<init>(kotlin.String?){}[0]
@@ -45,6 +61,17 @@ open class io.matthewnelson.kmp.file/EOFException : io.matthewnelson.kmp.file/IO
 open class io.matthewnelson.kmp.file/FileNotFoundException : io.matthewnelson.kmp.file/IOException { // io.matthewnelson.kmp.file/FileNotFoundException|null[0]
     constructor <init>() // io.matthewnelson.kmp.file/FileNotFoundException.<init>|<init>(){}[0]
     constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/FileNotFoundException.<init>|<init>(kotlin.String?){}[0]
+}
+
+open class io.matthewnelson.kmp.file/FileSystemException : io.matthewnelson.kmp.file/IOException { // io.matthewnelson.kmp.file/FileSystemException|null[0]
+    constructor <init>(io.matthewnelson.kmp.file/File, io.matthewnelson.kmp.file/File? = ..., kotlin/String? = ...) // io.matthewnelson.kmp.file/FileSystemException.<init>|<init>(io.matthewnelson.kmp.file.File;io.matthewnelson.kmp.file.File?;kotlin.String?){}[0]
+
+    final val file // io.matthewnelson.kmp.file/FileSystemException.file|{}file[0]
+        final fun <get-file>(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/FileSystemException.file.<get-file>|<get-file>(){}[0]
+    final val other // io.matthewnelson.kmp.file/FileSystemException.other|{}other[0]
+        final fun <get-other>(): io.matthewnelson.kmp.file/File? // io.matthewnelson.kmp.file/FileSystemException.other.<get-other>|<get-other>(){}[0]
+    final val reason // io.matthewnelson.kmp.file/FileSystemException.reason|{}reason[0]
+        final fun <get-reason>(): kotlin/String? // io.matthewnelson.kmp.file/FileSystemException.reason.<get-reason>|<get-reason>(){}[0]
 }
 
 open class io.matthewnelson.kmp.file/IOException : kotlin/Exception { // io.matthewnelson.kmp.file/IOException|null[0]
@@ -59,8 +86,39 @@ open class io.matthewnelson.kmp.file/InterruptedException : kotlin/Exception { /
     constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/InterruptedException.<init>|<init>(kotlin.String?){}[0]
 }
 
+sealed class io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/OpenExcl|null[0]
+    final val mode // io.matthewnelson.kmp.file/OpenExcl.mode|{}mode[0]
+        final fun <get-mode>(): kotlin/String // io.matthewnelson.kmp.file/OpenExcl.mode.<get-mode>|<get-mode>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.matthewnelson.kmp.file/OpenExcl.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.matthewnelson.kmp.file/OpenExcl.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.matthewnelson.kmp.file/OpenExcl.toString|toString(){}[0]
+
+    final class MaybeCreate : io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate|null[0]
+        final object Companion { // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate.Companion|null[0]
+            final val DEFAULT // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate.Companion.DEFAULT|{}DEFAULT[0]
+                final fun <get-DEFAULT>(): io.matthewnelson.kmp.file/OpenExcl.MaybeCreate // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate.Companion.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
+
+            final fun of(kotlin/String?): io.matthewnelson.kmp.file/OpenExcl.MaybeCreate // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate.Companion.of|of(kotlin.String?){}[0]
+        }
+    }
+
+    final class MustCreate : io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/OpenExcl.MustCreate|null[0]
+        final object Companion { // io.matthewnelson.kmp.file/OpenExcl.MustCreate.Companion|null[0]
+            final val DEFAULT // io.matthewnelson.kmp.file/OpenExcl.MustCreate.Companion.DEFAULT|{}DEFAULT[0]
+                final fun <get-DEFAULT>(): io.matthewnelson.kmp.file/OpenExcl.MustCreate // io.matthewnelson.kmp.file/OpenExcl.MustCreate.Companion.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
+
+            final fun of(kotlin/String?): io.matthewnelson.kmp.file/OpenExcl.MustCreate // io.matthewnelson.kmp.file/OpenExcl.MustCreate.Companion.of|of(kotlin.String?){}[0]
+        }
+    }
+
+    final object MustExist : io.matthewnelson.kmp.file/OpenExcl // io.matthewnelson.kmp.file/OpenExcl.MustExist|null[0]
+}
+
 final val io.matthewnelson.kmp.file/SysDirSep // io.matthewnelson.kmp.file/SysDirSep|{}SysDirSep[0]
     final fun <get-SysDirSep>(): kotlin/Char // io.matthewnelson.kmp.file/SysDirSep.<get-SysDirSep>|<get-SysDirSep>(){}[0]
+final val io.matthewnelson.kmp.file/SysFsName // io.matthewnelson.kmp.file/SysFsName|{}SysFsName[0]
+    final fun <get-SysFsName>(): kotlin/String // io.matthewnelson.kmp.file/SysFsName.<get-SysFsName>|<get-SysFsName>(){}[0]
 final val io.matthewnelson.kmp.file/SysPathSep // io.matthewnelson.kmp.file/SysPathSep|{}SysPathSep[0]
     final fun <get-SysPathSep>(): kotlin/Char // io.matthewnelson.kmp.file/SysPathSep.<get-SysPathSep>|<get-SysPathSep>(){}[0]
 final val io.matthewnelson.kmp.file/SysTempDir // io.matthewnelson.kmp.file/SysTempDir|{}SysTempDir[0]
@@ -78,6 +136,15 @@ final val io.matthewnelson.kmp.file/parentPath // io.matthewnelson.kmp.file/pare
 final val io.matthewnelson.kmp.file/path // io.matthewnelson.kmp.file/path|@io.matthewnelson.kmp.file.File{}path[0]
     final inline fun (io.matthewnelson.kmp.file/File).<get-path>(): kotlin/String // io.matthewnelson.kmp.file/path.<get-path>|<get-path>@io.matthewnelson.kmp.file.File(){}[0]
 
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/absoluteFile2(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/absoluteFile2|absoluteFile2@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/absolutePath2(): kotlin/String // io.matthewnelson.kmp.file/absolutePath2|absolutePath2@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/canonicalFile2(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/canonicalFile2|canonicalFile2@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/canonicalPath2(): kotlin/String // io.matthewnelson.kmp.file/canonicalPath2|canonicalPath2@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/chmod2(kotlin/String, kotlin/Boolean = ...): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/chmod2|chmod2@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Boolean){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/delete2(kotlin/Boolean = ..., kotlin/Boolean = ...): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/delete2|delete2@io.matthewnelson.kmp.file.File(kotlin.Boolean;kotlin.Boolean){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/exists2(): kotlin/Boolean // io.matthewnelson.kmp.file/exists2|exists2@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/mkdir2(kotlin/String?, kotlin/Boolean = ...): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/mkdir2|mkdir2@io.matthewnelson.kmp.file.File(kotlin.String?;kotlin.Boolean){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/mkdirs2(kotlin/String?, kotlin/Boolean = ...): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/mkdirs2|mkdirs2@io.matthewnelson.kmp.file.File(kotlin.String?;kotlin.Boolean){}[0]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/normalize(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/normalize|normalize@io.matthewnelson.kmp.file.File(){}[0]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/readBytes(): kotlin/ByteArray // io.matthewnelson.kmp.file/readBytes|readBytes@io.matthewnelson.kmp.file.File(){}[0]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/readUtf8(): kotlin/String // io.matthewnelson.kmp.file/readUtf8|readUtf8@io.matthewnelson.kmp.file.File(){}[0]
@@ -87,45 +154,16 @@ final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/writeBytes(
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/writeUtf8(kotlin/String) // io.matthewnelson.kmp.file/writeUtf8|writeUtf8@io.matthewnelson.kmp.file.File(kotlin.String){}[0]
 final inline fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/canonicalFile(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/canonicalFile|canonicalFile@io.matthewnelson.kmp.file.File(){}[0]
 final inline fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/canonicalPath(): kotlin/String // io.matthewnelson.kmp.file/canonicalPath|canonicalPath@io.matthewnelson.kmp.file.File(){}[0]
+final inline fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/normalizedFileOf(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/normalizedFileOf|normalizedFileOf@io.matthewnelson.kmp.file.File(){}[0]
 final inline fun (kotlin/String).io.matthewnelson.kmp.file/toFile(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/toFile|toFile@kotlin.String(){}[0]
 final inline fun (kotlin/Throwable).io.matthewnelson.kmp.file/wrapIOException(): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/wrapIOException|wrapIOException@kotlin.Throwable(){}[0]
 final inline fun (kotlin/Throwable).io.matthewnelson.kmp.file/wrapIOException(kotlin/Function0<kotlin/String>): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/wrapIOException|wrapIOException@kotlin.Throwable(kotlin.Function0<kotlin.String>){}[0]
 
 // Targets: [native]
-abstract class io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/OpenExcl|null[0]
-    abstract fun toString(): kotlin/String // io.matthewnelson.kmp.file/OpenExcl.toString|toString(){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // io.matthewnelson.kmp.file/OpenExcl.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // io.matthewnelson.kmp.file/OpenExcl.hashCode|hashCode(){}[0]
-
-    final class MaybeCreate : io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate|null[0]
-        final fun toString(): kotlin/String // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate.toString|toString(){}[0]
-
-        final object Companion { // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate.Companion|null[0]
-            final val DEFAULT // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate.Companion.DEFAULT|{}DEFAULT[0]
-                final fun <get-DEFAULT>(): io.matthewnelson.kmp.file/OpenExcl.MaybeCreate // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate.Companion.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
-
-            final fun invoke(kotlin/String = ...): io.matthewnelson.kmp.file/OpenExcl.MaybeCreate // io.matthewnelson.kmp.file/OpenExcl.MaybeCreate.Companion.invoke|invoke(kotlin.String){}[0]
-        }
-    }
-
-    final class MustCreate : io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/OpenExcl.MustCreate|null[0]
-        final fun toString(): kotlin/String // io.matthewnelson.kmp.file/OpenExcl.MustCreate.toString|toString(){}[0]
-
-        final object Companion { // io.matthewnelson.kmp.file/OpenExcl.MustCreate.Companion|null[0]
-            final val DEFAULT // io.matthewnelson.kmp.file/OpenExcl.MustCreate.Companion.DEFAULT|{}DEFAULT[0]
-                final fun <get-DEFAULT>(): io.matthewnelson.kmp.file/OpenExcl.MustCreate // io.matthewnelson.kmp.file/OpenExcl.MustCreate.Companion.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
-
-            final fun invoke(kotlin/String = ...): io.matthewnelson.kmp.file/OpenExcl.MustCreate // io.matthewnelson.kmp.file/OpenExcl.MustCreate.Companion.invoke|invoke(kotlin.String){}[0]
-        }
-    }
-
-    final object MustExist : io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/OpenExcl.MustExist|null[0]
-        final fun toString(): kotlin/String // io.matthewnelson.kmp.file/OpenExcl.MustExist.toString|toString(){}[0]
-    }
-}
+final fun io.matthewnelson.kmp.file/errnoToIOException(kotlin/Int): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/errnoToIOException|errnoToIOException(kotlin.Int){}[0]
 
 // Targets: [native]
-final fun io.matthewnelson.kmp.file/errnoToIOException(kotlin/Int): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/errnoToIOException|errnoToIOException(kotlin.Int){}[0]
+final fun io.matthewnelson.kmp.file/errnoToIOException(kotlin/Int, io.matthewnelson.kmp.file/File?, io.matthewnelson.kmp.file/File? = ...): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/errnoToIOException|errnoToIOException(kotlin.Int;io.matthewnelson.kmp.file.File?;io.matthewnelson.kmp.file.File?){}[0]
 
 // Targets: [native]
 final inline fun (kotlin/String).io.matthewnelson.kmp.file/appendFlagCLOEXEC(): kotlin/String // io.matthewnelson.kmp.file/appendFlagCLOEXEC|appendFlagCLOEXEC@kotlin.String(){}[0]
@@ -152,7 +190,7 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.k
 final fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [androidNative, apple]
-final inline fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(){}[0]
+final inline fun (kotlinx.cinterop/CPointer<platform.posix/__sFILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(io.matthewnelson.kmp.file/File): kotlinx.cinterop/CPointer<platform.posix/__sFILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix.__sFILE>(io.matthewnelson.kmp.file.File){}[0]
 
 // Targets: [androidNative, apple]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/__sFILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix.__sFILE>,0:0>){0§<kotlin.Any?>}[0]
@@ -182,7 +220,7 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.
 final fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [linux]
-final inline fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(){}[0]
+final inline fun (kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>).io.matthewnelson.kmp.file/setFDCLOEXEC(io.matthewnelson.kmp.file/File): kotlinx.cinterop/CPointer<platform.posix/_IO_FILE> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._IO_FILE>(io.matthewnelson.kmp.file.File){}[0]
 
 // Targets: [linux]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_IO_FILE>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._IO_FILE>,0:0>){0§<kotlin.Any?>}[0]
@@ -222,6 +260,8 @@ final value class io.matthewnelson.kmp.file/Stats { // io.matthewnelson.kmp.file
         final fun <get-isSymbolicLink>(): kotlin/Boolean // io.matthewnelson.kmp.file/Stats.isSymbolicLink.<get-isSymbolicLink>|<get-isSymbolicLink>(){}[0]
     final val mode // io.matthewnelson.kmp.file/Stats.mode|{}mode[0]
         final fun <get-mode>(): kotlin/Int // io.matthewnelson.kmp.file/Stats.mode.<get-mode>|<get-mode>(){}[0]
+    final val size // io.matthewnelson.kmp.file/Stats.size|{}size[0]
+        final fun <get-size>(): kotlin/Number // io.matthewnelson.kmp.file/Stats.size.<get-size>|<get-size>(){}[0]
 
     final fun equals(kotlin/Any?): kotlin/Boolean // io.matthewnelson.kmp.file/Stats.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.matthewnelson.kmp.file/Stats.hashCode|hashCode(){}[0]
@@ -248,6 +288,9 @@ final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/write(io.ma
 // Targets: [js]
 final fun (kotlin/Throwable).io.matthewnelson.kmp.file/toIOException(): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/toIOException|toIOException@kotlin.Throwable(){}[0]
 
+// Targets: [js]
+final fun (kotlin/Throwable).io.matthewnelson.kmp.file/toIOException(io.matthewnelson.kmp.file/File?, io.matthewnelson.kmp.file/File? = ...): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/toIOException|toIOException@kotlin.Throwable(io.matthewnelson.kmp.file.File?;io.matthewnelson.kmp.file.File?){}[0]
+
 // Targets: [mingwX64]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/open(kotlin/Char, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., io.matthewnelson.kmp.file/OpenExcl = ...): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/open|open@io.matthewnelson.kmp.file.File(kotlin.Char;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;io.matthewnelson.kmp.file.OpenExcl){}[0]
 
@@ -270,10 +313,16 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.km
 final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [mingwX64]
-final inline fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/setFDCLOEXEC(): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._iobuf>(){}[0]
+final fun io.matthewnelson.kmp.file/lastErrorToIOException(io.matthewnelson.kmp.file/File?, io.matthewnelson.kmp.file/File? = ...): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/lastErrorToIOException|lastErrorToIOException(io.matthewnelson.kmp.file.File?;io.matthewnelson.kmp.file.File?){}[0]
+
+// Targets: [mingwX64]
+final inline fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/setFDCLOEXEC(io.matthewnelson.kmp.file/File): kotlinx.cinterop/CPointer<platform.posix/_iobuf> // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._iobuf>(io.matthewnelson.kmp.file.File){}[0]
 
 // Targets: [mingwX64]
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]
 
 // Targets: [mingwX64]
 final inline fun <#A: kotlin/Any?> (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/use(kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/use|use@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]
+
+// Targets: [mingwX64]
+final inline fun io.matthewnelson.kmp.file/lastErrorToIOException(): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/lastErrorToIOException|lastErrorToIOException(){}[0]

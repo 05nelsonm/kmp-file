@@ -20,18 +20,6 @@ package io.matthewnelson.kmp.file.internal
 import kotlinx.cinterop.*
 import platform.posix.*
 
-@OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
-internal actual inline fun fs_platform_chmod(
-    path: Path,
-    mode: UInt,
-): Int = chmod(path, mode.convert()).convert()
-
-@OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
-internal actual inline fun fs_platform_mkdir(
-    path: Path,
-    mode: UInt,
-): Int = mkdir(path, mode.convert()).convert()
-
 @ExperimentalForeignApi
 @OptIn(UnsafeNumber::class)
 internal actual inline fun fs_platform_fread(

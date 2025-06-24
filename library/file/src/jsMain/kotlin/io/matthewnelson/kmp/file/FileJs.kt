@@ -16,48 +16,84 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.*
+import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 
-// @Throws(IOException::class)
+/**
+ * TODO
+ * */
+// @Throws(IOException::class, UnsupportedOperationException::class)
 public fun File.lstat(): Stats = try {
-    Stats(fs_lstatSync(path))
+    val node = FsJsNode.require()
+    Stats(node.fs.lstatSync(path))
 } catch (t: Throwable) {
-    throw t.toIOException()
+    throw t.toIOException(this)
 }
 
-// @Throws(IOException::class)
+/**
+ * TODO
+ * */
+// @Throws(IOException::class, UnsupportedOperationException::class)
 public fun File.stat(): Stats = try {
-    Stats(fs_statSync(path))
+    val node = FsJsNode.require()
+    Stats(node.fs.statSync(path))
 } catch (t: Throwable) {
-    throw t.toIOException()
+    throw t.toIOException(this)
 }
 
-// @Throws(IOException::class)
+/**
+ * TODO
+ * */
+// @Throws(IOException::class, UnsupportedOperationException::class)
 public fun File.read(): Buffer = try {
-    Buffer(fs_readFileSync(path))
+    val node = FsJsNode.require()
+    Buffer(node.fs.readFileSync(path))
 } catch (t: Throwable) {
-    throw t.toIOException()
+    throw t.toIOException(this)
 }
 
-// @Throws(IOException::class)
+/**
+ * TODO
+ * */
+// @Throws(IOException::class, UnsupportedOperationException::class)
 public fun File.write(data: Buffer) {
     try {
-        fs_writeFileSync(path, data.value)
+        FsJsNode.require().fs.writeFileSync(path, data.value)
     } catch (t: Throwable) {
-        throw t.toIOException()
+        throw t.toIOException(this)
     }
 }
 
+/**
+ * TODO
+ * */
 public val Throwable.errorCodeOrNull: String? get() = try {
     asDynamic().code as String
 } catch (_: Throwable) {
     null
 }
 
-public fun Throwable.toIOException(): IOException {
+/**
+ * TODO
+ * */
+public fun Throwable.toIOException(): IOException = toIOException(null)
+
+/**
+ * TODO
+ * */
+public fun Throwable.toIOException(file: File?, other: File? = null): IOException {
     if (this is IOException) return this
 
-    return when (errorCodeOrNull) {
-        "ENOENT" -> FileNotFoundException(message)
+    val code = errorCodeOrNull
+    return when {
+        code == "ENOENT" -> fileNotFoundException(file, code, message)
+        code?.startsWith("ERR_FS_") == true -> FileSystemException(file ?: "".toFile(), other, message)
+        file != null -> when (code) {
+            "EACCES" -> AccessDeniedException(file, other, message)
+            "EEXIST" -> FileAlreadyExistsException(file, other, message)
+            "ENOTDIR" -> NotDirectoryException(file)
+            "ENOTEMPTY" -> DirectoryNotEmptyException(file)
+            else -> FileSystemException(file, other, message)
+        }
         else -> IOException(this)
     }
 }

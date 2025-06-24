@@ -31,12 +31,12 @@ class CanonicalUnitTest {
             return
         }
 
-        assertEquals(FILE_LOREM_IPSUM, FILE_SYM_LINK_2.canonicalFile())
+        assertEquals(FILE_LOREM_IPSUM, FILE_SYM_LINK_2.canonicalFile2())
     }
 
     @Test
     fun givenFile_whenEmpty_thenReturnsCurrentWorkingDirectory() {
-        val cwd = "".toFile().canonicalPath()
+        val cwd = "".toFile().canonicalPath2()
 
         // not empty and has some (any) path
         assertTrue(cwd.contains(SysDirSep))

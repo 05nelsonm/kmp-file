@@ -70,9 +70,14 @@ kmpConfiguration {
             compileTargetCompatibility = JavaVersion.VERSION_1_8
 
             sourceSetTestInstrumented {
+                kotlin.srcDir("src/androidInstrumentedTest/file")
+
                 dependencies {
                     implementation(libs.androidx.test.core)
                     implementation(libs.androidx.test.runner)
+
+                    implementation(libs.encoding.base16)
+                    implementation(kotlincrypto.hash.sha2)
                 }
             }
         }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
 @file:JvmName("Exceptions")
 
 package io.matthewnelson.kmp.file
@@ -23,6 +23,9 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
 
+/**
+ * TODO
+ * */
 public expect open class IOException: Exception {
     public constructor()
     public constructor(message: String?)
@@ -30,16 +33,54 @@ public expect open class IOException: Exception {
     public constructor(cause: Throwable?)
 }
 
+/**
+ * TODO
+ * */
 public expect open class EOFException: IOException {
     public constructor()
     public constructor(message: String?)
 }
 
+/**
+ * TODO
+ * */
 public expect open class FileNotFoundException: IOException {
     public constructor()
     public constructor(message: String?)
 }
 
+/**
+ * TODO
+ * */
+public expect open class FileSystemException: IOException {
+    public val file: File
+    public val other: File?
+    public val reason: String?
+}
+
+/**
+ * TODO
+ * */
+public expect class FileAlreadyExistsException: FileSystemException
+
+/**
+ * TODO
+ * */
+public expect class AccessDeniedException: FileSystemException
+
+/**
+ * TODO
+ * */
+public expect class NotDirectoryException: FileSystemException
+
+/**
+ * TODO
+ * */
+public expect class DirectoryNotEmptyException: FileSystemException
+
+/**
+ * TODO
+ * */
 public expect open class InterruptedException: Exception {
     public constructor()
     public constructor(message: String?)
@@ -70,6 +111,6 @@ public inline fun Throwable.wrapIOException(
 
     return when (this) {
         is IOException -> this
-        else -> IOException(lazyMessage(), this)
+        else -> { val msg = lazyMessage(); IOException(msg, this) }
     }
 }

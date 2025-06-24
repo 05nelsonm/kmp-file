@@ -27,12 +27,12 @@ class ExistsUnitTest {
             println("Skipping...")
             return
         }
-        assertTrue(FILE_LOREM_IPSUM.exists())
+        assertTrue(FILE_LOREM_IPSUM.exists2())
     }
 
     @Test
     fun givenFile_whenDoesNotExist_thenReturnsFalse() {
         val doesNotExist = DIR_TEST_SUPPORT.resolve("does_not_exist")
-        assertFalse(doesNotExist.exists())
+        assertFalse(doesNotExist.exists2())
     }
 }

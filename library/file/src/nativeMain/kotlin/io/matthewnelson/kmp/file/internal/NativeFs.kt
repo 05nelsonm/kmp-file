@@ -24,27 +24,7 @@ import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.MemScope
-import platform.posix.ENOENT
 import platform.posix.FILE
-import platform.posix.access
-import platform.posix.errno
-
-internal actual fun fs_exists(path: Path): Boolean {
-    val result = access(path, 0)
-    return if (result != 0 && errno == ENOENT) {
-        false
-    } else {
-        result == 0
-    }
-}
-
-internal actual fun fs_mkdir(path: Path): Boolean {
-    return fs_platform_mkdir(path) == 0
-}
-
-internal expect inline fun fs_platform_mkdir(
-    path: Path,
-): Int
 
 @ExperimentalForeignApi
 @Throws(IOException::class)

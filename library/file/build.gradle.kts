@@ -23,28 +23,12 @@ kmpConfiguration {
     configureShared(java9ModuleName = "io.matthewnelson.kmp.file", publish = true) {
         common {
             sourceSetTest {
+                kotlin.srcDir("src/commonTestShared/kotlin")
                 kotlin.srcDir(testConfig.testConfigSrcDir)
 
                 dependencies {
                     implementation(libs.encoding.base16)
                     implementation(kotlincrypto.hash.sha2)
-                }
-            }
-        }
-
-        kotlin {
-            with(sourceSets) {
-                val sets = arrayOf("linux", "androidNative").mapNotNull name@ { name ->
-                    val main = findByName(name + "Main") ?: return@name null
-                    val test = getByName(name + "Test")
-                    main to test
-                }
-                if (sets.isEmpty()) return@kotlin
-                val main = maybeCreate("linuxAndroidMain").apply { dependsOn(getByName("unixMain")) }
-                val test = maybeCreate("linuxAndroidTest").apply { dependsOn(getByName("unixTest")) }
-                sets.forEach { (m, t) ->
-                    m.dependsOn(main)
-                    t.dependsOn(test)
                 }
             }
         }

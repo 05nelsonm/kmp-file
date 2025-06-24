@@ -45,28 +45,28 @@ class AndroidNativeTest {
             tmpFile.writeUtf8(expected)
             assertEquals(expected, tmpFile.readUtf8())
         } finally {
-            tmpFile.delete()
+            tmpFile.delete2()
         }
     }
 
     @Test
     fun givenEmptyFilePath_whenAbsolutePath_thenMatchesExpected() {
-        assertEquals(requireEnv(ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY), "".toFile().absolutePath)
+        assertEquals(requireEnv(ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY), "".toFile().absolutePath2())
     }
 
     @Test
     fun givenDotFilePath_whenAbsolutePath_thenMatchesExpected() {
-        assertEquals(requireEnv(ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT), ".".toFile().absolutePath)
+        assertEquals(requireEnv(ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT), ".".toFile().absolutePath2())
     }
 
     @Test
     fun givenEmptyFilePath_whenCanonicalPath_thenMatchesExpected() {
-        assertEquals(requireEnv(ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY), "".toFile().canonicalPath())
+        assertEquals(requireEnv(ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY), "".toFile().canonicalPath2())
     }
 
     @Test
     fun givenDotFilePath_whenCanonicalPath_thenMatchesExpected() {
-        assertEquals(requireEnv(ENV_KEY_EXPECTED_CANONICAL_PATH_DOT), ".".toFile().canonicalPath())
+        assertEquals(requireEnv(ENV_KEY_EXPECTED_CANONICAL_PATH_DOT), ".".toFile().canonicalPath2())
     }
 
     private fun requireEnv(key: String): String = getenv(key)

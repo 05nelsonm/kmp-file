@@ -21,7 +21,7 @@ import platform.posix.getenv
 import kotlin.test.Test
 
 @OptIn(ExperimentalForeignApi::class)
-class SysSepNativeUnitTest: SysSepBaseTest() {
+class SysSepNativeUnitTest: SysSepSharedTest() {
     override fun getenvPATH(): String? = getenv("PATH")?.toKString()
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,10 @@
 package io.matthewnelson.kmp.file
 
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
-class MkdirsUnitTest {
+class MkdirsUnitTest: MkdirsSharedTest() {
+    override val checker: PermissionChecker? = permissionChecker()
 
     @Test
-    fun givenFile_whenMkdirs_thenSucceeds() {
-        val tmp = randomTemp()
-        val dir1 = tmp.resolve(randomName())
-        val dir2 = dir1.resolve(randomName())
-
-        try {
-            assertTrue(dir2.mkdirs())
-            assertTrue(dir2.exists())
-        } finally {
-            dir2.delete()
-            dir1.delete()
-            tmp.delete()
-        }
-    }
+    fun stub() {}
 }

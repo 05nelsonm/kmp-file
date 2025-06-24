@@ -15,9 +15,13 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.internal.fs.FsJsNode
+
 @Suppress("UNUSED")
-class SysSepJsUnitTest: SysSepBaseTest() {
+class SysSepJsUnitTest: SysSepSharedTest() {
     override fun getenvPATH(): String? {
+        if (FsJs.INSTANCE !is FsJsNode) return null
         return js("require('process')").env["PATH"]
     }
 }

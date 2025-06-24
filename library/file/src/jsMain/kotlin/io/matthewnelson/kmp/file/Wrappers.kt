@@ -16,20 +16,15 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.*
-import io.matthewnelson.kmp.file.internal.buffer_Buffer
-import io.matthewnelson.kmp.file.internal.fs_Stats
+import io.matthewnelson.kmp.file.internal.fs.FsJsNode
+import io.matthewnelson.kmp.file.internal.node.JsBuffer
+import io.matthewnelson.kmp.file.internal.node.JsStats
 import io.matthewnelson.kmp.file.internal.toNotLong
 
 /**
- * If printing to console, use [unwrap] beforehand, otherwise
- * will not print the contents of [buffer_Buffer].
- *
- * e.g.
- *
- *     println(buffer.unwrap())
- *
+ * TODO
  * */
-public value class Buffer internal constructor(internal val value: buffer_Buffer) {
+public value class Buffer internal constructor(internal val value: JsBuffer) {
 
     public val length: Number get() = value.length
     public fun fill() { value.fill() }
@@ -52,30 +47,42 @@ public value class Buffer internal constructor(internal val value: buffer_Buffer
     public fun unwrap(): dynamic = value.asDynamic()
 
     /** @suppress */
-    override fun toString(): String = "Buffer@${hashCode()}"
+    public override fun toString(): String = "Buffer@${hashCode()}"
 
     public companion object {
 
-        public val MAX_LENGTH: Number get() = kMaxLength
+        public val MAX_LENGTH: Number get() = FsJsNode.INSTANCE?.buffer?.constants?.MAX_LENGTH ?: 65535
 
-        // @Throws(IllegalArgumentException::class)
+        // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public fun alloc(size: Number): Buffer = try {
-            Buffer(buffer_Buffer.alloc(size.toNotLong()))
+            FsJsNode.require()
+            @OptIn(DelicateFileApi::class)
+            Buffer(JsBuffer.alloc(size.toNotLong()))
         } catch (t: Throwable) {
+            if (t is IllegalArgumentException) throw t
             throw IllegalArgumentException(t)
         }
 
-        // @Throws(IllegalArgumentException::class)
+        // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public fun wrap(buffer: dynamic): Buffer {
-            require(buffer_Buffer.isBuffer(buffer)) { "Object is not a buffer" }
-            return Buffer(buffer.unsafeCast<buffer_Buffer>())
+            FsJsNode.require()
+            @OptIn(DelicateFileApi::class)
+            if (!JsBuffer.isBuffer(buffer)) {
+                throw IllegalArgumentException("Object is not a Buffer")
+            }
+            return Buffer(buffer.unsafeCast<JsBuffer>())
         }
     }
 }
 
-public value class Stats internal constructor(private val value: fs_Stats) {
+/**
+ * TODO
+ * */
+public value class Stats internal constructor(private val value: JsStats) {
 
     public val mode: Int get() = value.mode as Int
+    public val size: Number get() = value.size
+
     public val isFile: Boolean get() = value.isFile()
     public val isDirectory: Boolean get() = value.isDirectory()
     public val isSymbolicLink: Boolean get() = value.isSymbolicLink()
@@ -83,5 +90,5 @@ public value class Stats internal constructor(private val value: fs_Stats) {
     public fun unwrap(): dynamic = value.asDynamic()
 
     /** @suppress */
-    override fun toString(): String = "Stats@${hashCode()}"
+    public override fun toString(): String = "Stats@${hashCode()}"
 }

@@ -53,7 +53,7 @@ class AbsoluteUnitTest {
             return
         }
 
-        val absolute = "".toFile().absolutePath
+        val absolute = "".toFile().absolutePath2()
         assertTrue(!absolute.endsWith(SysDirSep))
         assertTrue(absolute.isNotBlank())
     }
@@ -72,7 +72,7 @@ class AbsoluteUnitTest {
         val projectRoot = projectRootDir()
 
         // Should resolve the current working directory
-        val absolute = "relative".toFile().absolutePath
+        val absolute = "relative".toFile().absolutePath2()
         assertTrue(absolute.startsWith(projectRoot))
 
         // NOTE: Need to ensure that this also checks that the system separator
@@ -98,7 +98,7 @@ class AbsoluteUnitTest {
         // running on (e.g. `C:`)
         val drive = projectRoot.substring(0, 2)
 
-        val absolute = "${drive}relative".toFile().absolutePath
+        val absolute = "${drive}relative".toFile().absolutePath2()
 
         assertTrue(absolute.startsWith(drive), absolute)
         assertTrue(absolute.endsWith("\\relative"), absolute)

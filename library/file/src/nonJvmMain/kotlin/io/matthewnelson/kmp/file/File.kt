@@ -13,165 +13,177 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "UNUSED")
 
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.*
+import io.matthewnelson.kmp.file.internal.fs.Fs
 
 public actual class File: Comparable<File> {
 
-    private val realPath: Path
+    private val _path: Path
 
     public actual constructor(pathname: String) {
-        realPath = pathname.resolveSlashes()
+        _path = pathname.resolveSlashes()
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private constructor(pathname: Path, direct: Any?) {
+    internal constructor(pathname: Path, direct: Any?) {
         // skip unnecessary work
-        realPath = pathname
+        _path = pathname
     }
 
-    /**
-     * Modifies file or directory permissiveness.
-     *
-     * **NOTE:** On Windows this only modifies the `read-only` file
-     * attribute. If [mode] contains any write permissions, then the
-     * `read-only` flag is removed. If [mode] does **not** contain
-     * any write permissions, the `read-only` flag is applied.
-     *
-     * e.g.
-     *
-     *     // The default POSIX permissiveness for a directory
-     *     file.chmod("775")
-     *
-     * **POSIX permissions:**
-     * - 7: READ | WRITE | EXECUTE
-     * - 6: READ | WRITE
-     * - 5: READ | EXECUTE
-     * - 4: READ
-     * - 3: WRITE | EXECUTE
-     * - 2: WRITE
-     * - 1: EXECUTE
-     * - 0: NONE
-     *
-     * **Mode char index (e.g. "740" >> i0 is 7, i1 is 4, i2 is 0):**
-     * - index 0: Owner
-     * - index 1: Group
-     * - index 2: Others
-     *
-     * See [chmod(2)](https://www.man7.org/linux/man-pages/man2/chmod.2.html)
-     *
-     * @param [mode] The permissions to set. Must be 3 digits, each
-     *   being between `0` and `7` (inclusive).
-     *
-     * @throws [IllegalArgumentException] if [mode] is inappropriate.
-     * @throws [FileNotFoundException] if the file does not exist.
-     * @throws [IOException] if there was a failure to apply desired permissions.
-     * */
-    @Throws(IOException::class)
-    public fun chmod(mode: String) { fs_chmod(realPath, mode) }
-
-    public actual fun isAbsolute(): Boolean = realPath.isAbsolute()
-
-    public actual fun exists(): Boolean = fs_exists(realPath)
-
-    public actual fun delete(): Boolean = try {
-        fs_remove(realPath)
-    } catch (_: IOException) {
-        // Will throw if a directory is not empty
-        //
-        // Swallow it and return false to be
-        // consistent with Jvm.
-        false
-    }
-
-    public actual fun mkdir(): Boolean = fs_mkdir(realPath)
-    public actual fun mkdirs(): Boolean = fs_mkdirs(realPath)
+    public actual fun isAbsolute(): Boolean = Fs.get().isAbsolute(this)
 
     // use .name
     @PublishedApi
-    internal actual fun getName(): String = realPath.basename()
+    internal actual fun getName(): String = _path.basename()
     // use .parentPath
     @PublishedApi
-    internal actual fun getParent(): String? = realPath.parentOrNull()
+    internal actual fun getParent(): String? = _path.parentOrNull()
     // use .parentFile
     @PublishedApi
     internal actual fun getParentFile(): File? {
-        val path = getParent() ?: return null
-        if (path == realPath) return this
-        return File(path, direct = null)
+        val p = getParent() ?: return null
+        if (p == _path) return this
+        return File(p, direct = null)
     }
     // use .path
     @PublishedApi
-    internal actual fun getPath(): String = realPath
+    internal actual fun getPath(): String = _path
 
-    // use .absolutePath
+    public actual override fun compareTo(other: File): Int = _path.compareTo(other._path)
+
+    /** @suppress */
+    public override fun equals(other: Any?): Boolean = other is File && other._path == _path
+    /** @suppress */
+    public override fun hashCode(): Int = _path.hashCode() xor 1234321
+    /** @suppress */
+    public override fun toString(): String = _path
+
+
+
+    // --- DEPRECATED ---
+
+    // use .absolutePath2
     @PublishedApi
-    internal actual fun getAbsolutePath(): String = realPath.absolute().resolveSlashes()
-    // use .absoluteFile
+    // @Throws(IOException::class)
+    internal actual fun getAbsolutePath(): String = Fs.get().absolutePath(this)
+
+    // use .absoluteFile2
     @PublishedApi
-    internal actual fun getAbsoluteFile(): File {
-        val path = getAbsolutePath()
-        if (path == realPath) return this
-        return File(path, direct = null)
-    }
+    // @Throws(IOException::class)
+    internal actual fun getAbsoluteFile(): File = Fs.get().absoluteFile(this)
 
-    // use .canonicalPath
+    // use .canonicalPath2
     @PublishedApi
-    internal actual fun getCanonicalPath(): String = fs_canonicalize(realPath)
-    // use .canonicalFile
+    // @Throws(IOException::class)
+    internal actual fun getCanonicalPath(): String = Fs.get().canonicalPath(this)
+
+    // use .canonicalFile2
     @PublishedApi
-    internal actual fun getCanonicalFile(): File {
-        val path = getCanonicalPath()
-        if (path == realPath) return this
-        return File(path, direct = null)
-    }
+    // @Throws(IOException::class)
+    internal actual fun getCanonicalFile(): File = Fs.get().canonicalFile(this)
 
-    public actual override fun compareTo(other: File): Int = realPath.compareTo(other.realPath)
-
-    /** @suppress */    
-    public override fun equals(other: Any?): Boolean = other is File && other.realPath == realPath
-    /** @suppress */    
-    public override fun hashCode(): Int = realPath.hashCode() xor 1234321
-    /** @suppress */    
-    public override fun toString(): String = realPath
-}
-
-private inline fun Path.resolveSlashes(): Path {
-    if (isEmpty()) return this
-    var result = this
-
-    if (IsWindows) {
-        result = result.replace('/', SysDirSep)
-    }
-
-    val rootSlashes = result.rootOrNull(normalizing = false) ?: ""
-
-    var lastWasSlash = rootSlashes.isNotEmpty()
-    var i = rootSlashes.length
-
-    result = buildString {
-        while (i < result.length) {
-            val c = result[i++]
-
-            if (c == SysDirSep) {
-                if (!lastWasSlash) {
-                    append(c)
-                    lastWasSlash = true
-                }
-                // else continue
-            } else {
-                append(c)
-                lastWasSlash = false
-            }
+    /**
+     * DEPRECATED
+     * @see [chmod2]
+     * @throws [IOException]
+     * @suppress
+     * */
+    @Deprecated(
+        message = "Missing throws annotation for IllegalArgumentException.",
+        replaceWith = ReplaceWith(
+            expression = "this.chmod2(mode = mode)",
+            "io.matthewnelson.kmp.file.chmod2"
+        )
+    )
+    @Throws(IOException::class)
+    public fun chmod(mode: String) {
+        try {
+            Fs.get().chmod(this, mode = mode.toMode(), mustExist = true)
+        } catch (t: IllegalArgumentException) {
+            throw t.wrapIOException()
         }
     }
 
-    if (result.isNotEmpty() && lastWasSlash) {
-        result = result.dropLast(1)
+    /**
+     * DEPRECATED
+     * @see [delete2]
+     * @throws `java.lang.SecurityException`
+     * @suppress
+     * */
+    @Deprecated(
+        message = "Missing throws annotation for java.lang.SecurityException.",
+        replaceWith = ReplaceWith(
+            expression = "this.delete2(ignoreReadOnly = true)",
+            "io.matthewnelson.kmp.file.delete2"
+        )
+    )
+    public actual fun delete(): Boolean = try {
+        Fs.get().delete(this, mustExist = true, ignoreReadOnly = true)
+        true
+    } catch (_: IOException) {
+        false
     }
 
-    return rootSlashes + result
+    /**
+     * DEPRECATED
+     * @see [exists2]
+     * @throws [IOException]
+     * @suppress
+     * */
+    @Deprecated(
+        message = "Missing throws annotation for IOException.",
+        replaceWith = ReplaceWith(
+            expression = "this.exists2()",
+            "io.matthewnelson.kmp.file.exists2"
+        )
+    )
+    public actual fun exists(): Boolean = try {
+        Fs.get().exists(this)
+    } catch (e: IOException) {
+        false
+    }
+
+    /**
+     * DEPRECATED
+     * @see [mkdir2]
+     * @throws `java.lang.SecurityException`
+     * @suppress
+     * */
+    @Deprecated(
+        message = "Missing throws annotation for java.lang.SecurityException.",
+        replaceWith = ReplaceWith(
+            expression = "this.mkdir2(mode = null)",
+            "io.matthewnelson.kmp.file.mkdir2"
+        )
+    )
+    public actual fun mkdir(): Boolean = try {
+        Fs.get().mkdir(this, Mode.DEFAULT_DIR, mustCreate = true)
+        true
+    } catch (_: IOException) {
+        false
+    }
+
+    /**
+     * DEPRECATED
+     * @see [mkdirs2]
+     * @throws `java.lang.SecurityException`
+     * @suppress
+     * */
+    @Deprecated(
+        message = "Missing throws annotation for java.lang.SecurityException.",
+        replaceWith = ReplaceWith(
+            expression = "this.mkdirs2(mode = null)",
+            "io.matthewnelson.kmp.file.mkdirs2"
+        )
+    )
+    public actual fun mkdirs(): Boolean = try {
+        Fs.get().commonMkdirs(this, mode = null, mustCreate = true)
+        true
+    } catch (_: IOException) {
+        false
+    }
 }

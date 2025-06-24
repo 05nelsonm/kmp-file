@@ -13,70 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE", "VariableInitializerIsRedundant")
+@file:Suppress("FunctionName", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.DelicateFileApi
 import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.chmod2
 import io.matthewnelson.kmp.file.close
+import io.matthewnelson.kmp.file.delete2
 import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.exists2
 import io.matthewnelson.kmp.file.path
+import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.*
 import platform.posix.*
-import platform.windows.FILE_ATTRIBUTE_READONLY
-import platform.windows.GetFileAttributesA
-import platform.windows.INVALID_FILE_ATTRIBUTES
-import platform.windows.SetFileAttributesA
-import platform.windows.TRUE
-
-@OptIn(ExperimentalForeignApi::class)
-@Throws(IllegalArgumentException::class, IOException::class)
-internal actual fun fs_chmod(path: Path, mode: String) {
-    val canWrite = ModeT.containsWritePermissions(mode)
-    val (attrs, isReadOnly) = fs_file_attributes(path)
-
-    // No modification needed
-    if (isReadOnly == !canWrite) return
-
-    if (fs_file_toggle_readonly(path, attrs, isReadOnly) == 0) {
-        throw lastErrorToIOException()
-    }
-}
-
-@Throws(IOException::class)
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_remove(path: Path): Boolean {
-    if (remove(path) == 0) return true
-
-    var err = errno
-    if (err == EACCES) {
-        // Check if file's read-only flag needs to be cleared
-        run {
-            val (attrs, isReadOnly) = try {
-                fs_file_attributes(path)
-            } catch (_: IOException) {
-                return@run
-            }
-            if (!isReadOnly) return@run
-            if (fs_file_toggle_readonly(path, attrs, isReadOnly) == 0) return@run
-            if (remove(path) == 0) return true
-            err = errno
-        }
-
-        // Could be a directory (if was read-only, is not anymore)
-        if (rmdir(path) == 0) return true
-    }
-    if (err == ENOENT) return false
-    throw errnoToIOException(err)
-}
-
-internal actual inline fun fs_platform_mkdir(
-    path: Path,
-): Int = mkdir(path)
 
 @ExperimentalForeignApi
 @Throws(IOException::class)
@@ -84,50 +37,8 @@ internal actual inline fun MemScope.fs_platform_file_size(
     path: Path,
 ): Long {
     val stat = alloc<_stat64>()
-    if (_stat64(path, stat.ptr) != 0) throw errnoToIOException(errno)
+    if (_stat64(path, stat.ptr) != 0) throw errnoToIOException(errno, path.toFile())
     return stat.st_size
-}
-
-@Throws(IOException::class)
-@OptIn(ExperimentalForeignApi::class)
-internal actual fun fs_realpath(path: Path): Path {
-    val real = _fullpath(null, path, PATH_MAX.toULong())
-        ?: throw errnoToIOException(errno)
-
-    return try {
-        val realPath = real.toKStringFromUtf8()
-        if (!fs_exists(realPath)) {
-            throw FileNotFoundException("File[$path] does not exist")
-        }
-        realPath
-    } finally {
-        free(real)
-    }
-}
-
-// Pair<GetFileAttributesA, isReadOnly>
-@Throws(IOException::class)
-internal inline fun fs_file_attributes(path: Path): Pair<UInt, Boolean> {
-    val attrs = GetFileAttributesA(path)
-    if (attrs == INVALID_FILE_ATTRIBUTES) {
-        throw lastErrorToIOException()
-    }
-    val isReadOnly = (attrs.toInt() and FILE_ATTRIBUTE_READONLY) == TRUE
-    return attrs to isReadOnly
-}
-
-// Returns 0 on failure
-@Throws(IOException::class)
-private inline fun fs_file_toggle_readonly(path: Path, attrs: UInt, currentReadOnly: Boolean): Int {
-    val attrsNew = if (currentReadOnly) {
-        // Clear read-only flag
-        (attrs.toInt() and FILE_ATTRIBUTE_READONLY.inv())
-    } else {
-        // Apply read-only flag
-        (attrs.toInt() or FILE_ATTRIBUTE_READONLY)
-    }.toUInt()
-
-    return SetFileAttributesA(path, attrsNew)
 }
 
 @ExperimentalForeignApi
@@ -139,23 +50,21 @@ internal actual inline fun File.fs_platform_fopen(
     e: Boolean,
     excl: OpenExcl,
 ): CPointer<FILE> {
-    // Utilized after fopen if is a new file, but also checks
-    // correctness of the excl.mode. Want to throw here, if possible.
-    val canWrite = ModeT.containsWritePermissions(excl.mode)
     var mode = if (b) "${mode}b" else mode
 
-    val exists = exists()
+    val exists = exists2()
 
     // Unfortunately, cannot check atomically like with Unix.
     when (excl) {
-        is OpenExcl.MustExist -> if (!exists) throw FileNotFoundException("$excl && !exists[$this]")
-        is OpenExcl.MustCreate -> if (exists) throw IOException("$excl && exists[$this]")
+        is OpenExcl.MustExist -> if (!exists) throw errnoToIOException(ENOENT, this)
+        is OpenExcl.MustCreate -> if (exists) throw errnoToIOException(EEXIST, this)
+        is OpenExcl.MaybeCreate -> {}
     }
 
     val setSeek0 = if (!exists && mode.startsWith("r+")) {
         // Hacks. Stream will be O_RDRW, but Windows always requires the file
         // to exist with mode r, regardless of r+ or not. So, use appending instead.
-        mode = mode.replace('r', 'a')
+        mode = "a" + mode.drop(1)
 
         // In the rare event that a file WAS created between the time
         // File.exists() was checked, and when fopen gets called, fseek
@@ -166,18 +75,17 @@ internal actual inline fun File.fs_platform_fopen(
     }
 
     val ptr = ignoreEINTR<FILE> { fopen(path, mode) }
-    if (ptr == null) throw errnoToIOException(errno)
+    if (ptr == null) throw errnoToIOException(errno, this)
 
-    if (!exists && !canWrite) {
+    if (!exists && !excl._mode.containsOwnerWriteAccess) {
         // File was just created with non-default permissions
         // which do not contain any write permission flags. Need
         // to set file attributes to read-only.
 
         try {
-            chmod(excl.mode)
+            chmod2(excl._mode.value)
         } catch (t: IOException) {
-            // Won't be IllegalArgumentException b/c a bad excl.mode
-            // would have thrown above for canWrite.
+            // "Shouldn't" happen b/c we just created the file with fopen, but just in case...
             try {
                 @OptIn(DelicateFileApi::class)
                 ptr.close()
@@ -185,9 +93,7 @@ internal actual inline fun File.fs_platform_fopen(
                 t.addSuppressed(tt)
             }
             try {
-                // call this instead of File.delete so any error
-                // can be added as a suppressed exception.
-                fs_remove(path)
+                delete2(ignoreReadOnly = true, mustExist = true)
             } catch (tt: IOException) {
                 t.addSuppressed(tt)
             }
