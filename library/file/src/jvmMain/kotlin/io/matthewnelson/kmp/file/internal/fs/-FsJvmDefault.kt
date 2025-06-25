@@ -84,7 +84,7 @@ internal class FsJvmDefault private constructor(): Fs.Jvm() {
                 // Already default permissions.
                 if (mode == Mode.DEFAULT_DIR) return
 
-                chmod(dir, mode, mustExist = true)
+                chmod(dir, mode, mustExist = false)
                 return
             }
 

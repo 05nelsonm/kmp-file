@@ -21,15 +21,12 @@ import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.SysPathSep
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
-import io.matthewnelson.kmp.file.toFile
-import java.io.ByteArrayOutputStream
 import java.io.InterruptedIOException
 import kotlin.Throws
 import kotlin.concurrent.Volatile
@@ -127,8 +124,6 @@ internal actual sealed class Fs private constructor() {
                     throw fileNotFoundException(file, null, null)
                 }
 
-                if (!HAS_CHMOD) throw IOException("chmod is not supported")
-
                 var p: Process? = null
                 try {
                     p = ProcessBuilder("chmod", mode.value, file.path).start()
@@ -160,26 +155,6 @@ internal actual sealed class Fs private constructor() {
         @Throws(InterruptedIOException::class)
         protected fun checkThread() {
             if (Thread.interrupted()) throw InterruptedIOException("interrupted")
-        }
-
-        private companion object {
-            private val HAS_CHMOD: Boolean by lazy {
-                try {
-                    var isAvailable = false
-                    val paths = System.getenv("PATH").split(SysPathSep, limit = 1_000)
-                    for (path in paths) {
-                        if (path.isEmpty()) continue
-                        try {
-                            if (!path.toFile().resolve("chmod").exists()) continue
-                            isAvailable = true
-                            break
-                        } catch (_: Throwable) {}
-                    }
-                    isAvailable
-                } catch (_: Throwable) {
-                    false
-                }
-            }
         }
     }
 
