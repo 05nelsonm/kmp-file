@@ -20,6 +20,7 @@ package io.matthewnelson.kmp.file.internal.fs
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
@@ -31,7 +32,7 @@ import java.io.InterruptedIOException
 import kotlin.Throws
 import kotlin.concurrent.Volatile
 
-internal actual sealed class Fs private constructor() {
+internal actual sealed class Fs private constructor(internal actual val info: FsInfo) {
 
     internal actual abstract fun isAbsolute(file: File): Boolean
 
@@ -64,7 +65,7 @@ internal actual sealed class Fs private constructor() {
     @Throws(IOException::class)
     internal actual abstract fun mkdir(dir: File, mode: Mode, mustCreate: Boolean)
 
-    internal sealed class Jvm: Fs() {
+    internal sealed class Jvm(info: FsInfo): Fs(info) {
 
         internal final override fun isAbsolute(file: File): Boolean = file.isAbsolute
 
@@ -185,5 +186,5 @@ internal actual sealed class Fs private constructor() {
         }
     }
 
-    public actual abstract override fun toString(): String
+    public actual final override fun toString(): String = info.name
 }

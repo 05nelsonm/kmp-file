@@ -21,8 +21,8 @@ import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
-import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileSystemException
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.internal.IsWindows
@@ -32,7 +32,9 @@ import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 
 // The "Default" filesystem implementation, when all else fails. In
 // production, should only ever be used when Android API is 20 or below.
-internal class FsJvmDefault private constructor(): Fs.Jvm() {
+internal class FsJvmDefault private constructor(): Fs.Jvm(
+    info = FsInfo.of(name = "FsJvmDefault", isPosix = !IsWindows)
+) {
 
     @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
@@ -112,6 +114,4 @@ internal class FsJvmDefault private constructor(): Fs.Jvm() {
         @JvmSynthetic
         internal fun get(): FsJvmDefault = FsJvmDefault()
     }
-
-    public override fun toString(): String = "FsJvmDefault"
 }

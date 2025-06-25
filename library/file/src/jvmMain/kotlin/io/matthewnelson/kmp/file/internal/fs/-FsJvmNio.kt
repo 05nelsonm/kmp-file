@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileSystemException
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.internal.Mode
@@ -37,7 +38,7 @@ import java.nio.file.attribute.PosixFilePermissions
 import kotlin.IllegalArgumentException
 
 @Suppress("NewApi")
-internal abstract class FsJvmNio private constructor(): Fs.Jvm() {
+internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info) {
 
     internal companion object {
 
@@ -57,7 +58,7 @@ internal abstract class FsJvmNio private constructor(): Fs.Jvm() {
     }
 
     // Windows
-    private class NonPosix: FsJvmNio() {
+    private class NonPosix: FsJvmNio(info = FsInfo.of(name = "FsJvmNioNonPosix", isPosix = false)) {
 
         @Throws(IOException::class)
         internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
@@ -133,11 +134,9 @@ internal abstract class FsJvmNio private constructor(): Fs.Jvm() {
             // Unfortunately, Windows read-only directories are not a thing for Java.
             // File.setCanWrite will always return false (failure).
         }
-
-        public override fun toString(): String = "FsJvmNioNonPosix"
     }
 
-    private class Posix: FsJvmNio() {
+    private class Posix: FsJvmNio(info = FsInfo.of(name = "FsJvmNioPosix", isPosix = true)) {
 
         @Throws(IOException::class)
         internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
@@ -200,8 +199,6 @@ internal abstract class FsJvmNio private constructor(): Fs.Jvm() {
 
             return PosixFilePermissions.fromString(perms)
         }
-
-        public override fun toString(): String = "FsJvmNioPosix"
     }
 
     @Throws(IOException::class)

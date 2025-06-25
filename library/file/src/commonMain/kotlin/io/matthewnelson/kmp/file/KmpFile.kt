@@ -73,8 +73,8 @@ public val SysTempDir: File = platformTempDirectory()
 /**
  * TODO
  * */
-@get:JvmName("SysFsName")
-public val SysFsName: String get() = Fs.get().toString()
+@get:JvmName("SysFsInfo")
+public val SysFsInfo: FsInfo get() = Fs.get().info
 
 /**
  * Kotlin syntactic sugar instead of `File("/some/path")`

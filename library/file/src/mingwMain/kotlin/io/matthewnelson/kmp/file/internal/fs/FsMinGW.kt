@@ -19,6 +19,7 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errnoToIOException
@@ -58,7 +59,7 @@ import platform.windows.PathIsRelativeA
 import platform.windows.SetFileAttributesA
 
 @OptIn(ExperimentalForeignApi::class)
-internal data object FsMinGW: FsNative() {
+internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosix = false)) {
 
     internal override fun isAbsolute(file: File): Boolean {
         val p = file.path
@@ -202,6 +203,4 @@ internal data object FsMinGW: FsNative() {
             null
         }
     }
-
-    public override fun toString(): String = "FsMinGW"
 }

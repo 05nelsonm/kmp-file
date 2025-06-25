@@ -18,6 +18,7 @@
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.path
@@ -27,10 +28,10 @@ import platform.posix.F_OK
 import platform.posix.access
 import platform.posix.errno
 
-internal actual sealed class FsNonJvm: Fs.NonJvm() {
+internal actual sealed class FsNonJvm(info: FsInfo): Fs.NonJvm(info) {
 
     @OptIn(ExperimentalForeignApi::class)
-    internal abstract class Native: FsNonJvm() {
+    internal abstract class Native(info: FsInfo): FsNonJvm(info) {
 
         @Throws(IOException::class)
         internal final override fun exists(file: File): Boolean {

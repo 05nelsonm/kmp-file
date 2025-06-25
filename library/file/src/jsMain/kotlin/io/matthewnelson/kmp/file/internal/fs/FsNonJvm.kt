@@ -17,9 +17,11 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.FsInfo
+
 internal typealias FsJs = FsNonJvm
 
-internal actual sealed class FsNonJvm: Fs.NonJvm() {
+internal actual sealed class FsNonJvm(info: FsInfo): Fs.NonJvm(info) {
 
     internal actual companion object {
         internal actual val INSTANCE: FsNonJvm by lazy {

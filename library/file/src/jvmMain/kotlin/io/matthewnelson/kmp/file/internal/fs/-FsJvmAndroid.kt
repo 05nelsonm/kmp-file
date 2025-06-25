@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileSystemException
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.internal.Mode
@@ -43,7 +44,7 @@ import java.lang.reflect.Method
 internal class FsJvmAndroid private constructor(
     private val os: Os,
     private val const: OsConstants,
-): Fs.Jvm() {
+): Fs.Jvm(info = FsInfo.of(name = NAME, isPosix = true)) {
 
     private val MODE_MASK = Mode.Mask(
         S_IRUSR = const.S_IRUSR,
@@ -158,8 +159,6 @@ internal class FsJvmAndroid private constructor(
             S_IXOTH = clazz.getField("S_IXOTH").getInt(null)
         }
     }
-
-    public override fun toString(): String = NAME
 
     // android.system.ErrnoException
     private inline fun <T: Any?> File.wrapErrnoException(other: File? = null, block: Os.() -> T): T = try {

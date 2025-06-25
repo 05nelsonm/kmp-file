@@ -12,11 +12,20 @@ public final class io/matthewnelson/kmp/file/Exceptions {
 	public static final fun wrapIO (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)Ljava/io/IOException;
 }
 
+public final class io/matthewnelson/kmp/file/FsInfo {
+	public final field isPosix Z
+	public final field name Ljava/lang/String;
+	public synthetic fun <init> (Ljava/lang/String;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final field SysDirSep C
 	public static final field SysPathSep C
 	public static final field SysTempDir Ljava/io/File;
-	public static final fun SysFsName ()Ljava/lang/String;
+	public static final fun SysFsInfo ()Lio/matthewnelson/kmp/file/FsInfo;
 	public static final fun absoluteFile2Of (Ljava/io/File;)Ljava/io/File;
 	public static final fun absoluteFileOf (Ljava/io/File;)Ljava/io/File;
 	public static final fun absolutePath2Of (Ljava/io/File;)Ljava/lang/String;

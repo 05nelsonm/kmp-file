@@ -17,7 +17,9 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
-internal actual sealed class FsNative: FsNonJvm.Native() {
+import io.matthewnelson.kmp.file.FsInfo
+
+internal actual sealed class FsNative(info: FsInfo): FsNonJvm.Native(info) {
     internal actual companion object {
         internal actual val INSTANCE: FsNative = FsMinGW
     }

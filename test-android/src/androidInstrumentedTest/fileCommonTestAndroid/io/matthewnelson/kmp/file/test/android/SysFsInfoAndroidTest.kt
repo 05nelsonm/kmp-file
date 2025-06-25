@@ -13,28 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file
+package io.matthewnelson.kmp.file.test.android
 
+import io.matthewnelson.kmp.file.SysFsInfoSharedTest
+import kotlin.test.Ignore
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
-class SysFsNameUnitTest {
+class SysFsInfoAndroidTest: SysFsInfoSharedTest() {
+    override val isWindows: Boolean = false
 
     @Test
-    fun givenFileSystem_whenSysFsName_thenReturnsExpected() {
-        val names = arrayOf(
-            "FsJvmAndroid",
-            "FsJvmNioNonPosix",
-            "FsJvmNioPosix",
-            "FsJvmDefault",
-            "FsJsNode",
-            "FsJsWebWorker",
-            "FsJsBrowser",
-            "FsMinGW",
-            "FsPosix",
-        )
-
-        val fsName = SysFsName
-        assertTrue(names.contains(fsName), "SysFsName[$fsName] is not present... Change it back.")
-    }
+    @Ignore
+    fun stub() {}
 }

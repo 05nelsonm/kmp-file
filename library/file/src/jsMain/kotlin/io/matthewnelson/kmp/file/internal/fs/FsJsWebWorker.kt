@@ -18,13 +18,15 @@
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.path
 
-internal class FsJsWebWorker private constructor(): FsJs() {
+internal class FsJsWebWorker private constructor(): FsJs(
+    info = FsInfo.of("FsJsWebWorker", isPosix = true /* TODO */)
+) {
 
     internal override fun isAbsolute(file: File): Boolean = file.path.startsWith(SysDirSep)
 
@@ -61,6 +63,4 @@ internal class FsJsWebWorker private constructor(): FsJs() {
             null
         }
     }
-
-    public override fun toString(): String = "FsJsWebWorker"
 }

@@ -17,27 +17,10 @@ package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
-class SysFsNameJvmUnitTest {
-
-    @Test
-    fun givenSysFsName_whenNotWindows_thenIsNioPosix() {
-        if (IsWindows) {
-            println("Skipping...")
-            return
-        }
-
-        assertEquals("FsJvmNioPosix", SysFsName)
-    }
+class SysFsInfoUnitTest: SysFsInfoSharedTest() {
+    override val isWindows: Boolean = IsWindows
 
     @Test
-    fun givenSysFsName_whenWindows_thenIsNioNonPosix() {
-        if (!IsWindows) {
-            println("Skipping...")
-            return
-        }
-
-        assertEquals("FsJvmNioNonPosix", SysFsName)
-    }
+    fun stub() {}
 }

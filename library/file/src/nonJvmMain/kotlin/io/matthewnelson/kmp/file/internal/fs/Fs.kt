@@ -18,6 +18,7 @@
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.internal.Mode
@@ -29,7 +30,7 @@ import io.matthewnelson.kmp.file.internal.resolveSlashes
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
 
-internal actual sealed class Fs private constructor() {
+internal actual sealed class Fs private constructor(internal actual val info: FsInfo) {
 
     internal actual abstract fun isAbsolute(file: File): Boolean
 
@@ -62,7 +63,7 @@ internal actual sealed class Fs private constructor() {
     @Throws(IOException::class)
     internal actual abstract fun mkdir(dir: File, mode: Mode, mustCreate: Boolean)
 
-    internal abstract class NonJvm: Fs() {
+    internal abstract class NonJvm(info: FsInfo): Fs(info) {
 
         @Throws(IOException::class)
         protected abstract fun realpath(path: Path): Path
@@ -127,5 +128,5 @@ internal actual sealed class Fs private constructor() {
         internal actual fun get(): Fs = FsNonJvm.INSTANCE
     }
 
-    public actual abstract override fun toString(): String
+    public actual final override fun toString(): String = info.name
 }

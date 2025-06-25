@@ -18,6 +18,7 @@
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.internal.Mode
@@ -48,7 +49,7 @@ import platform.posix.realpath
 import platform.posix.remove
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
-internal data object FsPosix: FsNative() {
+internal data object FsPosix: FsNative(info = FsInfo.of(name = "FsPosix", isPosix = true)) {
 
     internal val MODE_MASK: Mode.Mask = Mode.Mask(
         S_IRUSR = S_IRUSR,
@@ -102,6 +103,4 @@ internal data object FsPosix: FsNative() {
             free(p)
         }
     }
-
-    public override fun toString(): String = "FsPosix"
 }

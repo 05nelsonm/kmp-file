@@ -21,6 +21,7 @@ import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.SysDirSep
@@ -44,7 +45,7 @@ internal class FsJsNode private constructor(
     internal val fs: ModuleFs,
     internal val os: ModuleOs,
     internal val path: ModulePath,
-): FsJs() {
+): FsJs(info = FsInfo.of(name = "FsJsNode", isPosix = os.platform() != "win32")) {
 
     internal override fun isAbsolute(file: File): Boolean {
         val p = file.path
@@ -219,8 +220,6 @@ internal class FsJsNode private constructor(
             )
         }
     }
-
-    public override fun toString(): String = "FsJsNode"
 }
 
 private fun isNodeJs(): Boolean = js(

@@ -13,25 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file.test.android
+package io.matthewnelson.kmp.file
 
-import android.os.Build
-import io.matthewnelson.kmp.file.SysFsInfo
+import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class AndroidFsTest {
+class SysFsInfoJvmUnitTest {
 
     @Test
-    fun givenAndroid_whenSdkInt_thenIsUsingExpectedFileSystem() {
-        val expected = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            "FsJvmAndroid"
-        } else {
-            "FsJvmDefault"
+    fun givenSysFsName_whenNotWindows_thenIsNioPosix() {
+        if (IsWindows) {
+            println("Skipping...")
+            return
         }
 
-        assertEquals(expected, SysFsInfo.name)
+        assertEquals("FsJvmNioPosix", SysFsInfo.name)
         assertTrue(SysFsInfo.isPosix)
+    }
+
+    @Test
+    fun givenSysFsName_whenWindows_thenIsNioNonPosix() {
+        if (!IsWindows) {
+            println("Skipping...")
+            return
+        }
+
+        assertEquals("FsJvmNioNonPosix", SysFsInfo.name)
+        assertFalse(SysFsInfo.isPosix)
     }
 }

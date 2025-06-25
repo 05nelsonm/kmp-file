@@ -49,6 +49,17 @@ final class io.matthewnelson.kmp.file/FileAlreadyExistsException : io.matthewnel
     constructor <init>(io.matthewnelson.kmp.file/File, io.matthewnelson.kmp.file/File? = ..., kotlin/String? = ...) // io.matthewnelson.kmp.file/FileAlreadyExistsException.<init>|<init>(io.matthewnelson.kmp.file.File;io.matthewnelson.kmp.file.File?;kotlin.String?){}[0]
 }
 
+final class io.matthewnelson.kmp.file/FsInfo { // io.matthewnelson.kmp.file/FsInfo|null[0]
+    final val isPosix // io.matthewnelson.kmp.file/FsInfo.isPosix|{}isPosix[0]
+        final fun <get-isPosix>(): kotlin/Boolean // io.matthewnelson.kmp.file/FsInfo.isPosix.<get-isPosix>|<get-isPosix>(){}[0]
+    final val name // io.matthewnelson.kmp.file/FsInfo.name|{}name[0]
+        final fun <get-name>(): kotlin/String // io.matthewnelson.kmp.file/FsInfo.name.<get-name>|<get-name>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.matthewnelson.kmp.file/FsInfo.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.matthewnelson.kmp.file/FsInfo.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.matthewnelson.kmp.file/FsInfo.toString|toString(){}[0]
+}
+
 final class io.matthewnelson.kmp.file/NotDirectoryException : io.matthewnelson.kmp.file/FileSystemException { // io.matthewnelson.kmp.file/NotDirectoryException|null[0]
     constructor <init>(io.matthewnelson.kmp.file/File) // io.matthewnelson.kmp.file/NotDirectoryException.<init>|<init>(io.matthewnelson.kmp.file.File){}[0]
 }
@@ -117,8 +128,8 @@ sealed class io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/O
 
 final val io.matthewnelson.kmp.file/SysDirSep // io.matthewnelson.kmp.file/SysDirSep|{}SysDirSep[0]
     final fun <get-SysDirSep>(): kotlin/Char // io.matthewnelson.kmp.file/SysDirSep.<get-SysDirSep>|<get-SysDirSep>(){}[0]
-final val io.matthewnelson.kmp.file/SysFsName // io.matthewnelson.kmp.file/SysFsName|{}SysFsName[0]
-    final fun <get-SysFsName>(): kotlin/String // io.matthewnelson.kmp.file/SysFsName.<get-SysFsName>|<get-SysFsName>(){}[0]
+final val io.matthewnelson.kmp.file/SysFsInfo // io.matthewnelson.kmp.file/SysFsInfo|{}SysFsInfo[0]
+    final fun <get-SysFsInfo>(): io.matthewnelson.kmp.file/FsInfo // io.matthewnelson.kmp.file/SysFsInfo.<get-SysFsInfo>|<get-SysFsInfo>(){}[0]
 final val io.matthewnelson.kmp.file/SysPathSep // io.matthewnelson.kmp.file/SysPathSep|{}SysPathSep[0]
     final fun <get-SysPathSep>(): kotlin/Char // io.matthewnelson.kmp.file/SysPathSep.<get-SysPathSep>|<get-SysPathSep>(){}[0]
 final val io.matthewnelson.kmp.file/SysTempDir // io.matthewnelson.kmp.file/SysTempDir|{}SysTempDir[0]

@@ -18,11 +18,14 @@
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 
 internal expect sealed class Fs {
+
+    internal val info: FsInfo
 
     internal abstract fun isAbsolute(file: File): Boolean
 
@@ -58,5 +61,5 @@ internal expect sealed class Fs {
         internal fun get(): Fs
     }
 
-    public abstract override fun toString(): String
+    public final override fun toString(): String // = info.name
 }
