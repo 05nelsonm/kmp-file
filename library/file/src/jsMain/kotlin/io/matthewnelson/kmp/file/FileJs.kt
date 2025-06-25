@@ -88,7 +88,7 @@ public fun Throwable.toIOException(file: File?, other: File? = null): IOExceptio
         code == "ENOENT" -> fileNotFoundException(file, code, message)
         code?.startsWith("ERR_FS_") == true -> FileSystemException(file ?: "".toFile(), other, message)
         file != null -> when (code) {
-            "EACCES" -> AccessDeniedException(file, other, message)
+            "EACCES", "EPERM" -> AccessDeniedException(file, other, message)
             "EEXIST" -> FileAlreadyExistsException(file, other, message)
             "ENOTDIR" -> NotDirectoryException(file)
             "ENOTEMPTY" -> DirectoryNotEmptyException(file)

@@ -108,18 +108,19 @@ internal data object FsMinGW: FsNative() {
 
         var err = errno
         if (err == EACCES) {
-            if (ignoreReadOnly) {
-                run {
-                    val attrs = try {
-                        FileAttributes(file)
-                    } catch (_: IOException) {
-                        return@run
-                    }
-                    if (!attrs.isReadOnly) return@run
-                    if (attrs.toggleReadOnly(file) == 0) return@run
-                    if (remove(file.path) == 0) return
-                    err = errno
+            run {
+                if (!ignoreReadOnly) return@run
+
+                val attrs = try {
+                    FileAttributes(file)
+                } catch (_: IOException) {
+                    return@run
                 }
+
+                if (!attrs.isReadOnly) return@run
+                if (attrs.toggleReadOnly(file) == 0) return@run
+                if (remove(file.path) == 0) return
+                err = errno
             }
 
             // Could be a directory.

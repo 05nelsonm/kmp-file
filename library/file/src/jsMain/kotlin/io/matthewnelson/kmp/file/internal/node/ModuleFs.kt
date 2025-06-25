@@ -26,7 +26,6 @@ internal external interface ModuleFs {
     fun mkdirSync(path: Path, options: dynamic): String?
     fun readFileSync(path: Path): JsBuffer
     fun realpathSync(path: Path): Path
-    fun rmSync(path: Path, options: dynamic)
     fun rmdirSync(path: Path, options: dynamic)
     fun unlinkSync(path: Path)
     fun writeFileSync(path: Path, data: JsBuffer)

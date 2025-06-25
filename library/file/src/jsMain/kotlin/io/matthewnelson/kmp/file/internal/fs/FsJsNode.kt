@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
@@ -84,6 +85,18 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
+        if (IsWindows && !ignoreReadOnly) {
+            try {
+                fs.accessSync(file.path, fs.constants.W_OK)
+                // read-only = false
+            } catch (t: Throwable) {
+                // read-only = true
+                val e = t.toIOException(file)
+                if (e is FileNotFoundException && !mustExist) return
+                throw e
+            }
+        }
+
         try {
             fs.unlinkSync(file.path)
             return
@@ -96,19 +109,50 @@ internal class FsJsNode private constructor(
 
         val options = js("{}")
         options["force"] = false
-        options["recursive"] = false // Deprecated
+        options["recursive"] = false
 
+        // Could be a directory
         try {
-            // Available since Node v14.14.0 so, should be OK...
-            fs.rmSync(file.path, options)
+            fs.rmdirSync(file.path, options)
         } catch (t: Throwable) {
+            val e = t.toIOException(file)
+            if (e is FileNotFoundException && !mustExist) return
+
+            if (!IsWindows) throw e
+            if (e !is AccessDeniedException) throw e
+            if (!ignoreReadOnly) throw e
+
+            // So, on Windows + have EPERM for a directory + ignoreReadOnly == true
+            //
+            // Windows "permissions" on Node.js do not have a conventional way to
+            // check access for directories like with accessSync + W_OK; that will
+            // always return true for a directory (i.e. can write, so read-only is
+            // false). Under the hood, the Windows FILE_ATTRIBUTE_READONLY is being
+            // modified for the directory to set it read-only, but it's for a directory
+            // which you will still be able to write to.
+            //
+            // This is why chmod above checks for a directory first, and then silently
+            // ignores it. BUT, the attribute could be modified by some other program
+            // making kmp-file API consumers unable to delete it, even if they have
+            // specified ignoreReadOnly = true.
+            //
+            // So, remove the read-only attribute from the directory and try again
+            // to delete it.
             try {
-                fs.rmdirSync(file.path, options)
+                fs.chmodSync(file.path, "666")
             } catch (tt: Throwable) {
-                val e = tt.toIOException(file)
-                e.addSuppressed(t)
+                e.addSuppressed(tt)
                 throw e
             }
+
+            try {
+                fs.rmdirSync(file.path, options)
+                return // success
+            } catch (tt: Throwable) {
+                e.addSuppressed(tt)
+            }
+
+            throw e
         }
     }
 
@@ -145,10 +189,11 @@ internal class FsJsNode private constructor(
             val parentIsDirectory = try {
                 dir.parentFile?.stat()?.isDirectory
             } catch (ee: IOException) {
-                e.addSuppressed(ee)
+                if (ee !is FileNotFoundException) e.addSuppressed(ee)
                 null
             }
             if (parentIsDirectory == false) throw NotDirectoryException(dir)
+
             throw e
         }
     }
