@@ -111,6 +111,48 @@ abstract class DeleteSharedTest {
     }
 
     @Test
+    fun givenFile_whenWindowsPermissionsReadOnlyAndIgnoreReadOnlyFalse_thenThrowsAccessDeniedException() {
+        val checker = checker
+        if (checker !is PermissionChecker.Windows) {
+            println("Skipping...")
+            return
+        }
+
+        val tmp = randomTemp()
+        tmp.writeUtf8("Hello World!")
+        try {
+            assertFalse(checker.isReadOnly(tmp), "initial read-only check")
+            tmp.chmod2(mode = "400")
+            assertTrue(checker.isReadOnly(tmp), "post chmod 400")
+            assertFailsWith<AccessDeniedException> { tmp.testDelete(ignoreReadOnly = false) }
+            assertTrue(tmp.exists2(), "exists")
+        } finally {
+            tmp.delete2(ignoreReadOnly = true)
+        }
+    }
+
+    @Test
+    fun givenFile_whenWindowsPermissionsReadOnlyAndIgnoreReadOnlyTrue_thenIsDeleted() {
+        val checker = checker
+        if (checker !is PermissionChecker.Windows) {
+            println("Skipping...")
+            return
+        }
+
+        val tmp = randomTemp()
+        tmp.writeUtf8("Hello World!")
+        try {
+            assertFalse(checker.isReadOnly(tmp), "initial read-only check")
+            tmp.chmod2(mode = "400")
+            assertTrue(checker.isReadOnly(tmp), "post chmod 400")
+            tmp.testDelete(ignoreReadOnly = true)
+            assertFalse(tmp.exists2(), "exists")
+        } finally {
+            tmp.delete2(ignoreReadOnly = true)
+        }
+    }
+
+    @Test
     fun givenDelete1_whenFileExists_thenReturnsTrue() {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")

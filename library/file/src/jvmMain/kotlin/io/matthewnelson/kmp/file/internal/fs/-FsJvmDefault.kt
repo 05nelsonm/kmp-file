@@ -46,7 +46,7 @@ internal class FsJvmDefault private constructor(): Fs.Jvm() {
             if (IsWindows && !ignoreReadOnly) {
                 // Need to check before executing anything b/c File.delete() will just
                 // go ahead and ignore the read-only flag entirely.
-                if (file.exists() && file.isFile && !file.canWrite()) {
+                if (file.exists() && !file.isDirectory && !file.canWrite()) {
                     throw AccessDeniedException(file, reason = "File is read-only && ignoreReadOnly = false")
                 }
             }
@@ -77,8 +77,7 @@ internal class FsJvmDefault private constructor(): Fs.Jvm() {
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
         try {
             if (dir.mkdir()) {
-                // Modifying read-only attribute on anything other than a regular
-                // file is not a thing on Windows for Java. Ignore.
+                // Permissions are not a thing for directories on Windows. Ignore.
                 if (IsWindows) return
 
                 // Already default permissions.

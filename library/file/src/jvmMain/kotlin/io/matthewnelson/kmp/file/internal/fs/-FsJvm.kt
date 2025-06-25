@@ -110,9 +110,8 @@ internal actual sealed class Fs private constructor() {
                         throw fileNotFoundException(file, null, null)
                     }
 
-                    // Modifying read-only attribute on anything other than a regular
-                    // file is not a thing on Windows for Java. Ignore.
-                    if (!file.isFile) return
+                    // Not a thing for directories on Windows. Ignore.
+                    if (file.isDirectory) return
 
                     throw FileSystemException(file, null, "Failed to set file read-only attribute to ${!canWrite}")
                 }
