@@ -146,9 +146,18 @@ internal data object FsMinGW: FsNative() {
             // Unix behavior is to fail with an errno of ENOTDIR when
             // the parent is not a directory. Need to mimic that here
             // so the correct exception can be thrown.
-            if (dir.parentFile?.isDirectoryOrNull() == false) {
-                throw errnoToIOException(ENOTDIR, dir)
+            val parent = dir.parentFile
+            val parentExistsAndIsNotADir = if (parent != null) {
+                try {
+                    exists(parent) && parent.isDirectoryOrNull() == false
+                } catch (_: IOException) {
+                    null
+                }
+            } else {
+                null
             }
+
+            if (parentExistsAndIsNotADir == true) throw errnoToIOException(ENOTDIR, dir)
         }
 
         throw errnoToIOException(errno, dir)

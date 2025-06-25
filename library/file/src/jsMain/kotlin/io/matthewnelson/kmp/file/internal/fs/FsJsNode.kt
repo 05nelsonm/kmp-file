@@ -186,13 +186,14 @@ internal class FsJsNode private constructor(
             // Unix behavior is to fail with an errno of ENOTDIR when
             // the parent is not a directory. Need to mimic that here
             // so the correct exception can be thrown.
-            val parentIsDirectory = try {
-                dir.parentFile?.stat()?.isDirectory
-            } catch (ee: IOException) {
-                if (ee !is FileNotFoundException) e.addSuppressed(ee)
+            val parentExistsAndIsNotADir = try {
+                val stat = dir.parentFile?.stat()
+                if (stat != null) !stat.isDirectory else null
+            } catch (_: IOException) {
                 null
             }
-            if (parentIsDirectory == false) throw NotDirectoryException(dir)
+
+            if (parentExistsAndIsNotADir == true) throw NotDirectoryException(dir)
 
             throw e
         }

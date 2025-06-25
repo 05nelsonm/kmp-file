@@ -372,7 +372,7 @@ public fun errnoToIOException(errno: Int, file: File?, other: File? = null): IOE
     return when {
         errno == ENOENT -> fileNotFoundException(file, null, message)
         file != null -> when (errno) {
-            EACCES -> AccessDeniedException(file, other, message)
+            EACCES, EPERM -> AccessDeniedException(file, other, message)
             EEXIST -> FileAlreadyExistsException(file, other, message)
             ENOTDIR -> NotDirectoryException(file)
             ENOTEMPTY -> DirectoryNotEmptyException(file)

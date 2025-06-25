@@ -112,6 +112,21 @@ internal abstract class FsJvmNio private constructor(): Fs.Jvm() {
             } catch (t: Throwable) {
                 val e = t.mapNioException(dir)
                 if (e is FileAlreadyExistsException && !mustCreate) return
+                if (e !is FileNotFoundException) throw e
+
+                // Unix behavior is to fail with an errno of ENOTDIR when
+                // the parent is not a directory. Need to mimic that here
+                // so the correct exception can be thrown.
+                val parentExistsAndIsNotADir = try {
+                    val parent = dir.parentFile
+                    if (parent != null) parent.exists() && !parent.isDirectory else null
+                } catch (tt: SecurityException) {
+                    e.addSuppressed(tt)
+                    null
+                }
+
+                if (parentExistsAndIsNotADir == true) throw NotDirectoryException(dir)
+
                 throw e
             }
 
