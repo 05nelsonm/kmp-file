@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 import com.android.build.gradle.tasks.MergeSourceSetFolders
+import org.jetbrains.kotlin.konan.target.HostManager
 import java.io.FileNotFoundException
 
 plugins {
@@ -70,7 +71,11 @@ kmpConfiguration {
             compileTargetCompatibility = JavaVersion.VERSION_1_8
 
             sourceSetTestInstrumented {
-                kotlin.srcDir("src/androidInstrumentedTest/file")
+                // Symlinks are not a thing on Windows, so...
+                if (!HostManager.hostIsMingw) {
+                    kotlin.srcDir("src/androidInstrumentedTest/fileCommonTestShared")
+                    kotlin.srcDir("src/androidInstrumentedTest/fileCommonTestAndroid")
+                }
 
                 dependencies {
                     implementation(libs.androidx.test.core)
