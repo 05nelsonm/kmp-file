@@ -15,5 +15,19 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
+
 actual val IS_SIMULATOR: Boolean = false
 actual val IS_ANDROID: Boolean = ANDROID.SDK_INT != null
+
+actual fun permissionChecker(): PermissionChecker? = if (IsWindows) {
+    object : PermissionChecker.Windows {
+        override fun isReadOnly(file: File): Boolean = !file.canWrite()
+    }
+} else {
+    object : PermissionChecker.Posix {
+        override fun canRead(file: File): Boolean = file.canRead()
+        override fun canWrite(file: File): Boolean = file.canWrite()
+        override fun canExecute(file: File): Boolean = file.canExecute()
+    }
+}

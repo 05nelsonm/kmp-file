@@ -15,8 +15,9 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.fs_file_attributes
+import io.matthewnelson.kmp.file.internal.FileAttributes
+import io.matthewnelson.kmp.file.internal.isReadOnly
 
-fun File.isReadOnly(): Boolean {
-    return fs_file_attributes(path).second
+actual fun permissionChecker(): PermissionChecker? = object : PermissionChecker.Windows {
+    override fun isReadOnly(file: File): Boolean = FileAttributes(file).isReadOnly
 }

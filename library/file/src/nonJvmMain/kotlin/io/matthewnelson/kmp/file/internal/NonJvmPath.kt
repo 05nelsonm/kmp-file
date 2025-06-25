@@ -19,38 +19,6 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.SysDirSep
 
-internal fun Path.absolute(): Path {
-    if (isAbsolute()) return this
-
-    val drive = driveOrNull()
-
-    return if (drive != null) {
-        // Windows
-        //
-        // Path starts with C: (or some other letter)
-        // and is not rooted (because isAbsolute was false)
-        val resolvedDrive = fs_realpath(drive) + SysDirSep
-        replaceFirst(drive, resolvedDrive)
-    } else {
-        // Unix or no drive specified
-
-        val cwd = fs_realpath(".")
-        if (isEmpty() || startsWith(SysDirSep)) {
-            // Could be on windows where `\path`
-            // is a thing (and would not be absolute)
-            cwd + this
-        } else {
-            cwd + SysDirSep + this
-        }
-    }
-}
-
-internal expect inline fun Path.basename(): String
-
-internal expect inline fun Path.dirname(): Path
-
-internal expect inline fun Path.isAbsolute(): Boolean
-
 internal inline fun Path.parentOrNull(): Path? {
     if (!contains(SysDirSep)) return null
 
@@ -62,3 +30,55 @@ internal inline fun Path.parentOrNull(): Path? {
         else -> parent
     }
 }
+
+internal inline fun Path.resolveSlashes(): Path {
+    if (isEmpty()) return this
+    var result = this
+
+    if (IsWindows) {
+        result = result.replace('/', SysDirSep)
+    }
+
+    val rootSlashes = result.commonRootOrNull(isNormalizing = false) ?: ""
+
+    var lastWasSlash = rootSlashes.isNotEmpty()
+    var i = rootSlashes.length
+
+    result = buildString {
+        while (i < result.length) {
+            val c = result[i++]
+
+            if (c == SysDirSep) {
+                if (!lastWasSlash) {
+                    append(c)
+                    lastWasSlash = true
+                }
+                // else continue
+            } else {
+                append(c)
+                lastWasSlash = false
+            }
+        }
+    }
+
+    if (result.isNotEmpty() && lastWasSlash) {
+        result = result.dropLast(1)
+    }
+
+    return rootSlashes + result
+}
+
+/**
+ * Returns the last segment of the [Path], or the [Path]
+ * if no separators are present.
+ *
+ * @see [io.matthewnelson.kmp.file.File.getName]
+ * */
+internal expect inline fun Path.basename(): String
+
+/**
+ * Returns an empty string or the [Path]
+ *
+ * @see [io.matthewnelson.kmp.file.File.getParent]
+ * */
+internal expect inline fun Path.dirname(): Path

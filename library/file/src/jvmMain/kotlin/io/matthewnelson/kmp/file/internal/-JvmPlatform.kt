@@ -18,16 +18,18 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.ANDROID
+import io.matthewnelson.kmp.file.AccessDeniedException
+import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.toFile
 import io.matthewnelson.kmp.file.wrapIOException
-import java.io.File
 import kotlin.io.resolve
-import kotlin.io.readText as _readText
-import kotlin.io.readBytes as _readBytes
-import kotlin.io.resolve as _resolve
-import kotlin.io.writeBytes as _writeBytes
-import kotlin.io.writeText as _writeText
+import kotlin.io.readText as kReadText
+import kotlin.io.readBytes as kReadBytes
+import kotlin.io.resolve as kResolve
+import kotlin.io.writeBytes as kWriteBytes
+import kotlin.io.writeText as kWriteText
 
 internal actual inline fun platformDirSeparator(): Char = File.separatorChar
 
@@ -39,39 +41,38 @@ internal actual inline fun platformTempDirectory(): File {
         .getProperty("java.io.tmpdir")
         .toFile()
 
-    return ANDROID.SDK_INT?.let { sdk ->
-        if (sdk > 15) return@let null
+    if (ANDROID.SDK_INT == null) return jTemp
+    if (ANDROID.SDK_INT > 15) return jTemp
 
-        // java.io.tmpdir=/sdcard
-        if (
-            !jTemp.path.startsWith("/data")
-            || jTemp.path.startsWith("/sdcard")
-        ) {
-            // dexmaker.dexcache=/data/data/com.example.app/app_dxmaker_cache
-            val parent = System.getProperty("dexmaker.dexcache")
-                ?.toFile()
-                ?.parentFile
-                ?: return@let null
+    if (jTemp.path.startsWith("/data")) return jTemp
+    if (!jTemp.path.startsWith("/sdcard")) return jTemp
 
-            try {
-                if (!parent.exists()) return@let null
-            } catch (_: Throwable) {
-                return@let null
-            }
+    // java.io.tmpdir="/sdcard"
 
-            val cacheDir = parent.resolve("cache")
+    // dexmaker.dexcache=/data/data/com.example.app/app_dxmaker_cache
+    val parent = System.getProperty("dexmaker.dexcache")
+        ?.ifBlank { null }
+        ?.toFile()
+        ?.parentFile
+        ?: return jTemp
 
-            try {
-                if (!cacheDir.exists() && !cacheDir.mkdirs()) return@let null
-            } catch (_: Throwable) {
-                return@let null
-            }
+    try {
+        if (!parent.exists()) return jTemp
+    } catch (_: Throwable) {
+        // SecurityException
+        return jTemp
+    }
 
-            cacheDir
-        } else {
-            null
-        }
-    } ?: jTemp
+    val cache = parent.resolve("cache")
+
+    try {
+        if (!cache.exists() && !cache.mkdirs()) return jTemp
+    } catch (_: Throwable) {
+        // SecurityException
+        return jTemp
+    }
+
+    return cache
 }
 
 internal actual val IsWindows: Boolean = System.getProperty("os.name")
@@ -81,22 +82,32 @@ internal actual val IsWindows: Boolean = System.getProperty("os.name")
 
 @Throws(IOException::class)
 internal actual inline fun File.platformReadBytes(): ByteArray = try {
-    _readBytes()
+    kReadBytes()
 } catch (e: OutOfMemoryError) {
     throw e.wrapIOException()
 }
 
 @Throws(IOException::class)
 internal actual inline fun File.platformReadUtf8(): String = try {
-    _readText()
+    kReadText()
 } catch (e: OutOfMemoryError) {
     throw e.wrapIOException()
 }
 
-internal actual inline fun File.platformResolve(relative: File): File = _resolve(relative)
+internal actual inline fun File.platformResolve(relative: File): File = kResolve(relative)
 
 @Throws(IOException::class)
-internal actual inline fun File.platformWriteBytes(array: ByteArray) { _writeBytes(array) }
+internal actual inline fun File.platformWriteBytes(array: ByteArray) { kWriteBytes(array) }
 
 @Throws(IOException::class)
-internal actual inline fun File.platformWriteUtf8(text: String) { _writeText(text) }
+internal actual inline fun File.platformWriteUtf8(text: String) { kWriteText(text) }
+
+internal inline fun SecurityException.toAccessDeniedException(file: File): AccessDeniedException {
+    return AccessDeniedException(file, reason = "SecurityException[${message}]")
+}
+
+internal actual inline fun fileAlreadyExistsException(
+    file: File,
+    other: File?,
+    reason: String?,
+): FileAlreadyExistsException = FileAlreadyExistsException(file, other, reason)

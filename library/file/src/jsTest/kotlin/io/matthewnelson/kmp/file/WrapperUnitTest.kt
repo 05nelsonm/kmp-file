@@ -22,8 +22,9 @@ class WrapperUnitTest {
 
     @Test
     fun givenBuffer_whenFromDynamic_thenDoesNotThrow() {
+        val zlib = moduleZlib()
         val buffer = FILE_LOREM_IPSUM.read()
-        val gzip = Buffer.wrap(zlib_gzipSync(buffer.unwrap()))
+        val gzip = Buffer.wrap(zlib.gzipSync(buffer.unwrap()))
 
         val bytes = ByteArray(gzip.length.toInt()) { i -> gzip.readInt8(i) }
         assertTrue(bytes.isNotEmpty())
@@ -33,7 +34,7 @@ class WrapperUnitTest {
             tmp.write(gzip)
             assertEquals(bytes.sha256(), tmp.readBytes().sha256())
         } finally {
-            tmp.delete()
+            tmp.delete2()
         }
     }
 
@@ -63,7 +64,7 @@ class WrapperUnitTest {
 
     @Test
     fun givenBuffer_whenMAXLENGTH_thenIsDefined() {
-        // would throw exception if undefined
-        Buffer.MAX_LENGTH.toLong()
+        // If not Node.js, will default to 65535
+        Buffer.MAX_LENGTH.toLong() > 65535L
     }
 }

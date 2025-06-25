@@ -38,7 +38,7 @@ class OpenUnixUnitTest {
             @Suppress("DEPRECATION")
             tmp.fOpen("wb") { file -> assertTrue(file.hasFD_CLOEXEC()) }
         } finally {
-            tmp.delete()
+            tmp.delete2()
         }
     }
 
@@ -51,7 +51,7 @@ class OpenUnixUnitTest {
                 tmp.open(operation).use { file -> assertTrue(file.hasFD_CLOEXEC()) }
             }
         } finally {
-            tmp.delete()
+            tmp.delete2()
         }
     }
 
@@ -64,7 +64,7 @@ class OpenUnixUnitTest {
                 tmp.open(operation, e = false).use { file -> assertFalse(file.hasFD_CLOEXEC()) }
             }
         } finally {
-            tmp.delete()
+            tmp.delete2()
         }
     }
 

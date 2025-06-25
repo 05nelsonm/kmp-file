@@ -39,7 +39,7 @@ internal actual inline fun File.platformReadBytes(): ByteArray {
         while (true) {
             val read = file.fRead(buf)
 
-            if (read < 0) throw errnoToIOException(errno)
+            if (read < 0) throw errnoToIOException(errno, this)
             if (read == 0) break
             size += read
             if (size < 0) {
@@ -76,7 +76,7 @@ internal actual inline fun File.platformWriteBytes(array: ByteArray) {
 
         while (written < array.size) {
             val write = file.fWrite(array, written, array.size - written)
-            if (write < 0) throw errnoToIOException(errno)
+            if (write < 0) throw errnoToIOException(errno, this)
             if (write == 0) break
             written += write
         }

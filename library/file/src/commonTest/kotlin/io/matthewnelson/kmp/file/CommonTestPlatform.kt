@@ -15,11 +15,6 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.encoding.base16.Base16
-import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
-import org.kotlincrypto.hash.sha2.SHA256
-import kotlin.random.Random
-
 val DIR_TEST_SUPPORT by lazy {
     PROJECT_DIR_PATH
         .toFile()
@@ -36,19 +31,7 @@ val FILE_SYM_LINK_2 by lazy {
         .resolve("sym_link2")
 }
 
-private val BASE_16_LC = Base16 { encodeToLowercase = true }
-
 expect val IS_SIMULATOR: Boolean
 expect val IS_ANDROID: Boolean
 
-fun randomName(): String = Random
-    .Default
-    .nextBytes(8)
-    .encodeToString(Base16)
-
-fun randomTemp(): File = SysTempDir
-    .resolve(randomName())
-
-fun ByteArray.sha256(): String = SHA256()
-    .digest(this)
-    .encodeToString(BASE_16_LC)
+expect fun permissionChecker(): PermissionChecker?

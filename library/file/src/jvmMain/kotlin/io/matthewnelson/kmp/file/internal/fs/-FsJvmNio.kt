@@ -1,0 +1,241 @@
+/*
+ * Copyright (c) 2025 Matthew Nelson
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+@file:Suppress("RedundantVisibilityModifier", "NOTHING_TO_INLINE")
+
+package io.matthewnelson.kmp.file.internal.fs
+
+import io.matthewnelson.kmp.file.DirectoryNotEmptyException
+import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FileAlreadyExistsException
+import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.FileSystemException
+import io.matthewnelson.kmp.file.FsInfo
+import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.NotDirectoryException
+import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.toAccessDeniedException
+import io.matthewnelson.kmp.file.toFile
+import io.matthewnelson.kmp.file.wrapIOException
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.InvalidPathException
+import java.nio.file.Path
+import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.PosixFilePermissions
+import kotlin.IllegalArgumentException
+
+@Suppress("NewApi")
+internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info) {
+
+    internal companion object {
+
+        // MUST check for existence of java.nio.file.Files
+        // class first before referencing, otherwise Android
+        // may throw a VerifyError.
+        @JvmSynthetic
+        @Throws(VerifyError::class)
+        internal fun get(): FsJvmNio {
+            val isPosix = FileSystems
+                .getDefault()
+                .supportedFileAttributeViews()
+                .contains("posix")
+
+            return if (isPosix) Posix() else NonPosix()
+        }
+    }
+
+    // Windows
+    private class NonPosix: FsJvmNio(info = FsInfo.of(name = "FsJvmNioNonPosix", isPosix = false)) {
+
+        @Throws(IOException::class)
+        internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
+            super.chmod(file, mode, mustExist)
+        }
+
+        @Throws(IOException::class)
+        internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
+            checkThread()
+            val path = file.toSafePath()
+            try {
+                Files.delete(path)
+            } catch (t: Throwable) {
+                val e = t.mapNioException(file)
+                if (e is FileNotFoundException && !mustExist) return
+
+                if (e !is AccessDeniedException) throw e
+                if (e.reason?.startsWith("SecurityException") == true) throw e
+
+                try {
+                    if (file.canWrite()) throw e
+                    // Windows file is read-only
+
+                    if (!ignoreReadOnly) {
+                        // Configured not to ignore, create a more informative exception message.
+                        throw AccessDeniedException(file, reason = "File is read-only && ignoreReadOnly = false")
+                    }
+
+                    // Clear windows read-only flag
+                    file.setWritable(true)
+
+                    try {
+                        Files.delete(path)
+                    } catch (tt: Throwable) {
+                        val ee = tt.mapNioException(file)
+                        ee.addSuppressed(e)
+                        throw ee
+                    }
+                } catch (tt: SecurityException) {
+                    val ee = tt.toAccessDeniedException(file)
+                    e.addSuppressed(ee)
+                    throw e
+                }
+            }
+        }
+
+        @Throws(IOException::class)
+        internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
+            val path = dir.toSafePath()
+            try {
+                Files.createDirectory(path)
+            } catch (t: Throwable) {
+                val e = t.mapNioException(dir)
+                if (e is FileAlreadyExistsException && !mustCreate) return
+                if (e !is FileNotFoundException) throw e
+
+                // Unix behavior is to fail with an errno of ENOTDIR when
+                // the parent is not a directory. Need to mimic that here
+                // so the correct exception can be thrown.
+                val parentExistsAndIsNotADir = try {
+                    val parent = dir.parentFile
+                    if (parent != null) parent.exists() && !parent.isDirectory else null
+                } catch (tt: SecurityException) {
+                    e.addSuppressed(tt)
+                    null
+                }
+
+                if (parentExistsAndIsNotADir == true) throw NotDirectoryException(dir)
+
+                throw e
+            }
+
+            // Unfortunately, Windows read-only directories are not a thing for Java.
+            // File.setCanWrite will always return false (failure).
+        }
+    }
+
+    private class Posix: FsJvmNio(info = FsInfo.of(name = "FsJvmNioPosix", isPosix = true)) {
+
+        @Throws(IOException::class)
+        internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
+            val path = file.toSafePath()
+            val perms = mode.toPosixFilePermissions()
+
+            try {
+                Files.setPosixFilePermissions(path, perms)
+            } catch (t: Throwable) {
+                val e = t.mapNioException(file)
+                if (e is FileNotFoundException && !mustExist) return
+                throw e
+            }
+        }
+
+        @Throws(IOException::class)
+        internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
+            checkThread()
+            val path = file.toSafePath()
+            try {
+                Files.delete(path)
+            } catch (t: Throwable) {
+                val e = t.mapNioException(file)
+                if (e is FileNotFoundException && !mustExist) return
+                throw e
+            }
+        }
+
+        @Throws(IOException::class)
+        internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
+            val path = dir.toSafePath()
+            val perms = mode.toPosixFilePermissions()
+            val attrs = PosixFilePermissions.asFileAttribute(perms)
+
+            try {
+                Files.createDirectory(path, attrs)
+            } catch (t: Throwable) {
+                val e = t.mapNioException(dir)
+                if (e is FileAlreadyExistsException && !mustCreate) return
+                throw e
+            }
+        }
+
+        private fun Mode.toPosixFilePermissions(): Set<PosixFilePermission> {
+            var perms = ""
+            value.forEach { c ->
+                perms += when (c) {
+                    '7' -> "rwx"
+                    '6' -> "rw-"
+                    '5' -> "r-x"
+                    '4' -> "r--"
+                    '3' -> "-wx"
+                    '2' -> "-w-"
+                    '1' -> "--x"
+                    '0' -> "---"
+                    // Should never happen b/c Mode validates the string
+                    else -> throw IllegalArgumentException("Unknown mode digit[$c]. Acceptable digits >> 0-7")
+                }
+            }
+
+            return PosixFilePermissions.fromString(perms)
+        }
+    }
+
+    @Throws(IOException::class)
+    protected inline fun File.toSafePath(): Path = try {
+        toPath()
+    } catch (e: InvalidPathException) {
+        throw e.wrapIOException()
+    }
+
+    @Suppress("RemoveRedundantQualifierName")
+    protected fun Throwable.mapNioException(file: File): Throwable = when(this) {
+        is java.nio.file.FileSystemException -> when (this) {
+            is java.nio.file.AccessDeniedException -> AccessDeniedException(file, otherFile?.toFile(), reason)
+//            is java.nio.file.AtomicMoveNotSupportedException -> // TODO
+            is java.nio.file.DirectoryNotEmptyException -> DirectoryNotEmptyException(file)
+            is java.nio.file.FileAlreadyExistsException -> FileAlreadyExistsException(file, otherFile?.toFile(), reason)
+//            is java.nio.file.FileSystemLoopException -> // TODO
+            is java.nio.file.NoSuchFileException -> FileNotFoundException(message)
+            is java.nio.file.NotDirectoryException -> NotDirectoryException(file)
+//            is java.nio.file.NotLinkException -> // TODO
+            else -> if (this::class.qualifiedName == "java.nio.file.FileSystemException") {
+                if (reason?.equals("Not a directory", ignoreCase = true) == true) {
+                    // Sometimes occurs if createDirectory is attempted whereby
+                    // a segment in the path is an existing regular file.
+                    NotDirectoryException(file)
+                } else {
+                    FileSystemException(file, otherFile?.toFile(), reason)
+                }
+            } else {
+                this
+            }
+        }
+        is kotlin.io.FileSystemException -> when (this) {
+            is kotlin.io.NoSuchFileException -> FileNotFoundException(message)
+            else -> this
+        }
+        is SecurityException -> toAccessDeniedException(file)
+        else -> this
+    }
+}

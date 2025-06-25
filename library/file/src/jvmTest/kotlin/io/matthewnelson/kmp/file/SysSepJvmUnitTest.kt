@@ -18,7 +18,7 @@ package io.matthewnelson.kmp.file
 import kotlin.test.Ignore
 import kotlin.test.Test
 
-class SysSepJvmUnitTest: SysSepBaseTest() {
+class SysSepJvmUnitTest: SysSepSharedTest() {
     override fun getenvPATH(): String? = System.getenv("PATH")
 
     @Test

@@ -15,5 +15,54 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
+import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.internal.fs.FsJsNode
+
 actual val IS_SIMULATOR: Boolean = false
 actual val IS_ANDROID: Boolean = false
+
+actual fun permissionChecker(): PermissionChecker? {
+    val node = FsJs.INSTANCE
+    if (node !is FsJsNode) return null
+
+    return if (IsWindows) {
+        object : PermissionChecker.Windows {
+            override fun isReadOnly(file: File): Boolean = try {
+                node.fs.accessSync(file.path, node.fs.constants.W_OK)
+                false
+            } catch (t: Throwable) {
+                val e = t.toIOException(file)
+                if (e is FileNotFoundException) throw e
+                true
+            }
+        }
+    } else {
+        object : PermissionChecker.Posix {
+            override fun canRead(file: File): Boolean = try {
+                node.fs.accessSync(file.path, node.fs.constants.R_OK)
+                true
+            } catch (t: Throwable) {
+                val e = t.toIOException(file)
+                if (e is FileNotFoundException) throw e
+                false
+            }
+            override fun canWrite(file: File): Boolean = try {
+                node.fs.accessSync(file.path, node.fs.constants.W_OK)
+                true
+            } catch (t: Throwable) {
+                val e = t.toIOException(file)
+                if (e is FileNotFoundException) throw e
+                false
+            }
+            override fun canExecute(file: File): Boolean = try {
+                node.fs.accessSync(file.path, node.fs.constants.X_OK)
+                true
+            } catch (t: Throwable) {
+                val e = t.toIOException(file)
+                if (e is FileNotFoundException) throw e
+                false
+            }
+        }
+    }
+}

@@ -17,6 +17,10 @@
 
 package io.matthewnelson.kmp.file
 
+/**
+ * Signals that an I/O exception of some sort has occurred. This class is the
+ * general class of exceptions produced by failed or interrupted I/O operations.
+ * */
 public actual open class IOException: Exception {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)
@@ -24,16 +28,79 @@ public actual open class IOException: Exception {
     public actual constructor(cause: Throwable?): super(cause)
 }
 
+/**
+ * Signals that an end of file or end of stream has been reached unexpectedly
+ * during input. This exception is mainly used by data input streams to signal
+ * end of stream. Note that many other input operations return a special value
+ * on end of stream rather than throwing an exception.
+ * */
 public actual open class EOFException: IOException {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)
 }
 
+/**
+ * Signals that an attempt to open the file or directory denoted by a specified
+ * pathname has failed due to its non-existence.
+ * */
 public actual open class FileNotFoundException: IOException {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)
 }
 
+/**
+ * Thrown when a file system operation fails on one or two files. This class is
+ * the general class for file system exceptions.
+ * */
+public actual open class FileSystemException(
+    public actual val file: File,
+    public actual val other: File? = null,
+    public actual val reason: String? = null,
+): IOException(StringBuilder(file.toString()).apply {
+    if (other != null) append(" -> ").append(other.toString())
+    if (reason != null) append(": ").append(reason)
+}.toString())
+
+/**
+ * Checked exception thrown when an attempt is made to create a file or directory
+ * and a file of that name already exists.
+ * */
+public actual class FileAlreadyExistsException(
+    file: File,
+    other: File? = null,
+    reason: String? = null,
+): FileSystemException(file, other, reason)
+
+/**
+ * Checked exception thrown when a file system operation is denied, typically due
+ * to a file permission or other access check.
+ * */
+public actual class AccessDeniedException(
+    file: File,
+    other: File? = null,
+    reason: String? = null,
+): FileSystemException(file, other, reason)
+
+/**
+ * Checked exception thrown when a file system operation, intended for a directory,
+ * fails because the file is not a directory.
+ * */
+public actual class NotDirectoryException(
+    file: File,
+): FileSystemException(file, null, "Not a directory")
+
+/**
+ * Checked exception thrown when a file system operation fails because a directory
+ * is not empty.
+ * */
+public actual class DirectoryNotEmptyException(
+    file: File,
+): FileSystemException(file, null, "Directory is not empty")
+
+/**
+ * Thrown when a thread is waiting, sleeping, or otherwise occupied, and the thread
+ * is interrupted, either before or during the activity.
+ * */
 public actual open class InterruptedException: Exception {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)

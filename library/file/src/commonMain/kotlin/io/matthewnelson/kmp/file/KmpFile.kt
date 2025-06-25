@@ -19,12 +19,14 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.*
-import io.matthewnelson.kmp.file.internal.normalize
+import io.matthewnelson.kmp.file.internal.fs.Fs
+import io.matthewnelson.kmp.file.internal.commonNormalize
 import io.matthewnelson.kmp.file.internal.platformResolve
 import io.matthewnelson.kmp.file.internal.platformWriteBytes
 import io.matthewnelson.kmp.file.internal.platformWriteUtf8
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 
 /**
  * The operating system's directory separator character.
@@ -69,74 +71,112 @@ public val SysPathSep: Char = platformPathSeparator()
 public val SysTempDir: File = platformTempDirectory()
 
 /**
- * Syntactic sugar for `File("/some/path")`
+ * Information about the FileSystem that is backing [File].
+ *
+ * @see [FsInfo]
+ * */
+@get:JvmName("SysFsInfo")
+public val SysFsInfo: FsInfo get() = Fs.get().info
+
+/**
+ * Syntactic Kotlin sugar.
+ *
+ * @return [File]
  * */
 @JvmName("get")
 public inline fun String.toFile(): File = File(this)
 
 /**
- * The name of the file or directory. The last segment
- * of the [path].
+ * The name of the file or directory.
  *
  * e.g.
  *
  *     assertEquals("world", "hello/world".toFile().name)
+ *
+ * @return The last segment of the [path]
  * */
 @get:JvmName("nameOf")
 public inline val File.name: String get() = getName()
 
 /**
- * The [path] parent. If no parent is available, null
- * is returned.
+ * The [path] parent.
  *
  * e.g.
  *
  *     assertEquals("hello", "hello/world".toFile().parentPath)
  *     assertNull("world".toFile().parentPath)
+ *
+ * @return The parent of [path], otherwise `null` if not available
  * */
 @get:JvmName("parentPathOf")
 public inline val File.parentPath: String? get() = getParent()
 
 /**
- * The [path] parent. If no parent is available, null
- * is returned.
+ * The [path] parent [File].
  *
  * e.g.
  *
  *     assertEquals("hello".toFile(), "hello/world".toFile().parentFile)
  *     assertNull("world".toFile().parentFile)
+ *
+ * @return The parent of [path] as a [File], otherwise `null` if not available
  * */
 @get:JvmName("parentFileOf")
 public inline val File.parentFile: File? get() = getParentFile()
 
 /**
  * The abstract path to a directory or file.
+ *
+ * @return The path
  * */
 @get:JvmName("pathOf")
 public inline val File.path: String get() = getPath()
 
-/**
- * Returns the absolute pathname string of this abstract pathname.
- *
+/** *
  * If this abstract pathname is already absolute, then the pathname
  * string is simply returned.
  *
  * If this abstract pathname is the empty abstract pathname then the
  * pathname string of the current working directory is returned.
  * Otherwise, this pathname is resolved in a system-dependent way.
- * */
-@get:JvmName("absolutePathOf")
-public inline val File.absolutePath: String get() = getAbsolutePath()
-
-/**
- * [absolutePath] but returns a file.
- * */
-@get:JvmName("absoluteFileOf")
-public inline val File.absoluteFile: File get() = getAbsoluteFile()
-
-/**
- * Returns the canonical pathname string of this abstract pathname.
  *
+ * @return The absolute pathname string of this abstract pathname.
+ *
+ * @see [absoluteFile2]
+ *
+ * @throws [IOException] If interaction with the filesystem was
+ *   necessary to construct the pathname and a failure occurred,
+ *   such as a security exception.
+ * */
+@JvmName("absolutePath2Of")
+@Throws(IOException::class)
+public fun File.absolutePath2(): String {
+    return Fs.get().absolutePath(this)
+}
+
+/** *
+ * If this abstract pathname is already absolute, then the pathname
+ * [File] is simply returned.
+ *
+ * If this abstract pathname is the empty abstract pathname then the
+ * pathname [File] of the current working directory is returned.
+ * Otherwise, this pathname is resolved in a system-dependent way.
+ *
+ * @return The absolute pathname [File] of this abstract pathname.
+ *
+ * @see [absolutePath2]
+ *
+ * @throws [IOException] If interaction with the filesystem was
+ *   necessary to construct the pathname and a failure occurred,
+ *   such as a security exception.
+ * */
+@JvmName("absoluteFile2Of")
+@Throws(IOException::class)
+public fun File.absoluteFile2(): File {
+    return Fs.get().absoluteFile(this)
+}
+
+/**
  * A canonical pathname is both absolute and unique. The precise
  * definition of canonical form is system-dependent.
  *
@@ -146,34 +186,238 @@ public inline val File.absoluteFile: File get() = getAbsoluteFile()
  * and `..` from the pathname, resolving symbolic links (on Unix
  * platforms), and converting drive letters to a standard case
  * (on Windows platforms).
+ *
+ * @return The canonical pathname string of this abstract pathname.
+ *
+ * @see [canonicalFile2]
+ *
+ * @throws [IOException] If interaction with the filesystem resulted
+ *   in failure, such as a security exception.
  * */
 @Throws(IOException::class)
-@JvmName("canonicalPathOf")
-public inline fun File.canonicalPath(): String = getCanonicalPath()
+@JvmName("canonicalPath2Of")
+public fun File.canonicalPath2(): String {
+    return Fs.get().canonicalPath(this)
+}
 
 /**
- * [canonicalPath] but returns a file.
+ * A canonical pathname is both absolute and unique. The precise
+ * definition of canonical form is system-dependent.
+ *
+ * This method first converts this pathname to absolute form if
+ * necessary and then maps it to its unique form in a system-dependent
+ * way. This typically involves removing redundant names such as `.`
+ * and `..` from the pathname, resolving symbolic links (on Unix
+ * platforms), and converting drive letters to a standard case
+ * (on Windows platforms).
+ *
+ * @return The canonical pathname [File] of this abstract pathname.
+ *
+ * @see [canonicalPath2]
+ *
+ * @throws [IOException] If interaction with the filesystem resulted
+ *   in failure, such as a security exception.
  * */
 @Throws(IOException::class)
-@JvmName("canonicalFileOf")
-public inline fun File.canonicalFile(): File = getCanonicalFile()
+@JvmName("canonicalFile2Of")
+public fun File.canonicalFile2(): File {
+    return Fs.get().canonicalFile(this)
+}
 
 /**
- * Removes all `.` and resolves all possible `..` for
- * the provided [path].
+ * Modifies file or directory permissiveness.
+ *
+ * **NOTE:** On Windows this will only modify the `read-only` attribute
+ * for a file. If [mode] contains any **owner** write permissions, then
+ * the `read-only` attribute is removed. If [mode] does **not** contain
+ * any **owner** write permissions, the `read-only` attribute is applied.
+ *
+ * e.g.
+ *
+ *     // The default POSIX file permissions for a new file
+ *     myFile.chmod2("664")
+ *
+ * **POSIX permissions:**
+ * - 7: READ | WRITE | EXECUTE
+ * - 6: READ | WRITE
+ * - 5: READ | EXECUTE
+ * - 4: READ
+ * - 3: WRITE | EXECUTE
+ * - 2: WRITE
+ * - 1: EXECUTE
+ * - 0: NONE
+ *
+ * **Mode char index (e.g. "740" >> index 0 is `7`, index 1 is `4`, index 2 is `0`):**
+ * - index 0: Owner(`7`) >> READ | WRITE | EXECUTE
+ * - index 1: Group(`4`) >> READ
+ * - index 2: Other(`0`) >> NONE
+ *
+ * See [chmod(2)](https://www.man7.org/linux/man-pages/man2/chmod.2.html)
+ *
+ * @param [mode] The permissions to set. Must be 3 digits, each
+ *   being between `0` and `7` (inclusive).
+ * @param [mustExist] If `false`, failure to apply permissions due to the
+ *   file or directory's non-existence on the filesystem will return safely,
+ *   instead of throwing [FileNotFoundException]. If `true`, then the
+ *   [FileNotFoundException] will be thrown. Default `true`.
+ *
+ * @return The [File] for chaining operations.
+ *
+ * @throws [IllegalArgumentException] If [mode] is inappropriate.
+ * @throws [IOException] If there was a failure to apply desired permissions such
+ *   as non-existence, or a security exception.
  * */
-@JvmName("normalizedFileOf")
+@JvmOverloads
+@Throws(IOException::class)
+public fun File.chmod2(mode: String, mustExist: Boolean = true): File {
+    return Fs.get().commonChmod(this, mode, mustExist)
+}
+
+/**
+ * Deletes the file or directory denoted by this abstract pathname.
+ *
+ * If this pathname denotes a directory, then the directory must
+ * be empty in order to be deleted.
+ *
+ * @param [ignoreReadOnly] If the underlying filesystem is a Windows
+ *   filesystem, then attempting to delete a file marked as `read-only`
+ *   will result in an [AccessDeniedException]. If `true`, the `read-only`
+ *   attribute will be ignored and the file deleted. If `false`, then the
+ *   [AccessDeniedException] will be thrown. This parameter is ignored on
+ *   non-Windows filesystems. Default `false`.
+ * @param [mustExist] If `false`, failure to delete the file or directory
+ *   due to its non-existence on the filesystem will return safely, instead
+ *   of throwing [FileNotFoundException]. If `true`, then the
+ *   [FileNotFoundException] will be thrown. Default `false`.
+ *
+ * @return The [File] for chaining operations.
+ *
+ * @throws [IOException] If there was a failure to delete the [File], such as
+ *   a directory not being empty or the filesystem threw a security exception.
+ * */
+@JvmOverloads
+@Throws(IOException::class)
+public fun File.delete2(ignoreReadOnly: Boolean = false, mustExist: Boolean = false): File {
+    return Fs.get().commonDelete(this, ignoreReadOnly, mustExist)
+}
+
+/**
+ * Tests whether the file or directory denoted by this abstract
+ * pathname exists.
+ *
+ * @return `true` if and only if the file or directory denoted
+ *   by this abstract pathname exists; `false` otherwise.
+ *
+ * @throws [IOException] If the filesystem threw a security exception.
+ * */
+@Throws(IOException::class)
+public fun File.exists2(): Boolean {
+    return Fs.get().exists(this)
+}
+
+/**
+ * Creates the directory named by this abstract pathname.
+ *
+ * @param [mode] The permissions to set for the newly created directory.
+ *   Must be 3 digits, each being between `0` and `7` (inclusive). If
+ *   `null`, default directory permissions `775` will be used.
+ * @param [mustCreate] If `false`, failure to create the directory
+ *   due to it already existing on the filesystem will return safely,
+ *   instead of throwing [FileAlreadyExistsException]. If `true`, then
+ *   the [FileAlreadyExistsException] will be thrown. Default `false`.
+ *
+ * @return The [File] for chaining operations.
+ *
+ * @see [chmod2]
+ * @see [mkdirs2]
+ *
+ * @throws [IllegalArgumentException] if [mode] is inappropriate.
+ * @throws [IOException] If there was a failure to create the directory,
+ *   such as its [parentPath] not existing, or its [parentPath] points
+ *   to a [File] that is not a directory, or the filesystem threw a
+ *   security exception.
+ * */
+@JvmOverloads
+@Throws(IOException::class)
+public fun File.mkdir2(mode: String?, mustCreate: Boolean = false): File {
+    return Fs.get().commonMkdir(this, mode, mustCreate)
+}
+
+/**
+ * Creates the directory named by this abstract pathname, including
+ * any necessary but nonexistent parent directories. Note that if
+ * this operation fails it may have succeeded in creating some of
+ * the necessary parent directories. In this event the implementation
+ * is such that it attempts to "clean up" any parent directories that
+ * it created, before throwing its exception.
+ *
+ * @param [mode] The permissions to set for the newly created directory
+ *   and any necessary, but nonexistent parent directories that were
+ *   created. Must be 3 digits, each being between `0` and `7` (inclusive).
+ *   If `null`, default directory permissions `775` will be used.
+ * @param [mustCreate] If `false`, failure to create the directory
+ *   due to it already existing on the filesystem will return safely,
+ *   instead of throwing [FileAlreadyExistsException]. If `true`, then
+ *   the [FileAlreadyExistsException] will be thrown. Default `false`.
+ *
+ * @return The [File] for chaining operations.
+ *
+ * @see [chmod2]
+ * @see [mkdir2]
+ *
+ * @throws [IllegalArgumentException] if [mode] is inappropriate.
+ * @throws [IOException] If there was a failure to create the directory,
+ *   such as a [parentPath] points to a [File] that is not a directory,
+ *   or the filesystem threw a security exception.
+ * */
+@JvmOverloads
+@Throws(IOException::class)
+public fun File.mkdirs2(mode: String?, mustCreate: Boolean = false): File {
+    return Fs.get().commonMkdirs(this, mode, mustCreate)
+}
+
+/**
+ * Removes all `.` and resolves all possible `..` for the provided [path].
+ *
+ * @return The normalized [File]
+ * */
 public fun File.normalize(): File {
-    val normalized = path.normalize()
+    val normalized = path.commonNormalize()
     if (normalized == path) return this
     return File(normalized)
 }
+
+/**
+ * Resolves the [File] for provided [relative]. If [relative]
+ * is absolute, returns [relative], otherwise will concatenate
+ * the [File.path]s.
+ *
+ * @return The resolved [File]
+ * */
+public fun File.resolve(relative: File): File = platformResolve(relative)
+
+/**
+ * Resolves the [File] for provided [relative]. If [relative]
+ * is absolute, returns [relative], otherwise will concatenate
+ * the [File.path]s.
+ *
+ * @return The resolved [File]
+ * */
+public fun File.resolve(relative: String): File = resolve(relative.toFile())
 
 /**
  * Read the full contents of the file (as bytes).
  *
  * **NOTE:** This function is not recommended for large files. There
  * is an internal limitation of 2GB file size.
+ *
+ * @return The data as an array.
+ *
+ * @see [readUtf8]
+ *
+ * @throws [IOException] If there was a failure to read the [File], such as
+ *   its non-existence, not being a regular file, being too large, or the
+ *   filesystem threw a security exception.
  * */
 @JvmName("readBytesFrom")
 @Throws(IOException::class)
@@ -184,6 +428,14 @@ public fun File.readBytes(): ByteArray = platformReadBytes()
  *
  * **NOTE:** This function is not recommended for large files. There
  * is an internal limitation of 2GB file size.
+ *
+ * @return The data as UTF-8 text.
+ *
+ * @see [readBytes]
+ *
+ * @throws [IOException] If there was a failure to read the [File], such as
+ *   its non-existence, not being a regular file, being too large, or the
+ *   filesystem threw a security exception.
  * */
 @JvmName("readUtf8From")
 @Throws(IOException::class)
@@ -191,6 +443,13 @@ public fun File.readUtf8(): String = platformReadUtf8()
 
 /**
  * Writes the full contents of [array] to the file.
+ *
+ * @param [array] of bytes to write.
+ *
+ * @see [writeUtf8]
+ *
+ * @throws [IOException] If there was a failure to write the [File], such as
+ *   the thread being interrupted, or the filesystem threw a security exception.
  * */
 @JvmName("writeBytesTo")
 @Throws(IOException::class)
@@ -198,16 +457,100 @@ public fun File.writeBytes(array: ByteArray) { platformWriteBytes(array) }
 
 /**
  * Writes the full contents of [text] to the file (as UTF-8).
+ *
+ * @param [text] to write to the file
+ *
+ * @see [writeBytes]
+ *
+ * @throws [IOException] If there was a failure to write the [File], such as
+ *   the thread being interrupted, or the filesystem threw a security exception.
  * */
 @JvmName("writeUtf8To")
 @Throws(IOException::class)
 public fun File.writeUtf8(text: String) { platformWriteUtf8(text) }
 
-/**
- * Resolves the [File] for provided [relative]. If [relative]
- * is absolute, returns [relative], otherwise will concatenate
- * the [File.path]s.
- * */
-public fun File.resolve(relative: File): File = platformResolve(relative)
 
-public fun File.resolve(relative: String): File = resolve(relative.toFile())
+
+// --- DEPRECATED ---
+
+/**
+ * DEPRECATED
+ * @see [absolutePath2]
+ * @throws `java.lang.SecurityException`
+ * @suppress
+ * */
+@Deprecated(
+    message = "Missing throws annotation for java.lang.SecurityException.",
+    replaceWith = ReplaceWith(
+        expression = "this.absolutePath2()",
+        "io.matthewnelson.kmp.file.absolutePath2",
+    )
+)
+@get:JvmName("absolutePathOf")
+public inline val File.absolutePath: String get() = absolutePath2()
+
+/**
+ * DEPRECATED
+ * @see [absoluteFile2]
+ * @throws `java.lang.SecurityException`
+ * @suppress
+ * */
+@Deprecated(
+    message = "Missing throws annotation for java.lang.SecurityException.",
+    replaceWith = ReplaceWith(
+        expression = "this.absoluteFile2()",
+        "io.matthewnelson.kmp.file.absoluteFile2",
+    )
+)
+@get:JvmName("absoluteFileOf")
+public inline val File.absoluteFile: File get() = absoluteFile2()
+
+/**
+ * DEPRECATED
+ * @see [canonicalPath2]
+ * @throws [IOException]
+ * @throws `java.lang.SecurityException`
+ * @suppress
+ * */
+@Deprecated(
+    message = "Missing throws annotation for java.lang.SecurityException.",
+    replaceWith = ReplaceWith(
+        expression = "this.canonicalPath2()",
+        "io.matthewnelson.kmp.file.canonicalPath2",
+    )
+)
+@Throws(IOException::class)
+@JvmName("canonicalPathOf")
+public inline fun File.canonicalPath(): String = canonicalPath2()
+
+/**
+ * DEPRECATED
+ * @see [canonicalFile2]
+ * @throws [IOException]
+ * @throws `java.lang.SecurityException`
+ * @suppress
+ * */
+@Deprecated(
+    message = "Missing throws annotation for java.lang.SecurityException.",
+    replaceWith = ReplaceWith(
+        expression = "this.canonicalFile2()",
+        "io.matthewnelson.kmp.file.canonicalFile2",
+    )
+)
+@Throws(IOException::class)
+@JvmName("canonicalFileOf")
+public inline fun File.canonicalFile(): File = canonicalFile2()
+
+/**
+ * DEPRECATED
+ * @see [normalize]
+ * @suppress
+ * */
+@Deprecated(
+    message = "Function name change",
+    replaceWith = ReplaceWith(
+        expression = "this.normalize()",
+        "io.matthewnelson.kmp.file.normalize",
+    )
+)
+public inline fun File.normalizedFileOf(): File = normalize()

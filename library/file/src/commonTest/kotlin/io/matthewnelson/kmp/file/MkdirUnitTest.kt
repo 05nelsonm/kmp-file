@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,10 @@
 package io.matthewnelson.kmp.file
 
 import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
-class MkdirUnitTest {
-
-    @Test
-    fun givenDir_whenExists_thenMkdirReturnsFalse() {
-        if (IS_ANDROID) {
-            println("Skipping...")
-            return
-        }
-        assertFalse(File(PROJECT_DIR_PATH).mkdir())
-    }
+class MkdirUnitTest: MkdirSharedTest() {
+    override val checker: PermissionChecker? = permissionChecker()
 
     @Test
-    fun givenDir_whenDoesNotExist_thenMkdirReturnsTrue() {
-        val dir = randomTemp()
-        assertTrue(dir.mkdir())
-        assertTrue(dir.delete())
-    }
-
-    @Test
-    fun givenDir_when2DirsDeep_thenMkdirReturnsFalse() {
-        val dir = randomTemp().resolve(randomName())
-        assertFalse(dir.mkdir())
-    }
+    fun stub() {}
 }

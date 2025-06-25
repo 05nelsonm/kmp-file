@@ -18,10 +18,9 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class ReadUnitTest {
+class ReadUnitTest: ReadSharedTest() {
 
     @Test
     fun givenFile_whenReadBytes_thenSha256MatchesExpected() {
@@ -50,13 +49,5 @@ class ReadUnitTest {
             return
         }
         assertTrue(FILE_LOREM_IPSUM.readUtf8().isNotBlank())
-    }
-
-    @Test
-    fun givenFile_whenDoesNotExist_thenThrowsFileNotFoundException() {
-        val doesNotExist = randomTemp()
-
-        assertFailsWith<FileNotFoundException> { doesNotExist.readBytes() }
-        assertFailsWith<FileNotFoundException> { doesNotExist.readUtf8() }
     }
 }

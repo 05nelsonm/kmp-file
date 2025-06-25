@@ -15,17 +15,13 @@
  **/
 package io.matthewnelson.kmp.file
 
+import platform.posix.R_OK
+import platform.posix.W_OK
+import platform.posix.X_OK
 import platform.posix.access
 
-@Throws(IOException::class, IndexOutOfBoundsException::class)
-fun File.checkAccess(vararg access: Int): Boolean {
-    if (!exists()) throw FileNotFoundException()
-
-    var final = access.first()
-    for (i in 1 until access.size) {
-        final = final or access[i]
-    }
-
-    // Will be -1 Permission Denied if false
-    return access(path, final) == 0
+actual fun permissionChecker(): PermissionChecker? = object : PermissionChecker.Posix {
+    override fun canRead(file: File): Boolean = access(file.path, R_OK) == 0
+    override fun canWrite(file: File): Boolean = access(file.path, W_OK) == 0
+    override fun canExecute(file: File): Boolean = access(file.path, X_OK) == 0
 }

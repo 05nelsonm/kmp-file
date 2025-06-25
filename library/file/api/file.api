@@ -3,21 +3,54 @@ public final class io/matthewnelson/kmp/file/ANDROID {
 	public static final field SDK_INT Ljava/lang/Integer;
 }
 
+public final class io/matthewnelson/kmp/file/DirectoryNotEmptyException : kotlin/io/FileSystemException {
+	public fun <init> (Ljava/io/File;)V
+}
+
 public final class io/matthewnelson/kmp/file/Exceptions {
 	public static final fun wrapIO (Ljava/lang/Throwable;)Ljava/io/IOException;
 	public static final fun wrapIO (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)Ljava/io/IOException;
+}
+
+public final class io/matthewnelson/kmp/file/FsInfo {
+	public final field isPosix Z
+	public final field name Ljava/lang/String;
+	public synthetic fun <init> (Ljava/lang/String;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final field SysDirSep C
 	public static final field SysPathSep C
 	public static final field SysTempDir Ljava/io/File;
+	public static final fun SysFsInfo ()Lio/matthewnelson/kmp/file/FsInfo;
+	public static final fun absoluteFile2Of (Ljava/io/File;)Ljava/io/File;
 	public static final fun absoluteFileOf (Ljava/io/File;)Ljava/io/File;
+	public static final fun absolutePath2Of (Ljava/io/File;)Ljava/lang/String;
 	public static final fun absolutePathOf (Ljava/io/File;)Ljava/lang/String;
+	public static final fun canonicalFile2Of (Ljava/io/File;)Ljava/io/File;
 	public static final fun canonicalFileOf (Ljava/io/File;)Ljava/io/File;
+	public static final fun canonicalPath2Of (Ljava/io/File;)Ljava/lang/String;
 	public static final fun canonicalPathOf (Ljava/io/File;)Ljava/lang/String;
+	public static final fun chmod2 (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
+	public static final fun chmod2 (Ljava/io/File;Ljava/lang/String;Z)Ljava/io/File;
+	public static synthetic fun chmod2$default (Ljava/io/File;Ljava/lang/String;ZILjava/lang/Object;)Ljava/io/File;
+	public static final fun delete2 (Ljava/io/File;)Ljava/io/File;
+	public static final fun delete2 (Ljava/io/File;Z)Ljava/io/File;
+	public static final fun delete2 (Ljava/io/File;ZZ)Ljava/io/File;
+	public static synthetic fun delete2$default (Ljava/io/File;ZZILjava/lang/Object;)Ljava/io/File;
+	public static final fun exists2 (Ljava/io/File;)Z
 	public static final fun get (Ljava/lang/String;)Ljava/io/File;
+	public static final fun mkdir2 (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
+	public static final fun mkdir2 (Ljava/io/File;Ljava/lang/String;Z)Ljava/io/File;
+	public static synthetic fun mkdir2$default (Ljava/io/File;Ljava/lang/String;ZILjava/lang/Object;)Ljava/io/File;
+	public static final fun mkdirs2 (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
+	public static final fun mkdirs2 (Ljava/io/File;Ljava/lang/String;Z)Ljava/io/File;
+	public static synthetic fun mkdirs2$default (Ljava/io/File;Ljava/lang/String;ZILjava/lang/Object;)Ljava/io/File;
 	public static final fun nameOf (Ljava/io/File;)Ljava/lang/String;
+	public static final fun normalize (Ljava/io/File;)Ljava/io/File;
 	public static final fun normalizedFileOf (Ljava/io/File;)Ljava/io/File;
 	public static final fun parentFileOf (Ljava/io/File;)Ljava/io/File;
 	public static final fun parentPathOf (Ljava/io/File;)Ljava/lang/String;
@@ -28,5 +61,43 @@ public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final fun resolve (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
 	public static final fun writeBytesTo (Ljava/io/File;[B)V
 	public static final fun writeUtf8To (Ljava/io/File;Ljava/lang/String;)V
+}
+
+public final class io/matthewnelson/kmp/file/NotDirectoryException : kotlin/io/FileSystemException {
+	public fun <init> (Ljava/io/File;)V
+}
+
+public abstract class io/matthewnelson/kmp/file/OpenExcl {
+	public final field mode Ljava/lang/String;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun equals (Ljava/lang/Object;)Z
+	public final fun hashCode ()I
+	public final fun toString ()Ljava/lang/String;
+}
+
+public final class io/matthewnelson/kmp/file/OpenExcl$MaybeCreate : io/matthewnelson/kmp/file/OpenExcl {
+	public static final field Companion Lio/matthewnelson/kmp/file/OpenExcl$MaybeCreate$Companion;
+	public static final field DEFAULT Lio/matthewnelson/kmp/file/OpenExcl$MaybeCreate;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun of (Ljava/lang/String;)Lio/matthewnelson/kmp/file/OpenExcl$MaybeCreate;
+}
+
+public final class io/matthewnelson/kmp/file/OpenExcl$MaybeCreate$Companion {
+	public final fun of (Ljava/lang/String;)Lio/matthewnelson/kmp/file/OpenExcl$MaybeCreate;
+}
+
+public final class io/matthewnelson/kmp/file/OpenExcl$MustCreate : io/matthewnelson/kmp/file/OpenExcl {
+	public static final field Companion Lio/matthewnelson/kmp/file/OpenExcl$MustCreate$Companion;
+	public static final field DEFAULT Lio/matthewnelson/kmp/file/OpenExcl$MustCreate;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun of (Ljava/lang/String;)Lio/matthewnelson/kmp/file/OpenExcl$MustCreate;
+}
+
+public final class io/matthewnelson/kmp/file/OpenExcl$MustCreate$Companion {
+	public final fun of (Ljava/lang/String;)Lio/matthewnelson/kmp/file/OpenExcl$MustCreate;
+}
+
+public final class io/matthewnelson/kmp/file/OpenExcl$MustExist : io/matthewnelson/kmp/file/OpenExcl {
+	public static final field INSTANCE Lio/matthewnelson/kmp/file/OpenExcl$MustExist;
 }
 

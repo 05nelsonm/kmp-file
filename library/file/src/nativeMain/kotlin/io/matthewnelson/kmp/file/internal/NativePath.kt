@@ -19,6 +19,12 @@ package io.matthewnelson.kmp.file.internal
 
 import kotlinx.cinterop.*
 
+/**
+ * Returns the last segment of the [Path], or the [Path]
+ * if no separators are present.
+ *
+ * @see [io.matthewnelson.kmp.file.File.getName]
+ * */
 internal actual inline fun Path.basename(): String {
     if (isEmpty()) return this
 
@@ -28,6 +34,11 @@ internal actual inline fun Path.basename(): String {
     }
 }
 
+/**
+ * Returns an empty string or the [Path]
+ *
+ * @see [io.matthewnelson.kmp.file.File.getParent]
+ * */
 internal actual inline fun Path.dirname(): Path {
     @OptIn(ExperimentalForeignApi::class)
     return memScoped {

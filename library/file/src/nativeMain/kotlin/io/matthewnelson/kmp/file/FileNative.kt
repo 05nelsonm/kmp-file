@@ -18,6 +18,7 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.errnoToString
+import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.fs_platform_fopen
 import io.matthewnelson.kmp.file.internal.fs_platform_fread
 import io.matthewnelson.kmp.file.internal.fs_platform_fwrite
@@ -356,18 +357,59 @@ public inline fun <T: Any?> CPointer<FILE>.use(block: (CPointer<FILE>) -> T): T 
 }
 
 /**
- * Converts [errno] to its string message via [strerror], and returns
- * it as an [IOException]. When [errno] is [ENOENT], this function
- * will return [FileNotFoundException].
+ * Converts [platform.posix.errno] to a string (e.g. [ENOENT] > `"ENOENT"`) as a prefix
+ * for the human-readable error message retrieved via [strerror] and returns it as an
+ * [IOException]. When [platform.posix.errno] is [ENOENT], then this function will return
+ * [FileNotFoundException].
+ *
+ * @param [errno]
+ *
+ * @return The formatted error as an [IOException]
  * */
 @ExperimentalForeignApi
-public fun errnoToIOException(errno: Int): IOException {
+public fun errnoToIOException(errno: Int): IOException = errnoToIOException(errno, null)
+
+/**
+ * Converts [platform.posix.errno] to a string (e.g. [ENOENT] > `"ENOENT"`) as a prefix
+ * for the human-readable error message retrieved via [strerror] and returns it as an
+ * [IOException]. When [platform.posix.errno] is [ENOENT], then this function will return
+ * [FileNotFoundException].
+ *
+ * If and only if the [file] parameter is non-null, an appropriate [FileSystemException]
+ * will be returned for the given [platform.posix.errno].
+ *
+ * - [EACCES] or [EPERM] > [AccessDeniedException]
+ * - [EEXIST] > [FileAlreadyExistsException]
+ * - [ENOTDIR] > [NotDirectoryException]
+ * - [ENOTEMPTY] > [DirectoryNotEmptyException]
+ * - Else > [FileSystemException]
+ *
+ * @param [errno] The error
+ * @param [file] The [File] (if any) to associate this error with a [FileSystemException]
+ * @param [other] If multiple files were involved, such as a copy operation.
+ *
+ * @return The formatted error as an [IOException]
+ * */
+@ExperimentalForeignApi
+public fun errnoToIOException(errno: Int, file: File?, other: File? = null): IOException {
     val message = errnoToString(errno)
-    return when (errno) {
-        ENOENT -> FileNotFoundException(message)
+
+    return when {
+        errno == ENOENT -> fileNotFoundException(file, null, message)
+        file != null -> when (errno) {
+            EACCES, EPERM -> AccessDeniedException(file, other, message)
+            EEXIST -> FileAlreadyExistsException(file, other, message)
+            ENOTDIR -> NotDirectoryException(file)
+            ENOTEMPTY -> DirectoryNotEmptyException(file)
+            else -> FileSystemException(file, other, message)
+        }
         else -> IOException(message)
     }
 }
+
+
+
+// --- DEPRECATED ---
 
 /**
  * This has been DEPRECATED and replaced by the [open], [openR],
@@ -398,34 +440,34 @@ public inline fun <T: Any?> File.fOpen(
     }
 
     // Always open with 'e' for O_CLOEXEC (Linux/AndroidNative only)
-    @Suppress("DEPRECATION")
-    val f = flags.appendFlagCLOEXEC()
+    @Suppress("DEPRECATION_ERROR")
+    val mode = flags.appendFlagCLOEXEC()
 
     var ptr: CPointer<FILE>? = null
     while (true) {
-        ptr = fopen(path, f)
+        ptr = fopen(path, mode)
         if (ptr != null) break
         val errno = errno
         if (errno == EINTR) continue
-        throw errnoToIOException(errno)
+        throw errnoToIOException(errno, this)
     }
 
     // Unfortunately darwin targets do not recognize the
     // 'e' flag above and must be set non-atomically via fcntl.
     // For this reason fOpen is deprecated, but things are
     // "fixed" here.
-    @Suppress("DEPRECATION")
-    return ptr.setFDCLOEXEC().use(block)
+    @Suppress("DEPRECATION_ERROR")
+    return ptr.setFDCLOEXEC(this).use(block)
 }
 
 // Linux/AndroidNative targets only. All other platforms this is a no-op
 @PublishedApi
-@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
+@Deprecated("Strictly for deprecated File.fOpen function. Do not use.", level = DeprecationLevel.ERROR)
 internal expect inline fun String.appendFlagCLOEXEC(): String
 
 // Darwin targets only. All other platforms this is a no-op
 @PublishedApi
 @ExperimentalForeignApi
 @Throws(IOException::class)
-@Deprecated("Strictly for deprecated File.fOpen function. Do not use.")
-internal expect inline fun CPointer<FILE>.setFDCLOEXEC(): CPointer<FILE>
+@Deprecated("Strictly for deprecated File.fOpen function. Do not use.", level = DeprecationLevel.ERROR)
+internal expect inline fun CPointer<FILE>.setFDCLOEXEC(file: File): CPointer<FILE>

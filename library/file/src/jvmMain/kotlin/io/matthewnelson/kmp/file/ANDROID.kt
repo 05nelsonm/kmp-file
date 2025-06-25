@@ -18,7 +18,7 @@ package io.matthewnelson.kmp.file
 public object ANDROID {
 
     /**
-     * Reflection based retrieval of android.os.Build.VERSION.SDK_INT
+     * Reflection based retrieval of [android.os.Build.VERSION.SDK_INT](https://developer.android.com/reference/android/os/Build.VERSION#SDK_INT)
      *
      * Will be either:
      *  - `null`: NOT Android Runtime (i.e. not an emulator or device)
