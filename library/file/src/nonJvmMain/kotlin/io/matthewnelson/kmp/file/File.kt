@@ -20,6 +20,10 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.internal.*
 import io.matthewnelson.kmp.file.internal.fs.Fs
 
+/**
+ * A File which holds the abstract pathname to a location on the
+ * filesystem, be it for a regular file, directory, or symbolic link.
+ * */
 public actual class File: Comparable<File> {
 
     private val _path: Path
@@ -34,6 +38,16 @@ public actual class File: Comparable<File> {
         _path = pathname
     }
 
+    /**
+     * Tests whether this abstract pathname is absolute.
+     *
+     * The definition of absolute pathname is system dependent.
+     *
+     * On Unix, a pathname is absolute if its prefix is "/".
+     *
+     * On Windows, a pathname is absolute if its prefix is a drive
+     * specifier followed by "\\", or if its prefix is "\\\\" (a UNC path).
+     * */
     public actual fun isAbsolute(): Boolean = Fs.get().isAbsolute(this)
 
     // use .name
@@ -122,7 +136,7 @@ public actual class File: Comparable<File> {
         )
     )
     public actual fun delete(): Boolean = try {
-        Fs.get().delete(this, mustExist = true, ignoreReadOnly = true)
+        Fs.get().delete(this, ignoreReadOnly = true, mustExist = true)
         true
     } catch (_: IOException) {
         false

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
-import kotlinx.cinterop.*
+import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 
 /**
  * Returns the last segment of the [Path], or the [Path]
@@ -26,12 +26,7 @@ import kotlinx.cinterop.*
  * @see [io.matthewnelson.kmp.file.File.getName]
  * */
 internal actual inline fun Path.basename(): String {
-    if (isEmpty()) return this
-
-    @OptIn(ExperimentalForeignApi::class)
-    return memScoped {
-        platformBasename(this@basename)?.toKString() ?: ""
-    }
+    return FsJsNode.INSTANCE?.path?.basename(this) ?: nonNodeBasename()
 }
 
 /**
@@ -40,18 +35,13 @@ internal actual inline fun Path.basename(): String {
  * @see [io.matthewnelson.kmp.file.File.getParent]
  * */
 internal actual inline fun Path.dirname(): Path {
-    @OptIn(ExperimentalForeignApi::class)
-    return memScoped {
-        platformDirname(this@dirname)?.toKString() ?: ""
-    }
+    return FsJsNode.INSTANCE?.path?.dirname(this) ?: nonNodeDirname()
 }
 
-@OptIn(ExperimentalForeignApi::class)
-internal expect inline fun MemScope.platformBasename(
-    path: Path,
-): CPointer<ByteVar>?
+internal inline fun Path.nonNodeBasename(): Path {
+    throw UnsupportedOperationException("Not yet implemented")
+}
 
-@OptIn(ExperimentalForeignApi::class)
-internal expect inline fun MemScope.platformDirname(
-    path: Path,
-): CPointer<ByteVar>?
+internal inline fun Path.nonNodeDirname(): Path {
+    throw UnsupportedOperationException("Not yet implemented")
+}

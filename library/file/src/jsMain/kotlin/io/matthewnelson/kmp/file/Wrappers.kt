@@ -22,13 +22,32 @@ import io.matthewnelson.kmp.file.internal.node.JsStats
 import io.matthewnelson.kmp.file.internal.toNotLong
 
 /**
- * TODO
+ * A wrapper value class for a Node.js [Buffer](https://nodejs.org/api/buffer.html#class-buffer)
+ * object.
+ *
+ * @see [Companion.alloc]
+ * @see [Companion.wrap]
  * */
 public value class Buffer internal constructor(internal val value: JsBuffer) {
 
+    /**
+     * The length of the underlying Node.js Buffer.
+     * */
     public val length: Number get() = value.length
+
+    /**
+     * Fills the buffer with 0-byte data.
+     * */
     public fun fill() { value.fill() }
 
+    /**
+     * Reads a byte at the given [index] from the underlying Node.js Buffer.
+     *
+     * @param [index] The index for the byte to read
+     *
+     * @throws [IndexOutOfBoundsException] if [index] is inappropriate
+     * @throws [IllegalArgumentException] if [index] is inappropriate
+     * */
     // @Throws(IndexOutOfBoundsException::class, IllegalArgumentException::class)
     public fun readInt8(index: Number): Byte = try {
         value.readInt8(index.toNotLong()) as Byte
@@ -39,11 +58,20 @@ public value class Buffer internal constructor(internal val value: JsBuffer) {
         }
     }
 
+    /**
+     * Converts data from [start] to [end] from bytes, to UTF-8 text.
+     * */
     public fun toUtf8(
         start: Number = 0,
         end: Number = this.length,
     ): String = value.toString("utf8", start.toNotLong(), end.toNotLong())
 
+    /**
+     * Unwraps the [Buffer] value class, returning the underlying Node.js Buffer
+     * as a dynamic object.
+     *
+     * @see [Companion.wrap]
+     * */
     public fun unwrap(): dynamic = value.asDynamic()
 
     /** @suppress */
@@ -51,8 +79,20 @@ public value class Buffer internal constructor(internal val value: JsBuffer) {
 
     public companion object {
 
+        /**
+         * The maximum allowable length for a Node.js Buffer.
+         *
+         * [docs](https://nodejs.org/api/buffer.html#buffer-constants)
+         * */
         public val MAX_LENGTH: Number get() = FsJsNode.INSTANCE?.buffer?.constants?.MAX_LENGTH ?: 65535
 
+        /**
+         * Allocates a new Node.js Buffer of the provided [size], wrapped in the
+         * [Buffer] value class.
+         *
+         * @throws [IllegalArgumentException] If [size] is inappropriate.
+         * @throws [UnsupportedOperationException] If Node.js is not being used.
+         * */
         // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public fun alloc(size: Number): Buffer = try {
             FsJsNode.require()
@@ -60,9 +100,22 @@ public value class Buffer internal constructor(internal val value: JsBuffer) {
             Buffer(JsBuffer.alloc(size.toNotLong()))
         } catch (t: Throwable) {
             if (t is IllegalArgumentException) throw t
+            if (t is UnsupportedOperationException) throw t
             throw IllegalArgumentException(t)
         }
 
+        /**
+         * Wraps the dynamic object in the [Buffer] value class.
+         *
+         * @param [buffer] The Node.js Buffer dynamic object to wrap
+         *
+         * @return The Node.js Buffer wrapped in the [Buffer] value class.
+         *
+         * @see [Buffer.unwrap]
+         *
+         * @throws [IllegalArgumentException] If [buffer] is not a Node.js Buffer.
+         * @throws [UnsupportedOperationException] If Node.js is not being used.
+         * */
         // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public fun wrap(buffer: dynamic): Buffer {
             FsJsNode.require()
@@ -76,7 +129,11 @@ public value class Buffer internal constructor(internal val value: JsBuffer) {
 }
 
 /**
- * TODO
+ * A wrapper value class for a Node.js filesystem [Stats](https://nodejs.org/api/fs.html#class-fsstats)
+ * object.
+ *
+ * @see [stat]
+ * @see [lstat]
  * */
 public value class Stats internal constructor(private val value: JsStats) {
 
@@ -87,6 +144,10 @@ public value class Stats internal constructor(private val value: JsStats) {
     public val isDirectory: Boolean get() = value.isDirectory()
     public val isSymbolicLink: Boolean get() = value.isSymbolicLink()
 
+    /**
+     * Unwraps the [Stats] value class, returning the underlying Node.js Stats
+     * as a dynamic object.
+     * */
     public fun unwrap(): dynamic = value.asDynamic()
 
     /** @suppress */

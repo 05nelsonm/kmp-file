@@ -27,10 +27,18 @@ public actual typealias FileSystemException = kotlin.io.FileSystemException
 public actual typealias FileAlreadyExistsException = kotlin.io.FileAlreadyExistsException
 public actual typealias AccessDeniedException = kotlin.io.AccessDeniedException
 
+/**
+ * Checked exception thrown when a file system operation, intended for a directory,
+ * fails because the file is not a directory.
+ * */
 public actual class NotDirectoryException(
     file: File,
 ): FileSystemException(file, null, "Not a directory")
 
+/**
+ * Checked exception thrown when a file system operation fails because a directory
+ * is not empty.
+ * */
 public actual class DirectoryNotEmptyException(
     file: File,
 ): FileSystemException(file, null, "Directory is not empty")

@@ -24,7 +24,8 @@ import kotlin.contracts.contract
 import kotlin.jvm.JvmName
 
 /**
- * TODO
+ * Signals that an I/O exception of some sort has occurred. This class is the
+ * general class of exceptions produced by failed or interrupted I/O operations.
  * */
 public expect open class IOException: Exception {
     public constructor()
@@ -34,7 +35,10 @@ public expect open class IOException: Exception {
 }
 
 /**
- * TODO
+ * Signals that an end of file or end of stream has been reached unexpectedly
+ * during input. This exception is mainly used by data input streams to signal
+ * end of stream. Note that many other input operations return a special value
+ * on end of stream rather than throwing an exception.
  * */
 public expect open class EOFException: IOException {
     public constructor()
@@ -42,7 +46,8 @@ public expect open class EOFException: IOException {
 }
 
 /**
- * TODO
+ * Signals that an attempt to open the file or directory denoted by a specified
+ * pathname has failed due to its non-existence.
  * */
 public expect open class FileNotFoundException: IOException {
     public constructor()
@@ -50,7 +55,8 @@ public expect open class FileNotFoundException: IOException {
 }
 
 /**
- * TODO
+ * Thrown when a file system operation fails on one or two files. This class is
+ * the general class for file system exceptions.
  * */
 public expect open class FileSystemException: IOException {
     public val file: File
@@ -59,27 +65,32 @@ public expect open class FileSystemException: IOException {
 }
 
 /**
- * TODO
+ * Checked exception thrown when an attempt is made to create a file or directory
+ * and a file of that name already exists.
  * */
 public expect class FileAlreadyExistsException: FileSystemException
 
 /**
- * TODO
+ * Checked exception thrown when a file system operation is denied, typically due
+ * to a file permission or other access check.
  * */
 public expect class AccessDeniedException: FileSystemException
 
 /**
- * TODO
+ * Checked exception thrown when a file system operation, intended for a directory,
+ * fails because the file is not a directory.
  * */
 public expect class NotDirectoryException: FileSystemException
 
 /**
- * TODO
+ * Checked exception thrown when a file system operation fails because a directory
+ * is not empty.
  * */
 public expect class DirectoryNotEmptyException: FileSystemException
 
 /**
- * TODO
+ * Thrown when a thread is waiting, sleeping, or otherwise occupied, and the thread
+ * is interrupted, either before or during the activity.
  * */
 public expect open class InterruptedException: Exception {
     public constructor()

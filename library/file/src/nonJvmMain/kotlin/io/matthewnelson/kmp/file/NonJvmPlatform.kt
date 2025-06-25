@@ -18,7 +18,8 @@
 package io.matthewnelson.kmp.file
 
 /**
- * TODO
+ * Signals that an I/O exception of some sort has occurred. This class is the
+ * general class of exceptions produced by failed or interrupted I/O operations.
  * */
 public actual open class IOException: Exception {
     public actual constructor(): super()
@@ -28,7 +29,10 @@ public actual open class IOException: Exception {
 }
 
 /**
- * TODO
+ * Signals that an end of file or end of stream has been reached unexpectedly
+ * during input. This exception is mainly used by data input streams to signal
+ * end of stream. Note that many other input operations return a special value
+ * on end of stream rather than throwing an exception.
  * */
 public actual open class EOFException: IOException {
     public actual constructor(): super()
@@ -36,7 +40,8 @@ public actual open class EOFException: IOException {
 }
 
 /**
- * TODO
+ * Signals that an attempt to open the file or directory denoted by a specified
+ * pathname has failed due to its non-existence.
  * */
 public actual open class FileNotFoundException: IOException {
     public actual constructor(): super()
@@ -44,7 +49,8 @@ public actual open class FileNotFoundException: IOException {
 }
 
 /**
- * TODO
+ * Thrown when a file system operation fails on one or two files. This class is
+ * the general class for file system exceptions.
  * */
 public actual open class FileSystemException(
     public actual val file: File,
@@ -56,7 +62,8 @@ public actual open class FileSystemException(
 }.toString())
 
 /**
- * TODO
+ * Checked exception thrown when an attempt is made to create a file or directory
+ * and a file of that name already exists.
  * */
 public actual class FileAlreadyExistsException(
     file: File,
@@ -65,7 +72,8 @@ public actual class FileAlreadyExistsException(
 ): FileSystemException(file, other, reason)
 
 /**
- * TODO
+ * Checked exception thrown when a file system operation is denied, typically due
+ * to a file permission or other access check.
  * */
 public actual class AccessDeniedException(
     file: File,
@@ -74,21 +82,24 @@ public actual class AccessDeniedException(
 ): FileSystemException(file, other, reason)
 
 /**
- * TODO
+ * Checked exception thrown when a file system operation, intended for a directory,
+ * fails because the file is not a directory.
  * */
 public actual class NotDirectoryException(
     file: File,
 ): FileSystemException(file, null, "Not a directory")
 
 /**
- * TODO
+ * Checked exception thrown when a file system operation fails because a directory
+ * is not empty.
  * */
 public actual class DirectoryNotEmptyException(
     file: File,
 ): FileSystemException(file, null, "Directory is not empty")
 
 /**
- * TODO
+ * Thrown when a thread is waiting, sleeping, or otherwise occupied, and the thread
+ * is interrupted, either before or during the activity.
  * */
 public actual open class InterruptedException: Exception {
     public actual constructor(): super()

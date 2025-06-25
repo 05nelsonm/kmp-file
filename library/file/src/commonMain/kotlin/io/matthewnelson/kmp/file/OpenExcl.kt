@@ -23,7 +23,10 @@ import kotlin.jvm.JvmField
 import kotlin.jvm.JvmStatic
 
 /**
- * [File] open exclusivity.
+ * [File] open exclusivity. When supported by the underlying filesystem, operations
+ * regarding open exclusivity will be performed atomically. On filesystems such as
+ * Windows, some things are unable to be supported. A "best effort" is made in that
+ * event.
  *
  * @see [MaybeCreate]
  * @see [MustCreate]
@@ -36,6 +39,9 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
 
     /**
      * When opening a [File], create it if it does not already exist.
+     *
+     * @see [Companion.of]
+     * @see [Companion.DEFAULT]
      * */
     public class MaybeCreate private constructor(mode: Mode) : OpenExcl(mode) {
 
@@ -53,6 +59,8 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
              *
              * @param [mode] The permissions to use if the file is created.
              *
+             * @see [chmod2]
+             *
              * @throws [IllegalArgumentException] if [mode] is inappropriate.
              * */
             @JvmStatic
@@ -64,7 +72,12 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
     }
 
     /**
-     * When opening a [File], it **MUST NOT** exist. A new file will be created.
+     * When opening a [File], it **MUST NOT** exist. A new file will be created. If
+     * the file being opened already exists, a [FileAlreadyExistsException] will be
+     * thrown.
+     *
+     * @see [Companion.of]
+     * @see [Companion.DEFAULT]
      * */
     public class MustCreate private constructor(mode: Mode) : OpenExcl(mode) {
 
@@ -95,7 +108,8 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
     }
 
     /**
-     * When opening a [File], it **MUST** exist. A new file will **NOT** be created.
+     * When opening a [File], it **MUST** exist. A new file will **NOT** be created. If
+     * the file being opened does not exist, a [FileNotFoundException] will be thrown.
      * */
     public data object MustExist : OpenExcl(_mode = "000".toMode())
 

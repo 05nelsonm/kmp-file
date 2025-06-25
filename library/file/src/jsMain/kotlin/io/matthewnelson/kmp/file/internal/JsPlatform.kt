@@ -88,16 +88,6 @@ internal actual inline fun File.platformWriteUtf8(text: String) {
     }
 }
 
-internal actual inline fun Path.basename(): String = FsJsNode.INSTANCE?.path?.basename(this) ?: run {
-    // TODO
-    throw UnsupportedOperationException("Not yet implemented")
-}
-
-internal actual inline fun Path.dirname(): Path = FsJsNode.INSTANCE?.path?.dirname(this) ?: run {
-    // TODO
-    throw UnsupportedOperationException("Not yet implemented")
-}
-
 internal inline fun Number.toNotLong(): Number {
     if (this !is Long) return this
 

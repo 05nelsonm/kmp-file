@@ -19,18 +19,34 @@ import kotlin.jvm.JvmField
 import kotlin.jvm.JvmSynthetic
 
 /**
- * TODO
+ * Information about the filesystem backing the kmp-file API.
+ *
+ * @see [SysFsInfo]
  * */
 public class FsInfo private constructor(
 
     /**
-     * TODO
+     * The name of the filesystem.
+     *
+     * - Android:
+     *     - API 21+: `FsJvmAndroid`
+     *     - API 20-: `FsJvmDefault`
+     * - Jvm:
+     *     - Windows: `FsJvmNioNonPosix`
+     *     - Else: `FsJvmNioPosix`
+     * - Js:
+     *     - Node: `FsJsNode`
+     *     - Browser: `FsJsBrowser`
+     *         - NOTE: Implementation is non-operational outside of path resolution
+     * - Native:
+     *     - Windows: `FsMinGW`
+     *     - Else: `FsPosix`
      * */
     @JvmField
     public val name: String,
 
     /**
-     * TODO
+     * If the filesystem supports the POSIX standard.
      * */
     @JvmField
     public val isPosix: Boolean,

@@ -68,7 +68,17 @@ internal inline fun Path.resolveSlashes(): Path {
     return rootSlashes + result
 }
 
+/**
+ * Returns the last segment of the [Path], or the [Path]
+ * if no separators are present.
+ *
+ * @see [io.matthewnelson.kmp.file.File.getName]
+ * */
 internal expect inline fun Path.basename(): String
 
-// null or empty
+/**
+ * Returns an empty string or the [Path]
+ *
+ * @see [io.matthewnelson.kmp.file.File.getParent]
+ * */
 internal expect inline fun Path.dirname(): Path

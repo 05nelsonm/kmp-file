@@ -18,7 +18,8 @@
 package io.matthewnelson.kmp.file
 
 /**
- * A File
+ * A File which holds the abstract pathname to a location on the
+ * filesystem, be it for a regular file, directory, or symbolic link.
  * */
 public expect class File(pathname: String): Comparable<File> {
 

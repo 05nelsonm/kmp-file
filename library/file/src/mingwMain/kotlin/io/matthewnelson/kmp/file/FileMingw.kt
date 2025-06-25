@@ -42,13 +42,36 @@ import platform.windows.LANG_NEUTRAL
 import platform.windows.SUBLANG_DEFAULT
 
 /**
- * TODO
+ * Retrieves the human-readable message for [GetLastError] via [FormatMessageA] and
+ * returns it as an [IOException]. When the last error is [ERROR_FILE_NOT_FOUND] or
+ * [ERROR_PATH_NOT_FOUND], then this function will return [FileNotFoundException].
+ *
+ * @return The formatted error as an [IOException]
+ *
+ * @see [errnoToIOException]
  * */
 @ExperimentalForeignApi
 public inline fun lastErrorToIOException(): IOException = lastErrorToIOException(null)
 
 /**
- * TODO
+ * Retrieves the human-readable message for [GetLastError] via [FormatMessageA] and
+ * returns it as an [IOException]. When the last error is [ERROR_FILE_NOT_FOUND] or
+ * [ERROR_PATH_NOT_FOUND], then this function will return [FileNotFoundException].
+ *
+ * If and only if the [file] parameter is non-null, an appropriate [FileSystemException]
+ * will be returned for the given last error.
+ *
+ * - [ERROR_ACCESS_DENIED] or [ERROR_NOACCESS] > [AccessDeniedException]
+ * - [ERROR_ALREADY_EXISTS] or [ERROR_FILE_EXISTS] > [FileAlreadyExistsException]
+ * - [ERROR_NOT_EMPTY] or [ERROR_DIR_NOT_EMPTY] > [DirectoryNotEmptyException]
+ * - Else > [FileSystemException]
+ *
+ * @param [file] The [File] (if any) to associate this error with a [FileSystemException]
+ * @param [other] If multiple files were involved, such as a copy operation.
+ *
+ * @return The formatted error as an [IOException]
+ *
+ * @see [errnoToIOException]
  * */
 @ExperimentalForeignApi
 public fun lastErrorToIOException(file: File?, other: File? = null): IOException {

@@ -19,7 +19,15 @@ import io.matthewnelson.kmp.file.internal.*
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 
 /**
- * TODO
+ * Retrieve the symbolic [Stats] referred to by the abstract pathname.
+ *
+ * [docs](https://nodejs.org/api/fs.html#fslstatsyncpath-options)
+ *
+ * @return [Stats]
+ *
+ * @throws [IOException] if there was a failure to retrieve the information
+ *   from the filesystem, or the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] If Node.js is not being used.
  * */
 // @Throws(IOException::class, UnsupportedOperationException::class)
 public fun File.lstat(): Stats = try {
@@ -30,7 +38,15 @@ public fun File.lstat(): Stats = try {
 }
 
 /**
- * TODO
+ * Retrieve the [Stats] referred to by the abstract pathname.
+ *
+ * [docs](https://nodejs.org/api/fs.html#fsstatsyncpath-options)
+ *
+ * @return [Stats]
+ *
+ * @throws [IOException] if there was a failure to retrieve the information
+ *   from the filesystem, or the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] If Node.js is not being used.
  * */
 // @Throws(IOException::class, UnsupportedOperationException::class)
 public fun File.stat(): Stats = try {
@@ -41,7 +57,16 @@ public fun File.stat(): Stats = try {
 }
 
 /**
- * TODO
+ * Reads the entire content of a file associated with the abstract
+ * pathname into a [Buffer].
+ *
+ * [docs](https://nodejs.org/api/fs.html#fsreadfilesyncpath-options)
+ *
+ * @return [Buffer]
+ *
+ * @throws [IOException] if there was a failure to read the file, or the
+ *   filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] If Node.js is not being used.
  * */
 // @Throws(IOException::class, UnsupportedOperationException::class)
 public fun File.read(): Buffer = try {
@@ -52,7 +77,14 @@ public fun File.read(): Buffer = try {
 }
 
 /**
- * TODO
+ * Writes the contents of a [Buffer] to the file associated with the
+ * abstract pathname.
+ *
+ * [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options)
+ *
+ * @throws [IOException] if there was a failure to write to the filesystem,
+ *   or the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] If Node.js is not being used.
  * */
 // @Throws(IOException::class, UnsupportedOperationException::class)
 public fun File.write(data: Buffer) {
@@ -64,7 +96,10 @@ public fun File.write(data: Buffer) {
 }
 
 /**
- * TODO
+ * Attempts to retrieve the `code` from an exception thrown from JavaScript.
+ * If unable to retrieve it, `null` is returned.
+ *
+ * @see [toIOException]
  * */
 public val Throwable.errorCodeOrNull: String? get() = try {
     asDynamic().code as String
@@ -73,12 +108,32 @@ public val Throwable.errorCodeOrNull: String? get() = try {
 }
 
 /**
- * TODO
+ * Converts the throwable to an [IOException] if it is not already one. When
+ * [errorCodeOrNull] is `ENOENT`, then this function will return [FileNotFoundException].
+ * When the [errorCodeOrNull] starts with `ERR_FS_`, then this function will
+ * return [FileSystemException].
  * */
 public fun Throwable.toIOException(): IOException = toIOException(null)
 
 /**
- * TODO
+ * Converts the throwable to an [IOException] if it is not already one. When
+ * [errorCodeOrNull] is `ENOENT`, then this function will return [FileNotFoundException].
+ * When the [errorCodeOrNull] starts with `ERR_FS_`, then this function will
+ * return a [FileSystemException].
+ *
+ * If the [file] parameter is non-null, an appropriate [FileSystemException] will
+ * be returned for the given [errorCodeOrNull].
+ *
+ * - `EACCES` or `EPERM` > [AccessDeniedException]
+ * - `EEXIST` > [FileAlreadyExistsException]
+ * - `ENOTDIR` > [NotDirectoryException]
+ * - `ENOTEMPTY` > [DirectoryNotEmptyException]
+ * - Else > [FileSystemException]
+ *
+ * @param [file] The [File] (if any) to associate this error with a [FileSystemException]
+ * @param [other] If multiple files were involved, such as a copy operation.
+ *
+ * @return The formatted error as an [IOException]
  * */
 public fun Throwable.toIOException(file: File?, other: File? = null): IOException {
     if (this is IOException) return this

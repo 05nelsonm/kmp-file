@@ -357,13 +357,38 @@ public inline fun <T: Any?> CPointer<FILE>.use(block: (CPointer<FILE>) -> T): T 
 }
 
 /**
- * TODO
+ * Converts [platform.posix.errno] to a string (e.g. [ENOENT] > `"ENOENT"`) as a prefix
+ * for the human-readable error message retrieved via [strerror] and returns it as an
+ * [IOException]. When [platform.posix.errno] is [ENOENT], then this function will return
+ * [FileNotFoundException].
+ *
+ * @param [errno]
+ *
+ * @return The formatted error as an [IOException]
  * */
 @ExperimentalForeignApi
 public fun errnoToIOException(errno: Int): IOException = errnoToIOException(errno, null)
 
 /**
- * TODO
+ * Converts [platform.posix.errno] to a string (e.g. [ENOENT] > `"ENOENT"`) as a prefix
+ * for the human-readable error message retrieved via [strerror] and returns it as an
+ * [IOException]. When [platform.posix.errno] is [ENOENT], then this function will return
+ * [FileNotFoundException].
+ *
+ * If and only if the [file] parameter is non-null, an appropriate [FileSystemException]
+ * will be returned for the given [platform.posix.errno].
+ *
+ * - [EACCES] or [EPERM] > [AccessDeniedException]
+ * - [EEXIST] > [FileAlreadyExistsException]
+ * - [ENOTDIR] > [NotDirectoryException]
+ * - [ENOTEMPTY] > [DirectoryNotEmptyException]
+ * - Else > [FileSystemException]
+ *
+ * @param [errno] The error
+ * @param [file] The [File] (if any) to associate this error with a [FileSystemException]
+ * @param [other] If multiple files were involved, such as a copy operation.
+ *
+ * @return The formatted error as an [IOException]
  * */
 @ExperimentalForeignApi
 public fun errnoToIOException(errno: Int, file: File?, other: File? = null): IOException {
