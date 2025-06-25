@@ -82,16 +82,18 @@ internal data object FsMinGW: FsNative() {
 
     @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
-        val canWrite = mode.containsOwnerWriteAccess
+        // Not a thing. Ignore.
+        if (file.isDirectoryOrNull() == true) return
+
         val attrs = try {
             FileAttributes(file)
-        } catch (t: IOException) {
-            if (t is FileNotFoundException && !mustExist) return
-            throw t
+        } catch (e: IOException) {
+            if (e is FileNotFoundException && !mustExist) return
+            throw e
         }
 
         // No modification needed
-        if (attrs.isReadOnly == !canWrite) return
+        if (attrs.isReadOnly == !mode.containsOwnerWriteAccess) return
 
         if (attrs.toggleReadOnly(file) == 0) {
             val e = lastErrorToIOException(file)
@@ -121,14 +123,12 @@ internal data object FsMinGW: FsNative() {
             }
 
             // Could be a directory.
-            // If it was read-only & ignoreReadOnly was true,
-            // it's not anymore.
             if (rmdir(file.path) == 0) return
 
             // If was a directory and failure was because it's
             // not empty, ensure the exception that gets thrown
             // is correct.
-            if (errno == ENOTEMPTY) err = errno
+            if (errno == ENOTEMPTY) err = ENOTEMPTY
         }
 
         if (!mustExist && err == ENOENT) return
@@ -137,41 +137,20 @@ internal data object FsMinGW: FsNative() {
 
     @Throws(IOException::class)
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
-        if (mkdir(dir.path) != 0) {
-            if (!mustCreate && errno == EEXIST) return
-            if (errno == ENOENT) {
-                // Unix behavior is to fail with an errno of ENOTDIR when
-                // the parent is not a directory. Need to mimic that here
-                // so the correct exception can be thrown.
-                memScoped {
-                    val parent = dir.parentFile ?: return@memScoped
-                    val parentStat = alloc<_stat64>()
-                    if (_stat64(parent.path, parentStat.ptr) != 0) return@memScoped
-                    if (parentStat.st_mode.toInt() and S_IFMT == S_IFDIR) return@memScoped
+        if (mkdir(dir.path) == 0) return
+        val errno = errno
+        if (!mustCreate && errno == EEXIST) return
 
-                    // parent exists and is but is not a directory
-                    throw errnoToIOException(ENOTDIR, dir)
-                }
+        if (errno == ENOENT) {
+            // Unix behavior is to fail with an errno of ENOTDIR when
+            // the parent is not a directory. Need to mimic that here
+            // so the correct exception can be thrown.
+            if (dir.parentFile?.isDirectoryOrNull() == false) {
+                throw errnoToIOException(ENOTDIR, dir)
             }
-
-            throw errnoToIOException(errno, dir)
         }
 
-        // Newly created directory.
-        if (mode.containsOwnerWriteAccess) return
-
-        try {
-            if (FileAttributes(dir).toggleReadOnly(dir) == 0) {
-                throw lastErrorToIOException(dir)
-            }
-        } catch (e: IOException) {
-            try {
-                delete(dir, mustExist = true, ignoreReadOnly = true)
-            } catch (ee: IOException) {
-                e.addSuppressed(ee)
-            }
-            throw e
-        }
+        throw errnoToIOException(errno, dir)
     }
 
     @Throws(IOException::class)
@@ -202,6 +181,16 @@ internal data object FsMinGW: FsNative() {
         }.toUInt()
 
         return SetFileAttributesA(file.path, attrsNew)
+    }
+
+    @Throws(IOException::class)
+    private inline fun File.isDirectoryOrNull(): Boolean? = memScoped {
+        val stat = alloc<_stat64>()
+        if (_stat64(path, stat.ptr) == 0) {
+            stat.st_mode.toInt() and S_IFMT == S_IFDIR
+        } else {
+            null
+        }
     }
 
     public override fun toString(): String = "FsMinGW"

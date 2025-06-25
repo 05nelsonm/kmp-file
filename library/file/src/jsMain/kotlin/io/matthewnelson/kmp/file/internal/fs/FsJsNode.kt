@@ -20,16 +20,19 @@ package io.matthewnelson.kmp.file.internal.fs
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
 import io.matthewnelson.kmp.file.internal.node.ModuleOs
 import io.matthewnelson.kmp.file.internal.node.ModulePath
 import io.matthewnelson.kmp.file.path
+import io.matthewnelson.kmp.file.stat
 import io.matthewnelson.kmp.file.toFile
 import io.matthewnelson.kmp.file.toIOException
 
@@ -56,8 +59,20 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
+        val m = if (IsWindows) {
+            try {
+                if (file.stat().isDirectory) return
+            } catch (e: IOException) {
+                if (e is FileNotFoundException && !mustExist) return
+                throw e
+            }
+            if (mode.containsOwnerWriteAccess) "666" else "444"
+        } else {
+            mode.value
+        }
+
         try {
-            fs.chmodSync(file.path, mode.value)
+            fs.chmodSync(file.path, m)
         } catch (t: Throwable) {
             val e = t.toIOException(file)
             if (e is FileNotFoundException && !mustExist) return
@@ -109,10 +124,12 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
+        val options = js("{}")
+        options["recursive"] = false
+        // Not a thing for directories on Windows
+        if (!IsWindows) options["mode"] = mode.value
+
         try {
-            val options = js("{}")
-            options["recursive"] = false
-            options["mode"] = mode.value
             fs.mkdirSync(dir.path, options)
         } catch (t: Throwable) {
             val e = t.toIOException(dir)

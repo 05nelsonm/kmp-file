@@ -64,15 +64,25 @@ abstract class ChmodSharedTest {
 
     @Test
     fun givenFile_whenChmodWindows_thenReadOnlyIsSetAsExpected() = runWindows(
-        isDirectoryTest = false,
         create = { tmp -> tmp.writeUtf8("Hello World!") },
     )
 
     @Test
-    fun givenDir_whenChmodWindows_thenReadOnlyIsSetAsExpected() = runWindows(
-        isDirectoryTest = true,
-        create = { tmp -> tmp.mkdir2(mode = null) },
-    )
+    fun givenDir_whenChmodWindows_thenIsSilentlyIgnored() {
+        val checker = checker
+        if (checker !is PermissionChecker.Windows) {
+            println("Skipping...")
+            return
+        }
+
+        val tmp = randomTemp().mkdir2(mode = null, mustCreate = true)
+        try {
+            tmp.testChmod(mode = "500", mustExist = true)
+            // pass
+        } finally {
+            tmp.delete2(ignoreReadOnly = false, mustExist = true)
+        }
+    }
 
     @Test
     fun givenFile_whenChmodPosix_thenPermissionsAreSetAsExpected() = runPosix(
@@ -142,17 +152,9 @@ abstract class ChmodSharedTest {
         }
     }
 
-    private inline fun runWindows(
-        isDirectoryTest: Boolean,
-        create: (tmp: File) -> Unit,
-    ) {
+    private inline fun runWindows(create: (tmp: File) -> Unit) {
         val checker = checker
         if (checker !is PermissionChecker.Windows) {
-            println("Skipping...")
-            return
-        }
-        if (isDirectoryTest && checker.isJava()) {
-            // Java directory permissions on windows is not a thing unfortunately...
             println("Skipping...")
             return
         }

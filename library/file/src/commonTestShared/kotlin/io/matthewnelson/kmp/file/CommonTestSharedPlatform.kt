@@ -37,7 +37,6 @@ fun ByteArray.sha256(): String = SHA256()
 sealed interface PermissionChecker {
     interface Windows: PermissionChecker {
         fun isReadOnly(file: File): Boolean
-        fun isJava(): Boolean = false
     }
     interface Posix: PermissionChecker {
         fun canRead(file: File): Boolean

@@ -106,52 +106,6 @@ abstract class MkdirSharedTest {
     }
 
     @Test
-    fun givenNonDefaultMode_whenWindowsPermissionsReadOnly_thenIsSetAsExpected() {
-        val checker = checker
-        if (checker !is PermissionChecker.Windows) {
-            println("Skipping...")
-            return
-        }
-        if (checker.isJava()) {
-            // Directory read-only permissions are not a thing on Java
-            println("Skipping...")
-            return
-        }
-
-        val tmpDir = randomTemp()
-        try {
-            tmpDir.testMkdir(mode = "500", mustCreate = true)
-            assertTrue(tmpDir.exists2(), "exists")
-            assertTrue(checker.isReadOnly(tmpDir), "isReadOnly")
-        } finally {
-            tmpDir.delete2(ignoreReadOnly = true)
-        }
-    }
-
-    @Test
-    fun givenNonDefaultMode_whenWindowsPermissionsNotReadOnly_thenAreNotModified() {
-        val checker = checker
-        if (checker !is PermissionChecker.Windows) {
-            println("Skipping...")
-            return
-        }
-        if (checker.isJava()) {
-            // Directory read-only permissions are not a thing on Java
-            println("Skipping...")
-            return
-        }
-
-        val tmpDir = randomTemp()
-        try {
-            tmpDir.testMkdir(mode = "700", mustCreate = true)
-            assertTrue(tmpDir.exists2(), "exists")
-            assertFalse(checker.isReadOnly(tmpDir), "isReadOnly")
-        } finally {
-            tmpDir.delete2(ignoreReadOnly = true)
-        }
-    }
-
-    @Test
     fun givenMkdir1_whenDirExists_thenReturnsFalse() {
         val tmp = randomTemp().mkdir2(mode = null)
         try {

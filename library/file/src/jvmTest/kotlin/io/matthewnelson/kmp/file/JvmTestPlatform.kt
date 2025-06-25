@@ -23,7 +23,6 @@ actual val IS_ANDROID: Boolean = ANDROID.SDK_INT != null
 actual fun permissionChecker(): PermissionChecker? = if (IsWindows) {
     object : PermissionChecker.Windows {
         override fun isReadOnly(file: File): Boolean = !file.canWrite()
-        override fun isJava(): Boolean = true
     }
 } else {
     object : PermissionChecker.Posix {

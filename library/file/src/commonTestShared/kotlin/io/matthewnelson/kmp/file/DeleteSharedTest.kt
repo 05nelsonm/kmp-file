@@ -111,54 +111,6 @@ abstract class DeleteSharedTest {
     }
 
     @Test
-    fun givenDir_whenWindowsReadOnlyAndIgnoreReadOnlyFalse_thenThrowsAccessDeniedException() {
-        val checker = checker
-        if (checker !is PermissionChecker.Windows) {
-            println("Skipping...")
-            return
-        }
-        if (checker.isJava()) {
-            // Directory read-only permissions are not a thing on Java
-            println("Skipping...")
-            return
-        }
-
-        val tmpDir = randomTemp()
-        try {
-            tmpDir.mkdir2("400", mustCreate = true)
-            assertTrue(checker.isReadOnly(tmpDir), "isReadOnly")
-            assertFailsWith<AccessDeniedException> { tmpDir.testDelete(ignoreReadOnly = false) }
-            assertTrue(tmpDir.exists2(), "exists")
-        } finally {
-            tmpDir.delete2(ignoreReadOnly = true)
-        }
-    }
-
-    @Test
-    fun givenDir_whenWindowsReadOnlyAndIgnoreReadOnlyIsTrue_thenIsDeleted() {
-        val checker = checker
-        if (checker !is PermissionChecker.Windows) {
-            println("Skipping...")
-            return
-        }
-        if (checker.isJava()) {
-            // Directory read-only permissions are not a thing on Java
-            println("Skipping...")
-            return
-        }
-
-        val tmpDir = randomTemp()
-        try {
-            tmpDir.mkdir2("400", mustCreate = true)
-            assertTrue(checker.isReadOnly(tmpDir), "isReadOnly")
-            tmpDir.testDelete(ignoreReadOnly = true)
-            assertFalse(tmpDir.exists2(), "exists")
-        } finally {
-            tmpDir.delete2(ignoreReadOnly = true)
-        }
-    }
-
-    @Test
     fun givenDelete1_whenFileExists_thenReturnsTrue() {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
