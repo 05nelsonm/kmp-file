@@ -29,16 +29,24 @@ import io.matthewnelson.kmp.file.internal.commonDriveOrNull
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.isReadOnly
 import io.matthewnelson.kmp.file.lastErrorToIOException
+import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
 import platform.posix.EACCES
 import platform.posix.EEXIST
 import platform.posix.ENOENT
+import platform.posix.ENOTDIR
 import platform.posix.ENOTEMPTY
 import platform.posix.PATH_MAX
+import platform.posix.S_IFDIR
+import platform.posix.S_IFMT
 import platform.posix._fullpath
+import platform.posix._stat64
 import platform.posix.errno
 import platform.posix.free
 import platform.posix.mkdir
@@ -75,7 +83,12 @@ internal data object FsMinGW: FsNative() {
     @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
         val canWrite = mode.containsOwnerWriteAccess
-        val attrs = FileAttributes(file)
+        val attrs = try {
+            FileAttributes(file)
+        } catch (t: IOException) {
+            if (t is FileNotFoundException && !mustExist) return
+            throw t
+        }
 
         // No modification needed
         if (attrs.isReadOnly == !canWrite) return
@@ -124,25 +137,41 @@ internal data object FsMinGW: FsNative() {
 
     @Throws(IOException::class)
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
-        if (mkdir(dir.path) == 0) {
-            if (mode.containsOwnerWriteAccess) return
+        if (mkdir(dir.path) != 0) {
+            if (!mustCreate && errno == EEXIST) return
+            if (errno == ENOENT) {
+                // Unix behavior is to fail with an errno of ENOTDIR when
+                // the parent is not a directory. Need to mimic that here
+                // so the correct exception can be thrown.
+                memScoped {
+                    val parent = dir.parentFile ?: return@memScoped
+                    val parentStat = alloc<_stat64>()
+                    if (_stat64(parent.path, parentStat.ptr) != 0) return@memScoped
+                    if (parentStat.st_mode.toInt() and S_IFMT == S_IFDIR) return@memScoped
 
-            try {
-                if (FileAttributes(dir).toggleReadOnly(dir) == 0) {
-                    throw lastErrorToIOException(dir)
+                    // parent exists and is but is not a directory
+                    throw errnoToIOException(ENOTDIR, dir)
                 }
-            } catch (e: IOException) {
-                try {
-                    delete(dir, mustExist = true, ignoreReadOnly = true)
-                } catch (ee: IOException) {
-                    e.addSuppressed(ee)
-                }
-                throw e
             }
+
+            throw errnoToIOException(errno, dir)
         }
 
-        if (!mustCreate && errno == EEXIST) return
-        throw errnoToIOException(errno, dir)
+        // Newly created directory.
+        if (mode.containsOwnerWriteAccess) return
+
+        try {
+            if (FileAttributes(dir).toggleReadOnly(dir) == 0) {
+                throw lastErrorToIOException(dir)
+            }
+        } catch (e: IOException) {
+            try {
+                delete(dir, mustExist = true, ignoreReadOnly = true)
+            } catch (ee: IOException) {
+                e.addSuppressed(ee)
+            }
+            throw e
+        }
     }
 
     @Throws(IOException::class)

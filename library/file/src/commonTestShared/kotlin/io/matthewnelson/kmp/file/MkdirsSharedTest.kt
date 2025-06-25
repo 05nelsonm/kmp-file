@@ -154,9 +154,9 @@ abstract class MkdirsSharedTest {
                 assertTrue(checker.isReadOnly(dir), "$i: isReadOnly")
             }
         } finally {
-            tmp.delete2(ignoreReadOnly = true)
-            dir1.delete2(ignoreReadOnly = true)
             dir2.delete2(ignoreReadOnly = true)
+            dir1.delete2(ignoreReadOnly = true)
+            tmp.delete2(ignoreReadOnly = true)
         }
     }
 
@@ -184,9 +184,9 @@ abstract class MkdirsSharedTest {
                 assertFalse(checker.isReadOnly(dir), "$i: isReadOnly")
             }
         } finally {
-            tmp.delete2(ignoreReadOnly = true)
-            dir1.delete2(ignoreReadOnly = true)
             dir2.delete2(ignoreReadOnly = true)
+            dir1.delete2(ignoreReadOnly = true)
+            tmp.delete2(ignoreReadOnly = true)
         }
     }
 
