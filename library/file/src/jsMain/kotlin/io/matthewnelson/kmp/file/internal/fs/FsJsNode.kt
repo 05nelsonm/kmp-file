@@ -21,6 +21,7 @@ import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.IsWindows
@@ -31,6 +32,7 @@ import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
 import io.matthewnelson.kmp.file.internal.node.ModuleOs
 import io.matthewnelson.kmp.file.internal.node.ModulePath
+import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.stat
 import io.matthewnelson.kmp.file.toFile
@@ -134,6 +136,19 @@ internal class FsJsNode private constructor(
         } catch (t: Throwable) {
             val e = t.toIOException(dir)
             if (e is FileAlreadyExistsException && !mustCreate) return
+            if (!IsWindows) throw e
+            if (e !is FileNotFoundException) throw e
+
+            // Unix behavior is to fail with an errno of ENOTDIR when
+            // the parent is not a directory. Need to mimic that here
+            // so the correct exception can be thrown.
+            val parentIsDirectory = try {
+                dir.parentFile?.stat()?.isDirectory
+            } catch (ee: IOException) {
+                e.addSuppressed(ee)
+                null
+            }
+            if (parentIsDirectory == false) throw NotDirectoryException(dir)
             throw e
         }
     }
