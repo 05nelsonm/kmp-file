@@ -22,12 +22,14 @@ import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.InterruptedException
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
+import io.matthewnelson.kmp.file.wrapIOException
 import java.io.InterruptedIOException
 import kotlin.Throws
 import kotlin.concurrent.Volatile
@@ -124,10 +126,18 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                     throw fileNotFoundException(file, null, null)
                 }
 
+                checkThread()
                 var p: Process? = null
                 try {
                     p = ProcessBuilder("chmod", mode.value, file.path).start()
-                    p.waitFor()
+
+                    val code = try {
+                        p.waitFor()
+                    } catch (t: InterruptedException) {
+                        throw t.wrapIOException { "thread was interrupted while waiting for Process[chmod]" }
+                    }
+                    if (code == 0) return
+
                     val err = p.errorStream.readBytes().decodeToString()
                     if (err.isEmpty()) return
 
