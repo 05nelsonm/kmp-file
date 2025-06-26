@@ -31,7 +31,7 @@ abstract class DeleteSharedTest {
     ): File = delete2(ignoreReadOnly, mustExist)
 
     @Test
-    fun givenFile_whenDoesNotExistAndMustExistIsFalse_thenDoesNotThrowException() {
+    fun givenFile_whenDoesNotExistAndMustExistIsFalse_thenDoesNotThrowException() = skipTestIf(isJsBrowser) {
         try {
             randomTemp().testDelete(mustExist = false)
             // pass
@@ -41,14 +41,14 @@ abstract class DeleteSharedTest {
     }
 
     @Test
-    fun givenFile_whenDoesNotExistAndMustExistIsTrue_thenThrowsFileNotFoundException() {
+    fun givenFile_whenDoesNotExistAndMustExistIsTrue_thenThrowsFileNotFoundException() = skipTestIf(isJsBrowser) {
         assertFailsWith<FileNotFoundException> {
             randomTemp().testDelete(mustExist = true)
         }
     }
 
     @Test
-    fun givenFile_whenAlreadyExistsAndMustExistIsTrue_thenDoesNotThrowException() {
+    fun givenFile_whenAlreadyExistsAndMustExistIsTrue_thenDoesNotThrowException() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
         tmp.testDelete(mustExist = true)
@@ -56,7 +56,7 @@ abstract class DeleteSharedTest {
     }
 
     @Test
-    fun givenFile_whenAlreadyExistsAndMustExistIsFalse_thenFileIsDeleted() {
+    fun givenFile_whenAlreadyExistsAndMustExistIsFalse_thenFileIsDeleted() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
         assertTrue(tmp.exists2())
@@ -65,7 +65,7 @@ abstract class DeleteSharedTest {
     }
 
     @Test
-    fun givenFile_whenAlreadyExistsAndMustExistIsTrue_thenFileIsDeleted() {
+    fun givenFile_whenAlreadyExistsAndMustExistIsTrue_thenFileIsDeleted() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
         assertTrue(tmp.exists2())
@@ -74,7 +74,7 @@ abstract class DeleteSharedTest {
     }
 
     @Test
-    fun givenDir_whenIsNotEmpty_thenThrowsDirectoryNotEmptyException() {
+    fun givenDir_whenIsNotEmpty_thenThrowsDirectoryNotEmptyException() = skipTestIf(isJsBrowser) {
         val tmpDir = randomTemp().mkdir2(mode = null, mustCreate = true)
         val tmpFile = tmpDir.resolve(randomName())
 
@@ -153,7 +153,7 @@ abstract class DeleteSharedTest {
     }
 
     @Test
-    fun givenDelete1_whenFileExists_thenReturnsTrue() {
+    fun givenDelete1_whenFileExists_thenReturnsTrue() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         tmp.writeUtf8("Hello World!")
         try {
@@ -166,7 +166,7 @@ abstract class DeleteSharedTest {
     }
 
     @Test
-    fun givenDelete1_whenFileDoesNotExist_thenReturnsFalse() {
+    fun givenDelete1_whenFileDoesNotExist_thenReturnsFalse() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         assertFalse(tmp.exists2())
         @Suppress("DEPRECATION")

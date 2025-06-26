@@ -31,7 +31,7 @@ abstract class MkdirsSharedTest {
     ): File = mkdirs2(mode, mustCreate)
 
     @Test
-    fun givenDirs_whenAlreadyExistsAndMustCreateIsFalse_thenDoesNotThrowException() {
+    fun givenDirs_whenAlreadyExistsAndMustCreateIsFalse_thenDoesNotThrowException() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp().mkdir2(mode = null, mustCreate = true)
 
         try {
@@ -45,7 +45,7 @@ abstract class MkdirsSharedTest {
     }
 
     @Test
-    fun givenDirs_whenAlreadyExistsAndMustCreateIsTrue_thenThrowsFileAlreadyExistsException() {
+    fun givenDirs_whenAlreadyExistsAndMustCreateIsTrue_thenThrowsFileAlreadyExistsException() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp().mkdir2(mode = null, mustCreate = true)
 
         try {
@@ -58,7 +58,7 @@ abstract class MkdirsSharedTest {
     }
 
     @Test
-    fun givenDir_whenMkdirs_thenSucceeds() {
+    fun givenDir_whenMkdirs_thenSucceeds() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         val dir1 = tmp.resolve(randomName())
         val dir2 = dir1.resolve(randomName())
@@ -130,7 +130,7 @@ abstract class MkdirsSharedTest {
     }
 
     @Test
-    fun givenMkdirs1_whenDirExists_thenReturnsFalse() {
+    fun givenMkdirs1_whenDirExists_thenReturnsFalse() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         val dir1 = tmp.resolve(randomName()).mkdirs2(mode = null)
 
@@ -145,7 +145,7 @@ abstract class MkdirsSharedTest {
     }
 
     @Test
-    fun givenMkdirs1_whenDirDoesNotExist_thenReturnsTrue() {
+    fun givenMkdirs1_whenDirDoesNotExist_thenReturnsTrue() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         val dir1 = tmp.resolve(randomName())
 

@@ -23,19 +23,14 @@ import kotlin.test.assertTrue
 class CanonicalUnitTest {
 
     @Test
-    fun givenFile_whenPathHasSymlink_thenReturnsActualPath() {
+    fun givenFile_whenPathHasSymlink_thenReturnsActualPath() = skipTestIf(isJsBrowser || IsWindows || IS_ANDROID) {
         // windows doesn't do symbolic links.
         // Android emulator won't have access to project directory.
-        if (IsWindows || IS_ANDROID) {
-            println("Skipping..")
-            return
-        }
-
         assertEquals(FILE_LOREM_IPSUM, FILE_SYM_LINK_2.canonicalFile2())
     }
 
     @Test
-    fun givenFile_whenEmpty_thenReturnsCurrentWorkingDirectory() {
+    fun givenFile_whenEmpty_thenReturnsCurrentWorkingDirectory() = skipTestIf(isJsBrowser) {
         val cwd = "".toFile().canonicalPath2()
 
         // not empty and has some (any) path

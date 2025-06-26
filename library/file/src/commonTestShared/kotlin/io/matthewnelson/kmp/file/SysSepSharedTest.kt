@@ -16,6 +16,7 @@
 package io.matthewnelson.kmp.file
 
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 abstract class SysSepSharedTest {
@@ -23,23 +24,17 @@ abstract class SysSepSharedTest {
     abstract fun getenvPATH(): String?
 
     @Test
-    fun givenSysDirSep_whenEnvironmentVariablePATH_thenContainsSysDirSep() {
+    fun givenSysDirSep_whenEnvironmentVariablePATH_thenContainsSysDirSep() = skipTestIf(isJsBrowser) {
         val p = getenvPATH()
-        if (p == null) {
-            println("Skipping...")
-            return
-        }
+        assertNotNull(p)
 
         assertTrue(p.contains(SysDirSep))
     }
 
     @Test
-    fun givenSysPathSep_whenEnvironmentVariablePATH_thenContainsSysPathSep() {
+    fun givenSysPathSep_whenEnvironmentVariablePATH_thenContainsSysPathSep() = skipTestIf(isJsBrowser) {
         val p = getenvPATH()
-        if (p == null) {
-            println("Skipping...")
-            return
-        }
+        assertNotNull(p)
 
         assertTrue(p.contains(SysPathSep))
     }

@@ -31,7 +31,7 @@ abstract class MkdirSharedTest {
     ): File = mkdir2(mode, mustCreate)
 
     @Test
-    fun givenDir_whenAlreadyExistsAndMustCreateIsFalse_thenDoesNotThrowException() {
+    fun givenDir_whenAlreadyExistsAndMustCreateIsFalse_thenDoesNotThrowException() = skipTestIf(isJsBrowser) {
         assertTrue(SysTempDir.exists2())
 
         try {
@@ -43,7 +43,7 @@ abstract class MkdirSharedTest {
     }
 
     @Test
-    fun givenDir_whenExistsAndMustCreateIsTrue_thenThrowsFileAlreadyExistsException() {
+    fun givenDir_whenExistsAndMustCreateIsTrue_thenThrowsFileAlreadyExistsException() = skipTestIf(isJsBrowser) {
         assertTrue(SysTempDir.exists2())
 
         assertFailsWith<FileAlreadyExistsException> {
@@ -52,7 +52,7 @@ abstract class MkdirSharedTest {
     }
 
     @Test
-    fun givenDir_whenDoesNotExistAndMustCreateIsFalse_thenDirIsCreated() {
+    fun givenDir_whenDoesNotExistAndMustCreateIsFalse_thenDirIsCreated() = skipTestIf(isJsBrowser) {
         val dir = randomTemp()
         try {
             assertFalse(dir.exists2())
@@ -66,14 +66,14 @@ abstract class MkdirSharedTest {
     }
 
     @Test
-    fun givenDir_when2DirsDeep_thenThrowsFileNotFoundException() {
+    fun givenDir_when2DirsDeep_thenThrowsFileNotFoundException() = skipTestIf(isJsBrowser) {
         val dir = randomTemp().resolve(randomName())
         assertFalse(dir.exists2())
         assertFailsWith<FileNotFoundException> { dir.testMkdir(mode = null) }
     }
 
     @Test
-    fun givenDir_whenFileUsedInDirPath_thenThrowsNotDirectoryException() {
+    fun givenDir_whenFileUsedInDirPath_thenThrowsNotDirectoryException() = skipTestIf(isJsBrowser) {
         val tmpFile = randomTemp()
         tmpFile.writeUtf8("Hello World!")
         try {
@@ -106,7 +106,7 @@ abstract class MkdirSharedTest {
     }
 
     @Test
-    fun givenMkdir1_whenDirExists_thenReturnsFalse() {
+    fun givenMkdir1_whenDirExists_thenReturnsFalse() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp().mkdir2(mode = null)
         try {
             assertTrue(tmp.exists2())
@@ -118,7 +118,7 @@ abstract class MkdirSharedTest {
     }
 
     @Test
-    fun givenMkdir1_whenDirDoesNotExist_thenReturnsTrue() {
+    fun givenMkdir1_whenDirDoesNotExist_thenReturnsTrue() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         assertFalse(tmp.exists2())
         try {

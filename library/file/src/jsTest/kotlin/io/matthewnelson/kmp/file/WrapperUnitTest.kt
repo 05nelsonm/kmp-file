@@ -21,7 +21,7 @@ import kotlin.test.*
 class WrapperUnitTest {
 
     @Test
-    fun givenBuffer_whenFromDynamic_thenDoesNotThrow() {
+    fun givenBuffer_whenFromDynamic_thenDoesNotThrow() = skipTestIf(isJsBrowser) {
         val zlib = moduleZlib()
         val buffer = FILE_LOREM_IPSUM.read()
         val gzip = Buffer.wrap(zlib.gzipSync(buffer.unwrap()))
@@ -39,20 +39,20 @@ class WrapperUnitTest {
     }
 
     @Test
-    fun givenBuffer_whenFromDynamicAndNotActuallyABuffer_thenThrowsException() {
+    fun givenBuffer_whenFromDynamicAndNotActuallyABuffer_thenThrowsException() = skipTestIf(isJsBrowser) {
         val stats = FILE_LOREM_IPSUM.stat().unwrap()
         assertFailsWith<IllegalArgumentException> { Buffer.wrap(stats) }
     }
 
     @Test
-    fun givenEmptyBuffer_whenToString_thenIsEmptyString() {
+    fun givenEmptyBuffer_whenToString_thenIsEmptyString() = skipTestIf(isJsBrowser) {
         val buf = js("Buffer").alloc(0)
         val string = Buffer.wrap(buf).toUtf8()
         assertTrue(string.isEmpty())
     }
 
     @Test
-    fun givenBufferAlloc_whenExceedsIntMax_thenConvertsToDoubleUnderTheHood() {
+    fun givenBufferAlloc_whenExceedsIntMax_thenConvertsToDoubleUnderTheHood() = skipTestIf(isJsBrowser) {
         val long = Int.MAX_VALUE.toLong()
         val number = (long + 1000).toNotLong()
         assertIs<Double>(number)
@@ -65,6 +65,10 @@ class WrapperUnitTest {
     @Test
     fun givenBuffer_whenMAXLENGTH_thenIsDefined() {
         // If not Node.js, will default to 65535
-        Buffer.MAX_LENGTH.toLong() > 65535L
+        if (isJsBrowser) {
+            assertEquals(65535L, Buffer.MAX_LENGTH.toLong())
+        } else {
+            assertTrue(Buffer.MAX_LENGTH.toLong() > 65535L)
+        }
     }
 }
