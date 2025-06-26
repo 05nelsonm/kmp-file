@@ -113,7 +113,7 @@ internal inline fun Path.commonRootOrNull(
     if (c == SysDirSep) "$c" else null
 }
 
-private inline fun Path.commonDriveRootOrNull(): Path? {
+internal inline fun Path.commonDriveRootOrNull(): Path? {
     val drive = commonDriveOrNull() ?: return null
 
     return if (length > 2 && get(2) == SysDirSep) {

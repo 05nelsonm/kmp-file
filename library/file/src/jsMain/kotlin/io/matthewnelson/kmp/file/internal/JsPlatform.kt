@@ -24,13 +24,13 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-internal actual inline fun platformDirSeparator(): Char = FsJsNode.INSTANCE?.path?.sep?.firstOrNull() ?: '/'
+internal actual inline fun platformDirSeparator(): Char = FsJs.INSTANCE.dirSeparator
 
-internal actual inline fun platformPathSeparator(): Char = FsJsNode.INSTANCE?.path?.delimiter?.firstOrNull() ?: ':'
+internal actual inline fun platformPathSeparator(): Char = FsJs.INSTANCE.pathSeparator
 
-internal actual inline fun platformTempDirectory(): File = (FsJsNode.INSTANCE?.os?.tmpdir() ?: "/tmp").toFile()
+internal actual inline fun platformTempDirectory(): File = FsJs.INSTANCE.tempDirectory.toFile()
 
-internal actual val IsWindows: Boolean by lazy { (FsJsNode.INSTANCE?.os?.platform() ?: "") == "win32" }
+internal actual val IsWindows: Boolean get() = FsJs.INSTANCE.isWindows
 
 // @Throws(IOException::class, UnsupportedOperationException::class)
 internal actual inline fun File.platformReadBytes(): ByteArray = try {

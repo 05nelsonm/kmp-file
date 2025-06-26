@@ -24,9 +24,7 @@ import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
-import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
-import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
@@ -43,9 +41,16 @@ import io.matthewnelson.kmp.file.toIOException
 internal class FsJsNode private constructor(
     internal val buffer: ModuleBuffer,
     internal val fs: ModuleFs,
-    internal val os: ModuleOs,
-    internal val path: ModulePath,
-): FsJs(info = FsInfo.of(name = "FsJsNode", isPosix = os.platform() != "win32")) {
+    private val path: ModulePath,
+    internal override val isWindows: Boolean,
+    internal override val tempDirectory: Path,
+): FsJs(info = FsInfo.of(name = "FsJsNode", isPosix = !isWindows)) {
+
+    internal override val dirSeparator: Char = path.sep.firstOrNull() ?: if (isWindows) '\\' else '/'
+    internal override val pathSeparator: Char = path.delimiter.firstOrNull() ?: if (isWindows) ';' else ':'
+
+    internal override fun basename(path: Path): Path = this.path.basename(path)
+    internal override fun dirname(path: Path): Path = this.path.dirname(path)
 
     internal override fun isAbsolute(file: File): Boolean {
         val p = file.path
@@ -53,9 +58,9 @@ internal class FsJsNode private constructor(
         // something like `\path` as being absolute.
         // This is wrong. `path` is relative to the
         // current working drive in this instance.
-        if (IsWindows && p.startsWith(SysDirSep)) {
+        if (isWindows && p.startsWith(dirSeparator)) {
             // Check for UNC path `\\server_name`
-            return p.length > 1 && p[1] == SysDirSep
+            return p.length > 1 && p[1] == dirSeparator
         }
 
         return path.isAbsolute(p)
@@ -63,7 +68,7 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
-        val m = if (IsWindows) {
+        val m = if (isWindows) {
             try {
                 if (file.stat().isDirectory) return
             } catch (e: IOException) {
@@ -86,7 +91,7 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
-        if (IsWindows && !ignoreReadOnly) {
+        if (isWindows && !ignoreReadOnly) {
             try {
                 fs.accessSync(file.path, fs.constants.W_OK)
                 // read-only = false
@@ -119,7 +124,7 @@ internal class FsJsNode private constructor(
             val e = t.toIOException(file)
             if (e is FileNotFoundException && !mustExist) return
 
-            if (!IsWindows) throw e
+            if (!isWindows) throw e
             if (e !is AccessDeniedException) throw e
             if (!ignoreReadOnly) throw e
 
@@ -174,14 +179,14 @@ internal class FsJsNode private constructor(
         val options = js("{}")
         options["recursive"] = false
         // Not a thing for directories on Windows
-        if (!IsWindows) options["mode"] = mode.value
+        if (!isWindows) options["mode"] = mode.value
 
         try {
             fs.mkdirSync(dir.path, options)
         } catch (t: Throwable) {
             val e = t.toIOException(dir)
             if (e is FileAlreadyExistsException && !mustCreate) return
-            if (!IsWindows) throw e
+            if (!isWindows) throw e
             if (e !is FileNotFoundException) throw e
 
             // Unix behavior is to fail with an errno of ENOTDIR when
@@ -212,11 +217,14 @@ internal class FsJsNode private constructor(
         internal val INSTANCE: FsJsNode? by lazy {
             if (!isNodeJs()) return@lazy null
 
+            val os = require<ModuleOs>(module = "os")
+
             FsJsNode(
                 buffer = require(module = "buffer"),
                 fs = require(module = "fs"),
-                os = require(module = "os"),
                 path = require(module = "path"),
+                tempDirectory = os.tmpdir(),
+                isWindows = os.platform() == "win32",
             )
         }
     }
