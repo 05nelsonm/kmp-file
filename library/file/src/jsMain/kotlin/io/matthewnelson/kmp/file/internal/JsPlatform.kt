@@ -48,6 +48,7 @@ internal actual inline fun File.platformReadBytes(): ByteArray = try {
 
     ByteArray(buffer.length.toInt()) { i -> buffer.readInt8(i) }
 } catch (t: Throwable) {
+    if (t is UnsupportedOperationException) throw t
     throw t.toIOException(this)
 }
 
@@ -67,6 +68,7 @@ internal actual inline fun File.platformReadUtf8(): String = try {
 
     buffer.toUtf8()
 } catch (t: Throwable) {
+    if (t is UnsupportedOperationException) throw t
     throw t.toIOException(this)
 }
 
@@ -75,6 +77,7 @@ internal actual inline fun File.platformWriteBytes(array: ByteArray) {
     try {
         FsJsNode.require().fs.writeFileSync(path, array)
     } catch (t: Throwable) {
+        if (t is UnsupportedOperationException) throw t
         throw t.toIOException(this)
     }
 }
@@ -84,6 +87,7 @@ internal actual inline fun File.platformWriteUtf8(text: String) {
     try {
         FsJsNode.require().fs.writeFileSync(path, text)
     } catch (t: Throwable) {
+        if (t is UnsupportedOperationException) throw t
         throw t.toIOException(this)
     }
 }
