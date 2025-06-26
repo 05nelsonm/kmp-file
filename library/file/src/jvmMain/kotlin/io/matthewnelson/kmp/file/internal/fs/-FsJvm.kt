@@ -138,8 +138,10 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                     }
                     if (code == 0) return
 
-                    val err = p.errorStream.readBytes().decodeToString()
-                    if (err.isEmpty()) return
+                    var err = p.errorStream.readBytes().decodeToString()
+                    if (err.isEmpty()) {
+                        err = "chmod exited abnormally with code[$code] when applying permissions[$mode]"
+                    }
 
                     throw when {
                         // Shouldn't really happen b/c we checked prior to running the process, but...
