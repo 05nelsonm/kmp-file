@@ -21,7 +21,7 @@ import kotlin.test.assertFailsWith
 abstract class ReadSharedTest {
 
     @Test
-    fun givenFile_whenDoesNotExist_thenThrowsFileNotFoundException() {
+    fun givenFile_whenDoesNotExist_thenThrowsFileNotFoundException() = skipTestIf(isJsBrowser) {
         val doesNotExist = randomTemp()
 
         assertFailsWith<FileNotFoundException> { doesNotExist.readBytes() }

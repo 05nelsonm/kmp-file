@@ -47,6 +47,7 @@ fun KmpConfigurationExtension.configureShared(
 
         js {
             target {
+                browser()
                 nodejs {
                     testTask {
                         useMocha { timeout = "30s" }

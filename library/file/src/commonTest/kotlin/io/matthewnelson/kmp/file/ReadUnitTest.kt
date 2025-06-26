@@ -23,11 +23,7 @@ import kotlin.test.assertTrue
 class ReadUnitTest: ReadSharedTest() {
 
     @Test
-    fun givenFile_whenReadBytes_thenSha256MatchesExpected() {
-        if (IS_ANDROID) {
-            println("Skipping...")
-            return
-        }
+    fun givenFile_whenReadBytes_thenSha256MatchesExpected() = skipTestIf(isJsBrowser || IS_ANDROID) {
         val expected = if (IsWindows) {
             // Windows will produce a different result because of its
             // EOL value.
@@ -43,11 +39,7 @@ class ReadUnitTest: ReadSharedTest() {
     }
 
     @Test
-    fun givenFile_whenReadUtf8_thenSomethingIsReturned() {
-        if (IS_ANDROID) {
-            println("Skipping...")
-            return
-        }
+    fun givenFile_whenReadUtf8_thenSomethingIsReturned() = skipTestIf(isJsBrowser || IS_ANDROID) {
         assertTrue(FILE_LOREM_IPSUM.readUtf8().isNotBlank())
     }
 }

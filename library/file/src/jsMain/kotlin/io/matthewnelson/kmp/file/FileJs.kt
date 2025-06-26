@@ -34,6 +34,7 @@ public fun File.lstat(): Stats = try {
     val node = FsJsNode.require()
     Stats(node.fs.lstatSync(path))
 } catch (t: Throwable) {
+    if (t is UnsupportedOperationException) throw t
     throw t.toIOException(this)
 }
 
@@ -53,6 +54,7 @@ public fun File.stat(): Stats = try {
     val node = FsJsNode.require()
     Stats(node.fs.statSync(path))
 } catch (t: Throwable) {
+    if (t is UnsupportedOperationException) throw t
     throw t.toIOException(this)
 }
 
@@ -73,6 +75,7 @@ public fun File.read(): Buffer = try {
     val node = FsJsNode.require()
     Buffer(node.fs.readFileSync(path))
 } catch (t: Throwable) {
+    if (t is UnsupportedOperationException) throw t
     throw t.toIOException(this)
 }
 
@@ -91,6 +94,7 @@ public fun File.write(data: Buffer) {
     try {
         FsJsNode.require().fs.writeFileSync(path, data.value)
     } catch (t: Throwable) {
+        if (t is UnsupportedOperationException) throw t
         throw t.toIOException(this)
     }
 }

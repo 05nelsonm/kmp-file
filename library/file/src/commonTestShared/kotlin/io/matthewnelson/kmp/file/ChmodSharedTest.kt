@@ -32,12 +32,7 @@ abstract class ChmodSharedTest {
     ): File = chmod2(mode, mustExist)
 
     @Test
-    fun givenChmod_whenFileDoesNotExistAndMustExistIsTrue_thenThrowsFileNotFoundException() {
-        if (checker == null) {
-            println("Skipping...")
-            return
-        }
-
+    fun givenChmod_whenFileDoesNotExistAndMustExistIsTrue_thenThrowsFileNotFoundException() = skipTestIf(checker == null) {
         val tmp = randomTemp()
         assertFalse(tmp.exists2())
 
@@ -45,12 +40,7 @@ abstract class ChmodSharedTest {
     }
 
     @Test
-    fun givenChmod_whenFileDoesNotExistAndMustExistIsFalse_thenDoesNotThrowException() {
-        if (checker == null) {
-            println("Skipping...")
-            return
-        }
-
+    fun givenChmod_whenFileDoesNotExistAndMustExistIsFalse_thenDoesNotThrowException() = skipTestIf(checker == null) {
         val tmp = randomTemp()
         assertFalse(tmp.exists2())
 

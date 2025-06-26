@@ -17,7 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.internal.fs.FsJsNode
+import io.matthewnelson.kmp.file.internal.fs.FsJs
 
 /**
  * Returns the last segment of the [Path], or the [Path]
@@ -25,23 +25,11 @@ import io.matthewnelson.kmp.file.internal.fs.FsJsNode
  *
  * @see [io.matthewnelson.kmp.file.File.getName]
  * */
-internal actual inline fun Path.basename(): String {
-    return FsJsNode.INSTANCE?.path?.basename(this) ?: nonNodeBasename()
-}
+internal actual inline fun Path.basename(): String = FsJs.INSTANCE.basename(this)
 
 /**
  * Returns an empty string or the [Path]
  *
  * @see [io.matthewnelson.kmp.file.File.getParent]
  * */
-internal actual inline fun Path.dirname(): Path {
-    return FsJsNode.INSTANCE?.path?.dirname(this) ?: nonNodeDirname()
-}
-
-internal inline fun Path.nonNodeBasename(): Path {
-    throw UnsupportedOperationException("Not yet implemented")
-}
-
-internal inline fun Path.nonNodeDirname(): Path {
-    throw UnsupportedOperationException("Not yet implemented")
-}
+internal actual inline fun Path.dirname(): Path = FsJs.INSTANCE.dirname(this)

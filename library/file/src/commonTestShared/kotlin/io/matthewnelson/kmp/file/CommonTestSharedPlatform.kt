@@ -18,6 +18,9 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.encoding.base16.Base16
 import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
 import org.kotlincrypto.hash.sha2.SHA256
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.random.Random
 
 private val BASE_16_LC = Base16 { encodeToLowercase = true }
@@ -33,6 +36,22 @@ fun randomTemp(): File = SysTempDir
 fun ByteArray.sha256(): String = SHA256()
     .digest(this)
     .encodeToString(BASE_16_LC)
+
+val isJsBrowser: Boolean get() = SysFsInfo.name == "FsJsBrowser"
+
+@OptIn(ExperimentalContracts::class)
+inline fun skipTestIf(condition: Boolean, block: () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+
+    if (condition) {
+        println("Skipping...")
+        return
+    }
+
+    block()
+}
 
 sealed interface PermissionChecker {
     interface Windows: PermissionChecker {

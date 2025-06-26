@@ -34,10 +34,10 @@ internal expect inline fun File.platformReadBytes(): ByteArray
 @Throws(IOException::class)
 internal expect inline fun File.platformReadUtf8(): String
 
+internal expect inline fun File.platformResolve(relative: File): File
+
 @Throws(IOException::class)
 internal expect inline fun File.platformWriteBytes(array: ByteArray)
 
 @Throws(IOException::class)
 internal expect inline fun File.platformWriteUtf8(text: String)
-
-internal expect inline fun File.platformResolve(relative: File): File

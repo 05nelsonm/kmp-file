@@ -18,15 +18,23 @@
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.FsInfo
+import io.matthewnelson.kmp.file.internal.Path
 
 internal typealias FsJs = FsNonJvm
 
 internal actual sealed class FsNonJvm(info: FsInfo): Fs.NonJvm(info) {
 
+    internal abstract val isWindows: Boolean
+    internal abstract val dirSeparator: Char
+    internal abstract val pathSeparator: Char
+    internal abstract val tempDirectory: Path
+
+    internal abstract fun basename(path: Path): Path
+    internal abstract fun dirname(path: Path): Path
+
     internal actual companion object {
         internal actual val INSTANCE: FsNonJvm by lazy {
             FsJsNode.INSTANCE
-                ?: FsJsWebWorker.INSTANCE
                 // Will only be null if FsJsNode && FsJsWebWorker are both null.
                 ?: FsJsBrowser.INSTANCE
                 ?: throw UnsupportedOperationException("All file systems returned null")

@@ -22,35 +22,35 @@ import kotlin.test.assertNull
 class ParentUnitTest {
 
     @Test
-    fun givenFile_whenEmpty_thenReturnsNull() {
+    fun givenFile_whenEmpty_thenReturnsNull() = skipTestIf(isJsBrowser) {
         assertNull("".toFile().parentPath)
     }
 
     @Test
-    fun givenFile_whenNoPathSeparator_thenReturnsNull() {
+    fun givenFile_whenNoPathSeparator_thenReturnsNull() = skipTestIf(isJsBrowser) {
         assertNull(randomName().toFile().parentPath)
     }
 
     @Test
-    fun givenFile_whenParentDirNameIsSpace_thenReturnsSpace() {
+    fun givenFile_whenParentDirNameIsSpace_thenReturnsSpace() = skipTestIf(isJsBrowser) {
         val expected = " "
         assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
     @Test
-    fun givenFile_whenParentIsDot_thenReturnsNull() {
+    fun givenFile_whenParentIsDot_thenReturnsNull() = skipTestIf(isJsBrowser) {
         val expected = "."
         assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
     @Test
-    fun givenFile_whenParentIsDotDot_thenReturnsNull() {
+    fun givenFile_whenParentIsDotDot_thenReturnsNull() = skipTestIf(isJsBrowser) {
         val expected = ".."
         assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
     @Test
-    fun givenFile_whenHasTrailingSlashes_thenIgnoresThem() {
+    fun givenFile_whenHasTrailingSlashes_thenIgnoresThem() = skipTestIf(isJsBrowser) {
         val path = buildString {
             append(' ')
             repeat(3) { append(SysDirSep) }

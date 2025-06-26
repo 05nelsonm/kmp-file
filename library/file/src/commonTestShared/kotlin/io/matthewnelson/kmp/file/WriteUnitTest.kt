@@ -25,7 +25,7 @@ import kotlin.test.assertFailsWith
 class WriteUnitTest {
 
     @Test
-    fun givenFile_whenWriteEmptyBytes_thenIsSuccessful() {
+    fun givenFile_whenWriteEmptyBytes_thenIsSuccessful() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
 
         val bytes = ByteArray(0)
@@ -38,7 +38,7 @@ class WriteUnitTest {
     }
 
     @Test
-    fun givenFile_whenWriteBytes_thenIsSuccessful() {
+    fun givenFile_whenWriteBytes_thenIsSuccessful() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
 
         val bytes = Random.Default.nextBytes(500_000)
@@ -51,7 +51,7 @@ class WriteUnitTest {
     }
 
     @Test
-    fun givenFile_whenWriteEmptyString_thenIsSuccessful() {
+    fun givenFile_whenWriteEmptyString_thenIsSuccessful() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
 
         val text = ""
@@ -64,7 +64,7 @@ class WriteUnitTest {
     }
 
     @Test
-    fun givenFile_whenWriteUtf8_thenIsSuccessful() {
+    fun givenFile_whenWriteUtf8_thenIsSuccessful() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
 
         val text = Random.Default.nextBytes(20_000).encodeToString(Base16.Companion)
@@ -77,7 +77,7 @@ class WriteUnitTest {
     }
 
     @Test
-    fun givenFile_whenExists_thenIsTruncated() {
+    fun givenFile_whenExists_thenIsTruncated() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         val bytes = Random.Default.nextBytes(500_000)
 
@@ -92,7 +92,7 @@ class WriteUnitTest {
     }
 
     @Test
-    fun givenFile_whenDirDoesNotExist_thenThrowsFileNotFoundException() {
+    fun givenFile_whenDirDoesNotExist_thenThrowsFileNotFoundException() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp().resolve(randomName()).resolve(randomName())
         assertFailsWith<FileNotFoundException> { tmp.writeUtf8("Hello World!") }
     }

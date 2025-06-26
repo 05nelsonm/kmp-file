@@ -24,13 +24,13 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-internal actual inline fun platformDirSeparator(): Char = FsJsNode.INSTANCE?.path?.sep?.firstOrNull() ?: '/'
+internal actual inline fun platformDirSeparator(): Char = FsJs.INSTANCE.dirSeparator
 
-internal actual inline fun platformPathSeparator(): Char = FsJsNode.INSTANCE?.path?.delimiter?.firstOrNull() ?: ':'
+internal actual inline fun platformPathSeparator(): Char = FsJs.INSTANCE.pathSeparator
 
-internal actual inline fun platformTempDirectory(): File = (FsJsNode.INSTANCE?.os?.tmpdir() ?: "/tmp").toFile()
+internal actual inline fun platformTempDirectory(): File = FsJs.INSTANCE.tempDirectory.toFile()
 
-internal actual val IsWindows: Boolean by lazy { (FsJsNode.INSTANCE?.os?.platform() ?: "") == "win32" }
+internal actual val IsWindows: Boolean get() = FsJs.INSTANCE.isWindows
 
 // @Throws(IOException::class, UnsupportedOperationException::class)
 internal actual inline fun File.platformReadBytes(): ByteArray = try {
@@ -48,6 +48,7 @@ internal actual inline fun File.platformReadBytes(): ByteArray = try {
 
     ByteArray(buffer.length.toInt()) { i -> buffer.readInt8(i) }
 } catch (t: Throwable) {
+    if (t is UnsupportedOperationException) throw t
     throw t.toIOException(this)
 }
 
@@ -67,6 +68,7 @@ internal actual inline fun File.platformReadUtf8(): String = try {
 
     buffer.toUtf8()
 } catch (t: Throwable) {
+    if (t is UnsupportedOperationException) throw t
     throw t.toIOException(this)
 }
 
@@ -75,6 +77,7 @@ internal actual inline fun File.platformWriteBytes(array: ByteArray) {
     try {
         FsJsNode.require().fs.writeFileSync(path, array)
     } catch (t: Throwable) {
+        if (t is UnsupportedOperationException) throw t
         throw t.toIOException(this)
     }
 }
@@ -84,6 +87,7 @@ internal actual inline fun File.platformWriteUtf8(text: String) {
     try {
         FsJsNode.require().fs.writeFileSync(path, text)
     } catch (t: Throwable) {
+        if (t is UnsupportedOperationException) throw t
         throw t.toIOException(this)
     }
 }

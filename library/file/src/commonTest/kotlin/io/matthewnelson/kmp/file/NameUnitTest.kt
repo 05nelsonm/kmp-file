@@ -21,7 +21,7 @@ import kotlin.test.assertEquals
 class NameUnitTest {
 
     @Test
-    fun givenFile_whenName_thenIsAsExpected() {
+    fun givenFile_whenName_thenIsAsExpected() = skipTestIf(isJsBrowser) {
         assertEquals("lorem_ipsum", FILE_LOREM_IPSUM.name)
         assertEquals("abc123", "/some/path".toFile().resolve("abc123").name)
     }

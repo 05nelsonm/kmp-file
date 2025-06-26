@@ -22,16 +22,12 @@ import kotlin.test.assertTrue
 class ExistsUnitTest {
 
     @Test
-    fun givenFile_whenExists_thenReturnsTrue() {
-        if (IS_ANDROID) {
-            println("Skipping...")
-            return
-        }
+    fun givenFile_whenExists_thenReturnsTrue() = skipTestIf(isJsBrowser || IS_ANDROID) {
         assertTrue(FILE_LOREM_IPSUM.exists2())
     }
 
     @Test
-    fun givenFile_whenDoesNotExist_thenReturnsFalse() {
+    fun givenFile_whenDoesNotExist_thenReturnsFalse() = skipTestIf(isJsBrowser) {
         val doesNotExist = DIR_TEST_SUPPORT.resolve("does_not_exist")
         assertFalse(doesNotExist.exists2())
     }

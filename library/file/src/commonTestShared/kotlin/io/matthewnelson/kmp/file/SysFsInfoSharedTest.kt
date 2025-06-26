@@ -30,14 +30,14 @@ abstract class SysFsInfoSharedTest {
             "FsJvmNioNonPosix" to false,
             "FsJvmNioPosix" to true,
             "FsJvmDefault" to !isWindows,
+            "FsJsBrowser" to !isWindows,
             "FsJsNode" to !isWindows,
-            "FsJsWebWorker" to true,
-            "FsJsBrowser" to true,
             "FsMinGW" to false,
             "FsPosix" to true,
         )
 
         val info = SysFsInfo
+        println(info)
         val expectedIsPosix = names[info.name]
         assertNotNull(expectedIsPosix, "SysFsInfo.name is not present... Change it back.")
         assertEquals(expectedIsPosix, info.isPosix, info.toString())
