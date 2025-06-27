@@ -127,6 +127,26 @@ class OpenNativeUnitTest {
     }
 
     @Test
+    fun givenOpenR_whenOnlyIsFalse_thenExclDefaultsToMaybeCreate() {
+        val tmp = randomTemp()
+        try {
+            tmp.openR(only = false).use {}
+        } finally {
+            tmp.delete2()
+        }
+    }
+
+    @Test
+    fun givenOpen_whenOpRAndOnlyIsFalse_thenExclDefaultsToMaybeCreate() {
+        val tmp = randomTemp()
+        try {
+            tmp.open(op = 'r', only = false).use {}
+        } finally {
+            tmp.delete2()
+        }
+    }
+
+    @Test
     fun givenFile_whenOpenWindows_thenReadOnlyIsSetAsExpected() {
         val checker = checker
         if (checker !is PermissionChecker.Windows) {
