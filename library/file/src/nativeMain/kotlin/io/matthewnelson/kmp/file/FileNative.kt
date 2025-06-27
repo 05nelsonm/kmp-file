@@ -63,10 +63,11 @@ import kotlin.contracts.contract
  * @param [e] If `true`, will include the `O_CLOEXEC` flag when opening
  *   the file descriptor. For MinGW, this is ignored. Default value `true`.
  * @param [excl] Options for file opening exclusivity. Default value
- *   [OpenExcl.MustExist] (for [op] 'r') or [OpenExcl.MaybeCreate.DEFAULT]
- *   (for [op] 'w' and 'a'). Note that for [op] 'r', when [only] is `true`
- *   this **MUST** be [OpenExcl.MustExist], otherwise an [IllegalArgumentException]
- *   is thrown. When [only] is `false` it may be any other [OpenExcl].
+ *   [OpenExcl.MustExist] (for [op] 'r' when [only] is true) or
+ *   [OpenExcl.MaybeCreate.DEFAULT] (for [op] 'w', 'a', and 'r' when [only]
+ *   is `false`). Note that for [op] 'r', when [only] is `true` this **MUST**
+ *   be [OpenExcl.MustExist]; an [IllegalArgumentException] is thrown if it
+ *   is not. When [only] is `false` it may be any [OpenExcl].
  *
  * @return [CPointer] for a [FILE] stream
  *
@@ -89,7 +90,7 @@ public fun File.open(
     only: Boolean = true,
     b: Boolean = true,
     e: Boolean = true,
-    excl: OpenExcl = if (op == 'r') OpenExcl.MustExist else OpenExcl.MaybeCreate.DEFAULT,
+    excl: OpenExcl = if (op == 'r' && only) OpenExcl.MustExist else OpenExcl.MaybeCreate.DEFAULT,
 ): CPointer<FILE> = when (op) {
     'r' -> openR(only, b, e, excl)
     'w' -> openW(only, b, e, excl)
@@ -115,9 +116,10 @@ public fun File.open(
  * @param [e] If `true`, will include the `O_CLOEXEC` flag when opening
  *   the file descriptor. For MinGW, this is ignored. Default value `true`.
  * @param [excl] Options for file opening exclusivity. Default value
- *   [OpenExcl.MustExist]. Note that when [only] is `true` this **MUST**
- *   be [OpenExcl.MustExist], otherwise an [IllegalArgumentException]
- *   is thrown. When [only] is `false` it may be any other [OpenExcl].
+ *   when [only] is true [OpenExcl.MustExist]. Default value when [only]
+ *   is false is [OpenExcl.MaybeCreate.DEFAULT]. Note that when [only] is
+ *   `true` this **MUST** be [OpenExcl.MustExist]; an [IllegalArgumentException]
+ *   is thrown if it is not. When [only] is `false` it may be any [OpenExcl].
  *
  * @return [CPointer] for a [FILE] stream
  *
@@ -139,7 +141,7 @@ public fun File.openR(
     only: Boolean = true,
     b: Boolean = true,
     e: Boolean = true,
-    excl: OpenExcl = OpenExcl.MustExist,
+    excl: OpenExcl = if (only) OpenExcl.MustExist else OpenExcl.MaybeCreate.DEFAULT,
 ): CPointer<FILE> {
     if (only) {
         require(excl is OpenExcl.MustExist) {
