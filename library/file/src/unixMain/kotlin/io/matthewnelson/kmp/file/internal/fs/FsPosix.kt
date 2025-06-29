@@ -17,9 +17,11 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
@@ -90,6 +92,18 @@ internal data object FsPosix: FsNative(info = FsInfo.of(name = "FsPosix", isPosi
         if (mkdir(dir.path, m.convert()).toInt() == 0) return
         if (!mustCreate && errno == EEXIST) return
         throw errnoToIOException(errno, dir)
+    }
+
+    @Throws(IOException::class)
+    internal override fun openRead(file: File): AbstractFileStream {
+        // TODO
+        throw IOException("Not yet implemented")
+    }
+
+    @Throws(IOException::class)
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        // TODO
+        throw IOException("Not yet implemented")
     }
 
     @Throws(IOException::class)

@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
@@ -24,6 +25,7 @@ import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
@@ -203,6 +205,18 @@ internal class FsJsNode private constructor(
 
             throw e
         }
+    }
+
+    // @Throws(IOException::class)
+    internal override fun openRead(file: File): AbstractFileStream {
+        // TODO
+        throw IOException("Not yet implemented")
+    }
+
+    // @Throws(IOException::class)
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        // TODO
+        throw IOException("Not yet implemented")
     }
 
     // @Throws(IOException::class)

@@ -17,9 +17,12 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 
@@ -56,6 +59,12 @@ internal expect sealed class Fs {
     /** See [io.matthewnelson.kmp.file.mkdir2] */
     @Throws(IOException::class)
     internal abstract fun mkdir(dir: File, mode: Mode, mustCreate: Boolean)
+
+    @Throws(IOException::class)
+    internal abstract fun openRead(file: File): AbstractFileStream
+
+    @Throws(IOException::class)
+    internal abstract fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
 
     internal companion object {
         internal fun get(): Fs

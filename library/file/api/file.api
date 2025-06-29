@@ -3,6 +3,11 @@ public final class io/matthewnelson/kmp/file/ANDROID {
 	public static final field SDK_INT Ljava/lang/Integer;
 }
 
+public final class io/matthewnelson/kmp/file/CloseableKt {
+	public static final fun doFinally (Ljava/io/Closeable;Ljava/lang/Throwable;)Ljava/lang/Throwable;
+	public static final fun use (Ljava/io/Closeable;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
 public final class io/matthewnelson/kmp/file/DirectoryNotEmptyException : kotlin/io/FileSystemException {
 	public fun <init> (Ljava/io/File;)V
 }
@@ -12,6 +17,24 @@ public final class io/matthewnelson/kmp/file/Exceptions {
 	public static final fun wrapIO (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)Ljava/io/IOException;
 }
 
+public abstract interface class io/matthewnelson/kmp/file/FileStream : java/io/Closeable {
+	public abstract fun isOpen ()Z
+}
+
+public abstract interface class io/matthewnelson/kmp/file/FileStream$Read : io/matthewnelson/kmp/file/FileStream {
+	public abstract fun pointer ()J
+	public abstract fun read ([B)I
+	public abstract fun read ([BII)I
+	public abstract fun seek (J)J
+	public abstract fun size ()J
+}
+
+public abstract interface class io/matthewnelson/kmp/file/FileStream$Write : io/matthewnelson/kmp/file/FileStream, java/io/Flushable {
+	public abstract fun flush ()V
+	public abstract fun write ([B)V
+	public abstract fun write ([BII)V
+}
+
 public final class io/matthewnelson/kmp/file/FsInfo {
 	public final field isPosix Z
 	public final field name Ljava/lang/String;
@@ -19,6 +42,11 @@ public final class io/matthewnelson/kmp/file/FsInfo {
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/matthewnelson/kmp/file/JvmFileStreamKt {
+	public static final fun asInputStream (Lio/matthewnelson/kmp/file/FileStream$Read;Z)Ljava/io/InputStream;
+	public static final fun asOutputStream (Lio/matthewnelson/kmp/file/FileStream$Write;Z)Ljava/io/OutputStream;
 }
 
 public final class io/matthewnelson/kmp/file/KmpFile {
@@ -52,6 +80,10 @@ public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final fun nameOf (Ljava/io/File;)Ljava/lang/String;
 	public static final fun normalize (Ljava/io/File;)Ljava/io/File;
 	public static final fun normalizedFileOf (Ljava/io/File;)Ljava/io/File;
+	public static final fun openAppending (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;)Lio/matthewnelson/kmp/file/FileStream$Write;
+	public static final fun openRead (Ljava/io/File;)Lio/matthewnelson/kmp/file/FileStream$Read;
+	public static final fun openWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;)Lio/matthewnelson/kmp/file/FileStream$Write;
+	public static final fun openWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Z)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public static final fun parentFileOf (Ljava/io/File;)Ljava/io/File;
 	public static final fun parentPathOf (Ljava/io/File;)Ljava/lang/String;
 	public static final fun pathOf (Ljava/io/File;)Ljava/lang/String;
@@ -59,6 +91,10 @@ public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final fun readUtf8From (Ljava/io/File;)Ljava/lang/String;
 	public static final fun resolve (Ljava/io/File;Ljava/io/File;)Ljava/io/File;
 	public static final fun resolve (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
+	public static final fun useAppending (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun useRead (Ljava/io/File;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun useWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun useWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static final fun writeBytesTo (Ljava/io/File;[B)V
 	public static final fun writeUtf8To (Ljava/io/File;Ljava/lang/String;)V
 }

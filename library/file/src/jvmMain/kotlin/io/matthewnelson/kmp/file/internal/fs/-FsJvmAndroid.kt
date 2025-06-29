@@ -18,19 +18,29 @@
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.ANDROID
+import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
+import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
+import java.io.FileDescriptor
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InterruptedIOException
+import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import kotlin.concurrent.Volatile
 
 /**
  * Android API 21+
@@ -44,6 +54,7 @@ import java.lang.reflect.Method
 internal class FsJvmAndroid private constructor(
     private val os: Os,
     private val const: OsConstants,
+    private val stat: StructStat,
 ): Fs.Jvm(info = FsInfo.of(name = NAME, isPosix = true)) {
 
     private val MODE_MASK = Mode.Mask(
@@ -91,6 +102,18 @@ internal class FsJvmAndroid private constructor(
         }
     }
 
+    @Throws(IOException::class)
+    internal override fun openRead(file: File): AbstractFileStream {
+        val fd = file.open(const.O_RDONLY, OpenExcl.MustExist)
+        return AndroidFileStream(file, fd, canRead = true, canWrite = false)
+    }
+
+    @Throws(IOException::class)
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl)
+        return AndroidFileStream(file, fd, canRead = false, canWrite = true)
+    }
+
     internal companion object {
 
         private const val NAME = "FsJvmAndroid"
@@ -101,7 +124,7 @@ internal class FsJvmAndroid private constructor(
             if (ANDROID.SDK_INT < 21) return null
 
             return try {
-                FsJvmAndroid(Os(), OsConstants())
+                FsJvmAndroid(Os(), OsConstants(), StructStat())
             } catch (t: Throwable) {
                 // Should never happen, but just in case...
                 val b = StringBuilder("KMP-FILE: Failed to load $NAME!")
@@ -118,22 +141,56 @@ internal class FsJvmAndroid private constructor(
         }
     }
 
+    // android.system.Os
     private class Os {
 
         val chmod: Method // chmod(path: String, mode: Int)
+        val close: Method // close(fd: FileDescriptor)
+        val lseek: Method // lseek(fd: FileDescriptor, offset: Long, whence: Int): Long
+        val fstat: Method // fstat(fd: FileDescriptor): StructStat
         val mkdir: Method // mkdir(path: String, mode: Int)
+        val open: Method // open(path: String, flags: Int, mode: Int): FileDescriptor
         val remove: Method // remove(path: String)
+
 
         init {
             val clazz = Class.forName("android.system.Os")
 
             chmod = clazz.getMethod("chmod", String::class.java, Int::class.javaPrimitiveType)
+            close = clazz.getMethod("close", FileDescriptor::class.java)
+            fstat = clazz.getMethod("fstat", FileDescriptor::class.java)
+            lseek = clazz.getMethod("lseek", FileDescriptor::class.java, Long::class.javaPrimitiveType, Int::class.javaPrimitiveType)
             mkdir = clazz.getMethod("mkdir", String::class.java, Int::class.javaPrimitiveType)
+            open = clazz.getMethod("open", String::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
             remove = clazz.getMethod("remove", String::class.java)
         }
     }
 
+    // android.system.StructStat
+    private class StructStat {
+
+        val st_size: Field // Long
+
+        init {
+            val clazz = Class.forName("android.system.StructStat")
+            st_size = clazz.getField("st_size")
+        }
+    }
+
+    // android.system.OsConstants
     private class OsConstants {
+
+        val O_APPEND: Int
+        val O_CLOEXEC: Int
+        val O_CREAT: Int
+        val O_EXCL: Int
+        val O_RDONLY: Int
+        val O_RDWR: Int
+        val O_TRUNC: Int
+        val O_WRONLY: Int
+
+        val SEEK_CUR: Int
+        val SEEK_SET: Int
 
         val S_IRUSR: Int
         val S_IWUSR: Int
@@ -148,6 +205,25 @@ internal class FsJvmAndroid private constructor(
         init {
             val clazz: Class<*> = Class.forName("android.system.OsConstants")
 
+            O_APPEND = clazz.getField("O_APPEND").getInt(null)
+            O_CLOEXEC = if ((ANDROID.SDK_INT ?: 0) >= 27) {
+                clazz.getField("O_CLOEXEC").getInt(null)
+            } else {
+                // TODO: Should be 524288, but need to verify on Android native
+                //  side for multiple API levels, architectures, as well as
+                //  bionic source code.
+                0
+            }
+            O_CREAT = clazz.getField("O_CREAT").getInt(null)
+            O_EXCL = clazz.getField("O_EXCL").getInt(null)
+            O_RDONLY = clazz.getField("O_RDONLY").getInt(null)
+            O_RDWR = clazz.getField("O_RDWR").getInt(null)
+            O_TRUNC = clazz.getField("O_TRUNC").getInt(null)
+            O_WRONLY = clazz.getField("O_WRONLY").getInt(null)
+
+            SEEK_CUR = clazz.getField("SEEK_CUR").getInt(null)
+            SEEK_SET = clazz.getField("SEEK_SET").getInt(null)
+
             S_IRUSR = clazz.getField("S_IRUSR").getInt(null)
             S_IWUSR = clazz.getField("S_IWUSR").getInt(null)
             S_IXUSR = clazz.getField("S_IXUSR").getInt(null)
@@ -160,7 +236,136 @@ internal class FsJvmAndroid private constructor(
         }
     }
 
+    private inner class AndroidFileStream(
+        private val file: File,
+        fd: FileDescriptor,
+        canRead: Boolean,
+        canWrite: Boolean,
+    ): AbstractFileStream(canRead, canWrite) {
+
+        @Volatile
+        private var _fd: FileDescriptor? = fd
+        @Volatile
+        private var _fis: FileInputStream? = if (canRead) FileInputStream(/* fdObj = */ fd) else null
+        @Volatile
+        private var _fos: FileOutputStream? = if (canWrite) FileOutputStream(/* fdObj = */ fd) else null
+        private val closeLock = Any()
+
+        override fun isOpen(): Boolean = _fd != null
+
+        override fun pointer(): Long {
+            if (!canRead) return super.pointer()
+            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            return file.wrapErrnoException {
+                lseek.invoke(null, fd, 0, const.SEEK_CUR) as Long
+            }
+        }
+
+        override fun read(buf: ByteArray, offset: Int, len: Int): Int {
+            if (!canRead) return super.read(buf, offset, len)
+            val fis = synchronized(closeLock) { _fis } ?: throw fileStreamClosed()
+            return fis.read(buf, offset, len)
+        }
+
+        override fun seek(offset: Long): Long {
+            if (!canRead) return super.seek(offset)
+            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            return file.wrapErrnoException {
+                lseek.invoke(null, fd, offset, const.SEEK_SET) as Long
+            }
+        }
+
+        override fun size(): Long {
+            if (!canRead) return super.size()
+            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            return file.wrapErrnoException {
+                val s = fstat.invoke(null, fd)
+                stat.st_size.getLong(s)
+            }
+        }
+
+        override fun flush() {
+            if (!canWrite) return super.flush()
+            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            fd.sync()
+        }
+
+        override fun write(buf: ByteArray, offset: Int, len: Int) {
+            if (!canWrite) return super.write(buf, offset, len)
+            val fos = synchronized(closeLock) { _fos } ?: throw fileStreamClosed()
+            fos.write(buf, offset, len)
+        }
+
+        override fun close() {
+            val (fd, fis, fos) = synchronized(closeLock) {
+                val fd = _fd
+                val fis = _fis
+                val fos = _fos
+                _fd = null
+                _fis = null
+                _fos = null
+                Triple(fd, fis, fos)
+            }
+            if (fd == null) return
+
+            var threw: IOException? = null
+
+            if (fis != null) {
+                try {
+                    fis.close()
+                } catch (e: IOException) {
+                    threw = e
+                }
+            }
+
+            if (fos != null) {
+                try {
+                    fos.close()
+                } catch (e: IOException) {
+                    if (threw == null) {
+                        threw = e
+                    } else {
+                        threw.addSuppressed(e)
+                    }
+                }
+            }
+
+            // Android does not close the underlying FileDescriptor when using it with
+            // File{Input/Output}Stream because we opened it. Ownership lies with us.
+            try {
+                while (true) {
+                    try {
+                        file.wrapErrnoException { close.invoke(null, fd) }
+                        break
+                    } catch (_: InterruptedIOException) {
+                        // EINTR
+                    }
+                }
+            } catch (e: IOException) {
+                if (threw != null) {
+                    e.addSuppressed(threw)
+                }
+                threw = e
+            }
+
+            if (threw != null) throw threw
+        }
+
+        override fun toString(): String = "AndroidFileStream@" + hashCode().toString()
+    }
+
+    private fun File.open(flags: Int, excl: OpenExcl): FileDescriptor {
+        val mode = MODE_MASK.convert(excl._mode)
+        val flags = flags or const.O_CLOEXEC or when (excl) {
+            is OpenExcl.MaybeCreate -> const.O_CREAT
+            is OpenExcl.MustCreate -> const.O_CREAT or const.O_EXCL
+            is OpenExcl.MustExist -> 0
+        }
+        return wrapErrnoException { open.invoke(null, path, flags, mode) as FileDescriptor }
+    }
+
     // android.system.ErrnoException
+    @Throws(IOException::class)
     private inline fun <T: Any?> File.wrapErrnoException(other: File? = null, block: Os.() -> T): T = try {
         block(os)
     } catch (t: Throwable) {
@@ -173,6 +378,8 @@ internal class FsJvmAndroid private constructor(
             m == null -> IOException(c)
             m.contains("EACCES") -> AccessDeniedException(this, other, m)
             m.contains("EEXIST") -> FileAlreadyExistsException(this, other, m)
+            m.contains("EINTR") -> InterruptedIOException(m)
+            m.contains("EINVAL") -> IllegalArgumentException(m)
             m.contains("ENOENT") -> fileNotFoundException(this, null, m)
             m.contains("ENOTDIR") -> NotDirectoryException(this)
             m.contains("ENOTEMPTY") -> DirectoryNotEmptyException(this)

@@ -17,10 +17,12 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.internal.FileAttributes
@@ -162,6 +164,18 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
         }
 
         throw errnoToIOException(errno, dir)
+    }
+
+    @Throws(IOException::class)
+    internal override fun openRead(file: File): AbstractFileStream {
+        // TODO
+        throw IOException("Not yet implemented")
+    }
+
+    @Throws(IOException::class)
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        // TODO
+        throw IOException("Not yet implemented")
     }
 
     @Throws(IOException::class)

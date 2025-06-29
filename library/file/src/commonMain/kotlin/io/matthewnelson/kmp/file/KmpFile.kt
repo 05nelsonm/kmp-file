@@ -394,7 +394,9 @@ public fun File.normalize(): File {
  *
  * @return The resolved [File]
  * */
-public fun File.resolve(relative: File): File = platformResolve(relative)
+public fun File.resolve(relative: File): File {
+    return platformResolve(relative)
+}
 
 /**
  * Resolves the [File] for provided [relative]. If [relative]
@@ -403,7 +405,75 @@ public fun File.resolve(relative: File): File = platformResolve(relative)
  *
  * @return The resolved [File]
  * */
-public fun File.resolve(relative: String): File = resolve(relative.toFile())
+public fun File.resolve(relative: String): File {
+    return resolve(relative.toFile())
+}
+
+/**
+ * TODO
+ * */
+@Throws(IOException::class)
+public fun File.openRead(): FileStream.Read {
+    val s = Fs.get().openRead(this)
+    return FileStreamReadOnly(s)
+}
+
+/**
+ * TODO
+ * */
+@Throws(IOException::class)
+public inline fun <T: Any?> File.useRead(block: (s: FileStream.Read) -> T): T {
+    return openRead().use(block)
+}
+
+/**
+ * TODO
+ * */
+@Throws(IOException::class)
+public inline fun File.openWrite(excl: OpenExcl?): FileStream.Write {
+    return openWrite(excl, appending = false)
+}
+
+/**
+ * TODO
+ * */
+@Throws(IOException::class)
+public fun File.openWrite(excl: OpenExcl?, appending: Boolean): FileStream.Write {
+    val s = Fs.get().openWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT, appending)
+    return FileStreamWriteOnly(s)
+}
+
+/**
+ * TODO
+ * */
+@Throws(IOException::class)
+public inline fun <T: Any?> File.useWrite(excl: OpenExcl?, block: (s: FileStream.Write) -> T): T {
+    return useWrite(excl, appending = false, block)
+}
+
+/**
+ * TODO
+ * */
+@Throws(IOException::class)
+public inline fun <T: Any?> File.useWrite(excl: OpenExcl?, appending: Boolean, block: (s: FileStream.Write) -> T): T {
+    return openWrite(excl, appending).use(block)
+}
+
+/**
+ * TODO
+ * */
+@Throws(IOException::class)
+public inline fun File.openAppending(excl: OpenExcl?): FileStream.Write {
+    return openWrite(excl, appending = true)
+}
+
+/**
+ * TODO
+ * */
+@Throws(IOException::class)
+public inline fun <T: Any?> File.useAppending(excl: OpenExcl?, block: (s: FileStream.Write) -> T): T {
+    return useWrite(excl, appending = true, block)
+}
 
 /**
  * Read the full contents of the file (as bytes).
