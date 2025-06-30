@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("FunctionName", "NOTHING_TO_INLINE")
 
-package io.matthewnelson.kmp.file
+package io.matthewnelson.kmp.file.internal
 
-import kotlin.test.Test
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.convert
+import platform.posix.lseek
 
-actual class FileStreamReadUnitTest: FileStreamReadSharedTest() {
-
-    actual override val checker: PermissionChecker? = permissionChecker()
-
-    @Test
-    actual fun stub() {}
-}
+@ExperimentalForeignApi
+@OptIn(UnsafeNumber::class)
+internal actual inline fun fs_platform_lseek(
+    fd: Int,
+    offset: Long,
+    whence: Int,
+): Long = lseek(fd, offset.convert(), whence).convert()

@@ -35,3 +35,11 @@ internal actual inline fun fs_platform_fwrite(
     buf: CPointer<ByteVar>,
     numBytes: Int,
 ): Int = fwrite(buf, 1u, numBytes.convert(), file).convert()
+
+@ExperimentalForeignApi
+@OptIn(UnsafeNumber::class)
+internal actual inline fun fs_platform_lseek(
+    fd: Int,
+    offset: Long,
+    whence: Int,
+): Long = lseek64(fd, offset.convert(), whence).convert()

@@ -21,7 +21,7 @@ import kotlin.test.Test
 
 actual class FileStreamWriteUnitTest: FileStreamWriteSharedTest() {
 
-    actual override val checker: PermissionChecker? = null // TODO: permissionChecker()
+    actual override val checker: PermissionChecker? = permissionChecker()
 
     @Test
     actual fun stub() {}

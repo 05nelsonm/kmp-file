@@ -139,8 +139,14 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenReadStream_when0LengthRead_thenReturns0() = runTest { tmp ->
-        tmp.writeUtf8("Hello World!")
+        val buf = "Hello World!".encodeToByteArray()
+        tmp.writeBytes(buf)
+
         tmp.testOpen().use { s ->
+            assertEquals(0, s.read(ByteArray(1), 0, 0))
+            assertEquals(0, s.read(ByteArray(0), 0, 0))
+            assertEquals(buf.size, s.read(buf))
+            assertEquals(-1, s.read(buf))
             assertEquals(0, s.read(ByteArray(1), 0, 0))
             assertEquals(0, s.read(ByteArray(0), 0, 0))
         }
@@ -150,6 +156,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     fun givenReadStream_whenEOF_thenSubsequentReadsReturnNegative1() = runTest { tmp ->
         val expected = "Hello World!".encodeToByteArray()
         tmp.writeBytes(expected)
+
         tmp.testOpen().use { s ->
             val buf = ByteArray(expected.size + 10)
             assertEquals(expected.size, s.read(buf))

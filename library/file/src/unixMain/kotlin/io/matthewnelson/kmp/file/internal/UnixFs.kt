@@ -29,6 +29,13 @@ import kotlinx.cinterop.*
 import platform.posix.*
 
 @ExperimentalForeignApi
+internal expect inline fun fs_platform_lseek(
+    fd: Int,
+    offset: Long,
+    whence: Int,
+): Long
+
+@ExperimentalForeignApi
 @Throws(IOException::class)
 internal actual inline fun MemScope.fs_platform_file_size(
     path: Path,

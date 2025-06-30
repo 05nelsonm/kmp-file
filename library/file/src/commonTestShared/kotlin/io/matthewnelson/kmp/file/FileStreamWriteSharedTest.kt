@@ -37,6 +37,13 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
+    fun givenOpenWrite_whenFlush_thenIsFunctional() = runTest { tmp ->
+        tmp.testOpen(null, false).use { s ->
+            s.flush()
+        }
+    }
+
+    @Test
     fun givenOpenWrite_whenExclMustExist_thenThrowsFileNotFoundException() = runTest { tmp ->
         assertFailsWith<FileNotFoundException> {
             tmp.testOpen(excl = OpenExcl.MustExist, false).close()
@@ -68,6 +75,14 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
             s.write("Hello World2!".encodeToByteArray())
         }
         assertEquals("Hello World!Hello World2!", tmp.readUtf8())
+    }
+
+    @Test
+    fun givenOpenWrite_when0LengthWrite_thenDoesNotThrowException() = runTest { tmp ->
+        tmp.testOpen(null, false).use { s ->
+            s.write(ByteArray(0))
+            s.write(ByteArray(1), offset = 0, len = 0)
+        }
     }
 
     @Test

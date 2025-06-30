@@ -22,7 +22,6 @@ import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
-import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
@@ -141,99 +140,15 @@ internal class FsJvmAndroid private constructor(
         }
     }
 
-    // android.system.Os
-    private class Os {
-
-        val chmod: Method // chmod(path: String, mode: Int)
-        val close: Method // close(fd: FileDescriptor)
-        val lseek: Method // lseek(fd: FileDescriptor, offset: Long, whence: Int): Long
-        val fstat: Method // fstat(fd: FileDescriptor): StructStat
-        val mkdir: Method // mkdir(path: String, mode: Int)
-        val open: Method // open(path: String, flags: Int, mode: Int): FileDescriptor
-        val remove: Method // remove(path: String)
-
-
-        init {
-            val clazz = Class.forName("android.system.Os")
-
-            chmod = clazz.getMethod("chmod", String::class.java, Int::class.javaPrimitiveType)
-            close = clazz.getMethod("close", FileDescriptor::class.java)
-            fstat = clazz.getMethod("fstat", FileDescriptor::class.java)
-            lseek = clazz.getMethod("lseek", FileDescriptor::class.java, Long::class.javaPrimitiveType, Int::class.javaPrimitiveType)
-            mkdir = clazz.getMethod("mkdir", String::class.java, Int::class.javaPrimitiveType)
-            open = clazz.getMethod("open", String::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
-            remove = clazz.getMethod("remove", String::class.java)
+    @Throws(IOException::class)
+    private fun File.open(flags: Int, excl: OpenExcl): FileDescriptor {
+        val mode = MODE_MASK.convert(excl._mode)
+        val flags = flags or const.O_CLOEXEC or when (excl) {
+            is OpenExcl.MaybeCreate -> const.O_CREAT
+            is OpenExcl.MustCreate -> const.O_CREAT or const.O_EXCL
+            is OpenExcl.MustExist -> 0
         }
-    }
-
-    // android.system.StructStat
-    private class StructStat {
-
-        val st_size: Field // Long
-
-        init {
-            val clazz = Class.forName("android.system.StructStat")
-            st_size = clazz.getField("st_size")
-        }
-    }
-
-    // android.system.OsConstants
-    private class OsConstants {
-
-        val O_APPEND: Int
-        val O_CLOEXEC: Int
-        val O_CREAT: Int
-        val O_EXCL: Int
-        val O_RDONLY: Int
-        val O_RDWR: Int
-        val O_TRUNC: Int
-        val O_WRONLY: Int
-
-        val SEEK_CUR: Int
-        val SEEK_SET: Int
-
-        val S_IRUSR: Int
-        val S_IWUSR: Int
-        val S_IXUSR: Int
-        val S_IRGRP: Int
-        val S_IWGRP: Int
-        val S_IXGRP: Int
-        val S_IROTH: Int
-        val S_IWOTH: Int
-        val S_IXOTH: Int
-
-        init {
-            val clazz: Class<*> = Class.forName("android.system.OsConstants")
-
-            O_APPEND = clazz.getField("O_APPEND").getInt(null)
-            O_CLOEXEC = if ((ANDROID.SDK_INT ?: 0) >= 27) {
-                clazz.getField("O_CLOEXEC").getInt(null)
-            } else {
-                // TODO: Should be 524288, but need to verify on Android native
-                //  side for multiple API levels, architectures, as well as
-                //  bionic source code.
-                0
-            }
-            O_CREAT = clazz.getField("O_CREAT").getInt(null)
-            O_EXCL = clazz.getField("O_EXCL").getInt(null)
-            O_RDONLY = clazz.getField("O_RDONLY").getInt(null)
-            O_RDWR = clazz.getField("O_RDWR").getInt(null)
-            O_TRUNC = clazz.getField("O_TRUNC").getInt(null)
-            O_WRONLY = clazz.getField("O_WRONLY").getInt(null)
-
-            SEEK_CUR = clazz.getField("SEEK_CUR").getInt(null)
-            SEEK_SET = clazz.getField("SEEK_SET").getInt(null)
-
-            S_IRUSR = clazz.getField("S_IRUSR").getInt(null)
-            S_IWUSR = clazz.getField("S_IWUSR").getInt(null)
-            S_IXUSR = clazz.getField("S_IXUSR").getInt(null)
-            S_IRGRP = clazz.getField("S_IRGRP").getInt(null)
-            S_IWGRP = clazz.getField("S_IWGRP").getInt(null)
-            S_IXGRP = clazz.getField("S_IXGRP").getInt(null)
-            S_IROTH = clazz.getField("S_IROTH").getInt(null)
-            S_IWOTH = clazz.getField("S_IWOTH").getInt(null)
-            S_IXOTH = clazz.getField("S_IXOTH").getInt(null)
-        }
+        return wrapErrnoException { open.invoke(null, path, flags, mode) as FileDescriptor }
     }
 
     private inner class AndroidFileStream(
@@ -354,14 +269,99 @@ internal class FsJvmAndroid private constructor(
         override fun toString(): String = "AndroidFileStream@" + hashCode().toString()
     }
 
-    private fun File.open(flags: Int, excl: OpenExcl): FileDescriptor {
-        val mode = MODE_MASK.convert(excl._mode)
-        val flags = flags or const.O_CLOEXEC or when (excl) {
-            is OpenExcl.MaybeCreate -> const.O_CREAT
-            is OpenExcl.MustCreate -> const.O_CREAT or const.O_EXCL
-            is OpenExcl.MustExist -> 0
+    // android.system.Os
+    private class Os {
+
+        val chmod: Method // chmod(path: String, mode: Int)
+        val close: Method // close(fd: FileDescriptor)
+        val lseek: Method // lseek(fd: FileDescriptor, offset: Long, whence: Int): Long
+        val fstat: Method // fstat(fd: FileDescriptor): StructStat
+        val mkdir: Method // mkdir(path: String, mode: Int)
+        val open: Method // open(path: String, flags: Int, mode: Int): FileDescriptor
+        val remove: Method // remove(path: String)
+
+
+        init {
+            val clazz = Class.forName("android.system.Os")
+
+            chmod = clazz.getMethod("chmod", String::class.java, Int::class.javaPrimitiveType)
+            close = clazz.getMethod("close", FileDescriptor::class.java)
+            fstat = clazz.getMethod("fstat", FileDescriptor::class.java)
+            lseek = clazz.getMethod("lseek", FileDescriptor::class.java, Long::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+            mkdir = clazz.getMethod("mkdir", String::class.java, Int::class.javaPrimitiveType)
+            open = clazz.getMethod("open", String::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+            remove = clazz.getMethod("remove", String::class.java)
         }
-        return wrapErrnoException { open.invoke(null, path, flags, mode) as FileDescriptor }
+    }
+
+    // android.system.OsConstants
+    private class OsConstants {
+
+        val O_APPEND: Int
+        val O_CLOEXEC: Int
+        val O_CREAT: Int
+        val O_EXCL: Int
+        val O_RDONLY: Int
+        val O_RDWR: Int
+        val O_TRUNC: Int
+        val O_WRONLY: Int
+
+        val SEEK_CUR: Int
+        val SEEK_SET: Int
+
+        val S_IRUSR: Int
+        val S_IWUSR: Int
+        val S_IXUSR: Int
+        val S_IRGRP: Int
+        val S_IWGRP: Int
+        val S_IXGRP: Int
+        val S_IROTH: Int
+        val S_IWOTH: Int
+        val S_IXOTH: Int
+
+        init {
+            val clazz = Class.forName("android.system.OsConstants")
+
+            O_APPEND = clazz.getField("O_APPEND").getInt(null)
+            O_CLOEXEC = if ((ANDROID.SDK_INT ?: 0) >= 27) {
+                clazz.getField("O_CLOEXEC").getInt(null)
+            } else {
+                // TODO: Should be 524288, but need to verify on Android native
+                //  side for multiple API levels, architectures, as well as
+                //  bionic source code.
+                0
+            }
+            O_CREAT = clazz.getField("O_CREAT").getInt(null)
+            O_EXCL = clazz.getField("O_EXCL").getInt(null)
+            O_RDONLY = clazz.getField("O_RDONLY").getInt(null)
+            O_RDWR = clazz.getField("O_RDWR").getInt(null)
+            O_TRUNC = clazz.getField("O_TRUNC").getInt(null)
+            O_WRONLY = clazz.getField("O_WRONLY").getInt(null)
+
+            SEEK_CUR = clazz.getField("SEEK_CUR").getInt(null)
+            SEEK_SET = clazz.getField("SEEK_SET").getInt(null)
+
+            S_IRUSR = clazz.getField("S_IRUSR").getInt(null)
+            S_IWUSR = clazz.getField("S_IWUSR").getInt(null)
+            S_IXUSR = clazz.getField("S_IXUSR").getInt(null)
+            S_IRGRP = clazz.getField("S_IRGRP").getInt(null)
+            S_IWGRP = clazz.getField("S_IWGRP").getInt(null)
+            S_IXGRP = clazz.getField("S_IXGRP").getInt(null)
+            S_IROTH = clazz.getField("S_IROTH").getInt(null)
+            S_IWOTH = clazz.getField("S_IWOTH").getInt(null)
+            S_IXOTH = clazz.getField("S_IXOTH").getInt(null)
+        }
+    }
+
+    // android.system.StructStat
+    private class StructStat {
+
+        val st_size: Field // Long
+
+        init {
+            val clazz = Class.forName("android.system.StructStat")
+            st_size = clazz.getField("st_size")
+        }
     }
 
     // android.system.ErrnoException
