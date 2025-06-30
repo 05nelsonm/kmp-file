@@ -41,7 +41,14 @@ public actual sealed interface FileStream: Closeable {
          * TODO
          * */
         @Throws(IOException::class)
-        public actual fun pointer(): Long
+        public actual fun position(): Long
+
+        /**
+         * TODO
+         * @throws [IllegalArgumentException] TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun position(new: Long): Read
 
         /**
          * TODO
@@ -54,13 +61,6 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
-
-        /**
-         * TODO
-         * @throws [IllegalArgumentException] TODO
-         * */
-        @Throws(IOException::class)
-        public actual fun seek(offset: Long): Long
 
         /**
          * TODO
@@ -109,7 +109,7 @@ public fun FileStream.Read.asInputStream(closeParentOnClose: Boolean): InputStre
 
         override fun available(): Int {
             if (isClosed) throw jvmStreamClosed(isInput = true)
-            val avail = stream.size() - stream.pointer()
+            val avail = stream.size() - stream.position()
             if (avail <= 0) return 0
             if (avail > Int.MAX_VALUE) return Int.MAX_VALUE
             return avail.toInt()
@@ -128,8 +128,9 @@ public fun FileStream.Read.asInputStream(closeParentOnClose: Boolean): InputStre
 
         override fun skip(n: Long): Long = try {
             if (isClosed) throw jvmStreamClosed(isInput = true)
-            val posOld = stream.pointer()
-            val posNew = stream.seek(posOld + n)
+            val posOld = stream.position()
+            val posNew = posOld + n
+            stream.position(posNew)
             posNew - posOld
         } catch (e: IllegalArgumentException) {
             throw e.wrapIOException()

@@ -340,10 +340,17 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
 
         override fun isOpen(): Boolean = _ch != null
 
-        override fun pointer(): Long {
-            if (!canRead) return super.pointer()
+        override fun position(): Long {
+            if (!canRead) return super.position()
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
             return ch.position()
+        }
+
+        override fun position(new: Long): FileStream.Read {
+            if (!canRead) return super.position(new)
+            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            ch.position(new)
+            return this
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
@@ -360,12 +367,6 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 total += read
             }
             return total
-        }
-
-        override fun seek(offset: Long): Long {
-            if (!canRead) return super.seek(offset)
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            return ch.position(offset).position()
         }
 
         override fun size(): Long {

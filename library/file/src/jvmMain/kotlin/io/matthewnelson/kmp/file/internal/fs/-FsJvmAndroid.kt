@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
@@ -168,26 +169,27 @@ internal class FsJvmAndroid private constructor(
 
         override fun isOpen(): Boolean = _fd != null
 
-        override fun pointer(): Long {
-            if (!canRead) return super.pointer()
+        override fun position(): Long {
+            if (!canRead) return super.position()
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
             return file.wrapErrnoException {
                 lseek.invoke(null, fd, 0, const.SEEK_CUR) as Long
             }
         }
 
+        override fun position(new: Long): FileStream.Read {
+            if (!canRead) return super.position(new)
+            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            file.wrapErrnoException {
+                lseek.invoke(null, fd, new, const.SEEK_SET)
+            }
+            return this
+        }
+
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
             if (!canRead) return super.read(buf, offset, len)
             val fis = synchronized(closeLock) { _fis } ?: throw fileStreamClosed()
             return fis.read(buf, offset, len)
-        }
-
-        override fun seek(offset: Long): Long {
-            if (!canRead) return super.seek(offset)
-            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
-            return file.wrapErrnoException {
-                lseek.invoke(null, fd, offset, const.SEEK_SET) as Long
-            }
         }
 
         override fun size(): Long {

@@ -36,7 +36,14 @@ public actual sealed interface FileStream: Closeable {
          * TODO
          * */
         @Throws(IOException::class)
-        public actual fun pointer(): Long
+        public actual fun position(): Long
+
+        /**
+         * TODO
+         * @throws [IllegalArgumentException] TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun position(new: Long): Read
 
         /**
          * TODO
@@ -49,13 +56,6 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
-
-        /**
-         * TODO
-         * @throws [IllegalArgumentException] TODO
-         * */
-        @Throws(IOException::class)
-        public actual fun seek(offset: Long): Long
 
         /**
          * TODO

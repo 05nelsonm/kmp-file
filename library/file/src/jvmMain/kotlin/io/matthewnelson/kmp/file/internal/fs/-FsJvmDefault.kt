@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
+import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
@@ -203,24 +204,24 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
         override fun isOpen(): Boolean = _raf != null
 
-        override fun pointer(): Long {
-            if (!canRead) return super.pointer()
+        override fun position(): Long {
+            if (!canRead) return super.position()
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
             return raf.filePointer
+        }
+
+        override fun position(new: Long): FileStream.Read {
+            if (!canRead) return super.position(new)
+            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            require(new >= 0) { "offset[$new] < 0" }
+            raf.seek(new)
+            return this
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
             if (!canRead) return super.read(buf, offset, len)
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
             return raf.read(buf, offset, len)
-        }
-
-        override fun seek(offset: Long): Long {
-            if (!canRead) return super.seek(offset)
-            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            require(offset >= 0) { "offset[$offset] < 0" }
-            raf.seek(offset)
-            return offset
         }
 
         override fun size(): Long {

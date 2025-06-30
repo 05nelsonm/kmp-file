@@ -16,6 +16,7 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.fileStreamClosed
@@ -48,12 +49,20 @@ internal class PosixFileStream(
 
     override fun isOpen(): Boolean = _fd.value != null
 
-    override fun pointer(): Long {
-        if (!canRead) return super.pointer()
+    override fun position(): Long {
+        if (!canRead) return super.position()
         val fd = _fd.value ?: throw fileStreamClosed()
         val ret = fs_platform_lseek(fd, 0, SEEK_CUR)
         if (ret == -1L) throw errnoToIOException(errno)
         return ret
+    }
+
+    override fun position(new: Long): FileStream.Read {
+        if (!canRead) return super.position(new)
+        val fd = _fd.value ?: throw fileStreamClosed()
+        val ret = fs_platform_lseek(fd, new, SEEK_SET)
+        if (ret == -1L) throw errnoToIllegalArgumentOrIOException(errno, null)
+        return this
     }
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
@@ -78,14 +87,6 @@ internal class PosixFileStream(
 
         if (ret < 0) throw errnoToIOException(errno)
         if (ret == 0) return -1 // EOF
-        return ret
-    }
-
-    override fun seek(offset: Long): Long {
-        if (!canRead) return super.seek(offset)
-        val fd = _fd.value ?: throw fileStreamClosed()
-        val ret = fs_platform_lseek(fd, offset, SEEK_SET)
-        if (ret == -1L) throw errnoToIllegalArgumentOrIOException(errno, null)
         return ret
     }
 

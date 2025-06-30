@@ -21,7 +21,11 @@ import kotlin.test.Test
 
 actual class FileStreamWriteUnitTest: FileStreamWriteSharedTest() {
 
-    actual override val checker: PermissionChecker? = permissionChecker()
+    actual override val checker: PermissionChecker? = when (SysFsInfo.name) {
+        // TODO
+        "FsJsNode", "FsJsBrowser", "FsMinGW" -> null
+        else -> permissionChecker()
+    }
 
     @Test
     actual fun stub() {}

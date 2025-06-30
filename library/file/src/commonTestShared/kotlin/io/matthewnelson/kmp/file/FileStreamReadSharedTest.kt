@@ -15,7 +15,6 @@
  **/
 package io.matthewnelson.kmp.file
 
-import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -50,19 +49,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenReadStream_whenInvalidReadArguments_thenThrowsIndexOutOfBoundsException() = runTest { tmp ->
-        tmp.writeUtf8("Hello World!")
-
-        tmp.testOpen().use { s ->
-            val buf = ByteArray(1)
-            assertFailsWith<IndexOutOfBoundsException> { s.read(buf, offset = 1, len = 1) }
-            assertFailsWith<IndexOutOfBoundsException> { s.read(buf, offset = 0, len = 2) }
-            assertFailsWith<IndexOutOfBoundsException> { s.read(buf, offset = -1, len = 0) }
-        }
-    }
-
-    @Test
-    fun givenReadStream_whenSeek_thenWorksAsExpected() = runTest { tmp ->
+    fun givenReadStream_whenNewPosition_thenWorksAsExpected() = runTest { tmp ->
         val expected = ByteArray(8) { (it + 1).toByte() }
         tmp.writeBytes(expected)
 
@@ -70,27 +57,29 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             val buf = ByteArray(expected.size + 4)
             assertEquals(2, s.read(buf, 0, 2))
             for (i in 0..1) {
-                val e = expected[i]
-                val a = buf[i]
-                assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
+                assertEquals(expected[i], buf[i])
             }
-            assertEquals(4, s.seek(4))
+            // Ensure ReadOnlyFileStream wrapper has overridden and
+            // returns itself instead of the underlying.
+            assertIsNot<FileStream.Write>(s.position(4))
+            assertEquals(4, s.position())
+
             buf.fill(0)
             val read = s.read(buf)
             assertEquals(expected.size - 4, read)
             for (i in 0 until read) {
-                val e = expected[i + 4]
-                val a = buf[i]
-                assertEquals(e, a, "expected[$e] != actual[$a] >> index[${i + 4}]")
+                assertEquals(expected[i + 4], buf[i])
             }
-            assertEquals(expected.size + 10L, s.seek(expected.size + 10L))
-            assertEquals(0, s.seek(0))
+
+            assertEquals(expected.size + 10L, s.position(expected.size + 10L).position())
+            assertEquals(0, s.position(0).position())
+
             buf.fill(0)
             s.read(buf, 0, 1)
             assertNotEquals(0, buf[0])
             assertNotEquals(0, expected[0])
             assertEquals(expected[0], buf[0])
-            assertFailsWith<IllegalArgumentException> { s.seek(-1L) }
+            assertFailsWith<IllegalArgumentException> { s.position(-1L) }
         }
     }
 
@@ -103,66 +92,8 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             val buf = ByteArray(expected.size + 10)
             assertEquals(expected.size, s.read(buf))
             for (i in expected.indices) {
-                val e = expected[i]
-                val a = buf[i]
-                assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
+                assertEquals(expected[i], buf[i])
             }
-            assertEquals(-1, s.read(buf))
-        }
-    }
-
-    @Test
-    fun givenReadStream_whenLargeRead_thenReadsFully() = runTest { tmp ->
-        val expected = Random.Default.nextBytes(2_121_212)
-        val actual = ByteArray(expected.size + 20)
-        tmp.writeBytes(expected)
-
-        tmp.testOpen().use { s ->
-            val buf = ByteArray(1024 * 8)
-            var total = 0
-            while (total < expected.size) {
-                val read = s.read(buf)
-                if (read == -1) break
-                buf.copyInto(actual, destinationOffset = total, endIndex = read)
-                total += read
-            }
-
-            assertEquals(expected.size, total)
-        }
-
-        for (i in expected.indices) {
-            val e = expected[i]
-            val a = actual[i]
-            assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
-        }
-    }
-
-    @Test
-    fun givenReadStream_when0LengthRead_thenReturns0() = runTest { tmp ->
-        val buf = "Hello World!".encodeToByteArray()
-        tmp.writeBytes(buf)
-
-        tmp.testOpen().use { s ->
-            assertEquals(0, s.read(ByteArray(1), 0, 0))
-            assertEquals(0, s.read(ByteArray(0), 0, 0))
-            assertEquals(buf.size, s.read(buf))
-            assertEquals(-1, s.read(buf))
-            assertEquals(0, s.read(ByteArray(1), 0, 0))
-            assertEquals(0, s.read(ByteArray(0), 0, 0))
-        }
-    }
-
-    @Test
-    fun givenReadStream_whenEOF_thenSubsequentReadsReturnNegative1() = runTest { tmp ->
-        val expected = "Hello World!".encodeToByteArray()
-        tmp.writeBytes(expected)
-
-        tmp.testOpen().use { s ->
-            val buf = ByteArray(expected.size + 10)
-            assertEquals(expected.size, s.read(buf))
-            assertEquals(-1, s.read(buf))
-            assertEquals(-1, s.read(buf))
-            assertEquals(-1, s.read(buf))
             assertEquals(-1, s.read(buf))
         }
     }

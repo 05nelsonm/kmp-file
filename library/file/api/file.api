@@ -22,10 +22,10 @@ public abstract interface class io/matthewnelson/kmp/file/FileStream : java/io/C
 }
 
 public abstract interface class io/matthewnelson/kmp/file/FileStream$Read : io/matthewnelson/kmp/file/FileStream {
-	public abstract fun pointer ()J
+	public abstract fun position ()J
+	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream$Read;
 	public abstract fun read ([B)I
 	public abstract fun read ([BII)I
-	public abstract fun seek (J)J
 	public abstract fun size ()J
 }
 

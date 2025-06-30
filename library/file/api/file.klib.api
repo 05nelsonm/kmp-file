@@ -22,10 +22,10 @@ sealed interface io.matthewnelson.kmp.file/FileStream : io.matthewnelson.kmp.fil
     abstract fun isOpen(): kotlin/Boolean // io.matthewnelson.kmp.file/FileStream.isOpen|isOpen(){}[0]
 
     sealed interface Read : io.matthewnelson.kmp.file/FileStream { // io.matthewnelson.kmp.file/FileStream.Read|null[0]
-        abstract fun pointer(): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.pointer|pointer(){}[0]
+        abstract fun position(): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.position|position(){}[0]
+        abstract fun position(kotlin/Long): io.matthewnelson.kmp.file/FileStream.Read // io.matthewnelson.kmp.file/FileStream.Read.position|position(kotlin.Long){}[0]
         abstract fun read(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/FileStream.Read.read|read(kotlin.ByteArray){}[0]
         abstract fun read(kotlin/ByteArray, kotlin/Int, kotlin/Int): kotlin/Int // io.matthewnelson.kmp.file/FileStream.Read.read|read(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
-        abstract fun seek(kotlin/Long): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.seek|seek(kotlin.Long){}[0]
         abstract fun size(): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.size|size(){}[0]
     }
 

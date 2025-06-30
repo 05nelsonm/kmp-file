@@ -33,7 +33,14 @@ public expect sealed interface FileStream: Closeable {
     public sealed interface Read: FileStream {
 
         @Throws(IOException::class)
-        public fun pointer(): Long
+        public fun position(): Long
+
+        /**
+         * TODO
+         * @throws [IllegalArgumentException] TODO
+         * */
+        @Throws(IOException::class)
+        public fun position(new: Long): Read
 
         /**
          * TODO
@@ -46,13 +53,6 @@ public expect sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public fun read(buf: ByteArray, offset: Int, len: Int): Int
-
-        /**
-         * TODO
-         * @throws [IllegalArgumentException] TODO
-         * */
-        @Throws(IOException::class)
-        public fun seek(offset: Long): Long
 
         /**
          * TODO
@@ -94,6 +94,7 @@ internal class FileStreamReadOnly internal constructor(private val s: AbstractFi
         check(s.canRead) { "AbstractFileStream.canRead != true" }
         check(!s.canWrite) { "AbstractFileStream.canWrite != false" }
     }
+    override fun position(new: Long): FileStream.Read { s.position(new); return this }
     override fun equals(other: Any?): Boolean = other is FileStreamReadOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
     override fun toString(): String = s.toString()
@@ -123,13 +124,13 @@ internal abstract class AbstractFileStream internal constructor(
     final override fun write(buf: ByteArray) { write(buf, 0, buf.size) }
 
     // Read
-    override fun pointer(): Long {
+    override fun position(): Long {
+        throw IllegalStateException("FileStream is O_WRONLY")
+    }
+    override fun position(new: Long): FileStream.Read {
         throw IllegalStateException("FileStream is O_WRONLY")
     }
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-        throw IllegalStateException("FileStream is O_WRONLY")
-    }
-    override fun seek(offset: Long): Long {
         throw IllegalStateException("FileStream is O_WRONLY")
     }
     override fun size(): Long {
