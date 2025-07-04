@@ -84,6 +84,7 @@ internal class MinGWFileStream(
     override fun position(new: Long): FileStream.Read {
         if (!canRead) return super.position(new)
         val h = _h.value ?: throw fileStreamClosed()
+        require(new >= 0L) { "new < 0" }
 
         val distance = cValue<LARGE_INTEGER> {
             LowPart = new.toInt().convert()

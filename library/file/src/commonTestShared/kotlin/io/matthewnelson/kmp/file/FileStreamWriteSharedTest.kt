@@ -72,7 +72,9 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     fun givenOpenWrite_whenAppendingTrue_thenIsNotTruncated() = runTest { tmp ->
         tmp.writeUtf8("Hello World!")
         tmp.testOpen(null, appending = true).use { s ->
-            s.write("Hello World2!".encodeToByteArray())
+            val buf = "Hello World2!".encodeToByteArray()
+            s.write(buf, offset = 0, len = buf.size - 2)
+            s.write(buf, offset = buf.size - 2, 2)
         }
         assertEquals("Hello World!Hello World2!", tmp.readUtf8())
     }
