@@ -91,10 +91,6 @@ public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final fun readUtf8From (Ljava/io/File;)Ljava/lang/String;
 	public static final fun resolve (Ljava/io/File;Ljava/io/File;)Ljava/io/File;
 	public static final fun resolve (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
-	public static final fun useAppending (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public static final fun useRead (Ljava/io/File;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public static final fun useWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public static final fun useWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static final fun writeBytesTo (Ljava/io/File;[B)V
 	public static final fun writeUtf8To (Ljava/io/File;Ljava/lang/String;)V
 }

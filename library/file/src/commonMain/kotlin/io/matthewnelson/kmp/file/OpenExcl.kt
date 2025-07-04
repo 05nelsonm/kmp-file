@@ -23,10 +23,7 @@ import kotlin.jvm.JvmField
 import kotlin.jvm.JvmStatic
 
 /**
- * [File] open exclusivity. When supported by the underlying filesystem, operations
- * regarding open exclusivity will be performed atomically. On filesystems such as
- * Windows, some things are unable to be supported. A "best effort" is made in that
- * event.
+ * [File] open exclusivity.
  *
  * @see [MaybeCreate]
  * @see [MustCreate]
