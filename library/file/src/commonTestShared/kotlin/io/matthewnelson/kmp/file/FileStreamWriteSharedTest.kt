@@ -86,6 +86,23 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
+    fun givenOpenWrite_whenOffset_thenWritesAsExpected() = runTest { tmp ->
+        tmp.testOpen(null, false).use { s ->
+            val b = ByteArray(10) { 1.toByte() }
+            b[0] = 0
+            b[1] = 0
+            s.write(b, offset = 2, len = b.size - 2)
+            val read = tmp.readBytes()
+            assertEquals(b.size - 2, read.size)
+            for (i in read.indices) {
+                val e: Byte = 1
+                val a = read[i]
+                assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
+            }
+        }
+    }
+
+    @Test
     fun givenFile_whenOpenWindows_thenReadOnlyIsSetAsExpected() = runTest<PermissionChecker.Windows> { tmp ->
         tmp.testOpen(OpenExcl.MustCreate.of(mode = "400"), appending = false).use { s ->
             assertTrue(isReadOnly(tmp), "is read-only")

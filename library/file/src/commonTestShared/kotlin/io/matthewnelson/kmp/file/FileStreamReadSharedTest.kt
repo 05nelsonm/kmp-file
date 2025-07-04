@@ -57,7 +57,9 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             val buf = ByteArray(expected.size + 4)
             assertEquals(2, s.read(buf, 0, 2))
             for (i in 0..1) {
-                assertEquals(expected[i], buf[i])
+                val e = expected[i]
+                val a = buf[i]
+                assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
             }
             // Ensure ReadOnlyFileStream wrapper has overridden and
             // returns itself instead of the underlying.
@@ -68,7 +70,9 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             val read = s.read(buf)
             assertEquals(expected.size - 4, read)
             for (i in 0 until read) {
-                assertEquals(expected[i + 4], buf[i])
+                val e = expected[i + 4]
+                val a = buf[i]
+                assertEquals(e, a, "expected[$e] != actual[$a] >> index[${i + 4}]")
             }
 
             assertEquals(expected.size + 10L, s.position(expected.size + 10L).position())
@@ -92,9 +96,29 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             val buf = ByteArray(expected.size + 10)
             assertEquals(expected.size, s.read(buf))
             for (i in expected.indices) {
-                assertEquals(expected[i], buf[i])
+                val e = expected[i]
+                val a = buf[i]
+                assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
             }
             assertEquals(-1, s.read(buf))
+        }
+    }
+
+    @Test
+    fun givenReadStream_whenOffset_thenReadsAsExpected() = runTest { tmp ->
+        val b = ByteArray(10) { 1.toByte() }
+        tmp.writeBytes(b)
+        b.fill(0)
+
+        tmp.testOpen().use { s ->
+            s.read(b, offset = 2, len = b.size - 2)
+            assertEquals(0, b[0])
+            assertEquals(0, b[1])
+            for (i in 2 until b.size) {
+                val e: Byte = 1
+                val a = b[i]
+                assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
+            }
         }
     }
 }

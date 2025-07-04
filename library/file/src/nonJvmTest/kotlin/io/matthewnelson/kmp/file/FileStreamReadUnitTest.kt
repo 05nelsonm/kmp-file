@@ -23,7 +23,7 @@ actual class FileStreamReadUnitTest: FileStreamReadSharedTest() {
 
     actual override val checker: PermissionChecker? = when (SysFsInfo.name) {
         // TODO
-        "FsJsNode", "FsJsBrowser", "FsMinGW" -> null
+        "FsJsNode", "FsJsBrowser" -> null
         else -> permissionChecker()
     }
 

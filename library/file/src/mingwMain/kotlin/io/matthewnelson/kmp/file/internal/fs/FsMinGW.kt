@@ -26,6 +26,7 @@ import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.internal.FileAttributes
+import io.matthewnelson.kmp.file.internal.MinGWFileStream
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.commonDriveOrNull
@@ -37,6 +38,7 @@ import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
@@ -55,10 +57,25 @@ import platform.posix.free
 import platform.posix.mkdir
 import platform.posix.remove
 import platform.posix.rmdir
+import platform.windows.CREATE_NEW
+import platform.windows.CreateFileA
 import platform.windows.FALSE
+import platform.windows.FILE_ATTRIBUTE_NORMAL
 import platform.windows.FILE_ATTRIBUTE_READONLY
+import platform.windows.FILE_END
+import platform.windows.FILE_SHARE_DELETE
+import platform.windows.FILE_SHARE_READ
+import platform.windows.FILE_SHARE_WRITE
+import platform.windows.GENERIC_READ
+import platform.windows.GENERIC_WRITE
+import platform.windows.INVALID_HANDLE_VALUE
+import platform.windows.INVALID_SET_FILE_POINTER
+import platform.windows.OPEN_ALWAYS
+import platform.windows.OPEN_EXISTING
 import platform.windows.PathIsRelativeA
+import platform.windows.SetEndOfFile
 import platform.windows.SetFileAttributesA
+import platform.windows.SetFilePointer
 
 @OptIn(ExperimentalForeignApi::class)
 internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosix = false)) {
@@ -168,14 +185,79 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
     @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
-        // TODO
-        throw IOException("Not yet implemented")
+        val handle = CreateFileA(
+            lpFileName = file.path,
+            dwDesiredAccess = GENERIC_READ.convert(),
+            dwShareMode = (FILE_SHARE_DELETE or FILE_SHARE_READ or FILE_SHARE_WRITE).convert(),
+            lpSecurityAttributes = null,
+            dwCreationDisposition = OPEN_EXISTING.convert(),
+            dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL.convert(),
+            hTemplateFile = null,
+        )
+        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
+        return MinGWFileStream(handle, canRead = true, canWrite = false)
     }
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        // TODO
-        throw IOException("Not yet implemented")
+        val disposition = when (excl) {
+            is OpenExcl.MaybeCreate -> OPEN_ALWAYS
+            is OpenExcl.MustCreate -> CREATE_NEW
+            is OpenExcl.MustExist -> OPEN_EXISTING
+        }
+
+        var attributes = FILE_ATTRIBUTE_NORMAL
+        if (!excl._mode.containsOwnerWriteAccess) {
+            attributes = attributes or FILE_ATTRIBUTE_READONLY
+        }
+
+        val handle = CreateFileA(
+            lpFileName = file.path,
+            dwDesiredAccess = GENERIC_WRITE.convert(),
+            dwShareMode = (FILE_SHARE_DELETE or FILE_SHARE_READ or FILE_SHARE_WRITE).convert(),
+            lpSecurityAttributes = null,
+            dwCreationDisposition = disposition.convert(),
+            dwFlagsAndAttributes = attributes.convert(),
+            hTemplateFile = null,
+        )
+        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
+
+        val stream = MinGWFileStream(handle, canRead = false, canWrite = true)
+
+        val doFailure = when {
+            // No need to do anything, file was just created.
+            excl is OpenExcl.MustCreate -> false
+
+            // Need to ensure pointer is at the end of the file
+            appending -> {
+                val ret = SetFilePointer(
+                    hFile = handle,
+                    lDistanceToMove = 0,
+                    lpDistanceToMoveHigh = null,
+                    dwMoveMethod = FILE_END.convert()
+                )
+                ret == INVALID_SET_FILE_POINTER
+            }
+
+            // Truncate if not already
+            else -> {
+                val ret = SetEndOfFile(handle)
+                ret == FALSE
+            }
+        }
+
+        if (doFailure) {
+            val e = lastErrorToIOException(file)
+            try {
+                stream.close()
+            } catch (ee: IOException) {
+                e.addSuppressed(ee)
+            }
+            // TODO: delete file if it was just created
+            throw e
+        }
+
+        return stream
     }
 
     @Throws(IOException::class)

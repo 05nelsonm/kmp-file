@@ -32,6 +32,9 @@ public expect sealed interface FileStream: Closeable {
      * */
     public sealed interface Read: FileStream {
 
+        /**
+         * TODO
+         * */
         @Throws(IOException::class)
         public fun position(): Long
 
