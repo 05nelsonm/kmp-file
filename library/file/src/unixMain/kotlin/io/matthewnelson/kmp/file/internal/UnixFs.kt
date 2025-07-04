@@ -22,7 +22,7 @@ import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
-import io.matthewnelson.kmp.file.internal.fs.FsPosix.MODE_MASK
+import io.matthewnelson.kmp.file.internal.fs.FsUnix.MODE_MASK
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.*

@@ -26,7 +26,7 @@ import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.Path
-import io.matthewnelson.kmp.file.internal.PosixFileStream
+import io.matthewnelson.kmp.file.internal.UnixFileStream
 import io.matthewnelson.kmp.file.internal.errnoToIllegalArgumentOrIOException
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
 import io.matthewnelson.kmp.file.path
@@ -61,7 +61,7 @@ import platform.posix.realpath
 import platform.posix.remove
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
-internal data object FsPosix: FsNative(info = FsInfo.of(name = "FsPosix", isPosix = true)) {
+internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix = true)) {
 
     internal val MODE_MASK: Mode.Mask = Mode.Mask(
         S_IRUSR = S_IRUSR,
@@ -107,14 +107,14 @@ internal data object FsPosix: FsNative(info = FsInfo.of(name = "FsPosix", isPosi
     @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = file.open(O_RDONLY, OpenExcl.MustExist)
-        return PosixFileStream(fd, canRead = true, canWrite = false)
+        return UnixFileStream(fd, canRead = true, canWrite = false)
     }
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
         val flags = O_WRONLY or (if (appending) O_APPEND else O_TRUNC)
         val fd = file.open(flags, excl)
-        return PosixFileStream(fd, canRead = false, canWrite = true)
+        return UnixFileStream(fd, canRead = false, canWrite = true)
     }
 
     @Throws(IOException::class)

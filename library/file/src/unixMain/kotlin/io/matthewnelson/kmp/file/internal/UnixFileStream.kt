@@ -37,7 +37,7 @@ import platform.posix.stat
 import kotlin.concurrent.AtomicReference
 
 @OptIn(ExperimentalForeignApi::class)
-internal class PosixFileStream(
+internal class UnixFileStream(
     fd: Int,
     canRead: Boolean,
     canWrite: Boolean,
@@ -143,5 +143,5 @@ internal class PosixFileStream(
         throw errnoToIOException(errno)
     }
 
-    override fun toString(): String = "PosixFileStream@" + hashCode().toString()
+    override fun toString(): String = "UnixFileStream@" + hashCode().toString()
 }

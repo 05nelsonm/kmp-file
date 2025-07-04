@@ -21,6 +21,6 @@ import io.matthewnelson.kmp.file.FsInfo
 
 internal actual sealed class FsNative(info: FsInfo): FsNonJvm.Native(info) {
     internal actual companion object {
-        internal actual val INSTANCE: FsNative = FsPosix
+        internal actual val INSTANCE: FsNative = FsUnix
     }
 }
