@@ -126,7 +126,7 @@ internal class UnixFileStream(
                 val ret = ignoreEINTR {
                     platform.posix.write(
                         fd,
-                        pinned.addressOf(offset),
+                        pinned.addressOf(offset + total),
                         (len - total).convert(),
                     ).toInt()
                 }
