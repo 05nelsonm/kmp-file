@@ -17,18 +17,26 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
+import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
+import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
+import java.io.FileOutputStream
+import java.io.RandomAccessFile
+import kotlin.concurrent.Volatile
 
 // The "Default" filesystem implementation, when all else fails. In
 // production, should only ever be used when Android API is 20 or below.
@@ -107,6 +115,142 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
         } catch (t: SecurityException) {
             throw t.toAccessDeniedException(dir)
         }
+    }
+
+    @Throws(IOException::class)
+    internal override fun openRead(file: File): AbstractFileStream {
+        // Android's FileInputStream.skip implementation for API 23 and
+        // below does not allow skipping backwards for some dumb reason.
+        // So, use read-only RandomAccessFile instead.
+        val raf = RandomAccessFile(file, "r")
+        return RandomAccessFileStream(raf, canRead = true, canWrite = false)
+    }
+
+    @Throws(IOException::class)
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        val exists = exists(file)
+
+        when (excl) {
+            is OpenExcl.MaybeCreate -> {}
+            is OpenExcl.MustCreate -> if (exists) throw FileAlreadyExistsException(file)
+            is OpenExcl.MustExist -> if (!exists) throw fileNotFoundException(file, null, null)
+        }
+
+        val fos = FileOutputStream(file, /* append = */ appending)
+
+        run {
+            if (exists) return@run
+            if (excl._mode == Mode.DEFAULT_FILE) return@run
+            if (IsWindows && excl._mode.containsOwnerWriteAccess) return@run
+
+            try {
+                chmod(file, excl._mode, mustExist = true)
+            } catch (e: IOException) {
+                try {
+                    fos.close()
+                } catch (ee: IOException) {
+                    e.addSuppressed(ee)
+                }
+                try {
+                    delete(file, ignoreReadOnly = true, mustExist = true)
+                } catch (ee: IOException) {
+                    e.addSuppressed(ee)
+                }
+                throw e
+            }
+        }
+
+        return WriteOnlyFileStream(fos)
+    }
+
+    private class WriteOnlyFileStream(fos: FileOutputStream): AbstractFileStream(canRead = false, canWrite = true) {
+
+        @Volatile
+        private var _fos: FileOutputStream? = fos
+        private val closeLock = Any()
+
+        override fun isOpen(): Boolean = _fos != null
+
+        override fun flush() {
+            val fos = synchronized(closeLock) { _fos } ?: throw fileStreamClosed()
+            fos.fd.sync()
+        }
+
+        override fun write(buf: ByteArray, offset: Int, len: Int) {
+            val fos = synchronized(closeLock) { _fos } ?: throw fileStreamClosed()
+            fos.write(buf, offset, len)
+        }
+
+        override fun close() {
+            synchronized(closeLock) {
+                val fos = _fos
+                _fos = null
+                fos
+            }?.close()
+        }
+
+        override fun toString(): String = "WriteOnlyFileStream@" + hashCode().toString()
+    }
+
+    private class RandomAccessFileStream(
+        raf: RandomAccessFile,
+        canRead: Boolean,
+        canWrite: Boolean,
+    ): AbstractFileStream(canRead = canRead, canWrite = canWrite) {
+
+        @Volatile
+        private var _raf: RandomAccessFile? = raf
+        private val closeLock = Any()
+
+        override fun isOpen(): Boolean = _raf != null
+
+        override fun position(): Long {
+            if (!canRead) return super.position()
+            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            return raf.filePointer
+        }
+
+        override fun position(new: Long): FileStream.Read {
+            if (!canRead) return super.position(new)
+            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            require(new >= 0L) { "offset[$new] < 0" }
+            raf.seek(new)
+            return this
+        }
+
+        override fun read(buf: ByteArray, offset: Int, len: Int): Int {
+            if (!canRead) return super.read(buf, offset, len)
+            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            return raf.read(buf, offset, len)
+        }
+
+        override fun size(): Long {
+            if (!canRead) return super.size()
+            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            return raf.length()
+        }
+
+        override fun flush() {
+            if (!canWrite) return super.flush()
+            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            raf.fd.sync()
+        }
+
+        override fun write(buf: ByteArray, offset: Int, len: Int) {
+            if (!canWrite) return super.write(buf, offset, len)
+            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            raf.write(buf, offset, len)
+        }
+
+        override fun close() {
+            synchronized(closeLock) {
+                val raf = _raf
+                _raf = null
+                raf
+            }?.close()
+        }
+
+        override fun toString(): String = "RandomAccessFileStream@" + hashCode().toString()
     }
 
     internal companion object {

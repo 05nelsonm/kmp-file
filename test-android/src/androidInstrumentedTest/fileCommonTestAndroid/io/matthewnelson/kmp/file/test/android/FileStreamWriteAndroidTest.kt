@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+package io.matthewnelson.kmp.file.test.android
 
-package io.matthewnelson.kmp.file.internal.fs
+import io.matthewnelson.kmp.file.FileStreamWriteJvmSharedTest
+import io.matthewnelson.kmp.file.PermissionChecker
+import kotlin.test.Ignore
+import kotlin.test.Test
 
-import io.matthewnelson.kmp.file.FsInfo
+class FileStreamWriteAndroidTest: FileStreamWriteJvmSharedTest() {
 
-internal actual sealed class FsNative(info: FsInfo): FsNonJvm.Native(info) {
-    internal actual companion object {
-        internal actual val INSTANCE: FsNative = FsUnix
-    }
+    override val checker: PermissionChecker? = androidPermissionChecker()
+
+    @Test
+    @Ignore
+    fun stub() {}
 }

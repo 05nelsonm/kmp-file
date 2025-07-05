@@ -40,7 +40,7 @@ public class FsInfo private constructor(
      *         - NOTE: Implementation is non-operational outside of path resolution
      * - Native:
      *     - Windows: `FsMinGW`
-     *     - Else: `FsPosix`
+     *     - Else: `FsUnix`
      * */
     @JvmField
     public val name: String,

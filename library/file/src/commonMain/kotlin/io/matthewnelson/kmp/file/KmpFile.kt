@@ -147,6 +147,9 @@ public inline val File.path: String get() = getPath()
  * @throws [IOException] If interaction with the filesystem was
  *   necessary to construct the pathname and a failure occurred,
  *   such as a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser
+ *   if interaction with the filesystem is necessary to construct
+ *   the pathname.
  * */
 @JvmName("absolutePath2Of")
 @Throws(IOException::class)
@@ -169,6 +172,9 @@ public fun File.absolutePath2(): String {
  * @throws [IOException] If interaction with the filesystem was
  *   necessary to construct the pathname and a failure occurred,
  *   such as a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser
+ *   if interaction with the filesystem is necessary to construct
+ *   the pathname.
  * */
 @JvmName("absoluteFile2Of")
 @Throws(IOException::class)
@@ -193,6 +199,7 @@ public fun File.absoluteFile2(): File {
  *
  * @throws [IOException] If interaction with the filesystem resulted
  *   in failure, such as a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @Throws(IOException::class)
 @JvmName("canonicalPath2Of")
@@ -217,6 +224,7 @@ public fun File.canonicalPath2(): String {
  *
  * @throws [IOException] If interaction with the filesystem resulted
  *   in failure, such as a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @Throws(IOException::class)
 @JvmName("canonicalFile2Of")
@@ -266,6 +274,7 @@ public fun File.canonicalFile2(): File {
  * @throws [IllegalArgumentException] If [mode] is inappropriate.
  * @throws [IOException] If there was a failure to apply desired permissions such
  *   as non-existence, or a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmOverloads
 @Throws(IOException::class)
@@ -294,6 +303,7 @@ public fun File.chmod2(mode: String, mustExist: Boolean = true): File {
  *
  * @throws [IOException] If there was a failure to delete the [File], such as
  *   a directory not being empty or the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmOverloads
 @Throws(IOException::class)
@@ -309,6 +319,7 @@ public fun File.delete2(ignoreReadOnly: Boolean = false, mustExist: Boolean = fa
  *   by this abstract pathname exists; `false` otherwise.
  *
  * @throws [IOException] If the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @Throws(IOException::class)
 public fun File.exists2(): Boolean {
@@ -336,6 +347,7 @@ public fun File.exists2(): Boolean {
  *   such as its [parentPath] not existing, or its [parentPath] points
  *   to a [File] that is not a directory, or the filesystem threw a
  *   security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmOverloads
 @Throws(IOException::class)
@@ -369,6 +381,7 @@ public fun File.mkdir2(mode: String?, mustCreate: Boolean = false): File {
  * @throws [IOException] If there was a failure to create the directory,
  *   such as a [parentPath] points to a [File] that is not a directory,
  *   or the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmOverloads
 @Throws(IOException::class)
@@ -394,7 +407,9 @@ public fun File.normalize(): File {
  *
  * @return The resolved [File]
  * */
-public fun File.resolve(relative: File): File = platformResolve(relative)
+public fun File.resolve(relative: File): File {
+    return platformResolve(relative)
+}
 
 /**
  * Resolves the [File] for provided [relative]. If [relative]
@@ -403,7 +418,115 @@ public fun File.resolve(relative: File): File = platformResolve(relative)
  *
  * @return The resolved [File]
  * */
-public fun File.resolve(relative: String): File = resolve(relative.toFile())
+public fun File.resolve(relative: String): File {
+    return resolve(relative.toFile())
+}
+
+/**
+ * Opens a [File] for read operations.
+ *
+ * e.g.
+ *
+ *     "/path/to/my/file".toFile().openRead().use { s ->
+ *         // read
+ *     }
+ *
+ * @return A [FileStream.Read] for read-only operations.
+ *
+ * @see [use]
+ *
+ * @throws [IOException] If the [File] does not exist, if the [File] points
+ *   to an existing directory, or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
+ * */
+@Throws(IOException::class)
+public fun File.openRead(): FileStream.Read {
+    val s = Fs.get().openRead(this)
+    return FileStreamReadOnly(s)
+}
+
+/**
+ * Opens a [File] for write operations.
+ *
+ * e.g.
+ *
+ *     "/path/to/my/file".toFile().openWrite(excl = null, false).use { s ->
+ *         // write
+ *     }
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [appending] If `true`, data written to this file will occur at the
+ *   end of the file. If `false`, the file will be truncated if it exists.
+ *
+ * @return A [FileStream.Write] for write-only operations.
+ *
+ * @see [use]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
+ * */
+@Throws(IOException::class)
+public fun File.openWrite(excl: OpenExcl?, appending: Boolean): FileStream.Write {
+    val s = Fs.get().openWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT, appending)
+    return FileStreamWriteOnly(s)
+}
+
+/**
+ * Opens a [File] for write operations. The [File] will be truncated if it
+ * exists.
+ *
+ * e.g.
+ *
+ *     "/path/to/my/file".toFile().openWrite(excl = null).use { s ->
+ *         // write
+ *     }
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ *
+ * @return A [FileStream.Write] for write-only operations.
+ *
+ * @see [use]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
+ * */
+@Throws(IOException::class)
+public inline fun File.openWrite(excl: OpenExcl?): FileStream.Write {
+    return openWrite(excl, appending = false)
+}
+
+/**
+ * Opens a [File] for write operations, appending all new data to the
+ * end of the file.
+ *
+ * e.g.
+ *
+ *     "/path/to/my/file".toFile().openAppending(excl = null).use { s ->
+ *         // write
+ *     }
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ *
+ * @return A [FileStream.Write] for write-only operations.
+ *
+ * @see [use]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
+ * */
+@Throws(IOException::class)
+public inline fun File.openAppending(excl: OpenExcl?): FileStream.Write {
+    return openWrite(excl, appending = true)
+}
 
 /**
  * Read the full contents of the file (as bytes).
@@ -418,6 +541,7 @@ public fun File.resolve(relative: String): File = resolve(relative.toFile())
  * @throws [IOException] If there was a failure to read the [File], such as
  *   its non-existence, not being a regular file, being too large, or the
  *   filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmName("readBytesFrom")
 @Throws(IOException::class)
@@ -436,6 +560,7 @@ public fun File.readBytes(): ByteArray = platformReadBytes()
  * @throws [IOException] If there was a failure to read the [File], such as
  *   its non-existence, not being a regular file, being too large, or the
  *   filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmName("readUtf8From")
 @Throws(IOException::class)
@@ -450,6 +575,7 @@ public fun File.readUtf8(): String = platformReadUtf8()
  *
  * @throws [IOException] If there was a failure to write the [File], such as
  *   the thread being interrupted, or the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmName("writeBytesTo")
 @Throws(IOException::class)
@@ -464,6 +590,7 @@ public fun File.writeBytes(array: ByteArray) { platformWriteBytes(array) }
  *
  * @throws [IOException] If there was a failure to write the [File], such as
  *   the thread being interrupted, or the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmName("writeUtf8To")
 @Throws(IOException::class)

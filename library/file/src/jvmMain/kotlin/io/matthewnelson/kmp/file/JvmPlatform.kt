@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file
 
+public actual typealias Closeable = java.io.Closeable
 public actual typealias File = java.io.File
 
 public actual typealias IOException = java.io.IOException

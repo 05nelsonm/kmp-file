@@ -15,12 +15,24 @@
  **/
 @file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
-package io.matthewnelson.kmp.file.internal.fs
+package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.FsInfo
+/**
+ * A source or destination of data (such as a [File]) which can be closed.
+ *
+ * @see [use]
+ * */
+public actual fun interface Closeable {
 
-internal actual sealed class FsNative(info: FsInfo): FsNonJvm.Native(info) {
-    internal actual companion object {
-        internal actual val INSTANCE: FsNative = FsUnix
-    }
+    /**
+     * Closes the resource releasing any system resources that may
+     * be allocated to this [Closeable]. Subsequent invocations
+     * do nothing.
+     *
+     * @see [use]
+     *
+     * @throws [IOException] If an I/O error occurs.
+     * */
+    @Throws(IOException::class)
+    public actual fun close()
 }

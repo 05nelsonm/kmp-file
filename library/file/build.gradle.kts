@@ -21,6 +21,12 @@ private val testConfig = TestConfigInject()
 
 kmpConfiguration {
     configureShared(java9ModuleName = "io.matthewnelson.kmp.file", publish = true) {
+        jvm {
+            sourceSetTest {
+                kotlin.srcDir("src/jvmTestShared/kotlin")
+            }
+        }
+
         common {
             sourceSetTest {
                 kotlin.srcDir("src/commonTestShared/kotlin")

@@ -37,3 +37,10 @@ internal actual inline fun fileAlreadyExistsException(
     other: File?,
     reason: String?,
 ): FileAlreadyExistsException = FileAlreadyExistsException(file, other, reason)
+
+@Throws(IndexOutOfBoundsException::class)
+internal inline fun ByteArray.checkBounds(offset: Int, len: Int) {
+    if (offset < 0) throw IndexOutOfBoundsException("offset[$offset] < 0")
+    if (len < 0) throw IndexOutOfBoundsException("len[$len] < 0")
+    if (offset > size - len) throw IndexOutOfBoundsException("offset[$offset] > size[$size] - len[$len]")
+}

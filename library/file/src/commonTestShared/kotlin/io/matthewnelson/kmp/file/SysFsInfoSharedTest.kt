@@ -33,7 +33,7 @@ abstract class SysFsInfoSharedTest {
             "FsJsBrowser" to !isWindows,
             "FsJsNode" to !isWindows,
             "FsMinGW" to false,
-            "FsPosix" to true,
+            "FsUnix" to true,
         )
 
         val info = SysFsInfo
