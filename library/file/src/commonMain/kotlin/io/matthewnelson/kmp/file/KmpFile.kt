@@ -455,7 +455,7 @@ public fun File.openRead(): FileStream.Read {
  *     }
  *
  * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
- *   then [OpenExcl.MaybeCreate.DEFAULT] wil be used.
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
  * @param [appending] If `true`, data written to this file will occur at the
  *   end of the file. If `false`, the file will be truncated if it exists.
  *
@@ -485,7 +485,7 @@ public fun File.openWrite(excl: OpenExcl?, appending: Boolean): FileStream.Write
  *     }
  *
  * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
- *   then [OpenExcl.MaybeCreate.DEFAULT] wil be used.
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
  *
  * @return A [FileStream.Write] for write-only operations.
  *
@@ -512,7 +512,7 @@ public inline fun File.openWrite(excl: OpenExcl?): FileStream.Write {
  *     }
  *
  * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
- *   then [OpenExcl.MaybeCreate.DEFAULT] wil be used.
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
  *
  * @return A [FileStream.Write] for write-only operations.
  *
