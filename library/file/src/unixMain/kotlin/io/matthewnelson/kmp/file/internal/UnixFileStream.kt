@@ -104,14 +104,14 @@ internal class UnixFileStream(
     }
 
     override fun flush() {
-        if (!canWrite) super.flush()
+        if (!canWrite) return super.flush()
         val fd = _fd.value ?: throw fileStreamClosed()
         if (fsync(fd) == 0) return
         throw errnoToIOException(errno)
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {
-        if (!canWrite) super.write(buf, offset, len)
+        if (!canWrite) return super.write(buf, offset, len)
         val fd = _fd.value ?: throw fileStreamClosed()
 
         buf.checkBounds(offset, len)

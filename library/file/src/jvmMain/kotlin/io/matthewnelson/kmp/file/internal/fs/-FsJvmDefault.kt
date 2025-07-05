@@ -213,7 +213,7 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
         override fun position(new: Long): FileStream.Read {
             if (!canRead) return super.position(new)
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            require(new >= 0) { "offset[$new] < 0" }
+            require(new >= 0L) { "offset[$new] < 0" }
             raf.seek(new)
             return this
         }

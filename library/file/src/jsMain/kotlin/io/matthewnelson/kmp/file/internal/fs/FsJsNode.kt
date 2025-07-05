@@ -22,13 +22,16 @@ import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errorCodeOrNull
+import io.matthewnelson.kmp.file.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
@@ -209,14 +212,35 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
-        // TODO
-        throw IOException("Not yet implemented")
+        val fd = try {
+            fs.openSync(file.path, fs.constants.O_RDONLY)
+        } catch (t: Throwable) {
+            throw t.toIOException(file)
+        }
+        return JsNodeFileStream(fd, canRead = true, canWrite = false)
     }
 
     // @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        // TODO
-        throw IOException("Not yet implemented")
+        val mode = if (isWindows) {
+            if (excl._mode.containsOwnerWriteAccess) "666" else "444"
+        } else {
+            excl._mode.value
+        }
+        var flags = fs.constants.O_WRONLY
+        flags = flags or if (appending) fs.constants.O_APPEND else fs.constants.O_TRUNC
+        flags = flags or when (excl) {
+            is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
+            is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
+            is OpenExcl.MustExist -> 0
+        }
+
+        val fd = try {
+            fs.openSync(file.path, flags, mode)
+        } catch (t: Throwable) {
+            throw t.toIOException(file)
+        }
+        return JsNodeFileStream(fd, canRead = false, canWrite = true)
     }
 
     // @Throws(IOException::class)
@@ -241,6 +265,121 @@ internal class FsJsNode private constructor(
                 isWindows = os.platform() == "win32",
             )
         }
+    }
+
+    private inner class JsNodeFileStream(
+        fd: Number,
+        canRead: Boolean,
+        canWrite: Boolean,
+    ): AbstractFileStream(canRead, canWrite) {
+
+        private var _position: Long = 0L
+        private var _fd: Number? = fd
+
+        override fun isOpen(): Boolean = _fd != null
+
+        override fun position(): Long {
+            if (!canRead) return super.position()
+            _fd ?: throw fileStreamClosed()
+            return _position
+        }
+
+        override fun position(new: Long): FileStream.Read {
+            if (!canRead) return super.position(new)
+            _fd ?: throw fileStreamClosed()
+            require(new >= 0L) { "new < 0" }
+            _position = new
+            return this
+        }
+
+        override fun read(buf: ByteArray, offset: Int, len: Int): Int {
+            if (!canRead) return super.read(buf, offset, len)
+            val fd = _fd ?: throw fileStreamClosed()
+
+            buf.checkBounds(offset, len)
+            if (buf.isEmpty()) return 0
+            if (len == 0) return 0
+
+            val read = try {
+                fs.readSync(
+                    fd = fd,
+                    buffer = buf,
+                    offset = offset,
+                    length = len,
+                    position = _position.toDouble(),
+                )
+            } catch (t: Throwable) {
+                throw t.toIOException()
+            }
+            if (read == 0) return -1
+            _position += read
+            return read
+        }
+
+        override fun size(): Long {
+            if (!canRead) return super.size()
+            val fd = _fd ?: throw fileStreamClosed()
+            val stat = try {
+                fs.fstatSync(fd)
+            } catch (t: Throwable) {
+                throw t.toIOException()
+            }
+            return stat.size.toLong()
+        }
+
+        override fun flush() {
+            if (!canWrite) return super.flush()
+            val fd = _fd ?: throw fileStreamClosed()
+            if (isWindows) return
+            try {
+                fs.fsyncSync(fd)
+            } catch (t: Throwable) {
+                throw t.toIOException()
+            }
+        }
+
+        override fun write(buf: ByteArray, offset: Int, len: Int) {
+            if (!canWrite) return super.write(buf, offset, len)
+            val fd = _fd ?: throw fileStreamClosed()
+
+            buf.checkBounds(offset, len)
+            if (buf.isEmpty()) return
+            if (len == 0) return
+
+            var total = 0
+            while (total < len) {
+                val pos: Long? = if (canRead) _position + total else null
+
+                val bytesWritten = try {
+                    fs.writeSync(
+                        fd = fd,
+                        buffer = buf,
+                        offset = offset + total,
+                        length = len - total,
+                        position = pos?.toDouble(),
+                    )
+                } catch (t: Throwable) {
+                    throw t.toIOException()
+                }
+
+                if (bytesWritten == 0) throw IOException("write == 0")
+                total += bytesWritten
+            }
+
+            if (canRead) _position += total
+        }
+
+        override fun close() {
+            val fd = _fd ?: return
+            _fd = null
+            try {
+                fs.closeSync(fd)
+            } catch (t: Throwable) {
+                throw t.toIOException()
+            }
+        }
+
+        override fun toString(): String = "JsNodeFileStream@" + hashCode().toString()
     }
 }
 

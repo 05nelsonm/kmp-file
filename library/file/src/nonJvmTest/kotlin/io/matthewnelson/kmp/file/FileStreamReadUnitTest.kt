@@ -21,11 +21,7 @@ import kotlin.test.Test
 
 actual class FileStreamReadUnitTest: FileStreamReadSharedTest() {
 
-    actual override val checker: PermissionChecker? = when (SysFsInfo.name) {
-        // TODO
-        "FsJsNode", "FsJsBrowser" -> null
-        else -> permissionChecker()
-    }
+    actual override val checker: PermissionChecker? = permissionChecker()
 
     @Test
     actual fun stub() {}

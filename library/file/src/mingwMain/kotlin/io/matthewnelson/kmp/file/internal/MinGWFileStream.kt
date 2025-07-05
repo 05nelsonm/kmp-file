@@ -152,14 +152,14 @@ internal class MinGWFileStream(
     }
 
     override fun flush() {
-        if (!canWrite) super.flush()
+        if (!canWrite) return super.flush()
         val h = _h.value ?: throw fileStreamClosed()
         val ret = FlushFileBuffers(hFile = h)
         if (ret == FALSE) throw lastErrorToIOException()
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {
-        if (!canWrite) super.write(buf, offset, len)
+        if (!canWrite) return super.write(buf, offset, len)
         val h = _h.value ?: throw fileStreamClosed()
 
         buf.checkBounds(offset, len)
@@ -177,7 +177,7 @@ internal class MinGWFileStream(
                     val ret = WriteFile(
                         hFile = h,
                         lpBuffer = pinned.addressOf(offset + total).getPointer(this),
-                        nNumberOfBytesToWrite = len.convert(),
+                        nNumberOfBytesToWrite = (len - total).convert(),
                         lpNumberOfBytesWritten = bytesWrite.ptr,
                         lpOverlapped = null,
                     )

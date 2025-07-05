@@ -88,13 +88,13 @@ internal class FsJsBrowser private constructor(
     // @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
         // TODO
-        throw UnsupportedOperationException("mkdir is not supported on $this.")
+        throw UnsupportedOperationException("openRead is not supported on $this.")
     }
 
     // @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
         // TODO
-        throw UnsupportedOperationException("mkdir is not supported on $this.")
+        throw UnsupportedOperationException("openWrite is not supported on $this.")
     }
 
     // @Throws(IOException::class)

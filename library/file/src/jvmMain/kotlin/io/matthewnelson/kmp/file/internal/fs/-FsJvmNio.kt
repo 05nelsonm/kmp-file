@@ -376,13 +376,13 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         }
 
         override fun flush() {
-            if (!canWrite) super.flush()
+            if (!canWrite) return super.flush()
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
             ch.force(true)
         }
 
         override fun write(buf: ByteArray, offset: Int, len: Int) {
-            if (!canWrite) super.write(buf, offset, len)
+            if (!canWrite) return super.write(buf, offset, len)
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
             val bb = ByteBuffer.wrap(buf, offset, len)
             ch.write(bb)
