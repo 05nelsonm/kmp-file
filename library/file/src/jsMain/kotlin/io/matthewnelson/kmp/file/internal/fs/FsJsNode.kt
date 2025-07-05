@@ -33,6 +33,7 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
+import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
 import io.matthewnelson.kmp.file.internal.node.ModuleOs
@@ -222,24 +223,32 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val mode = if (isWindows) {
-            if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-        } else {
-            excl._mode.value
-        }
-        var flags = fs.constants.O_WRONLY
-        flags = flags or if (appending) fs.constants.O_APPEND else fs.constants.O_TRUNC
-        flags = flags or when (excl) {
-            is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
-            is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
-            is OpenExcl.MustExist -> 0
-        }
-
         val fd = try {
-            fs.openSync(file.path, flags, mode)
+            if (isWindows) {
+                var flags = if (appending) "a" else "w"
+                when (excl) {
+                    is OpenExcl.MaybeCreate -> {}
+                    // Windows does not recognize the O_CREAT|O_EXCL combination, so must check non-atomically
+                    is OpenExcl.MustCreate -> flags += "x"
+                    is OpenExcl.MustExist -> if (!exists(file)) throw fileNotFoundException(file, null, null)
+                }
+
+                fs.openSync(file.path, flags, if (excl._mode.containsOwnerWriteAccess) "666" else "444")
+            } else {
+                var flags = fs.constants.O_WRONLY
+                flags = flags or if (appending) fs.constants.O_APPEND else fs.constants.O_TRUNC
+                flags = flags or when (excl) {
+                    is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
+                    is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
+                    is OpenExcl.MustExist -> 0
+                }
+
+                fs.openSync(file.path, flags, excl.mode)
+            }
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
+
         return JsNodeFileStream(fd, canRead = false, canWrite = true)
     }
 

@@ -29,6 +29,7 @@ internal external interface ModuleFs {
     fun mkdirSync(path: Path, options: dynamic): String?
     fun openSync(path: Path, flags: Int): Number
     fun openSync(path: Path, flags: Int, mode: String): Number
+    fun openSync(path: Path, flags: String, mode: String): Number // Windows
     fun readSync(fd: Number, buffer: ByteArray, offset: Int, length: Int, position: Number): Int
     fun readFileSync(path: Path): JsBuffer
     fun realpathSync(path: Path): Path
