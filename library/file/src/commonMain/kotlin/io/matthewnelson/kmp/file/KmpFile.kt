@@ -423,7 +423,20 @@ public fun File.resolve(relative: String): File {
 }
 
 /**
- * TODO
+ * Opens a [File] for read operations.
+ *
+ * e.g.
+ *
+ *     "/path/to/my/file".toFile().openRead().use { s ->
+ *         // read
+ *     }
+ *
+ * @return A [FileStream.Read] for read-only operations.
+ *
+ * @see [use]
+ *
+ * @throws [IOException] If the [File] does not exist, if the [File] points
+ *   to an existing directory, or if the filesystem threw a security exception.
  * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @Throws(IOException::class)
@@ -433,7 +446,26 @@ public fun File.openRead(): FileStream.Read {
 }
 
 /**
- * TODO
+ * Opens a [File] for write operations.
+ *
+ * e.g.
+ *
+ *     "/path/to/my/file".toFile().openWrite(excl = null, false).use { s ->
+ *         // write
+ *     }
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] wil be used.
+ * @param [appending] If `true`, data written to this file will occur at the
+ *   end of the file. If `false`, the file will be truncated if it exists.
+ *
+ * @return A [FileStream.Write] for write-only operations.
+ *
+ * @see [use]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
  * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @Throws(IOException::class)
@@ -443,7 +475,25 @@ public fun File.openWrite(excl: OpenExcl?, appending: Boolean): FileStream.Write
 }
 
 /**
- * TODO
+ * Opens a [File] for write operations. The [File] will be truncated if it
+ * exists.
+ *
+ * e.g.
+ *
+ *     "/path/to/my/file".toFile().openWrite(excl = null).use { s ->
+ *         // write
+ *     }
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] wil be used.
+ *
+ * @return A [FileStream.Write] for write-only operations.
+ *
+ * @see [use]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
  * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @Throws(IOException::class)
@@ -452,7 +502,25 @@ public inline fun File.openWrite(excl: OpenExcl?): FileStream.Write {
 }
 
 /**
- * TODO
+ * Opens a [File] for write operations, appending all new data to the
+ * end of the file.
+ *
+ * e.g.
+ *
+ *     "/path/to/my/file".toFile().openAppending(excl = null).use { s ->
+ *         // write
+ *     }
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] wil be used.
+ *
+ * @return A [FileStream.Write] for write-only operations.
+ *
+ * @see [use]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
  * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @Throws(IOException::class)

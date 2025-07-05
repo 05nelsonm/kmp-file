@@ -228,8 +228,9 @@ internal class FsJsNode private constructor(
                 var flags = if (appending) "a" else "w"
                 when (excl) {
                     is OpenExcl.MaybeCreate -> {}
-                    // Windows does not recognize the O_CREAT|O_EXCL combination, so must check non-atomically
                     is OpenExcl.MustCreate -> flags += "x"
+                    // Windows must check manually because using flag combinations and
+                    // omitting O_CREAT will result in an EINVAL error.
                     is OpenExcl.MustExist -> if (!exists(file)) throw fileNotFoundException(file, null, null)
                 }
 

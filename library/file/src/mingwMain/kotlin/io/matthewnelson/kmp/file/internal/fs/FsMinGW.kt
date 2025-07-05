@@ -200,10 +200,10 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val disposition = when (excl) {
-            is OpenExcl.MaybeCreate -> OPEN_ALWAYS
-            is OpenExcl.MustCreate -> CREATE_NEW
-            is OpenExcl.MustExist -> OPEN_EXISTING
+        val (disposition, deleteOnFailure) = when (excl) {
+            is OpenExcl.MaybeCreate -> OPEN_ALWAYS to !exists(file)
+            is OpenExcl.MustCreate -> CREATE_NEW to true
+            is OpenExcl.MustExist -> OPEN_EXISTING to false
         }
 
         var attributes = FILE_ATTRIBUTE_NORMAL
@@ -234,7 +234,7 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
                     hFile = handle,
                     lDistanceToMove = 0,
                     lpDistanceToMoveHigh = null,
-                    dwMoveMethod = FILE_END.convert()
+                    dwMoveMethod = FILE_END.convert(),
                 )
                 ret == INVALID_SET_FILE_POINTER
             }
@@ -253,7 +253,13 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
             } catch (ee: IOException) {
                 e.addSuppressed(ee)
             }
-            // TODO: delete file if it was just created
+            if (deleteOnFailure) {
+                try {
+                    delete(file, ignoreReadOnly = true, mustExist = true)
+                } catch (ee: IOException) {
+                    e.addSuppressed(ee)
+                }
+            }
             throw e
         }
 

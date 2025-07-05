@@ -22,19 +22,35 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
 /**
- * TODO
+ * A source or destination of data (such as a [File]) which can be closed.
+ *
+ * @see [use]
  * */
 public expect fun interface Closeable {
 
     /**
-     * TODO
+     * Closes the resource releasing any system resources that may
+     * be allocated to this [Closeable]. Subsequent invocations
+     * do nothing.
+     *
+     * @see [use]
+     *
+     * @throws [IOException] If an I/O error occurs.
      * */
     @Throws(IOException::class)
     public fun close()
 }
 
 /**
- * TODO
+ * Executes the given [block] function on this resource and then closes it down
+ * correctly, whether an exception is thrown or not.
+ *
+ * In case if the resource is being closed due to an exception throw within [block],
+ * exceptions thrown by [Closeable.close] will be added as a suppressed exception
+ * instead of being thrown.
+ *
+ * @param [block] The function to process this [Closeable] resource.
+ * @return The result of the [block] function.
  * */
 @OptIn(ExperimentalContracts::class)
 public inline fun <T: Closeable?, R: Any?> T.use(block: (T) -> R): R {

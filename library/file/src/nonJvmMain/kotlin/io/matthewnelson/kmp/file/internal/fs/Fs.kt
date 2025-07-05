@@ -65,9 +65,11 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
     @Throws(IOException::class)
     internal actual abstract fun mkdir(dir: File, mode: Mode, mustCreate: Boolean)
 
+    /** See [io.matthewnelson.kmp.file.openRead] */
     @Throws(IOException::class)
     internal actual abstract fun openRead(file: File): AbstractFileStream
 
+    /** See [io.matthewnelson.kmp.file.openWrite] */
     @Throws(IOException::class)
     internal actual abstract fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
 

@@ -22,7 +22,7 @@ import io.matthewnelson.kmp.file.internal.fs.Fs
 
 /**
  * A File which holds the abstract pathname to a location on the
- * filesystem, be it for a regular file, directory, or symbolic link.
+ * filesystem, be it for a regular file, directory, symbolic link, etc.
  * */
 public actual class File: Comparable<File> {
 

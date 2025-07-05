@@ -21,81 +21,163 @@ import java.io.Flushable
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.Throws
+import kotlin.concurrent.Volatile
 
 /**
- * TODO
+ * A stream for a [File].
+ *
+ * **NOTE:** Implementations are **not** thread-safe.
+ *
+ * @see [use]
+ * @see [openRead]
+ * @see [openWrite]
+ * @see [openAppending]
+ * @see [Read]
+ * @see [Write]
  * */
 public actual sealed interface FileStream: Closeable {
 
     /**
-     * TODO
+     * Checks if this [FileStream] has been closed or not.
+     *
+     * @return `true` if the [FileStream] is still open, `false` otherwise.
      * */
     public actual fun isOpen(): Boolean
 
     /**
-     * TODO
+     * A stream for read operations whereby the source of data is a [File].
+     *
+     * @see [openRead]
+     * @see [asInputStream]
      * */
     public actual sealed interface Read: FileStream {
 
         /**
-         * TODO
+         * Retrieves the current position of the file pointer for which
+         * the next operation will occur at. This is akin to [lseek](https://man7.org/linux/man-pages/man2/lseek.2.html)
+         * using arguments `offset = 0, whence = SEEK_CUR`
+         *
+         * @return The current position of the file pointer.
+         *
+         * @throws [IOException] If the stream is closed.
          * */
         @Throws(IOException::class)
         public actual fun position(): Long
 
         /**
-         * TODO
-         * @throws [IllegalArgumentException] TODO
+         * Sets the current position of the file pointer to [new]. This is
+         * akin to [lseek](https://man7.org/linux/man-pages/man2/lseek.2.html) using
+         * arguments `offset = new, whence = SEEK_SET`.
+         *
+         * @param [new] The new position for the file pointer.
+         *
+         * @return The [Read] stream for chaining operations.
+         *
+         * @throws [IllegalArgumentException] If [new] is less than 0.
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
         public actual fun position(new: Long): Read
 
         /**
-         * TODO
+         * Reads data into the provided array. The [position] is automatically
+         * incremented by the number of bytes read for subsequent operations.
+         *
+         * @param [buf] The array to read data from the file into.
+         *
+         * @return The number of bytes read into [buf], or -1 if no more data
+         *   is available from the [File] for which this [Read] stream belongs.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
         public actual fun read(buf: ByteArray): Int
 
         /**
-         * TODO
+         * Reads data into the provided array. The [position] is automatically
+         * incremented by the number of bytes read for subsequent operations.
+         *
+         * @param [buf] The array to place data into.
+         * @param [offset] The index in [buf] to start placing data.
+         * @param [len] The number of bytes to place into [buf], starting at index [offset].
+         *
+         * @return The number of bytes read into [buf], or -1 if no more data
+         *   is available from the [File] for which this [Read] stream belongs.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * @throws [IndexOutOfBoundsException] If [offset] or [len] are inappropriate.
          * */
         @Throws(IOException::class)
         public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
 
         /**
-         * TODO
+         * The size of the [File] for which this [Read] stream belongs.
+         *
+         * @return The size of the [File].
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
         public actual fun size(): Long
     }
 
     /**
-     * TODO
+     * A stream for write operations to a [File].
+     *
+     * @see [openWrite]
+     * @see [openAppending]
+     * @see [asOutputStream]
      * */
     public actual sealed interface Write: FileStream, Flushable {
 
         /**
-         * TODO
+         * Flushes any buffered data to the device filesystem.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * */
+        @Throws(IOException::class)
+        public actual override fun flush()
+
+        /**
+         * Writes the entire contents of [buf] to the [File] for which this [Write]
+         * stream belongs.
+         *
+         * @param [buf] the array of data to write.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
         public actual fun write(buf: ByteArray)
 
         /**
-         * TODO
+         * Writes [len] number of bytes from [buf], starting at index [offset], to the
+         * [File] for which this [Write] stream belongs.
+         *
+         * @param [buf] The array of data to write.
+         * @param [offset] The index in [buf] to start at when writing data.
+         * @param [len] The number of bytes from [buf], starting at index [offset], to write.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * @throws [IndexOutOfBoundsException] If [offset] or [len] are inappropriate.
          * */
         @Throws(IOException::class)
         public actual fun write(buf: ByteArray, offset: Int, len: Int)
-
-        /**
-         * TODO
-         * */
-        @Throws(IOException::class)
-        public actual override fun flush()
     }
 }
 
 /**
- * TODO
+ * Converts the provided [FileStream.Read] to an [InputStream].
+ *
+ * **NOTE:** [InputStream.skip] supports negative values (skipping backwards).
+ * **NOTE:** [InputStream.available] is implemented.
+ *
+ * @param [closeParentOnClose] If `true`, closure of the [InputStream] will also
+ *   close the [FileStream.Read]. If `false`, only the [InputStream] will be
+ *   closed when [InputStream.close] is called.
+ *
+ * @return An [InputStream].
+ *
+ * @throws [IOException] If [FileStream.isOpen] is `false`.
  * */
 @Throws(IOException::class)
 public fun FileStream.Read.asInputStream(closeParentOnClose: Boolean): InputStream {
@@ -105,10 +187,11 @@ public fun FileStream.Read.asInputStream(closeParentOnClose: Boolean): InputStre
 
     return object : InputStream() {
 
-        var isClosed = false
+        @Volatile
+        private var _closed = false
 
         override fun available(): Int {
-            if (isClosed) throw jvmStreamClosed(isInput = true)
+            if (_closed) throw jvmStreamClosed(isInput = true)
             val avail = stream.size() - stream.position()
             if (avail <= 0) return 0
             if (avail > Int.MAX_VALUE) return Int.MAX_VALUE
@@ -116,18 +199,18 @@ public fun FileStream.Read.asInputStream(closeParentOnClose: Boolean): InputStre
         }
 
         override fun read(): Int {
-            if (isClosed) throw jvmStreamClosed(isInput = true)
+            if (_closed) throw jvmStreamClosed(isInput = true)
             val b = ByteArray(1)
             return if (stream.read(b, 0, 1) == -1) -1 else b[0].toInt() and 0xFF
         }
 
         override fun read(b: ByteArray, off: Int, len: Int): Int {
-            if (isClosed) throw jvmStreamClosed(isInput = true)
+            if (_closed) throw jvmStreamClosed(isInput = true)
             return stream.read(b, off, len)
         }
 
         override fun skip(n: Long): Long = try {
-            if (isClosed) throw jvmStreamClosed(isInput = true)
+            if (_closed) throw jvmStreamClosed(isInput = true)
             val posOld = stream.position()
             val posNew = posOld + n
             stream.position(posNew)
@@ -137,14 +220,20 @@ public fun FileStream.Read.asInputStream(closeParentOnClose: Boolean): InputStre
         }
 
         override fun close() {
-            isClosed = true
+            _closed = true
             if (closeParentOnClose) stream.close()
         }
     }
 }
 
 /**
- * TODO
+ * Converts the provided [FileStream.Write] to an [OutputStream].
+ *
+ * @param [closeParentOnClose] If `true`, closure of the [OutputStream] will also
+ *   close the [FileStream.Write]. If `false`, only the [OutputStream] will be
+ *   closed when [OutputStream.close] is called.
+ *
+ * @throws [IOException] If [FileStream.isOpen] is `false`.
  * */
 @Throws(IOException::class)
 public fun FileStream.Write.asOutputStream(closeParentOnClose: Boolean): OutputStream {
@@ -154,26 +243,27 @@ public fun FileStream.Write.asOutputStream(closeParentOnClose: Boolean): OutputS
 
     return object : OutputStream() {
 
-        var isClosed = false
+        @Volatile
+        private var _closed = false
 
         override fun write(p0: Int) {
-            if (isClosed) throw jvmStreamClosed(isInput = false)
+            if (_closed) throw jvmStreamClosed(isInput = false)
             val b = byteArrayOf(p0.toByte())
             stream.write(b)
         }
 
         override fun write(b: ByteArray, off: Int, len: Int) {
-            if (isClosed) throw jvmStreamClosed(isInput = false)
+            if (_closed) throw jvmStreamClosed(isInput = false)
             stream.write(b, off, len)
         }
 
         override fun flush() {
-            if (isClosed) throw jvmStreamClosed(isInput = false)
+            if (_closed) throw jvmStreamClosed(isInput = false)
             stream.flush()
         }
 
         override fun close() {
-            isClosed = true
+            _closed = true
             if (closeParentOnClose) stream.close()
         }
     }

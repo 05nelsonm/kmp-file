@@ -18,12 +18,20 @@
 package io.matthewnelson.kmp.file
 
 /**
- * TODO
+ * A source or destination of data (such as a [File]) which can be closed.
+ *
+ * @see [use]
  * */
 public actual fun interface Closeable {
 
     /**
-     * TODO
+     * Closes the resource releasing any system resources that may
+     * be allocated to this [Closeable]. Subsequent invocations
+     * do nothing.
+     *
+     * @see [use]
+     *
+     * @throws [IOException] If an I/O error occurs.
      * */
     @Throws(IOException::class)
     public actual fun close()
