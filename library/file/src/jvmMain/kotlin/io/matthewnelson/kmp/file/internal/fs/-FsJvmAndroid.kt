@@ -33,6 +33,7 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
+import io.matthewnelson.kmp.file.toFile
 import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -73,7 +74,7 @@ internal class FsJvmAndroid private constructor(
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
         val m = MODE_MASK.convert(mode)
         try {
-            file.wrapErrnoException { chmod.invoke(null, file.path, m) }
+            wrapErrnoException(file) { chmod.invoke(null, file.path, m) }
         } catch (e: IOException) {
             if (e is FileNotFoundException && !mustExist) return
             throw e
@@ -84,7 +85,7 @@ internal class FsJvmAndroid private constructor(
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
         checkThread()
         try {
-            file.wrapErrnoException { remove.invoke(null, file.path) }
+            wrapErrnoException(file) { remove.invoke(null, file.path) }
         } catch (e: IOException) {
             if (e is FileNotFoundException && !mustExist) return
             throw e
@@ -95,7 +96,7 @@ internal class FsJvmAndroid private constructor(
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
         val m = MODE_MASK.convert(mode)
         try {
-            dir.wrapErrnoException { mkdir.invoke(null, dir.path, m) }
+            wrapErrnoException(dir) { mkdir.invoke(null, dir.path, m) }
         } catch (e: IOException) {
             if (e is FileAlreadyExistsException && !mustCreate) return
             throw e
@@ -105,13 +106,13 @@ internal class FsJvmAndroid private constructor(
     @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = file.open(const.O_RDONLY, OpenExcl.MustExist)
-        return AndroidFileStream(file, fd, canRead = true, canWrite = false)
+        return AndroidFileStream(fd, canRead = true, canWrite = false)
     }
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
         val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl)
-        return AndroidFileStream(file, fd, canRead = false, canWrite = true)
+        return AndroidFileStream(fd, canRead = false, canWrite = true)
     }
 
     internal companion object {
@@ -149,11 +150,10 @@ internal class FsJvmAndroid private constructor(
             is OpenExcl.MustCreate -> const.O_CREAT or const.O_EXCL
             is OpenExcl.MustExist -> 0
         }
-        return wrapErrnoException { open.invoke(null, path, flags, mode) as FileDescriptor }
+        return wrapErrnoException(this) { open.invoke(null, path, flags, mode) as FileDescriptor }
     }
 
     private inner class AndroidFileStream(
-        private val file: File,
         fd: FileDescriptor,
         canRead: Boolean,
         canWrite: Boolean,
@@ -172,7 +172,7 @@ internal class FsJvmAndroid private constructor(
         override fun position(): Long {
             if (!canRead) return super.position()
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
-            return file.wrapErrnoException {
+            return wrapErrnoException(null) {
                 lseek.invoke(null, fd, 0, const.SEEK_CUR) as Long
             }
         }
@@ -180,7 +180,7 @@ internal class FsJvmAndroid private constructor(
         override fun position(new: Long): FileStream.Read {
             if (!canRead) return super.position(new)
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
-            file.wrapErrnoException {
+            wrapErrnoException(null) {
                 lseek.invoke(null, fd, new, const.SEEK_SET)
             }
             return this
@@ -195,7 +195,7 @@ internal class FsJvmAndroid private constructor(
         override fun size(): Long {
             if (!canRead) return super.size()
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
-            return file.wrapErrnoException {
+            return wrapErrnoException(null) {
                 val s = fstat.invoke(null, fd)
                 stat.st_size.getLong(s)
             }
@@ -252,7 +252,7 @@ internal class FsJvmAndroid private constructor(
             try {
                 while (true) {
                     try {
-                        file.wrapErrnoException { close.invoke(null, fd) }
+                        wrapErrnoException(null) { close.invoke(null, fd) }
                         break
                     } catch (_: InterruptedIOException) {
                         // EINTR
@@ -367,25 +367,29 @@ internal class FsJvmAndroid private constructor(
     }
 
     // android.system.ErrnoException
-    @Throws(IOException::class)
-    private inline fun <T: Any?> File.wrapErrnoException(other: File? = null, block: Os.() -> T): T = try {
+    @Throws(IllegalArgumentException::class, IOException::class)
+    private inline fun <T: Any?> wrapErrnoException(file: File?, other: File? = null, block: Os.() -> T): T = try {
         block(os)
     } catch (t: Throwable) {
         val c = if (t is InvocationTargetException) t.cause ?: t else t
         val m = c.message
 
         throw when {
-            t is SecurityException -> t.toAccessDeniedException(this)
-            c is SecurityException -> c.toAccessDeniedException(this)
+            t is SecurityException -> t.toAccessDeniedException(file ?: "".toFile())
+            c is SecurityException -> c.toAccessDeniedException(file ?: "".toFile())
             m == null -> IOException(c)
-            m.contains("EACCES") -> AccessDeniedException(this, other, m)
-            m.contains("EEXIST") -> FileAlreadyExistsException(this, other, m)
             m.contains("EINTR") -> InterruptedIOException(m)
             m.contains("EINVAL") -> IllegalArgumentException(m)
-            m.contains("ENOENT") -> fileNotFoundException(this, null, m)
-            m.contains("ENOTDIR") -> NotDirectoryException(this)
-            m.contains("ENOTEMPTY") -> DirectoryNotEmptyException(this)
-            else -> FileSystemException(this, other, m)
+            m.contains("ENOENT") -> fileNotFoundException(file, null, m)
+            file != null -> when {
+                m.contains("EACCES") -> AccessDeniedException(file, other, m)
+                m.contains("EEXIST") -> FileAlreadyExistsException(file, other, m)
+                m.contains("ENOTDIR") -> NotDirectoryException(file)
+                m.contains("ENOTEMPTY") -> DirectoryNotEmptyException(file)
+                m.contains("EPERM") -> AccessDeniedException(file, other, m)
+                else -> FileSystemException(file, other, m)
+            }
+            else -> IOException(m)
         }
     }
 }
