@@ -15,12 +15,16 @@
  **/
 @file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
-package io.matthewnelson.kmp.file.internal.fs
+package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.FsInfo
+import org.junit.Test
+import kotlin.test.Ignore
 
-internal actual sealed class FsNative(info: FsInfo): FsNonJvm.Native(info) {
-    internal actual companion object {
-        internal actual val INSTANCE: FsNative = FsUnix
-    }
+actual class FileStreamReadUnitTest: FileStreamReadJvmSharedTest() {
+
+    actual override val checker: PermissionChecker? = permissionChecker()
+
+    @Test
+    @Ignore
+    actual fun stub() {}
 }

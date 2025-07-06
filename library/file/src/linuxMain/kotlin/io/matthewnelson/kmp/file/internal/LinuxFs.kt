@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("FunctionName", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -28,11 +28,18 @@ internal actual inline fun fs_platform_fread(
     file: CPointer<FILE>,
     buf: CPointer<ByteVar>,
     numBytes: Int,
-): Int = fread(buf, 1u, numBytes.toUInt().convert(), file).convert()
+): Int = fread(buf, 1u, numBytes.convert(), file).convert()
 
 @ExperimentalForeignApi
 internal actual inline fun fs_platform_fwrite(
     file: CPointer<FILE>,
     buf: CPointer<ByteVar>,
     numBytes: Int,
-): Int = fwrite(buf, 1u, numBytes.toUInt().convert(), file).convert()
+): Int = fwrite(buf, 1u, numBytes.convert(), file).convert()
+
+@ExperimentalForeignApi
+internal actual inline fun fs_platform_lseek(
+    fd: Int,
+    offset: Long,
+    whence: Int,
+): Long = lseek(fd, offset.convert(), whence).convert()

@@ -13,14 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+package io.matthewnelson.kmp.file
 
-package io.matthewnelson.kmp.file.internal.fs
+import io.matthewnelson.kmp.file.internal.fs.FsJvmDefault
+import kotlin.test.Ignore
+import kotlin.test.Test
 
-import io.matthewnelson.kmp.file.FsInfo
+class FileStreamReadJvmDefaultUnitTest: FileStreamReadJvmSharedTest() {
 
-internal actual sealed class FsNative(info: FsInfo): FsNonJvm.Native(info) {
-    internal actual companion object {
-        internal actual val INSTANCE: FsNative = FsUnix
+    private companion object {
+        val DEFAULT by lazy { FsJvmDefault.get() }
     }
+
+    override val checker: PermissionChecker? = permissionChecker()
+
+    override fun File.testOpen(): FileStream.Read {
+        val s = DEFAULT.openRead(this)
+        return FileStreamReadOnly(s)
+    }
+
+    @Test
+    @Ignore
+    fun stub() {}
 }

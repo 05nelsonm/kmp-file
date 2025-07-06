@@ -23,11 +23,19 @@ import io.matthewnelson.kmp.file.internal.Path
 internal external interface ModuleFs {
     fun accessSync(path: Path, mode: Int)
     fun chmodSync(path: Path, mode: String)
+    fun closeSync(fd: Number)
+    fun fstatSync(fd: Number): JsStats
+    fun fsyncSync(fd: Number)
     fun mkdirSync(path: Path, options: dynamic): String?
+    fun openSync(path: Path, flags: Int): Number
+    fun openSync(path: Path, flags: Int, mode: String): Number
+    fun openSync(path: Path, flags: String, mode: String): Number // Windows
+    fun readSync(fd: Number, buffer: ByteArray, offset: Int, length: Int, position: Number): Int
     fun readFileSync(path: Path): JsBuffer
     fun realpathSync(path: Path): Path
     fun rmdirSync(path: Path, options: dynamic)
     fun unlinkSync(path: Path)
+    fun writeSync(fd: Number, buffer: ByteArray, offset: Int, length: Int, position: Number?): Int
     fun writeFileSync(path: Path, data: JsBuffer)
     fun writeFileSync(path: Path, data: ByteArray)
     fun writeFileSync(path: Path, data: String)
@@ -44,13 +52,13 @@ internal external interface ConstantsFs {
     val W_OK: Int
     val X_OK: Int
 
-//    val O_RDONLY: Int
-//    val O_WRONLY: Int
-//    val O_RDWR: Int
-//    val O_CREAT: Int
-//    val O_EXCL: Int
-//    val O_TRUNC: Int
-//    val O_APPEND: Int
+    val O_RDONLY: Int
+    val O_WRONLY: Int
+    val O_RDWR: Int
+    val O_CREAT: Int
+    val O_EXCL: Int
+    val O_TRUNC: Int
+    val O_APPEND: Int
 
 //    val S_IFCHR: Int
 //    val S_IFDIR: Int

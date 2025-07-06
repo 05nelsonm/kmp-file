@@ -75,6 +75,7 @@ kmpConfiguration {
                 if (!HostManager.hostIsMingw) {
                     kotlin.srcDir("src/androidInstrumentedTest/fileCommonTestShared")
                     kotlin.srcDir("src/androidInstrumentedTest/fileCommonTestAndroid")
+                    kotlin.srcDir("src/androidInstrumentedTest/fileJvmTestShared")
                 }
 
                 dependencies {

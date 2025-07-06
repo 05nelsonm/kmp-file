@@ -62,6 +62,8 @@ internal actual inline fun File.fs_platform_fopen(
     }
 
     val setSeek0 = if (!exists && mode.startsWith("r+")) {
+        // TODO: This is incorrect b/c all writes will be to end of file
+
         // Hacks. Stream will be O_RDRW, but Windows always requires the file
         // to exist with mode r, regardless of r+ or not. So, use appending instead.
         mode = "a" + mode.drop(1)
@@ -111,11 +113,11 @@ internal actual inline fun fs_platform_fread(
     file: CPointer<FILE>,
     buf: CPointer<ByteVar>,
     numBytes: Int,
-): Int = fread(buf, 1u, numBytes.toUInt().convert(), file).convert()
+): Int = fread(buf, 1u, numBytes.convert(), file).convert()
 
 @ExperimentalForeignApi
 internal actual inline fun fs_platform_fwrite(
     file: CPointer<FILE>,
     buf: CPointer<ByteVar>,
     numBytes: Int,
-): Int = fwrite(buf, 1u, numBytes.toUInt().convert(), file).convert()
+): Int = fwrite(buf, 1u, numBytes.convert(), file).convert()

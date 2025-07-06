@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("FunctionName", "NOTHING_TO_INLINE")
 
-package io.matthewnelson.kmp.file.internal.fs
+package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.FsInfo
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.convert
+import platform.posix.lseek
 
-internal actual sealed class FsNative(info: FsInfo): FsNonJvm.Native(info) {
-    internal actual companion object {
-        internal actual val INSTANCE: FsNative = FsUnix
-    }
-}
+@ExperimentalForeignApi
+@OptIn(UnsafeNumber::class)
+internal actual inline fun fs_platform_lseek(
+    fd: Int,
+    offset: Long,
+    whence: Int,
+): Long = lseek(fd, offset.convert(), whence).convert()

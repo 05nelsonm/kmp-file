@@ -17,12 +17,14 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.InterruptedException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
@@ -66,6 +68,14 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
     /** See [io.matthewnelson.kmp.file.mkdir2] */
     @Throws(IOException::class)
     internal actual abstract fun mkdir(dir: File, mode: Mode, mustCreate: Boolean)
+
+    /** See [io.matthewnelson.kmp.file.openRead] */
+    @Throws(IOException::class)
+    internal actual abstract fun openRead(file: File): AbstractFileStream
+
+    /** See [io.matthewnelson.kmp.file.openWrite] */
+    @Throws(IOException::class)
+    internal actual abstract fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
 
     internal sealed class Jvm(info: FsInfo): Fs(info) {
 
