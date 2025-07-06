@@ -17,8 +17,11 @@
 
 package io.matthewnelson.kmp.file
 
+import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.convert
 import platform.posix.FD_CLOEXEC
 import platform.posix.FILE
 import platform.posix.F_GETFD
@@ -26,6 +29,8 @@ import platform.posix.F_SETFD
 import platform.posix.errno
 import platform.posix.fcntl
 import platform.posix.fileno
+import platform.posix.fread
+import platform.posix.fwrite
 
 @PublishedApi
 @Deprecated("Strictly for deprecated File.fOpen function. Do not use.", level = DeprecationLevel.ERROR)
@@ -35,23 +40,29 @@ internal actual inline fun String.appendFlagCLOEXEC(): String = this // no-op
 @ExperimentalForeignApi
 @Throws(IOException::class)
 @Deprecated("Strictly for deprecated File.fOpen function. Do not use.", level = DeprecationLevel.ERROR)
-internal actual inline fun CPointer<FILE>.setFDCLOEXEC(file: File): CPointer<FILE> {
+internal actual inline fun CPointer<FILE>.setFDCLOEXEC() {
     val fd = fileno(this)
     run {
         if (fd == -1) return@run
         val stat = fcntl(fd, F_GETFD)
         if (stat == -1) return@run
-        if (fcntl(fd, F_SETFD, stat or FD_CLOEXEC) == 0) {
-            return this
-        }
+        if (fcntl(fd, F_SETFD, stat or FD_CLOEXEC) == 0) return
     }
-
-    val e = errnoToIOException(errno, file)
-    try {
-        @OptIn(DelicateFileApi::class)
-        close()
-    } catch (t: IOException) {
-        e.addSuppressed(t)
-    }
-    throw e
+    throw errnoToIOException(errno)
 }
+
+@ExperimentalForeignApi
+@OptIn(UnsafeNumber::class)
+@Deprecated("Strictly for deprecated fRead function. Do not use.", level = DeprecationLevel.ERROR)
+internal actual inline fun CPointer<FILE>.fRead(
+    buf: CPointer<ByteVar>,
+    numBytes: Int,
+): Int = fread(buf, 1u, numBytes.convert(), this).convert()
+
+@ExperimentalForeignApi
+@OptIn(UnsafeNumber::class)
+@Deprecated("Strictly for deprecated fWrite function. Do not use.", level = DeprecationLevel.ERROR)
+internal actual inline fun CPointer<FILE>.fWrite(
+    buf: CPointer<ByteVar>,
+    numBytes: Int,
+): Int = fwrite(buf, 1u, numBytes.convert(), this).convert()

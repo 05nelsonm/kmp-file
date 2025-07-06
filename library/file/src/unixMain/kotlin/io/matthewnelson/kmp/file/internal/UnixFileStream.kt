@@ -51,7 +51,7 @@ internal class UnixFileStream(
     override fun position(): Long {
         if (!canRead) return super.position()
         val fd = _fd.value ?: throw fileStreamClosed()
-        val ret = fs_platform_lseek(fd, 0, SEEK_CUR)
+        val ret = platformLSeek(fd, 0, SEEK_CUR)
         if (ret == -1L) throw errnoToIOException(errno)
         return ret
     }
@@ -59,7 +59,7 @@ internal class UnixFileStream(
     override fun position(new: Long): FileStream.Read {
         if (!canRead) return super.position(new)
         val fd = _fd.value ?: throw fileStreamClosed()
-        val ret = fs_platform_lseek(fd, new, SEEK_SET)
+        val ret = platformLSeek(fd, new, SEEK_SET)
         if (ret == -1L) throw errnoToIllegalArgumentOrIOException(errno, null)
         return this
     }
@@ -144,3 +144,10 @@ internal class UnixFileStream(
 
     override fun toString(): String = "UnixFileStream@" + hashCode().toString()
 }
+
+@ExperimentalForeignApi
+internal expect inline fun platformLSeek(
+    fd: Int,
+    offset: Long,
+    whence: Int,
+): Long

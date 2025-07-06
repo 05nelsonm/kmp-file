@@ -24,11 +24,10 @@ import platform.posix.errno
 import platform.posix.fcntl
 import platform.posix.fileno
 import kotlin.test.Test
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-class OpenUnixUnitTest {
+class FOpenUnixUnitTest {
 
     @Test
     fun givenFile_whenFOpen_thenHasCLOEXEC() {
@@ -37,32 +36,6 @@ class OpenUnixUnitTest {
         try {
             @Suppress("DEPRECATION")
             tmp.fOpen("wb") { file -> assertTrue(file.hasFD_CLOEXEC()) }
-        } finally {
-            tmp.delete2()
-        }
-    }
-
-    @Test
-    fun givenFile_whenOpenWithETrue_thenHasCLOEXEC() {
-        val tmp = randomTemp()
-
-        try {
-            charArrayOf('w', 'r', 'a').forEach { operation ->
-                tmp.open(operation).use { file -> assertTrue(file.hasFD_CLOEXEC()) }
-            }
-        } finally {
-            tmp.delete2()
-        }
-    }
-
-    @Test
-    fun givenFile_whenOpenWithEFalse_thenDoesNotHaveCLOEXEC() {
-        val tmp = randomTemp()
-
-        try {
-            charArrayOf('w', 'r', 'a').forEach { operation ->
-                tmp.open(operation, e = false).use { file -> assertFalse(file.hasFD_CLOEXEC()) }
-            }
         } finally {
             tmp.delete2()
         }
