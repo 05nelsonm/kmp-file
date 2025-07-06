@@ -20,7 +20,6 @@ import io.matthewnelson.kmp.file.internal.commonReadBytes
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -51,7 +50,7 @@ class ReadUnitTest: ReadSharedTest() {
     fun givenFile_whenReadStreamSizeReportsInaccurately_thenReadBytesReturnsExpected() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         val expected = Random.Default.nextBytes(212_121)
-        tmp.writeBytes(expected)
+        tmp.writeBytes(excl = null, expected)
 
         try {
             // Simulates the filesystem lying to us about what the actual size
@@ -84,7 +83,7 @@ class ReadUnitTest: ReadSharedTest() {
     @Test
     fun givenFile_whenReadStreamSizeReturnsGreaterThanIntMax_thenThrowsFileSystemException() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         var stream: TestStream? = null
 
         try {

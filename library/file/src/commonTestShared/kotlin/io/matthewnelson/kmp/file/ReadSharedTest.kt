@@ -32,7 +32,7 @@ abstract class ReadSharedTest {
     @Test
     fun givenFile_whenIsEmpty_thenReadReturnsEmptyBytes() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
-        tmp.writeBytes(ByteArray(0))
+        tmp.writeBytes(excl = null, ByteArray(0))
 
         try {
             assertTrue(tmp.readBytes().isEmpty())

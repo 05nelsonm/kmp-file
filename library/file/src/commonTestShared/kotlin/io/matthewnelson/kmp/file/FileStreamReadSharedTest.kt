@@ -29,7 +29,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenOpenRead_whenIsInstanceOfFileStreamWrite_thenIsFalse() = runTest { tmp ->
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         tmp.testOpen().use { s ->
             assertIsNot<FileStream.Write>(s)
         }
@@ -37,7 +37,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenReadStream_whenClose_thenIsClosed() = runTest { tmp ->
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
 
         tmp.testOpen().use { s ->
             assertTrue(s.isOpen())
@@ -51,7 +51,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     @Test
     fun givenReadStream_whenNewPosition_thenWorksAsExpected() = runTest { tmp ->
         val expected = ByteArray(8) { (it + 1).toByte() }
-        tmp.writeBytes(expected)
+        tmp.writeBytes(excl = null, expected)
 
         tmp.testOpen().use { s ->
             val buf = ByteArray(expected.size + 4)
@@ -90,7 +90,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     @Test
     fun givenReadStream_whenExhausted_thenReturnsNegative1() = runTest { tmp ->
         val expected = "Hello World!".encodeToByteArray()
-        tmp.writeBytes(expected)
+        tmp.writeBytes(excl = null, expected)
 
         tmp.testOpen().use { s ->
             val buf = ByteArray(expected.size + 10)
@@ -107,7 +107,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     @Test
     fun givenReadStream_whenOffset_thenReadsAsExpected() = runTest { tmp ->
         val b = ByteArray(10) { 1.toByte() }
-        tmp.writeBytes(b)
+        tmp.writeBytes(excl = null, b)
         b.fill(0)
 
         tmp.testOpen().use { s ->

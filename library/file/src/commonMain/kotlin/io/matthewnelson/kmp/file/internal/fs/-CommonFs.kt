@@ -39,14 +39,14 @@ internal inline fun Fs.commonDelete(file: File, ignoreReadOnly: Boolean, mustExi
 
 @Throws(IllegalArgumentException::class, IOException::class)
 internal inline fun Fs.commonMkdir(dir: File, mode: String?, mustCreate: Boolean): File {
-    val m = mode?.toMode() ?: Mode.Companion.DEFAULT_DIR
+    val m = mode?.toMode() ?: Mode.DEFAULT_DIR
     mkdir(dir, m, mustCreate)
     return dir
 }
 
 @Throws(IllegalArgumentException::class, IOException::class)
 internal inline fun Fs.commonMkdirs(dir: File, mode: String?, mustCreate: Boolean): File {
-    val m = mode?.toMode() ?: Mode.Companion.DEFAULT_DIR
+    val m = mode?.toMode() ?: Mode.DEFAULT_DIR
     val directories = ArrayDeque<File>(1)
 
     run {

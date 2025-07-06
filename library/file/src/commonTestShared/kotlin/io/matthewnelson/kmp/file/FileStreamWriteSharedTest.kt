@@ -52,7 +52,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenOpenWrite_whenExclMustCreate_thenThrowsFileAlreadyExistsException() = runTest { tmp ->
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         assertFailsWith<FileAlreadyExistsException> {
             tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, false).close()
         }
@@ -60,7 +60,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenOpenWrite_whenAppendingFalse_thenIsTruncated() = runTest { tmp ->
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         assertTrue(tmp.readBytes().isNotEmpty())
 
         tmp.testOpen(null, appending = false).use { s ->
@@ -70,7 +70,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenOpenWrite_whenAppendingTrue_thenIsNotTruncated() = runTest { tmp ->
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         tmp.testOpen(null, appending = true).use { s ->
             val buf = "Hello World2!".encodeToByteArray()
             s.write(buf, offset = 0, len = buf.size - 2)
@@ -115,7 +115,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenFile_whenOpenWindows_thenFilePermissionsAreNotModifiedIfAlreadyExists() = runTest<PermissionChecker.Windows> { tmp ->
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         assertFalse(isReadOnly(tmp))
         tmp.testOpen(OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
             assertFalse(isReadOnly(tmp), "is read-only")
@@ -134,7 +134,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenFile_whenOpenPosix_thenFilePermissionsAreNotModifiedIfAlreadyExists() = runTest<PermissionChecker.Posix> { tmp ->
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         tmp.testOpen(OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
             assertTrue(canRead(tmp), "canRead")
             assertTrue(canWrite(tmp), "canWrite")

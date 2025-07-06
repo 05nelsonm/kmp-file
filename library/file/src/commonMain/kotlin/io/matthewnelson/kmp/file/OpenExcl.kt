@@ -31,11 +31,17 @@ import kotlin.jvm.JvmStatic
  * */
 public sealed class OpenExcl private constructor(internal val _mode: Mode) {
 
+    /**
+     * The mode to use for newly created files. If a file is **NOT** created
+     * upon open (e.g. it already exists), then this will be ignored.
+     *
+     * @see [chmod2]
+     * */
     @JvmField
     public val mode: String = _mode.value
 
     /**
-     * When opening a [File], create it if it does not already exist.
+     * When opening a [File], create it with the supplied [mode] if it does not already exist.
      *
      * @see [Companion.of]
      * @see [Companion.DEFAULT]
@@ -69,8 +75,8 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
     }
 
     /**
-     * When opening a [File], it **MUST NOT** exist. A new file will be created. If
-     * the file being opened already exists, a [FileAlreadyExistsException] will be
+     * When opening a [File], it **MUST NOT** exist. A new file will be created with the supplied
+     * [mode]. If the file being opened already exists, a [FileAlreadyExistsException] will be
      * thrown.
      *
      * @see [Companion.of]
@@ -108,7 +114,7 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
      * When opening a [File], it **MUST** exist. A new file will **NOT** be created. If
      * the file being opened does not exist, a [FileNotFoundException] will be thrown.
      * */
-    public data object MustExist : OpenExcl(_mode = "000".toMode())
+    public data object MustExist : OpenExcl(_mode = Mode.DEFAULT_FILE)
 
     /** @suppress */
     public final override fun equals(other: Any?): Boolean {

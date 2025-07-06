@@ -54,7 +54,7 @@ abstract class ChmodSharedTest {
 
     @Test
     fun givenFile_whenChmodWindows_thenReadOnlyIsSetAsExpected() = runWindows(
-        create = { tmp -> tmp.writeUtf8("Hello World!") },
+        create = { tmp -> tmp.writeUtf8(excl = null, "Hello World!") },
     )
 
     @Test
@@ -76,7 +76,7 @@ abstract class ChmodSharedTest {
 
     @Test
     fun givenFile_whenChmodPosix_thenPermissionsAreSetAsExpected() = runPosix(
-        create = { tmp -> tmp.writeUtf8("Hello World!") },
+        create = { tmp -> tmp.writeUtf8(excl = null, "Hello World!") },
     )
 
     @Test

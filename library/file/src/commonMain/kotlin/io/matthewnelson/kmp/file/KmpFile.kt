@@ -232,9 +232,9 @@ public fun File.canonicalFile2(): File {
  * Modifies file or directory permissiveness.
  *
  * **NOTE:** On Windows this will only modify the `read-only` attribute
- * for a file. If [mode] contains any **owner** write permissions, then
- * the `read-only` attribute is removed. If [mode] does **not** contain
- * any **owner** write permissions, the `read-only` attribute is applied.
+ * of a regular file. If [mode] contains any **owner** write permissions,
+ * then the `read-only` attribute is removed. If [mode] does **not** contain
+ * any **owner** write permissions, then the `read-only` attribute is applied.
  *
  * e.g.
  *
@@ -569,41 +569,156 @@ public fun File.readUtf8(): String {
 /**
  * Writes the full contents of [array] to the file.
  *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [appending] If `true`, data written to this file will occur at the
+ *   end of the file. If `false`, the file will be truncated if it exists.
  * @param [array] of bytes to write.
  *
- * @see [writeUtf8]
+ * @return The [File] for chaining operations.
  *
- * @throws [IOException] If there was a failure to write the [File], such as
- *   the thread being interrupted, or the filesystem threw a security exception.
+ * @see [writeUtf8]
+ * @see [appendBytes]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
  * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmName("writeBytesTo")
 @Throws(IOException::class)
-public fun File.writeBytes(array: ByteArray) {
-    openWrite(excl = null).use { it.write(buf = array) }
+public fun File.writeBytes(excl: OpenExcl?, appending: Boolean, array: ByteArray): File {
+    openWrite(excl, appending).use { s -> s.write(buf = array) }
+    return this
+}
+
+/**
+ * Writes the full contents of [array] to the file. The [File] will be truncated
+ * if it exists.
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [array] of bytes to write.
+ *
+ * @return The [File] for chaining operations.
+ *
+ * @see [writeUtf8]
+ * @see [appendBytes]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
+ * */
+@JvmName("writeBytesTo")
+@Throws(IOException::class)
+public inline fun File.writeBytes(excl: OpenExcl?, array: ByteArray): File {
+    return writeBytes(excl, appending = false, array)
 }
 
 /**
  * Writes the full contents of [text] to the file (as UTF-8).
  *
- * @param [text] to write to the file
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [appending] If `true`, text written to this file will occur at the
+ *   end of the file. If `false`, the file will be truncated if it exists.
+ * @param [text] to write to the file.
+ *
+ * @return The [File] for chaining operations.
  *
  * @see [writeBytes]
+ * @see [appendUtf8]
  *
- * @throws [IOException] If there was a failure to write the [File], such as
- *   the thread being interrupted, or the filesystem threw a security exception.
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
  * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @JvmName("writeUtf8To")
 @Throws(IOException::class)
-public fun File.writeUtf8(text: String) {
+public fun File.writeUtf8(excl: OpenExcl?, appending: Boolean, text: String): File {
     val bytes = try {
         text.encodeToByteArray()
     } catch (t: Throwable) {
         throw t.wrapIOException()
     }
 
-    writeBytes(array = bytes)
+    return writeBytes(excl, appending, bytes)
+}
+
+/**
+ * Writes the full contents of [text] to the file (as UTF-8). The [File] will
+ * be truncated if it exists.
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [text] to write to the file.
+ *
+ * @return The [File] for chaining operations.
+ *
+ * @see [writeBytes]
+ * @see [appendUtf8]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
+ * */
+@JvmName("writeUtf8To")
+@Throws(IOException::class)
+public inline fun File.writeUtf8(excl: OpenExcl?, text: String): File {
+    return writeUtf8(excl, appending = false, text)
+}
+
+/**
+ * Writes the full contents of [array] to the file. If the file exists, all
+ * new data will be appended to the end of the file.
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [array] of bytes to write.
+ *
+ * @return The [File] for chaining operations.
+ *
+ * @see [writeBytes]
+ * @see [writeUtf8]
+ * @see [appendUtf8]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
+ * */
+@JvmName("appendBytesTo")
+@Throws(IOException::class)
+public inline fun File.appendBytes(excl: OpenExcl?, array: ByteArray): File {
+    return writeBytes(excl, appending = true, array)
+}
+
+/**
+ * Writes the full contents of [text] to the file. If the file exists, all
+ * new text will be appended to the end of the file.
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [text] to write to the file.
+ *
+ * @return The [File] for chaining operations.
+ *
+ * @see [writeBytes]
+ * @see [writeUtf8]
+ * @see [appendBytes]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
+ * */
+@JvmName("appendUtf8To")
+@Throws(IOException::class)
+public inline fun File.appendUtf8(excl: OpenExcl?, text: String): File {
+    return writeUtf8(excl, appending = true, text)
 }
 
 
@@ -691,3 +806,35 @@ public inline fun File.canonicalFile(): File = canonicalFile2()
     )
 )
 public inline fun File.normalizedFileOf(): File = normalize()
+
+/**
+ * DEPRECATED
+ * @throws [IOException]
+ * @throws [UnsupportedOperationException]
+ * @suppress
+ * */
+@Deprecated(
+    message = "Missing file exclusivity parameter. Use other writeBytes function.",
+    replaceWith = ReplaceWith(
+        expression = "this.writeBytes(excl = null, array)",
+    )
+)
+@JvmName("writeBytesTo")
+@Throws(IOException::class)
+public fun File.writeBytes(array: ByteArray) { writeBytes(excl = null, array) }
+
+/**
+ * DEPRECATED
+ * @throws [IOException]
+ * @throws [UnsupportedOperationException]
+ * @suppress
+ * */
+@Deprecated(
+    message = "Missing file exclusivity parameter. Use other writeUtf8 function.",
+    replaceWith = ReplaceWith(
+        expression = "this.writeUtf8(excl = null, text)",
+    )
+)
+@JvmName("writeUtf8To")
+@Throws(IOException::class)
+public fun File.writeUtf8(text: String) { writeUtf8(excl = null, text) }

@@ -75,7 +75,7 @@ abstract class MkdirSharedTest {
     @Test
     fun givenDir_whenFileUsedInDirPath_thenThrowsNotDirectoryException() = skipTestIf(isJsBrowser) {
         val tmpFile = randomTemp()
-        tmpFile.writeUtf8("Hello World!")
+        tmpFile.writeUtf8(excl = null, "Hello World!")
         try {
             assertFailsWith<NotDirectoryException> {
                 tmpFile.resolve(randomName()).testMkdir(mode = null)
