@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.*
+import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.internal.fs.FsJs
-import io.matthewnelson.kmp.file.internal.fs.FsJsNode
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
+import io.matthewnelson.kmp.file.toFile
 
 internal actual inline fun platformDirSeparator(): Char = FsJs.INSTANCE.dirSeparator
 
@@ -31,84 +28,3 @@ internal actual inline fun platformPathSeparator(): Char = FsJs.INSTANCE.pathSep
 internal actual inline fun platformTempDirectory(): File = FsJs.INSTANCE.tempDirectory.toFile()
 
 internal actual val IsWindows: Boolean get() = FsJs.INSTANCE.isWindows
-
-// @Throws(IOException::class, UnsupportedOperationException::class)
-internal actual inline fun File.platformReadBytes(): ByteArray = try {
-    if (stat().size.toLong() > Int.MAX_VALUE.toLong()) {
-        throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
-    }
-
-    val buffer = read()
-
-    // Max buffer size for Node.js 16+ can be larger than the
-    // maximum size of the ByteArray capacity when on 64-bit
-    if (buffer.length.toLong() > Int.MAX_VALUE.toLong()) {
-        throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
-    }
-
-    ByteArray(buffer.length.toInt()) { i -> buffer.readInt8(i) }
-} catch (t: Throwable) {
-    if (t is UnsupportedOperationException) throw t
-    throw t.toIOException(this)
-}
-
-// @Throws(IOException::class, UnsupportedOperationException::class)
-internal actual inline fun File.platformReadUtf8(): String = try {
-    if (stat().size.toLong() > Int.MAX_VALUE.toLong()) {
-        throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
-    }
-
-    val buffer = read()
-
-    // Max buffer size for Node.js 16+ can be larger than the
-    // maximum size of the ByteArray capacity when on 64-bit
-    if (buffer.length.toLong() > Int.MAX_VALUE.toLong()) {
-        throw IOException("File size exceeds limit of ${Int.MAX_VALUE}")
-    }
-
-    buffer.toUtf8()
-} catch (t: Throwable) {
-    if (t is UnsupportedOperationException) throw t
-    throw t.toIOException(this)
-}
-
-// @Throws(IOException::class, UnsupportedOperationException::class)
-internal actual inline fun File.platformWriteBytes(array: ByteArray) {
-    try {
-        FsJsNode.require().fs.writeFileSync(path, array)
-    } catch (t: Throwable) {
-        if (t is UnsupportedOperationException) throw t
-        throw t.toIOException(this)
-    }
-}
-
-// @Throws(IOException::class, UnsupportedOperationException::class)
-internal actual inline fun File.platformWriteUtf8(text: String) {
-    try {
-        FsJsNode.require().fs.writeFileSync(path, text)
-    } catch (t: Throwable) {
-        if (t is UnsupportedOperationException) throw t
-        throw t.toIOException(this)
-    }
-}
-
-internal inline fun Number.toNotLong(): Number {
-    if (this !is Long) return this
-
-    // Long
-    return if (this in Int.MIN_VALUE..Int.MAX_VALUE) toInt() else toDouble()
-}
-
-//@Throws(Exception::class)
-@OptIn(ExperimentalContracts::class)
-internal inline fun FsJsNode.Companion.require(
-    exception: (String) -> Exception = ::UnsupportedOperationException,
-): FsJsNode {
-    contract {
-        callsInPlace(exception, InvocationKind.AT_MOST_ONCE)
-    }
-
-    val fs = FsJs.INSTANCE
-    if (fs !is FsJsNode) throw exception("Unsupported FileSystem[$fs]")
-    return fs
-}

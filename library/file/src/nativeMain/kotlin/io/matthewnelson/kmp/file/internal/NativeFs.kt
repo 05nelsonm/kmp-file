@@ -23,14 +23,7 @@ import io.matthewnelson.kmp.file.OpenExcl
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.MemScope
 import platform.posix.FILE
-
-@ExperimentalForeignApi
-@Throws(IOException::class)
-internal expect inline fun MemScope.fs_platform_file_size(
-    path: Path,
-): Long
 
 @ExperimentalForeignApi
 @Throws(IllegalArgumentException::class, IOException::class)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,17 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.SysDirSep
-import io.matthewnelson.kmp.file.path
+import io.matthewnelson.kmp.file.FileAlreadyExistsException
+import io.matthewnelson.kmp.file.FileSystemException
 
-internal actual inline fun File.platformResolve(relative: File): File = when {
-    path.isEmpty() -> relative
+internal actual inline fun fileAlreadyExistsException(
+    file: File,
+    other: File?,
+    reason: String?,
+): FileAlreadyExistsException = FileAlreadyExistsException(file, other, reason)
 
-    // Functionality on Jvm is that if relative is
-    // rooted it will be returned instead of concatenating
-    // it with the parent path. isAbsolute would return false
-    // if the path on windows was relative, like `\Windows`.
-    relative.path.startsWith(SysDirSep) -> relative
-    relative.isAbsolute() -> relative
-    path.endsWith(SysDirSep) -> File(path + relative.path)
-    else -> File(path + SysDirSep + relative.path)
-}
+internal actual inline fun fileSystemException(
+    file: File,
+    other: File?,
+    reason: String?,
+): FileSystemException = FileSystemException(file, other, reason)

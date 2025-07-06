@@ -24,6 +24,7 @@ import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
+import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel

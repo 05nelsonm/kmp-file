@@ -15,7 +15,7 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.commonDelete
+import io.matthewnelson.kmp.file.internal.fs.commonDelete
 import io.matthewnelson.kmp.file.internal.fs.FsJvmDefault
 import kotlin.test.Ignore
 import kotlin.test.Test

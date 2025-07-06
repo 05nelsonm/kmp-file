@@ -17,8 +17,14 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.*
+import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.basename
 import io.matthewnelson.kmp.file.internal.fs.Fs
+import io.matthewnelson.kmp.file.internal.fs.commonMkdirs
+import io.matthewnelson.kmp.file.internal.parentOrNull
+import io.matthewnelson.kmp.file.internal.resolveSlashes
+import io.matthewnelson.kmp.file.internal.toMode
 
 /**
  * A File which holds the abstract pathname to a location on the

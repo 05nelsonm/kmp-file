@@ -19,11 +19,7 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.*
-import io.matthewnelson.kmp.file.internal.fs.Fs
-import io.matthewnelson.kmp.file.internal.commonNormalize
-import io.matthewnelson.kmp.file.internal.platformResolve
-import io.matthewnelson.kmp.file.internal.platformWriteBytes
-import io.matthewnelson.kmp.file.internal.platformWriteUtf8
+import io.matthewnelson.kmp.file.internal.fs.*
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
@@ -529,7 +525,7 @@ public inline fun File.openAppending(excl: OpenExcl?): FileStream.Write {
 }
 
 /**
- * Read the full contents of the file (as bytes).
+ * Read the entire contents of a [File] (as bytes).
  *
  * **NOTE:** This function is not recommended for large files. There
  * is an internal limitation of 2GB file size.
@@ -545,10 +541,12 @@ public inline fun File.openAppending(excl: OpenExcl?): FileStream.Write {
  * */
 @JvmName("readBytesFrom")
 @Throws(IOException::class)
-public fun File.readBytes(): ByteArray = platformReadBytes()
+public fun File.readBytes(): ByteArray {
+    return commonReadBytes(open = { openRead() })
+}
 
 /**
- * Read the full contents of the file (as UTF-8 text).
+ * Read the entire contents of a [File] (as UTF-8 text).
  *
  * **NOTE:** This function is not recommended for large files. There
  * is an internal limitation of 2GB file size.
@@ -564,7 +562,9 @@ public fun File.readBytes(): ByteArray = platformReadBytes()
  * */
 @JvmName("readUtf8From")
 @Throws(IOException::class)
-public fun File.readUtf8(): String = platformReadUtf8()
+public fun File.readUtf8(): String {
+    return readBytes().decodeToString()
+}
 
 /**
  * Writes the full contents of [array] to the file.
@@ -579,7 +579,9 @@ public fun File.readUtf8(): String = platformReadUtf8()
  * */
 @JvmName("writeBytesTo")
 @Throws(IOException::class)
-public fun File.writeBytes(array: ByteArray) { platformWriteBytes(array) }
+public fun File.writeBytes(array: ByteArray) {
+    openWrite(excl = null).use { it.write(buf = array) }
+}
 
 /**
  * Writes the full contents of [text] to the file (as UTF-8).
@@ -594,7 +596,15 @@ public fun File.writeBytes(array: ByteArray) { platformWriteBytes(array) }
  * */
 @JvmName("writeUtf8To")
 @Throws(IOException::class)
-public fun File.writeUtf8(text: String) { platformWriteUtf8(text) }
+public fun File.writeUtf8(text: String) {
+    val bytes = try {
+        text.encodeToByteArray()
+    } catch (t: Throwable) {
+        throw t.wrapIOException()
+    }
+
+    writeBytes(array = bytes)
+}
 
 
 

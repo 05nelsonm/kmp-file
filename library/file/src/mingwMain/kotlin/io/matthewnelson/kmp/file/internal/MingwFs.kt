@@ -27,19 +27,8 @@ import io.matthewnelson.kmp.file.delete2
 import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.exists2
 import io.matthewnelson.kmp.file.path
-import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.*
 import platform.posix.*
-
-@ExperimentalForeignApi
-@Throws(IOException::class)
-internal actual inline fun MemScope.fs_platform_file_size(
-    path: Path,
-): Long {
-    val stat = alloc<_stat64>()
-    if (_stat64(path, stat.ptr) != 0) throw errnoToIOException(errno, path.toFile())
-    return stat.st_size
-}
 
 @ExperimentalForeignApi
 @Throws(IllegalArgumentException::class, IOException::class)

@@ -24,7 +24,6 @@ import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.fs.FsUnix.MODE_MASK
 import io.matthewnelson.kmp.file.path
-import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.*
 import platform.posix.*
 
@@ -34,16 +33,6 @@ internal expect inline fun fs_platform_lseek(
     offset: Long,
     whence: Int,
 ): Long
-
-@ExperimentalForeignApi
-@Throws(IOException::class)
-internal actual inline fun MemScope.fs_platform_file_size(
-    path: Path,
-): Long {
-    val stat = alloc<stat>()
-    if (stat(path, stat.ptr) != 0) throw errnoToIOException(errno, path.toFile())
-    return stat.st_size
-}
 
 @ExperimentalForeignApi
 @Throws(IllegalArgumentException::class, IOException::class)

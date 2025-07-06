@@ -15,10 +15,10 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.*
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.JsStats
+import io.matthewnelson.kmp.file.internal.require
 import io.matthewnelson.kmp.file.internal.toNotLong
 
 /**

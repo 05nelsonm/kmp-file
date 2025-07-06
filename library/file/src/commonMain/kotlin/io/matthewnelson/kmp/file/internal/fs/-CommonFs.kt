@@ -15,15 +15,14 @@
  **/
 @file:Suppress("NOTHING_TO_INLINE")
 
-package io.matthewnelson.kmp.file.internal
+package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.FileAlreadyExistsException
-import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.internal.fs.Fs
+import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.fileAlreadyExistsException
+import io.matthewnelson.kmp.file.internal.toMode
 import io.matthewnelson.kmp.file.parentFile
-import io.matthewnelson.kmp.file.path
 
 @Throws(IllegalArgumentException::class, IOException::class)
 internal inline fun Fs.commonChmod(file: File, mode: String, mustExist: Boolean): File {
@@ -32,7 +31,7 @@ internal inline fun Fs.commonChmod(file: File, mode: String, mustExist: Boolean)
     return file
 }
 
-@Throws(IllegalArgumentException::class, IOException::class)
+@Throws(IOException::class)
 internal inline fun Fs.commonDelete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean): File {
     delete(file, ignoreReadOnly, mustExist)
     return file
@@ -40,14 +39,14 @@ internal inline fun Fs.commonDelete(file: File, ignoreReadOnly: Boolean, mustExi
 
 @Throws(IllegalArgumentException::class, IOException::class)
 internal inline fun Fs.commonMkdir(dir: File, mode: String?, mustCreate: Boolean): File {
-    val m = mode?.toMode() ?: Mode.DEFAULT_DIR
+    val m = mode?.toMode() ?: Mode.Companion.DEFAULT_DIR
     mkdir(dir, m, mustCreate)
     return dir
 }
 
 @Throws(IllegalArgumentException::class, IOException::class)
 internal inline fun Fs.commonMkdirs(dir: File, mode: String?, mustCreate: Boolean): File {
-    val m = mode?.toMode() ?: Mode.DEFAULT_DIR
+    val m = mode?.toMode() ?: Mode.Companion.DEFAULT_DIR
     val directories = ArrayDeque<File>(1)
 
     run {
@@ -85,27 +84,4 @@ internal inline fun Fs.commonMkdirs(dir: File, mode: String?, mustCreate: Boolea
     }
 
     return dir
-}
-
-internal expect inline fun fileAlreadyExistsException(
-    file: File,
-    other: File? = null,
-    reason: String? = null,
-): FileAlreadyExistsException
-
-internal inline fun fileNotFoundException(file: File?, code: String?, message: String?): FileNotFoundException {
-    var msg = ""
-    if (file != null) {
-        val path = file.path
-        if (path.isNotEmpty()) msg += path
-    }
-    if (!code.isNullOrBlank()) {
-        if (msg.isNotEmpty()) msg += ": "
-        msg += code
-    }
-    if (!message.isNullOrBlank()) {
-        if (msg.isNotEmpty()) msg += ": "
-        msg += message
-    }
-    return FileNotFoundException(msg)
 }
