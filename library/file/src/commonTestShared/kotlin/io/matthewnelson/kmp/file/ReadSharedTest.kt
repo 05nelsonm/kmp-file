@@ -17,6 +17,7 @@ package io.matthewnelson.kmp.file
 
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 abstract class ReadSharedTest {
 
@@ -28,5 +29,15 @@ abstract class ReadSharedTest {
         assertFailsWith<FileNotFoundException> { doesNotExist.readUtf8() }
     }
 
-    // TODO: test read on a directory
+    @Test
+    fun givenFile_whenIsEmpty_thenReadReturnsEmptyBytes() = skipTestIf(isJsBrowser) {
+        val tmp = randomTemp()
+        tmp.writeBytes(excl = null, ByteArray(0))
+
+        try {
+            assertTrue(tmp.readBytes().isEmpty())
+        } finally {
+            tmp.delete2()
+        }
+    }
 }

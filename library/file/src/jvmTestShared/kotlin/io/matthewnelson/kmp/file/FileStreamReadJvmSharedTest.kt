@@ -26,7 +26,7 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
 
     @Test
     fun givenReadStreamAsInputStream_whenCloseParentOnCloseIsTrue_thenClosesFileStream() = runTest { tmp ->
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
 
         tmp.testOpen().use { s ->
             s.asInputStream(closeParentOnClose = true).use { iS ->
@@ -43,7 +43,7 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
 
     @Test
     fun givenReadStreamAsInputStream_whenCloseParentOnCloseIsFalse_thenDoesNotCloseFileStream() = runTest { tmp ->
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
 
         tmp.testOpen().use { s ->
             s.asInputStream(closeParentOnClose = false).use { iS ->
@@ -60,7 +60,7 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
     @Test
     fun givenReadStreamAsInputStream_whenAvailable_thenWorksAsExpected() = runTest { tmp ->
         val hello = "Hello World!".encodeToByteArray()
-        tmp.writeBytes(hello)
+        tmp.writeBytes(excl = null, hello)
 
         tmp.testOpen().use { s ->
             s.asInputStream(true).use { iS ->
@@ -78,7 +78,7 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
     @Test
     fun givenReadStreamAsInputStream_whenSkipForward_thenWorksAsExpected() = runTest { tmp ->
         val expected = ByteArray(8) { (it + 1).toByte() }
-        tmp.writeBytes(expected)
+        tmp.writeBytes(excl = null, expected)
 
         tmp.testOpen().use { s ->
             s.asInputStream(true).use { iS ->
@@ -106,7 +106,7 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
     @Test
     fun givenReadStreamAsInputStream_whenSkipBackward_thenWorksAsExpected() = runTest { tmp ->
         val expected = ByteArray(8) { (it + 1).toByte() }
-        tmp.writeBytes(expected)
+        tmp.writeBytes(excl = null, expected)
 
         tmp.testOpen().use { s ->
             s.asInputStream(true).use { iS ->

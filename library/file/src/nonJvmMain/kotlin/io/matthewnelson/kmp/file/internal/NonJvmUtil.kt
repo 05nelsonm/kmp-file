@@ -13,25 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file
+@file:Suppress("NOTHING_TO_INLINE")
 
-import io.matthewnelson.kmp.file.internal.fs.commonMkdirs
-import io.matthewnelson.kmp.file.internal.fs.FsJvmDefault
-import kotlin.test.Ignore
-import kotlin.test.Test
+package io.matthewnelson.kmp.file.internal
 
-class MkdirsFsJvmDefaultUnitTest: MkdirsSharedTest() {
-
-    private companion object {
-        val DEFAULT by lazy { FsJvmDefault.get() }
-    }
-
-    override val checker: PermissionChecker? = permissionChecker()
-    override fun File.testMkdirs(mode: String?, mustCreate: Boolean): File {
-        return DEFAULT.commonMkdirs(this, mode, mustCreate)
-    }
-
-    @Test
-    @Ignore
-    fun stub() {}
+@Throws(IndexOutOfBoundsException::class)
+internal inline fun ByteArray.checkBounds(offset: Int, len: Int) {
+    if (offset < 0) throw IndexOutOfBoundsException("offset[$offset] < 0")
+    if (len < 0) throw IndexOutOfBoundsException("len[$len] < 0")
+    if (offset > size - len) throw IndexOutOfBoundsException("offset[$offset] > size[$size] - len[$len]")
 }

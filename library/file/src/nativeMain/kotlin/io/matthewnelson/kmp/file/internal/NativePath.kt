@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -29,9 +29,7 @@ internal actual inline fun Path.basename(): String {
     if (isEmpty()) return this
 
     @OptIn(ExperimentalForeignApi::class)
-    return memScoped {
-        platformBasename(this@basename)?.toKString() ?: ""
-    }
+    return memScoped { platformBasename(this@basename)?.toKString() ?: "" }
 }
 
 /**
@@ -41,9 +39,7 @@ internal actual inline fun Path.basename(): String {
  * */
 internal actual inline fun Path.dirname(): Path {
     @OptIn(ExperimentalForeignApi::class)
-    return memScoped {
-        platformDirname(this@dirname)?.toKString() ?: ""
-    }
+    return memScoped { platformDirname(this@dirname)?.toKString() ?: "" }
 }
 
 @OptIn(ExperimentalForeignApi::class)

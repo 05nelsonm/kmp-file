@@ -50,7 +50,7 @@ abstract class DeleteSharedTest {
     @Test
     fun givenFile_whenAlreadyExistsAndMustExistIsTrue_thenDoesNotThrowException() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         tmp.testDelete(mustExist = true)
         assertFalse(tmp.exists2())
     }
@@ -58,7 +58,7 @@ abstract class DeleteSharedTest {
     @Test
     fun givenFile_whenAlreadyExistsAndMustExistIsFalse_thenFileIsDeleted() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         assertTrue(tmp.exists2())
         tmp.testDelete(mustExist = false)
         assertFalse(tmp.exists2())
@@ -67,7 +67,7 @@ abstract class DeleteSharedTest {
     @Test
     fun givenFile_whenAlreadyExistsAndMustExistIsTrue_thenFileIsDeleted() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         assertTrue(tmp.exists2())
         tmp.testDelete(mustExist = true)
         assertFalse(tmp.exists2())
@@ -80,7 +80,7 @@ abstract class DeleteSharedTest {
 
         try {
             assertTrue(tmpDir.exists2(), "dir exists")
-            tmpFile.writeUtf8("Hello World!")
+            tmpFile.writeUtf8(excl = null, "Hello World!")
             assertTrue(tmpFile.exists2(), "file exists")
             assertFailsWith<DirectoryNotEmptyException> { tmpDir.testDelete() }
         } finally {
@@ -119,7 +119,7 @@ abstract class DeleteSharedTest {
         }
 
         val tmp = randomTemp()
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         try {
             assertFalse(checker.isReadOnly(tmp), "initial read-only check")
             tmp.chmod2(mode = "400")
@@ -140,7 +140,7 @@ abstract class DeleteSharedTest {
         }
 
         val tmp = randomTemp()
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         try {
             assertFalse(checker.isReadOnly(tmp), "initial read-only check")
             tmp.chmod2(mode = "400")
@@ -155,7 +155,7 @@ abstract class DeleteSharedTest {
     @Test
     fun givenDelete1_whenFileExists_thenReturnsTrue() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
-        tmp.writeUtf8("Hello World!")
+        tmp.writeUtf8(excl = null, "Hello World!")
         try {
             assertTrue(tmp.exists2())
             @Suppress("DEPRECATION")

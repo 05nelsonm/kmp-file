@@ -18,7 +18,6 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.fileStreamClosed
 import io.matthewnelson.kmp.file.lastErrorToIOException
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.IntVarOf

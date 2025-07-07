@@ -63,6 +63,7 @@ public inline fun <T: Closeable?, R: Any?> T.use(block: (T) -> R): R {
         block(this)
     } catch (t: Throwable) {
         threw = t
+        null
     } finally {
         threw = doFinally(threw)
     }

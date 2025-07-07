@@ -18,18 +18,10 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.ANDROID
-import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.FileAlreadyExistsException
-import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.toFile
-import io.matthewnelson.kmp.file.wrapIOException
 import kotlin.io.resolve
-import kotlin.io.readText as kReadText
-import kotlin.io.readBytes as kReadBytes
 import kotlin.io.resolve as kResolve
-import kotlin.io.writeBytes as kWriteBytes
-import kotlin.io.writeText as kWriteText
 
 internal actual inline fun platformDirSeparator(): Char = File.separatorChar
 
@@ -80,34 +72,4 @@ internal actual val IsWindows: Boolean = System.getProperty("os.name")
     ?.contains("windows", ignoreCase = true)
     ?: (File.separatorChar == '\\')
 
-@Throws(IOException::class)
-internal actual inline fun File.platformReadBytes(): ByteArray = try {
-    kReadBytes()
-} catch (e: OutOfMemoryError) {
-    throw e.wrapIOException()
-}
-
-@Throws(IOException::class)
-internal actual inline fun File.platformReadUtf8(): String = try {
-    kReadText()
-} catch (e: OutOfMemoryError) {
-    throw e.wrapIOException()
-}
-
 internal actual inline fun File.platformResolve(relative: File): File = kResolve(relative)
-
-@Throws(IOException::class)
-internal actual inline fun File.platformWriteBytes(array: ByteArray) { kWriteBytes(array) }
-
-@Throws(IOException::class)
-internal actual inline fun File.platformWriteUtf8(text: String) { kWriteText(text) }
-
-internal inline fun SecurityException.toAccessDeniedException(file: File): AccessDeniedException {
-    return AccessDeniedException(file, reason = "SecurityException[${message}]")
-}
-
-internal actual inline fun fileAlreadyExistsException(
-    file: File,
-    other: File?,
-    reason: String?,
-): FileAlreadyExistsException = FileAlreadyExistsException(file, other, reason)

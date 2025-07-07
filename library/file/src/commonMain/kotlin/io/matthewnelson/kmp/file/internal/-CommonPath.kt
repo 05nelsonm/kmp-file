@@ -87,21 +87,20 @@ internal inline fun Path.commonRootOrNull(
     val driveRoot = commonDriveRootOrNull()
     val sep = SysDirSep
     val sepX2 = "$sep$sep"
+
     when {
         // drive letter with slash (e.g. `C:\`)
         driveRoot != null -> driveRoot
         // Absolute UNC path (e.g. `\\server_name`)
-        startsWith(sepX2) -> {
-            if (isNormalizing) {
-                val i = indexOf(sep, startIndex = 2)
-                val root = if (i == -1) this else substring(0, i)
-                when (root) {
-                    "$sepX2.", "$sepX2.." -> sepX2
-                    else -> root
-                }
-            } else {
-                sepX2
+        startsWith(sepX2) -> if (isNormalizing) {
+            val i = indexOf(sep, startIndex = 2)
+            val root = if (i == -1) this else substring(0, i)
+            when (root) {
+                "$sepX2.", "$sepX2.." -> sepX2
+                else -> root
             }
+        } else {
+            sepX2
         }
         // Relative path (e.g. `\Windows`)
         startsWith(sep) -> "$sep"
@@ -115,10 +114,5 @@ internal inline fun Path.commonRootOrNull(
 
 internal inline fun Path.commonDriveRootOrNull(): Path? {
     val drive = commonDriveOrNull() ?: return null
-
-    return if (length > 2 && get(2) == SysDirSep) {
-        "${drive}${SysDirSep}"
-    } else {
-        null
-    }
+    return if (length > 2 && get(2) == SysDirSep) "${drive}${SysDirSep}" else null
 }

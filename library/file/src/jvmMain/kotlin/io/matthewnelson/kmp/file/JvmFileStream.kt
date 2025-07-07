@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import java.io.Flushable
 import java.io.InputStream
 import java.io.OutputStream

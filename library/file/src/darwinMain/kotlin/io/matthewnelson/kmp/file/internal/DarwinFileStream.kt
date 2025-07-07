@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("FunctionName", "NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
-import kotlinx.cinterop.ByteVar
-import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.convert
-import platform.posix.*
+import platform.posix.lseek
 
 @ExperimentalForeignApi
-internal actual inline fun fs_platform_fread(
-    file: CPointer<FILE>,
-    buf: CPointer<ByteVar>,
-    numBytes: Int,
-): Int = fread(buf, 1u, numBytes.convert(), file).convert()
-
-@ExperimentalForeignApi
-internal actual inline fun fs_platform_fwrite(
-    file: CPointer<FILE>,
-    buf: CPointer<ByteVar>,
-    numBytes: Int,
-): Int = fwrite(buf, 1u, numBytes.convert(), file).convert()
-
-@ExperimentalForeignApi
-internal actual inline fun fs_platform_lseek(
+@OptIn(UnsafeNumber::class)
+internal actual inline fun platformLSeek(
     fd: Int,
     offset: Long,
     whence: Int,

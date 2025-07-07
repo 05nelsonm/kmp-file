@@ -30,7 +30,7 @@ class WriteUnitTest {
 
         val bytes = ByteArray(0)
         try {
-            tmp.writeBytes(bytes)
+            tmp.writeBytes(excl = null, bytes)
             assertEquals(bytes.sha256(), tmp.readBytes().sha256())
         } finally {
             tmp.delete2(mustExist = true)
@@ -43,7 +43,7 @@ class WriteUnitTest {
 
         val bytes = Random.Default.nextBytes(500_000)
         try {
-            tmp.writeBytes(bytes)
+            tmp.writeBytes(excl = null, bytes)
             assertEquals(bytes.sha256(), tmp.readBytes().sha256())
         } finally {
             tmp.delete2(mustExist = true)
@@ -56,7 +56,7 @@ class WriteUnitTest {
 
         val text = ""
         try {
-            tmp.writeUtf8(text)
+            tmp.writeUtf8(excl = null, text)
             assertEquals(ByteArray(0).sha256(), tmp.readBytes().sha256())
         } finally {
             tmp.delete2(mustExist = true)
@@ -69,7 +69,7 @@ class WriteUnitTest {
 
         val text = Random.Default.nextBytes(20_000).encodeToString(Base16.Companion)
         try {
-            tmp.writeUtf8(text)
+            tmp.writeUtf8(excl = null, text)
             assertEquals(text, tmp.readUtf8())
         } finally {
             tmp.delete2(mustExist = true)
@@ -82,9 +82,9 @@ class WriteUnitTest {
         val bytes = Random.Default.nextBytes(500_000)
 
         try {
-            tmp.writeBytes(bytes)
+            tmp.writeBytes(excl = null, bytes)
             assertEquals(bytes.size, tmp.readBytes().size)
-            tmp.writeBytes(bytes.copyOf(50))
+            tmp.writeBytes(excl = null, bytes.copyOf(50))
             assertEquals(50, tmp.readBytes().size)
         } finally {
             tmp.delete2(mustExist = true)
@@ -94,6 +94,6 @@ class WriteUnitTest {
     @Test
     fun givenFile_whenDirDoesNotExist_thenThrowsFileNotFoundException() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp().resolve(randomName()).resolve(randomName())
-        assertFailsWith<FileNotFoundException> { tmp.writeUtf8("Hello World!") }
+        assertFailsWith<FileNotFoundException> { tmp.writeUtf8(excl = null, "Hello World!") }
     }
 }

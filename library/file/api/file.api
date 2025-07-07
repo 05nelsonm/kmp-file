@@ -58,6 +58,8 @@ public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final fun absoluteFileOf (Ljava/io/File;)Ljava/io/File;
 	public static final fun absolutePath2Of (Ljava/io/File;)Ljava/lang/String;
 	public static final fun absolutePathOf (Ljava/io/File;)Ljava/lang/String;
+	public static final fun appendBytesTo (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;[B)Ljava/io/File;
+	public static final fun appendUtf8To (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/lang/String;)Ljava/io/File;
 	public static final fun canonicalFile2Of (Ljava/io/File;)Ljava/io/File;
 	public static final fun canonicalFileOf (Ljava/io/File;)Ljava/io/File;
 	public static final fun canonicalPath2Of (Ljava/io/File;)Ljava/lang/String;
@@ -91,7 +93,11 @@ public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final fun readUtf8From (Ljava/io/File;)Ljava/lang/String;
 	public static final fun resolve (Ljava/io/File;Ljava/io/File;)Ljava/io/File;
 	public static final fun resolve (Ljava/io/File;Ljava/lang/String;)Ljava/io/File;
+	public static final fun writeBytesTo (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Z[B)Ljava/io/File;
+	public static final fun writeBytesTo (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;[B)Ljava/io/File;
 	public static final fun writeBytesTo (Ljava/io/File;[B)V
+	public static final fun writeUtf8To (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/lang/String;)Ljava/io/File;
+	public static final fun writeUtf8To (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLjava/lang/String;)Ljava/io/File;
 	public static final fun writeUtf8To (Ljava/io/File;Ljava/lang/String;)V
 }
 

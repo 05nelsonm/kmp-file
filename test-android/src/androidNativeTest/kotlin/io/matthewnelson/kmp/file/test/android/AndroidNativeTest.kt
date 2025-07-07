@@ -42,7 +42,7 @@ class AndroidNativeTest {
         val tmpFile = SysTempDir.resolve("write_$pid.txt")
         try {
             val expected = "Hello PID[$pid]!"
-            tmpFile.writeUtf8(expected)
+            tmpFile.writeUtf8(excl = null, expected)
             assertEquals(expected, tmpFile.readUtf8())
         } finally {
             tmpFile.delete2()

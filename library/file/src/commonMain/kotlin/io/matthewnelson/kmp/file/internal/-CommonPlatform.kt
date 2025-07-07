@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("KotlinRedundantDiagnosticSuppress", "NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.IOException
 
 internal expect inline fun platformDirSeparator(): Char
 internal expect inline fun platformPathSeparator(): Char
@@ -28,16 +27,4 @@ internal expect inline fun platformTempDirectory(): File
 //  inline API and annotated with @PublishedApi.
 internal expect val IsWindows: Boolean
 
-@Throws(IOException::class)
-internal expect inline fun File.platformReadBytes(): ByteArray
-
-@Throws(IOException::class)
-internal expect inline fun File.platformReadUtf8(): String
-
 internal expect inline fun File.platformResolve(relative: File): File
-
-@Throws(IOException::class)
-internal expect inline fun File.platformWriteBytes(array: ByteArray)
-
-@Throws(IOException::class)
-internal expect inline fun File.platformWriteUtf8(text: String)
