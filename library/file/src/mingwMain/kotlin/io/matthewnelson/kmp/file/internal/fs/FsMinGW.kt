@@ -268,7 +268,29 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
     @Throws(IOException::class)
     internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
-        TODO("Not yet implemented")
+        val disposition = when (excl) {
+            is OpenExcl.MaybeCreate -> OPEN_ALWAYS
+            is OpenExcl.MustCreate -> CREATE_NEW
+            is OpenExcl.MustExist -> OPEN_EXISTING
+        }
+
+        var attributes = FILE_ATTRIBUTE_NORMAL
+        if (!excl._mode.containsOwnerWriteAccess) {
+            attributes = attributes or FILE_ATTRIBUTE_READONLY
+        }
+
+        val handle = CreateFileA(
+            lpFileName = file.path,
+            dwDesiredAccess = (GENERIC_READ.toInt() or GENERIC_WRITE).convert(),
+            dwShareMode = (FILE_SHARE_DELETE or FILE_SHARE_READ or FILE_SHARE_WRITE).convert(),
+            lpSecurityAttributes = null,
+            dwCreationDisposition = disposition.convert(),
+            dwFlagsAndAttributes = attributes.convert(),
+            hTemplateFile = null,
+        )
+        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
+
+        return MinGWFileStream(handle, canRead = true, canWrite = true)
     }
 
     @Throws(IOException::class)
