@@ -105,7 +105,16 @@ internal class UnixFileStream(
     override fun size(new: Long): FileStream.ReadWrite {
         if (!canRead || !canWrite) return super.size(new)
         val fd = _fd.value ?: throw fileStreamClosed()
-        // TODO
+        val pos = platformLSeek(fd, 0L, SEEK_CUR)
+        if (pos == -1L) {
+            throw errnoToIllegalArgumentOrIOException(errno, null)
+        }
+        if (platformFTruncate(fd, new) == -1) {
+            throw errnoToIllegalArgumentOrIOException(errno, null)
+        }
+        if (pos > new && platformLSeek(fd, new, SEEK_SET) == -1L) {
+            throw errnoToIllegalArgumentOrIOException(errno, null)
+        }
         return this
     }
 
@@ -158,3 +167,9 @@ internal expect inline fun platformLSeek(
     offset: Long,
     whence: Int,
 ): Long
+
+@ExperimentalForeignApi
+internal expect inline fun platformFTruncate(
+    fd: Int,
+    offset: Long,
+): Int

@@ -74,6 +74,6 @@ internal abstract class AbstractFileStream internal constructor(
 
     // ReadWrite
     override fun size(new: Long): FileStream.ReadWrite {
-        throw IllegalStateException("FileStream is not O_RDRW")
+        throw IllegalStateException("FileStream is not O_RDWR")
     }
 }

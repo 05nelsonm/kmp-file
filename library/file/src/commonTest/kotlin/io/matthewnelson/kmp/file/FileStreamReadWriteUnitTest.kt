@@ -21,7 +21,7 @@ class FileStreamReadWriteUnitTest: FileStreamReadWriteSharedTest() {
 
     // TODO
     override val checker: PermissionChecker? = when (SysFsInfo.name) {
-        "FsJsNode", "FsMinGW", "FsUnix" -> null
+        "FsJsNode", "FsMinGW" -> null
         else -> permissionChecker()
     }
 

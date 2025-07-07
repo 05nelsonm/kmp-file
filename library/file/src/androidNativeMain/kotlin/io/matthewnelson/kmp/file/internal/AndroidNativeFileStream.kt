@@ -18,14 +18,18 @@
 package io.matthewnelson.kmp.file.internal
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.UnsafeNumber
-import kotlinx.cinterop.convert
+import platform.posix.ftruncate64
 import platform.posix.lseek64
 
 @ExperimentalForeignApi
-@OptIn(UnsafeNumber::class)
 internal actual inline fun platformLSeek(
     fd: Int,
     offset: Long,
     whence: Int,
-): Long = lseek64(fd, offset.convert(), whence).convert()
+): Long = lseek64(fd, offset, whence)
+
+@ExperimentalForeignApi
+internal actual inline fun platformFTruncate(
+    fd: Int,
+    offset: Long,
+): Int = ftruncate64(fd, offset)

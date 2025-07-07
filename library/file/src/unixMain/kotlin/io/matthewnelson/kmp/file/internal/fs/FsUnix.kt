@@ -42,6 +42,7 @@ import platform.posix.O_CLOEXEC
 import platform.posix.O_CREAT
 import platform.posix.O_EXCL
 import platform.posix.O_RDONLY
+import platform.posix.O_RDWR
 import platform.posix.O_TRUNC
 import platform.posix.O_WRONLY
 import platform.posix.S_IRGRP
@@ -119,7 +120,8 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
 
     @Throws(IOException::class)
     internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
-        TODO("Not yet implemented")
+        val fd = file.open(O_RDWR, excl)
+        return UnixFileStream(fd, canRead = true, canWrite = true)
     }
 
     @Throws(IOException::class)

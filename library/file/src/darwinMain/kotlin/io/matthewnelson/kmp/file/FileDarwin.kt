@@ -57,7 +57,7 @@ internal actual inline fun CPointer<FILE>.setFDCLOEXEC() {
 internal actual inline fun CPointer<FILE>.fRead(
     buf: CPointer<ByteVar>,
     numBytes: Int,
-): Int = fread(buf, 1u, numBytes.convert(), this).convert()
+): Int = fread(buf, 1u, numBytes.convert(), this).toInt()
 
 @ExperimentalForeignApi
 @OptIn(UnsafeNumber::class)
@@ -65,4 +65,4 @@ internal actual inline fun CPointer<FILE>.fRead(
 internal actual inline fun CPointer<FILE>.fWrite(
     buf: CPointer<ByteVar>,
     numBytes: Int,
-): Int = fwrite(buf, 1u, numBytes.convert(), this).convert()
+): Int = fwrite(buf, 1u, numBytes.convert(), this).toInt()

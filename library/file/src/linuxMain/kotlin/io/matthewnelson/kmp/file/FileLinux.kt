@@ -20,7 +20,6 @@ package io.matthewnelson.kmp.file
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.convert
 import platform.posix.FILE
 import platform.posix.fread
 import platform.posix.fwrite
@@ -42,11 +41,11 @@ internal actual inline fun CPointer<FILE>.setFDCLOEXEC() { /* no-op */ }
 internal actual inline fun CPointer<FILE>.fRead(
     buf: CPointer<ByteVar>,
     numBytes: Int,
-): Int = fread(buf, 1u, numBytes.convert(), this).convert()
+): Int = fread(buf, 1u, numBytes.toULong(), this).toInt()
 
 @ExperimentalForeignApi
 @Deprecated("Strictly for deprecated fWrite function. Do not use.", level = DeprecationLevel.ERROR)
 internal actual inline fun CPointer<FILE>.fWrite(
     buf: CPointer<ByteVar>,
     numBytes: Int,
-): Int = fwrite(buf, 1u, numBytes.convert(), this).convert()
+): Int = fwrite(buf, 1u, numBytes.toULong(), this).toInt()
