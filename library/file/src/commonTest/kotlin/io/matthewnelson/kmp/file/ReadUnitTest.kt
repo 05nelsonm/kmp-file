@@ -103,7 +103,7 @@ class ReadUnitTest: ReadSharedTest() {
     private abstract class TestStream(val s: FileStream.Read): AbstractFileStream(canRead = true, canWrite = false) {
         final override fun isOpen(): Boolean = s.isOpen()
         final override fun position(): Long = s.position()
-        final override fun position(new: Long): FileStream.Read { s.position(new); return this }
+        final override fun position(new: Long): FileStream.ReadWrite { s.position(new); return this }
         final override fun read(buf: ByteArray, offset: Int, len: Int): Int = s.read(buf, offset, len)
         override fun size(): Long = s.size()
         final override fun close() { s.close() }

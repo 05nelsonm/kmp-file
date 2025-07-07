@@ -115,6 +115,12 @@ internal class FsJvmAndroid private constructor(
         return AndroidFileStream(fd, canRead = false, canWrite = true)
     }
 
+    @Throws(IOException::class)
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        val fd = file.open(const.O_RDWR, excl)
+        return AndroidFileStream(fd, canRead = true, canWrite = true)
+    }
+
     internal companion object {
 
         private const val NAME = "FsJvmAndroid"
@@ -172,17 +178,13 @@ internal class FsJvmAndroid private constructor(
         override fun position(): Long {
             if (!canRead) return super.position()
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
-            return wrapErrnoException(null) {
-                lseek.invoke(null, fd, 0, const.SEEK_CUR) as Long
-            }
+            return wrapErrnoException(null) { lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long }
         }
 
-        override fun position(new: Long): FileStream.Read {
+        override fun position(new: Long): FileStream.ReadWrite {
             if (!canRead) return super.position(new)
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
-            wrapErrnoException(null) {
-                lseek.invoke(null, fd, new, const.SEEK_SET)
-            }
+            wrapErrnoException(null) { lseek.invoke(null, fd, new, const.SEEK_SET) }
             return this
         }
 
@@ -199,6 +201,17 @@ internal class FsJvmAndroid private constructor(
                 val s = fstat.invoke(null, fd)
                 stat.st_size.getLong(s)
             }
+        }
+
+        override fun size(new: Long): FileStream.ReadWrite {
+            if (!canRead || !canWrite) return super.size(new)
+            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            wrapErrnoException(null) {
+                val pos = lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long
+                ftruncate.invoke(null, fd, new)
+                if (pos > new) lseek.invoke(null, fd, new, const.SEEK_SET)
+            }
+            return this
         }
 
         override fun flush() {
@@ -274,14 +287,22 @@ internal class FsJvmAndroid private constructor(
     // android.system.Os
     private class Os {
 
-        val chmod: Method // chmod(path: String, mode: Int)
-        val close: Method // close(fd: FileDescriptor)
-        val lseek: Method // lseek(fd: FileDescriptor, offset: Long, whence: Int): Long
-        val fstat: Method // fstat(fd: FileDescriptor): StructStat
-        val mkdir: Method // mkdir(path: String, mode: Int)
-        val open: Method // open(path: String, flags: Int, mode: Int): FileDescriptor
-        val remove: Method // remove(path: String)
-
+        /** `chmod(path: String, mode: Int)` */
+        val chmod: Method
+        /** `close(fd: FileDescriptor)` */
+        val close: Method
+        /** `fstat(fd: FileDescriptor): StructStat` */
+        val fstat: Method
+        /** `ftruncate(fd: FileDescriptor, length: Long)` */
+        val ftruncate: Method
+        /** `lseek(fd: FileDescriptor, offset: Long, whence: Int): Long` */
+        val lseek: Method
+        /** `mkdir(path: String, mode: Int)` */
+        val mkdir: Method
+        /** `open(path: String, flags: Int, mode: Int): FileDescriptor` */
+        val open: Method
+        /** `remove(path: String)` */
+        val remove: Method
 
         init {
             val clazz = Class.forName("android.system.Os")
@@ -289,6 +310,7 @@ internal class FsJvmAndroid private constructor(
             chmod = clazz.getMethod("chmod", String::class.java, Int::class.javaPrimitiveType)
             close = clazz.getMethod("close", FileDescriptor::class.java)
             fstat = clazz.getMethod("fstat", FileDescriptor::class.java)
+            ftruncate = clazz.getMethod("ftruncate", FileDescriptor::class.java, Long::class.javaPrimitiveType)
             lseek = clazz.getMethod("lseek", FileDescriptor::class.java, Long::class.javaPrimitiveType, Int::class.javaPrimitiveType)
             mkdir = clazz.getMethod("mkdir", String::class.java, Int::class.javaPrimitiveType)
             open = clazz.getMethod("open", String::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
@@ -358,7 +380,8 @@ internal class FsJvmAndroid private constructor(
     // android.system.StructStat
     private class StructStat {
 
-        val st_size: Field // Long
+        /** `Long` */
+        val st_size: Field
 
         init {
             val clazz = Class.forName("android.system.StructStat")

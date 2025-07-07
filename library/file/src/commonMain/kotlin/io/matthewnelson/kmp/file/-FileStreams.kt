@@ -41,7 +41,7 @@ internal class FileStreamWriteOnly internal constructor(private val s: AbstractF
 internal abstract class AbstractFileStream internal constructor(
     internal val canRead: Boolean,
     internal val canWrite: Boolean,
-): FileStream.Read, FileStream.Write {
+): FileStream.ReadWrite {
 
     init {
         if (!canRead && !canWrite) throw IllegalStateException("!canRead && !canWrite")
@@ -54,7 +54,7 @@ internal abstract class AbstractFileStream internal constructor(
     override fun position(): Long {
         throw IllegalStateException("FileStream is O_WRONLY")
     }
-    override fun position(new: Long): FileStream.Read {
+    override fun position(new: Long): FileStream.ReadWrite {
         throw IllegalStateException("FileStream is O_WRONLY")
     }
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
@@ -70,5 +70,10 @@ internal abstract class AbstractFileStream internal constructor(
     }
     override fun write(buf: ByteArray, offset: Int, len: Int) {
         throw IllegalStateException("FileStream is O_RDONLY")
+    }
+
+    // ReadWrite
+    override fun size(new: Long): FileStream.ReadWrite {
+        throw IllegalStateException("FileStream is not O_RDRW")
     }
 }

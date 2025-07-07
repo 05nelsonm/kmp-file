@@ -56,7 +56,7 @@ internal class UnixFileStream(
         return ret
     }
 
-    override fun position(new: Long): FileStream.Read {
+    override fun position(new: Long): FileStream.ReadWrite {
         if (!canRead) return super.position(new)
         val fd = _fd.value ?: throw fileStreamClosed()
         val ret = platformLSeek(fd, new, SEEK_SET)
@@ -100,6 +100,13 @@ internal class UnixFileStream(
             }
             stat.st_size
         }
+    }
+
+    override fun size(new: Long): FileStream.ReadWrite {
+        if (!canRead || !canWrite) return super.size(new)
+        val fd = _fd.value ?: throw fileStreamClosed()
+        // TODO
+        return this
     }
 
     override fun flush() {

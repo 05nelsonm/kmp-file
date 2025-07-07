@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.NotDirectoryException
+import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileStreamClosed
@@ -153,28 +154,44 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 }
             }
 
-            val doChmod = if (excl._mode.containsOwnerWriteAccess) {
-                false
-            } else {
-                when (excl) {
-                    is OpenExcl.MaybeCreate -> !exists(file)
-                    is OpenExcl.MustCreate -> true
-                    is OpenExcl.MustExist -> false
-                }
+            return file.open(excl, options)
+        }
+
+        @Throws(IOException::class)
+        internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+            val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
+                add(StandardOpenOption.READ)
+                add(StandardOpenOption.WRITE)
             }
 
-            val s = file.open(excl, options, attrs = null)
+            return file.open(excl, options)
+        }
+
+        private inline fun File.open(excl: OpenExcl, options: LinkedHashSet<StandardOpenOption>): NioFileStream {
+            val doChmod = when {
+                excl._mode == Mode.DEFAULT_FILE -> false
+                IsWindows -> if (excl._mode.containsOwnerWriteAccess) false else null
+                else -> null
+            } ?: when (excl) {
+                is OpenExcl.MaybeCreate -> !exists(this)
+                is OpenExcl.MustCreate -> true
+                is OpenExcl.MustExist -> false
+            }
+
+            val s = open(excl, options, attrs = null)
             if (doChmod) {
                 try {
-                    chmod(file, excl._mode, mustExist = true)
+                    chmod(this, excl._mode, mustExist = true)
                 } catch (e: IOException) {
                     try {
                         s.close()
                     } catch (ee: IOException) {
                         e.addSuppressed(ee)
                     }
+                    // doChmod will only be true if the file did not exist prior
+                    // to calling open. So, safe to delete on failure.
                     try {
-                        delete(file, ignoreReadOnly = true, mustExist = true)
+                        delete(this, ignoreReadOnly = true, mustExist = true)
                     } catch (ee: IOException) {
                         e.addSuppressed(ee)
                     }
@@ -231,8 +248,6 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
 
         @Throws(IOException::class)
         internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-            val perms = excl._mode.toPosixFilePermissions()
-            val attrs = PosixFilePermissions.asFileAttribute(perms)
             val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
                 add(StandardOpenOption.WRITE)
                 if (appending) {
@@ -241,7 +256,22 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                     add(StandardOpenOption.TRUNCATE_EXISTING)
                 }
             }
-            return file.open(excl, options, attrs)
+            return file.open(excl, options)
+        }
+
+        @Throws(IOException::class)
+        internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+            val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
+                add(StandardOpenOption.READ)
+                add(StandardOpenOption.WRITE)
+            }
+            return file.open(excl, options)
+        }
+
+        private inline fun File.open(excl: OpenExcl, options: LinkedHashSet<StandardOpenOption>): NioFileStream {
+            val perms = excl._mode.toPosixFilePermissions()
+            val attrs = PosixFilePermissions.asFileAttribute(perms)
+            return open(excl, options, attrs)
         }
 
         private fun Mode.toPosixFilePermissions(): Set<PosixFilePermission> {
@@ -288,7 +318,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             throw t.mapNioException(this)
         }
 
-        return NioFileStream(channel, canRead = canRead, canWrite = canWrite)
+        return NioFileStream(channel, canRead, canWrite)
     }
 
     @Throws(IOException::class)
@@ -347,7 +377,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             return ch.position()
         }
 
-        override fun position(new: Long): FileStream.Read {
+        override fun position(new: Long): FileStream.ReadWrite {
             if (!canRead) return super.position(new)
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
             ch.position(new)
@@ -387,6 +417,23 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
             val bb = ByteBuffer.wrap(buf, offset, len)
             ch.write(bb)
+        }
+
+        override fun size(new: Long): FileStream.ReadWrite {
+            if (!canRead || !canWrite) return super.size(new)
+            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            val size = ch.size()
+            if (new > size) {
+                val pos = ch.position()
+                val bb = ByteBuffer.wrap(ByteArray(1))
+                ch.position(new - 1L)
+                ch.write(bb)
+                // Set back to what it was previously
+                if (pos < new) ch.position(pos)
+            } else {
+                ch.truncate(new)
+            }
+            return this
         }
 
         override fun close() {

@@ -73,6 +73,10 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
     @Throws(IOException::class)
     internal actual abstract fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
 
+    /** See [io.matthewnelson.kmp.file.openReadWrite] */
+    @Throws(IOException::class)
+    internal actual abstract fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream
+
     internal abstract class NonJvm(info: FsInfo): Fs(info) {
 
         @Throws(IOException::class)

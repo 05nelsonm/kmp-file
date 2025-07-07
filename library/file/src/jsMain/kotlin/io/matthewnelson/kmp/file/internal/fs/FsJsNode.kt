@@ -254,6 +254,11 @@ internal class FsJsNode private constructor(
     }
 
     // @Throws(IOException::class)
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        TODO("Not yet implemented")
+    }
+
+    // @Throws(IOException::class)
     override fun realpath(path: Path): Path = try {
         fs.realpathSync(path)
     } catch (t: Throwable) {
@@ -294,10 +299,10 @@ internal class FsJsNode private constructor(
             return _position
         }
 
-        override fun position(new: Long): FileStream.Read {
+        override fun position(new: Long): FileStream.ReadWrite {
             if (!canRead) return super.position(new)
             _fd ?: throw fileStreamClosed()
-            require(new >= 0L) { "new < 0" }
+            require(new >= 0L) { "new[$new] < 0" }
             _position = new
             return this
         }
@@ -335,6 +340,14 @@ internal class FsJsNode private constructor(
                 throw t.toIOException()
             }
             return stat.size.toLong()
+        }
+
+        override fun size(new: Long): FileStream.ReadWrite {
+            if (!canRead || !canWrite) return super.size(new)
+            val fd = _fd ?: throw fileStreamClosed()
+            require(new >= 0L) { "new[$new] < 0" }
+            // TODO
+            return this
         }
 
         override fun flush() {

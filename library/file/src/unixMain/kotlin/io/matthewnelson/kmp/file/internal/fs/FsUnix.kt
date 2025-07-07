@@ -118,6 +118,11 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     }
 
     @Throws(IOException::class)
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        TODO("Not yet implemented")
+    }
+
+    @Throws(IOException::class)
     override fun realpath(path: Path): Path {
         val p = realpath(path, null)
             ?: throw errnoToIOException(errno, path.toFile())

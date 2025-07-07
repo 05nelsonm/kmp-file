@@ -29,6 +29,13 @@ public abstract interface class io/matthewnelson/kmp/file/FileStream$Read : io/m
 	public abstract fun size ()J
 }
 
+public abstract interface class io/matthewnelson/kmp/file/FileStream$ReadWrite : io/matthewnelson/kmp/file/FileStream$Read, io/matthewnelson/kmp/file/FileStream$Write {
+	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
+	public abstract fun size (J)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
+	public abstract fun write ([B)V
+	public abstract fun write ([BII)V
+}
+
 public abstract interface class io/matthewnelson/kmp/file/FileStream$Write : io/matthewnelson/kmp/file/FileStream, java/io/Flushable {
 	public abstract fun flush ()V
 	public abstract fun write ([B)V
@@ -84,6 +91,7 @@ public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final fun normalizedFileOf (Ljava/io/File;)Ljava/io/File;
 	public static final fun openAppending (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public static final fun openRead (Ljava/io/File;)Lio/matthewnelson/kmp/file/FileStream$Read;
+	public static final fun openReadWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
 	public static final fun openWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public static final fun openWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Z)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public static final fun parentFileOf (Ljava/io/File;)Ljava/io/File;

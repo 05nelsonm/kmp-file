@@ -98,6 +98,12 @@ internal class FsJsBrowser private constructor(
     }
 
     // @Throws(IOException::class)
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        // TODO
+        throw UnsupportedOperationException("openReadWrite is not supported on $this.")
+    }
+
+    // @Throws(IOException::class)
     override fun realpath(path: Path): Path {
         // TODO: Maybe? >> return if (path.isEmpty() || path == ".") "/" else path
         throw UnsupportedOperationException("mkdir is not supported on $this.")

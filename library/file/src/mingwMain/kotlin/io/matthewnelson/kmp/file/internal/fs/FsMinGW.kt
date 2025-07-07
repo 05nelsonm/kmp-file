@@ -267,6 +267,11 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
     }
 
     @Throws(IOException::class)
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        TODO("Not yet implemented")
+    }
+
+    @Throws(IOException::class)
     override fun realpath(path: Path): Path {
         val p = _fullpath(null, path, PATH_MAX.toULong())
             ?: throw errnoToIOException(errno, path.toFile())
