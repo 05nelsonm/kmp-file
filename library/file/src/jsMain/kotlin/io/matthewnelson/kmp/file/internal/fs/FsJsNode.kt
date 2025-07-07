@@ -38,6 +38,7 @@ import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
 import io.matthewnelson.kmp.file.internal.node.ModuleOs
 import io.matthewnelson.kmp.file.internal.node.ModulePath
+import io.matthewnelson.kmp.file.internal.toNotLong
 import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.stat
@@ -222,40 +223,84 @@ internal class FsJsNode private constructor(
     }
 
     // @Throws(IOException::class)
-    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val fd = try {
-            if (isWindows) {
-                var flags = if (appending) "a" else "w"
-                when (excl) {
-                    is OpenExcl.MaybeCreate -> {}
-                    is OpenExcl.MustCreate -> flags += "x"
-                    // Windows must check manually because using flag combinations and
-                    // omitting O_CREAT will result in an EINVAL error.
-                    is OpenExcl.MustExist -> if (!exists(file)) throw fileNotFoundException(file, null, null)
-                }
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream = try {
+        if (isWindows) {
+            var flags = if (appending) "a" else "w"
+            when (excl) {
+                is OpenExcl.MaybeCreate -> {}
+                is OpenExcl.MustCreate -> flags += "x"
 
-                fs.openSync(file.path, flags, if (excl._mode.containsOwnerWriteAccess) "666" else "444")
-            } else {
-                var flags = fs.constants.O_WRONLY
-                flags = flags or if (appending) fs.constants.O_APPEND else fs.constants.O_TRUNC
-                flags = flags or when (excl) {
-                    is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
-                    is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
-                    is OpenExcl.MustExist -> 0
-                }
-
-                fs.openSync(file.path, flags, excl.mode)
+                // The resulting stream gets wrapped in a class that only implements FileStream.Write,
+                // so can force this OpenExcl.MustExist by opening O_RDWR and then setting up the stream
+                // manually before returning it.
+                is OpenExcl.MustExist -> flags = "r+"
             }
-        } catch (t: Throwable) {
-            throw t.toIOException(file)
-        }
+            val mode = if (excl._mode.containsOwnerWriteAccess) "666" else "444"
+            val fd = fs.openSync(file.path, flags, mode)
+            val s = JsNodeFileStream(fd, canRead = flags == "r+", canWrite = true)
 
-        return JsNodeFileStream(fd, canRead = false, canWrite = true)
+            if (s.canRead) {
+                try {
+                    if (appending) {
+                        val size = s.size()
+                        s.position(size)
+                    } else {
+                        // Truncate
+                        s.size(0L)
+                    }
+                } catch (e: IOException) {
+                    try {
+                        s.close()
+                    } catch (ee: IOException) {
+                        e.addSuppressed(ee)
+                    }
+                    throw e
+                }
+            }
+
+            s
+        } else {
+            var flags = fs.constants.O_WRONLY
+            flags = flags or if (appending) fs.constants.O_APPEND else fs.constants.O_TRUNC
+            flags = flags or when (excl) {
+                is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
+                is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
+                is OpenExcl.MustExist -> 0
+            }
+
+            val fd = fs.openSync(file.path, flags, excl.mode)
+            JsNodeFileStream(fd, canRead = false, canWrite = true)
+        }
+    } catch (t: Throwable) {
+        throw t.toIOException(file)
     }
 
     // @Throws(IOException::class)
-    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
-        TODO("Not yet implemented")
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream = try {
+        val flags = fs.constants.O_RDWR or when (excl) {
+            is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
+            is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
+            is OpenExcl.MustExist -> if (isWindows) {
+                // Windows requires that at least O_CREAT be expressed, otherwise
+                // will fail with EINVAL. So, must check for existence non-atomically
+                // beforehand.
+                if (!exists(file)) throw fileNotFoundException(file, null, null)
+
+                fs.constants.O_CREAT
+            } else {
+                0
+            }
+        }
+
+        val mode = if (isWindows) {
+            if (excl._mode.containsOwnerWriteAccess) "666" else "444"
+        } else {
+            excl.mode
+        }
+        val fd = fs.openSync(file.path, flags, mode)
+        JsNodeFileStream(fd, canRead = true, canWrite = true)
+    } catch (t: Throwable) {
+        throw t.toIOException(file)
     }
 
     // @Throws(IOException::class)
@@ -346,7 +391,12 @@ internal class FsJsNode private constructor(
             if (!canRead || !canWrite) return super.size(new)
             val fd = _fd ?: throw fileStreamClosed()
             require(new >= 0L) { "new[$new] < 0" }
-            // TODO
+            try {
+                fs.ftruncateSync(fd, new.toNotLong())
+            } catch (t: Throwable) {
+                throw t.toIOException()
+            }
+            if (_position > new) _position = new
             return this
         }
 
@@ -371,6 +421,9 @@ internal class FsJsNode private constructor(
 
             var total = 0
             while (total < len) {
+                // If it's write-only, modification of position is not supported
+                // from the interface so use whatever the current position is
+                // for the descriptor.
                 val pos: Long? = if (canRead) _position + total else null
 
                 val bytesWritten = try {

@@ -26,6 +26,8 @@ internal external interface ModuleFs {
     fun closeSync(fd: Number)
     fun fstatSync(fd: Number): JsStats
     fun fsyncSync(fd: Number)
+    fun ftruncateSync(fd: Number, len: Number)
+    fun lstatSync(path: Path): JsStats
     fun mkdirSync(path: Path, options: dynamic): String?
     fun openSync(path: Path, flags: Int): Number
     fun openSync(path: Path, flags: Int, mode: String): Number
@@ -34,13 +36,12 @@ internal external interface ModuleFs {
     fun readFileSync(path: Path): JsBuffer
     fun realpathSync(path: Path): Path
     fun rmdirSync(path: Path, options: dynamic)
+    fun statSync(path: Path): JsStats
     fun unlinkSync(path: Path)
     fun writeSync(fd: Number, buffer: ByteArray, offset: Int, length: Int, position: Number?): Int
     fun writeFileSync(path: Path, data: JsBuffer)
     fun writeFileSync(path: Path, data: ByteArray)
     fun writeFileSync(path: Path, data: String)
-    fun lstatSync(path: Path): JsStats
-    fun statSync(path: Path): JsStats
 
     val constants: ConstantsFs
 }

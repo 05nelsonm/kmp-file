@@ -19,11 +19,7 @@ import kotlin.test.Test
 
 class FileStreamReadWriteUnitTest: FileStreamReadWriteSharedTest() {
 
-    // TODO
-    override val checker: PermissionChecker? = when (SysFsInfo.name) {
-        "FsJsNode" -> null
-        else -> permissionChecker()
-    }
+    override val checker: PermissionChecker? = permissionChecker()
 
     @Test
     fun stub() {}

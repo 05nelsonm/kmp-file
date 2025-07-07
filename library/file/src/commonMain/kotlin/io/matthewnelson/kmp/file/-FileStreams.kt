@@ -17,10 +17,7 @@ package io.matthewnelson.kmp.file
 
 // Strictly for supporting isInstance checks
 internal class FileStreamReadOnly internal constructor(private val s: AbstractFileStream): FileStream.Read by s {
-    init {
-        check(s.canRead) { "AbstractFileStream.canRead != true" }
-        check(!s.canWrite) { "AbstractFileStream.canWrite != false" }
-    }
+    init { check(s.canRead) { "AbstractFileStream.canRead != true" } }
     override fun position(new: Long): FileStream.Read { s.position(new); return this }
     override fun equals(other: Any?): Boolean = other is FileStreamReadOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
@@ -29,10 +26,7 @@ internal class FileStreamReadOnly internal constructor(private val s: AbstractFi
 
 // Strictly for supporting isInstance checks
 internal class FileStreamWriteOnly internal constructor(private val s: AbstractFileStream): FileStream.Write by s {
-    init {
-        check(!s.canRead) { "AbstractFileStream.canRead != false" }
-        check(s.canWrite) { "AbstractFileStream.canWrite != true" }
-    }
+    init { check(s.canWrite) { "AbstractFileStream.canWrite != true" } }
     override fun equals(other: Any?): Boolean = other is FileStreamWriteOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
     override fun toString(): String = s.toString()

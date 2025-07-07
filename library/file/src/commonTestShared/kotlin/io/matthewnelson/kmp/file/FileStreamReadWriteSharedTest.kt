@@ -35,10 +35,25 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
     final override fun assertIsNotWrite(s: FileStream) { assertIs<FileStream.ReadWrite>(s) }
 
     @Test
+    fun givenOpenReadWrite_whenExclMustExist_thenThrowsFileNotFoundException() = runTest { tmp ->
+        assertFailsWith<FileNotFoundException> {
+            tmp.testOpen(excl = OpenExcl.MustExist).close()
+        }
+    }
+
+    @Test
+    fun givenOpenWrite_whenExclMustCreate_thenThrowsFileAlreadyExistsException() = runTest { tmp ->
+        tmp.writeUtf8(excl = null, "Hello World!")
+        assertFailsWith<FileAlreadyExistsException> {
+            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT).close()
+        }
+    }
+
+    @Test
     fun givenOpenReadWrite_whenOpened_thenInitialPositionIs0() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
 
-        tmp.testOpen(null).use { s ->
+        tmp.testOpen(excl = OpenExcl.MustExist).use { s ->
             assertEquals(0L, s.position())
             assertTrue(s.size() > 0L)
         }
@@ -49,7 +64,7 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
         val data = "Hello World!".encodeToByteArray()
         tmp.writeBytes(excl = null, data)
 
-        tmp.testOpen(null).use { s ->
+        tmp.testOpen(excl = OpenExcl.MustExist).use { s ->
             assertEquals(data.size.toLong(), s.size())
         }
     }
