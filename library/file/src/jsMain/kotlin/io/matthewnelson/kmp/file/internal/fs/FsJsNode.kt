@@ -33,7 +33,6 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
-import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
 import io.matthewnelson.kmp.file.internal.node.ModuleOs
@@ -240,6 +239,7 @@ internal class FsJsNode private constructor(
             val s = JsNodeFileStream(fd, canRead = flags == "r+", canWrite = true)
 
             if (s.canRead) {
+                // Will only be the case when OpenExcl.MustExist.
                 try {
                     if (appending) {
                         val size = s.size()
