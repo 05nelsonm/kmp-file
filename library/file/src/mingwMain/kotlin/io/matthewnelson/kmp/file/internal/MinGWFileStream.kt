@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.lastErrorToIOException
+import kotlinx.cinterop.AutofreeScope
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.IntVarOf
 import kotlinx.cinterop.UIntVarOf
@@ -43,6 +46,7 @@ import platform.windows.INVALID_HANDLE_VALUE
 import platform.windows.INVALID_SET_FILE_POINTER
 import platform.windows.LARGE_INTEGER
 import platform.windows.ReadFile
+import platform.windows.SetEndOfFile
 import platform.windows.SetFilePointer
 import platform.windows.SetFilePointerEx
 import platform.windows.WriteFile
@@ -64,40 +68,13 @@ internal class MinGWFileStream(
     override fun position(): Long {
         if (!canRead) return super.position()
         val h = _h.value ?: throw fileStreamClosed()
-        return memScoped {
-            val dhi = alloc<IntVarOf<Int>> { value = 0 }
-            val dlo = SetFilePointer(
-                hFile = h,
-                lDistanceToMove = 0,
-                lpDistanceToMoveHigh = dhi.ptr,
-                dwMoveMethod = FILE_CURRENT.convert(),
-            )
-            if (dlo == INVALID_SET_FILE_POINTER) throw lastErrorToIOException()
-
-            val hi = (dhi.value.toLong() and 0xffffffff) shl 32
-            val lo = (dlo.toLong()       and 0xffffffff)
-            hi or lo
-        }
+        return memScoped { h.getPosition(scope = this) }
     }
 
-    override fun position(new: Long): FileStream.Read {
+    override fun position(new: Long): FileStream.ReadWrite {
         if (!canRead) return super.position(new)
         val h = _h.value ?: throw fileStreamClosed()
-        require(new >= 0L) { "new < 0" }
-
-        val distance = cValue<LARGE_INTEGER> {
-            LowPart = new.toInt().convert()
-            HighPart = (new ushr 32).toInt().convert()
-        }
-
-        val ret = SetFilePointerEx(
-            hFile = h,
-            liDistanceToMove = distance,
-            lpNewFilePointer = null,
-            dwMoveMethod = FILE_BEGIN.convert(),
-        )
-        if (ret == FALSE) throw lastErrorToIOException()
-
+        h.setPosition(new)
         return this
     }
 
@@ -150,6 +127,17 @@ internal class MinGWFileStream(
         }
     }
 
+    override fun size(new: Long): FileStream.ReadWrite {
+        if (!canRead || !canWrite) return super.size(new)
+        val h = _h.value ?: throw fileStreamClosed()
+        val pos = memScoped { h.getPosition(scope = this) }
+        if (pos != new) h.setPosition(new)
+        if (SetEndOfFile(h) == FALSE) throw lastErrorToIOException()
+        // Set back to what it was previously
+        if (pos < new) h.setPosition(pos)
+        return this
+    }
+
     override fun flush() {
         if (!canWrite) return super.flush()
         val h = _h.value ?: throw fileStreamClosed()
@@ -196,4 +184,40 @@ internal class MinGWFileStream(
     }
 
     override fun toString(): String = "MinGWFileStream@" + hashCode().toString()
+}
+
+@Throws(IOException::class)
+@OptIn(ExperimentalForeignApi::class)
+private inline fun HANDLE.getPosition(scope: AutofreeScope): Long = with(scope) {
+    val dhi = alloc<IntVarOf<Int>> { value = 0 }
+    val dlo = SetFilePointer(
+        hFile = this@getPosition,
+        lDistanceToMove = 0,
+        lpDistanceToMoveHigh = dhi.ptr,
+        dwMoveMethod = FILE_CURRENT.convert(),
+    )
+    if (dlo == INVALID_SET_FILE_POINTER) throw lastErrorToIOException()
+
+    val hi = (dhi.value.toLong() and 0xffffffff) shl 32
+    val lo = (dlo.toLong()       and 0xffffffff)
+    return hi or lo
+}
+
+@OptIn(ExperimentalForeignApi::class)
+@Throws(IllegalArgumentException::class, IOException::class)
+private inline fun HANDLE.setPosition(new: Long) {
+    require(new >= 0L) { "new[$new] < 0" }
+
+    val distance = cValue<LARGE_INTEGER> {
+        LowPart = new.toInt().convert()
+        HighPart = (new ushr 32).toInt().convert()
+    }
+
+    val ret = SetFilePointerEx(
+        hFile = this,
+        liDistanceToMove = distance,
+        lpNewFilePointer = null,
+        dwMoveMethod = FILE_BEGIN.convert(),
+    )
+    if (ret == FALSE) throw lastErrorToIOException()
 }

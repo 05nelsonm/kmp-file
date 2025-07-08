@@ -57,6 +57,7 @@ import platform.posix.free
 import platform.posix.mkdir
 import platform.posix.remove
 import platform.posix.rmdir
+import platform.windows.CREATE_ALWAYS
 import platform.windows.CREATE_NEW
 import platform.windows.CreateFileA
 import platform.windows.FALSE
@@ -73,9 +74,9 @@ import platform.windows.INVALID_SET_FILE_POINTER
 import platform.windows.OPEN_ALWAYS
 import platform.windows.OPEN_EXISTING
 import platform.windows.PathIsRelativeA
-import platform.windows.SetEndOfFile
 import platform.windows.SetFileAttributesA
 import platform.windows.SetFilePointer
+import platform.windows.TRUNCATE_EXISTING
 
 @OptIn(ExperimentalForeignApi::class)
 internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosix = false)) {
@@ -200,15 +201,30 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val (disposition, deleteOnFailure) = when (excl) {
-            is OpenExcl.MaybeCreate -> OPEN_ALWAYS to !exists(file)
-            is OpenExcl.MustCreate -> CREATE_NEW to true
-            is OpenExcl.MustExist -> OPEN_EXISTING to false
-        }
-
         var attributes = FILE_ATTRIBUTE_NORMAL
         if (!excl._mode.containsOwnerWriteAccess) {
             attributes = attributes or FILE_ATTRIBUTE_READONLY
+        }
+
+        val disposition = when (excl) {
+            is OpenExcl.MaybeCreate -> if (appending) OPEN_ALWAYS else CREATE_ALWAYS
+            is OpenExcl.MustCreate -> CREATE_NEW
+            is OpenExcl.MustExist -> if (appending) OPEN_EXISTING else TRUNCATE_EXISTING
+        }
+
+        val deleteOnSetPointerFailure = if (appending) {
+            // Only when appending do we need to run commands after opening
+            // the stream. If they fail, need to clean up the file if it is
+            // newly created.
+            when (excl) {
+                is OpenExcl.MaybeCreate -> !exists(file)
+                // Will be a new file if successful CreateFile. No need to
+                // set pointer to EOF for appending (size will be 0L).
+                is OpenExcl.MustCreate -> null
+                is OpenExcl.MustExist -> false
+            }
+        } else {
+            null
         }
 
         val handle = CreateFileA(
@@ -224,46 +240,62 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
         val stream = MinGWFileStream(handle, canRead = false, canWrite = true)
 
-        val doFailure = when {
-            // No need to do anything, file was just created.
-            excl is OpenExcl.MustCreate -> false
+        run {
+            if (deleteOnSetPointerFailure == null) return@run
 
-            // Need to ensure pointer is at the end of the file
-            appending -> {
-                val ret = SetFilePointer(
-                    hFile = handle,
-                    lDistanceToMove = 0,
-                    lpDistanceToMoveHigh = null,
-                    dwMoveMethod = FILE_END.convert(),
-                )
-                ret == INVALID_SET_FILE_POINTER
-            }
+            val ret = SetFilePointer(
+                hFile = handle,
+                lDistanceToMove = 0,
+                lpDistanceToMoveHigh = null,
+                dwMoveMethod = FILE_END.convert(),
+            )
+            if (ret != INVALID_SET_FILE_POINTER) return@run
 
-            // Truncate if not already
-            else -> {
-                val ret = SetEndOfFile(handle)
-                ret == FALSE
-            }
-        }
-
-        if (doFailure) {
+            // Failed to set pointer to EOF for appending.
             val e = lastErrorToIOException(file)
             try {
                 stream.close()
             } catch (ee: IOException) {
                 e.addSuppressed(ee)
             }
-            if (deleteOnFailure) {
-                try {
-                    delete(file, ignoreReadOnly = true, mustExist = true)
-                } catch (ee: IOException) {
-                    e.addSuppressed(ee)
-                }
+            if (!deleteOnSetPointerFailure) throw e
+
+            try {
+                delete(file, ignoreReadOnly = true, mustExist = true)
+            } catch (ee: IOException) {
+                e.addSuppressed(ee)
             }
             throw e
         }
 
         return stream
+    }
+
+    @Throws(IOException::class)
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        var attributes = FILE_ATTRIBUTE_NORMAL
+        if (!excl._mode.containsOwnerWriteAccess) {
+            attributes = attributes or FILE_ATTRIBUTE_READONLY
+        }
+
+        val disposition = when (excl) {
+            is OpenExcl.MaybeCreate -> OPEN_ALWAYS
+            is OpenExcl.MustCreate -> CREATE_NEW
+            is OpenExcl.MustExist -> OPEN_EXISTING
+        }
+
+        val handle = CreateFileA(
+            lpFileName = file.path,
+            dwDesiredAccess = (GENERIC_READ.toInt() or GENERIC_WRITE).convert(),
+            dwShareMode = (FILE_SHARE_DELETE or FILE_SHARE_READ or FILE_SHARE_WRITE).convert(),
+            lpSecurityAttributes = null,
+            dwCreationDisposition = disposition.convert(),
+            dwFlagsAndAttributes = attributes.convert(),
+            hTemplateFile = null,
+        )
+        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
+
+        return MinGWFileStream(handle, canRead = true, canWrite = true)
     }
 
     @Throws(IOException::class)

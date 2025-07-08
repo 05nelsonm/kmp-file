@@ -29,6 +29,13 @@ sealed interface io.matthewnelson.kmp.file/FileStream : io.matthewnelson.kmp.fil
         abstract fun size(): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.size|size(){}[0]
     }
 
+    sealed interface ReadWrite : io.matthewnelson.kmp.file/FileStream.Read, io.matthewnelson.kmp.file/FileStream.Write { // io.matthewnelson.kmp.file/FileStream.ReadWrite|null[0]
+        abstract fun position(kotlin/Long): io.matthewnelson.kmp.file/FileStream.ReadWrite // io.matthewnelson.kmp.file/FileStream.ReadWrite.position|position(kotlin.Long){}[0]
+        abstract fun size(kotlin/Long): io.matthewnelson.kmp.file/FileStream.ReadWrite // io.matthewnelson.kmp.file/FileStream.ReadWrite.size|size(kotlin.Long){}[0]
+        abstract fun write(kotlin/ByteArray) // io.matthewnelson.kmp.file/FileStream.ReadWrite.write|write(kotlin.ByteArray){}[0]
+        abstract fun write(kotlin/ByteArray, kotlin/Int, kotlin/Int) // io.matthewnelson.kmp.file/FileStream.ReadWrite.write|write(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+    }
+
     sealed interface Write : io.matthewnelson.kmp.file/FileStream { // io.matthewnelson.kmp.file/FileStream.Write|null[0]
         abstract fun flush() // io.matthewnelson.kmp.file/FileStream.Write.flush|flush(){}[0]
         abstract fun write(kotlin/ByteArray) // io.matthewnelson.kmp.file/FileStream.Write.write|write(kotlin.ByteArray){}[0]
@@ -181,6 +188,7 @@ final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/mkdir2(kotl
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/mkdirs2(kotlin/String?, kotlin/Boolean = ...): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/mkdirs2|mkdirs2@io.matthewnelson.kmp.file.File(kotlin.String?;kotlin.Boolean){}[0]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/normalize(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/normalize|normalize@io.matthewnelson.kmp.file.File(){}[0]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/openRead(): io.matthewnelson.kmp.file/FileStream.Read // io.matthewnelson.kmp.file/openRead|openRead@io.matthewnelson.kmp.file.File(){}[0]
+final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/openReadWrite(io.matthewnelson.kmp.file/OpenExcl?): io.matthewnelson.kmp.file/FileStream.ReadWrite // io.matthewnelson.kmp.file/openReadWrite|openReadWrite@io.matthewnelson.kmp.file.File(io.matthewnelson.kmp.file.OpenExcl?){}[0]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/openWrite(io.matthewnelson.kmp.file/OpenExcl?, kotlin/Boolean): io.matthewnelson.kmp.file/FileStream.Write // io.matthewnelson.kmp.file/openWrite|openWrite@io.matthewnelson.kmp.file.File(io.matthewnelson.kmp.file.OpenExcl?;kotlin.Boolean){}[0]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/readBytes(): kotlin/ByteArray // io.matthewnelson.kmp.file/readBytes|readBytes@io.matthewnelson.kmp.file.File(){}[0]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/readUtf8(): kotlin/String // io.matthewnelson.kmp.file/readUtf8|readUtf8@io.matthewnelson.kmp.file.File(){}[0]

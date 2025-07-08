@@ -13,23 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("NOTHING_TO_INLINE")
+package io.matthewnelson.kmp.file.test.android
 
-package io.matthewnelson.kmp.file.internal
+import io.matthewnelson.kmp.file.FileStreamReadWriteSharedTest
+import io.matthewnelson.kmp.file.PermissionChecker
+import kotlin.test.Ignore
+import kotlin.test.Test
 
-import kotlinx.cinterop.ExperimentalForeignApi
-import platform.posix.ftruncate64
-import platform.posix.lseek64
+class FileStreamReadWriteAndroidTest: FileStreamReadWriteSharedTest() {
 
-@ExperimentalForeignApi
-internal actual inline fun platformLSeek(
-    fd: Int,
-    offset: Long,
-    whence: Int,
-): Long = lseek64(fd, offset, whence)
+    override val checker: PermissionChecker? = androidPermissionChecker()
 
-@ExperimentalForeignApi
-internal actual inline fun platformFTruncate(
-    fd: Int,
-    offset: Long,
-): Int = ftruncate64(fd, offset)
+    @Test
+    @Ignore
+    fun stub() {}
+}

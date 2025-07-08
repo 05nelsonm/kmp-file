@@ -48,6 +48,9 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
         assertFailsWith<FileNotFoundException> {
             tmp.testOpen(excl = OpenExcl.MustExist, false).close()
         }
+        assertFailsWith<FileNotFoundException> {
+            tmp.testOpen(excl = OpenExcl.MustExist, true).close()
+        }
     }
 
     @Test
@@ -56,6 +59,9 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
         assertFailsWith<FileAlreadyExistsException> {
             tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, false).close()
         }
+        assertFailsWith<FileAlreadyExistsException> {
+            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, true).close()
+        }
     }
 
     @Test
@@ -63,7 +69,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
         tmp.writeUtf8(excl = null, "Hello World!")
         assertTrue(tmp.readBytes().isNotEmpty())
 
-        tmp.testOpen(null, appending = false).use { s ->
+        tmp.testOpen(excl = OpenExcl.MustExist, appending = false).use { s ->
             assertTrue(tmp.readBytes().isEmpty())
         }
     }
@@ -71,7 +77,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     @Test
     fun givenOpenWrite_whenAppendingTrue_thenIsNotTruncated() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-        tmp.testOpen(null, appending = true).use { s ->
+        tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s ->
             val buf = "Hello World2!".encodeToByteArray()
             s.write(buf, offset = 0, len = buf.size - 2)
             s.write(buf, offset = buf.size - 2, 2)

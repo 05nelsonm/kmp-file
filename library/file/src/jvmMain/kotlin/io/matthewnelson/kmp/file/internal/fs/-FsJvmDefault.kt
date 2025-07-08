@@ -19,6 +19,7 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
+import io.matthewnelson.kmp.file.Closeable
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
@@ -37,6 +38,9 @@ import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import kotlin.concurrent.Volatile
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 // The "Default" filesystem implementation, when all else fails. In
 // production, should only ever be used when Android API is 20 or below.
@@ -128,31 +132,48 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val exists = exists(file)
+        val fos = file.open(excl, openCloseable = { FileOutputStream(file, /* append = */ appending) })
+        return WriteOnlyFileStream(fos)
+    }
+
+    @Throws(IOException::class)
+    override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        val raf = file.open(excl, openCloseable = { RandomAccessFile(file, "rw") })
+        return RandomAccessFileStream(raf, canRead = true, canWrite = true)
+    }
+
+    @Throws(IOException::class)
+    @OptIn(ExperimentalContracts::class)
+    private inline fun <C: Closeable> File.open(excl: OpenExcl, openCloseable: () -> C): C {
+        contract {
+            callsInPlace(openCloseable, InvocationKind.AT_MOST_ONCE)
+        }
+
+        val exists = exists(this)
 
         when (excl) {
             is OpenExcl.MaybeCreate -> {}
-            is OpenExcl.MustCreate -> if (exists) throw FileAlreadyExistsException(file)
-            is OpenExcl.MustExist -> if (!exists) throw fileNotFoundException(file, null, null)
+            is OpenExcl.MustCreate -> if (exists) throw FileAlreadyExistsException(this)
+            is OpenExcl.MustExist -> if (!exists) throw fileNotFoundException(this, null, null)
         }
 
-        val fos = FileOutputStream(file, /* append = */ appending)
+        val closeable = openCloseable()
 
         run {
-            if (exists) return@run
-            if (excl._mode == Mode.DEFAULT_FILE) return@run
-            if (IsWindows && excl._mode.containsOwnerWriteAccess) return@run
+            if (exists) return@run // Already existed prior to opening for the first time
+            if (excl._mode == Mode.DEFAULT_FILE) return@run // Default permissions, nothing to change
+            if (IsWindows && excl._mode.containsOwnerWriteAccess) return@run // Default permissions, nothing to change.
 
             try {
-                chmod(file, excl._mode, mustExist = true)
+                chmod(this, excl._mode, mustExist = true)
             } catch (e: IOException) {
                 try {
-                    fos.close()
+                    closeable.close()
                 } catch (ee: IOException) {
                     e.addSuppressed(ee)
                 }
                 try {
-                    delete(file, ignoreReadOnly = true, mustExist = true)
+                    delete(this, ignoreReadOnly = true, mustExist = true)
                 } catch (ee: IOException) {
                     e.addSuppressed(ee)
                 }
@@ -160,7 +181,7 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
             }
         }
 
-        return WriteOnlyFileStream(fos)
+        return closeable
     }
 
     private class WriteOnlyFileStream(fos: FileOutputStream): AbstractFileStream(canRead = false, canWrite = true) {
@@ -210,10 +231,10 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
             return raf.filePointer
         }
 
-        override fun position(new: Long): FileStream.Read {
+        override fun position(new: Long): FileStream.ReadWrite {
             if (!canRead) return super.position(new)
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            require(new >= 0L) { "offset[$new] < 0" }
+            require(new >= 0L) { "new[$new] < 0" }
             raf.seek(new)
             return this
         }
@@ -228,6 +249,14 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
             if (!canRead) return super.size()
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
             return raf.length()
+        }
+
+        override fun size(new: Long): FileStream.ReadWrite {
+            if (!canRead || !canWrite) return super.size(new)
+            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            require(new >= 0L) { "new[$new] < 0" }
+            raf.setLength(new)
+            return this
         }
 
         override fun flush() {

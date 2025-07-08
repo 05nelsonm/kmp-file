@@ -27,12 +27,12 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
 
     protected open fun File.testOpen(): FileStream.Read = openRead()
 
+    protected open fun assertIsNotWrite(s: FileStream) { assertIsNot<FileStream.Write>(s) }
+
     @Test
     fun givenOpenRead_whenIsInstanceOfFileStreamWrite_thenIsFalse() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-        tmp.testOpen().use { s ->
-            assertIsNot<FileStream.Write>(s)
-        }
+        tmp.testOpen().use { s -> assertIsNotWrite(s) }
     }
 
     @Test
@@ -63,7 +63,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             }
             // Ensure ReadOnlyFileStream wrapper has overridden and
             // returns itself instead of the underlying.
-            assertIsNot<FileStream.Write>(s.position(4))
+            assertIsNotWrite(s.position(4))
             assertEquals(4, s.position())
 
             buf.fill(0)

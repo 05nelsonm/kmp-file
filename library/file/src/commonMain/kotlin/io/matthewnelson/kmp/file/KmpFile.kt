@@ -442,6 +442,39 @@ public fun File.openRead(): FileStream.Read {
 }
 
 /**
+ * Opens a [File] for read/write operations. The [File] is **not** truncated
+ * if it already exists, and the initial [FileStream.ReadWrite.position] is
+ * `0`.
+ *
+ * e.g.
+ *
+ *     "/path/to/my/file".toFile().openReadWrite().use { s ->
+ *         // read
+ *         // write
+ *     }
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ *
+ * @return A [FileStream.ReadWrite] for read/write operations.
+ *
+ * @see [use]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
+ * */
+@Throws(IOException::class)
+public fun File.openReadWrite(excl: OpenExcl?): FileStream.ReadWrite {
+    val s = Fs.get().openReadWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT)
+    // TODO: Disappearing check whereby non-SNAPSHOT version does nothing.
+    check(s.canRead) { "!canRead" }
+    check(s.canWrite) { "!canWrite" }
+    return s
+}
+
+/**
  * Opens a [File] for write operations.
  *
  * e.g.
