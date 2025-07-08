@@ -277,27 +277,23 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream = try {
-        val flags = fs.constants.O_RDWR or when (excl) {
-            is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
-            is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
-            is OpenExcl.MustExist -> if (isWindows) {
-                // Windows requires that at least O_CREAT be expressed, otherwise
-                // will fail with EINVAL. So, must check for existence non-atomically
-                // beforehand.
-                if (!exists(file)) throw fileNotFoundException(file, null, null)
-
-                fs.constants.O_CREAT
-            } else {
-                0
-            }
-        }
-
         val mode = if (isWindows) {
             if (excl._mode.containsOwnerWriteAccess) "666" else "444"
         } else {
             excl.mode
         }
-        val fd = fs.openSync(file.path, flags, mode)
+
+        val fd = if (isWindows && excl is OpenExcl.MustExist) {
+            fs.openSync(file.path, "r+", mode)
+        } else {
+            val flags = fs.constants.O_RDWR or when (excl) {
+                is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
+                is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
+                is OpenExcl.MustExist -> 0
+            }
+            fs.openSync(file.path, flags, mode)
+        }
+
         JsNodeFileStream(fd, canRead = true, canWrite = true)
     } catch (t: Throwable) {
         throw t.toIOException(file)
