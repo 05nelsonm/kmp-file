@@ -20,3 +20,4 @@ import io.matthewnelson.kmp.file.internal.js.JsObject
 internal expect fun nodeOptionsMkDir(recursive: Boolean): JsObject
 internal expect fun nodeOptionsMkDir(recursive: Boolean, mode: String): JsObject
 internal expect fun nodeOptionsRmDir(force: Boolean, recursive: Boolean): JsObject
+internal expect fun nodeOptionsWriteFile(mode: String, flag: String): JsObject

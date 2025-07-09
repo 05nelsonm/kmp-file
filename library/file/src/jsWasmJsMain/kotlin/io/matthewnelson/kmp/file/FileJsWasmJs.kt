@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
+import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
+import io.matthewnelson.kmp.file.internal.node.nodeOptionsWriteFile
 import io.matthewnelson.kmp.file.internal.require
 
 /**
@@ -91,23 +96,85 @@ public fun File.read(): Buffer {
 
 /**
  * Writes the contents of a [Buffer] to the file associated with the
+ * abstract pathname. The [File] will be truncated if it exists.
+ *
+ * [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options)
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] If Node.js is not being used.
+ * */
+@Throws(IOException::class)
+public inline fun File.write(excl: OpenExcl?, data: Buffer) {
+    write(excl, appending = false, data)
+}
+
+/**
+ * Writes the contents of a [Buffer] to the file associated with the
  * abstract pathname.
  *
  * [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options)
  *
- * @throws [IOException] if there was a failure to write to the filesystem,
- *   or the filesystem threw a security exception.
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [appending] If `true`, data written to this file will occur at the
+ *   end of the file. If `false`, the file will be truncated if it exists.
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
  * @throws [UnsupportedOperationException] If Node.js is not being used.
  * */
 @Throws(IOException::class)
-public fun File.write(data: Buffer) {
+public fun File.write(excl: OpenExcl?, appending: Boolean, data: Buffer) {
     val node = FsJsNode.require()
+    val excl = excl ?: OpenExcl.MaybeCreate.DEFAULT
+
+    val mode = if (IsWindows) {
+        if (excl._mode.containsOwnerWriteAccess) "666" else "444"
+    } else {
+        excl.mode
+    }
+
+    var flags = if (appending) "a" else "w"
+    when (excl) {
+        is OpenExcl.MaybeCreate -> {}
+        is OpenExcl.MustCreate -> flags += "x"
+        is OpenExcl.MustExist -> if (!node.exists(this)) throw fileNotFoundException(this, null, null)
+    }
+
+    val options = nodeOptionsWriteFile(mode = mode, flag = flags)
+
     try {
         @OptIn(DelicateFileApi::class)
-        jsExternTryCatch { node.fs.writeFileSync(path, data.value) }
+        jsExternTryCatch { node.fs.writeFileSync(path, data.value, options) }
     } catch (t: Throwable) {
         throw t.toIOException(this)
     }
+}
+
+/**
+ * Writes the contents of a [Buffer] to the file associated with the
+ * abstract pathname. If the file exists, all new data will be appended
+ * to the end of the file.
+ *
+ * [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options)
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] If Node.js is not being used.
+ * */
+@Throws(IOException::class)
+public inline fun File.append(excl: OpenExcl?, data: Buffer) {
+    write(excl, appending = true, data)
 }
 
 /**
@@ -117,6 +184,9 @@ public fun File.write(data: Buffer) {
  * wrapped in a function call and run from Js within its own try/catch block. If
  * an Error was caught, it is returned to Kotlin code, converted to [Throwable],
  * and then thrown.
+ *
+ * **NOTE:** This should only be utilized for externally defined calls, not general
+ * kotlin code.
  *
  * e.g.
  *
@@ -132,6 +202,11 @@ public fun File.write(data: Buffer) {
  *             throw t
  *         }
  *     }
+ *
+ * @see [errorCodeOrNull]
+ * @see [toIOException]
+ *
+ * @throws [Throwable] If [block] throws exception
  * */
 @DelicateFileApi
 @Throws(Throwable::class)

@@ -30,7 +30,7 @@ class WrapperJsUnitTest: WrapperBaseTest() {
 
         val tmp = randomTemp()
         try {
-            tmp.write(gzip)
+            tmp.write(excl = null, data = gzip)
             assertEquals(bytes.sha256(), tmp.readBytes().sha256())
         } finally {
             tmp.delete2()

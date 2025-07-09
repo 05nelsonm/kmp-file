@@ -23,10 +23,15 @@ internal actual fun nodeOptionsMkDir(
 
 internal actual fun nodeOptionsMkDir(
     recursive: Boolean,
-    mode: String
+    mode: String,
 ): JsObject = js("({ recursive: recursive, mode: mode })")
 
 internal actual fun nodeOptionsRmDir(
     force: Boolean,
-    recursive: Boolean
+    recursive: Boolean,
 ): JsObject = js("({ force: force, recursive: recursive })")
+
+internal actual fun nodeOptionsWriteFile(
+    mode: String,
+    flag: String,
+): JsObject = js("({ mode: mode, flag: flag })")

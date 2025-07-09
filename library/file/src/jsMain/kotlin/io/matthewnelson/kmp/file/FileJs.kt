@@ -25,6 +25,9 @@ package io.matthewnelson.kmp.file
  * an Error was caught, it is returned to Kotlin code, converted to [Throwable],
  * and then thrown.
  *
+ * **NOTE:** This should only be utilized for externally defined calls, not general
+ * kotlin code.
+ *
  * e.g.
  *
  *     internal external interface SomeJsThing {
@@ -39,6 +42,11 @@ package io.matthewnelson.kmp.file
  *             throw t
  *         }
  *     }
+ *
+ * @see [errorCodeOrNull]
+ * @see [toIOException]
+ *
+ * @throws [Throwable] If [block] throws exception
  * */
 // @Throws(Throwable::class)
 public actual inline fun <T: Any?> jsExternTryCatch(block: () -> T): T = block()
@@ -54,3 +62,22 @@ public actual val Throwable.errorCodeOrNull: String? get() = try {
 } catch (_: Throwable) {
     null
 }
+
+
+
+// --- DEPRECATED ---
+
+/**
+ * DEPRECATED
+ * @throws [IOException]
+ * @throws [UnsupportedOperationException]
+ * @suppress
+ * */
+@Deprecated(
+    message = "Missing file exclusivity parameter. Use other write function.",
+    replaceWith = ReplaceWith(
+        expression = "this.write(excl = null, data)",
+    )
+)
+//@Throws(IOException::class)
+public fun File.write(data: Buffer) { write(excl = null, data) }
