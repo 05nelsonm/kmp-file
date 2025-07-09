@@ -17,6 +17,10 @@
 
 package io.matthewnelson.kmp.file
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * Helper for calling externally defined code in order to propagate a proper
  * JS [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
@@ -49,7 +53,14 @@ package io.matthewnelson.kmp.file
  * @throws [Throwable] If [block] throws exception
  * */
 // @Throws(Throwable::class)
-public actual inline fun <T: Any?> jsExternTryCatch(block: () -> T): T = block()
+@OptIn(ExperimentalContracts::class)
+public actual inline fun <T: Any?> jsExternTryCatch(block: () -> T): T {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+
+    return block()
+}
 
 /**
  * Attempts to retrieve the `code` from an exception thrown from JavaScript.

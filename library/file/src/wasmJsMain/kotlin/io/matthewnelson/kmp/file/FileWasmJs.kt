@@ -17,6 +17,10 @@
 
 package io.matthewnelson.kmp.file
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * Helper for calling externally defined code in order to propagate a proper
  * JS [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
@@ -50,8 +54,15 @@ package io.matthewnelson.kmp.file
  * */
 @DelicateFileApi
 // @Throws(Throwable::class)
+@OptIn(ExperimentalContracts::class)
 public actual inline fun <T: Any?> jsExternTryCatch(crossinline block: () -> T): T {
+    @Suppress("LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+
     var r: Any? = null
+    @Suppress("LEAKED_IN_PLACE_LAMBDA")
     internalWasmJsExternTryCatch { r = block() }
     @Suppress("UNCHECKED_CAST")
     return r as T
