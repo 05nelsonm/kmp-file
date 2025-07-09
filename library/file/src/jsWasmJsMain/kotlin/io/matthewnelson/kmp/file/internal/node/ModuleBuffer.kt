@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("UNUSED", "PropertyName")
+@file:Suppress("UNUSED", "PropertyName", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
 package io.matthewnelson.kmp.file.internal.node
 
 import io.matthewnelson.kmp.file.DelicateFileApi
+import kotlin.js.JsName
 
 /** [docs](https://nodejs.org/api/buffer.html) */
 internal external interface ModuleBuffer {
@@ -26,25 +27,27 @@ internal external interface ModuleBuffer {
 
 /** [docs](https://nodejs.org/api/buffer.html#buffer-constants) */
 internal external interface ConstantsBuffer {
-    val MAX_LENGTH: Number
-//    val MAX_STRING_LENGTH: Number
+    val MAX_LENGTH: Double
+//    val MAX_STRING_LENGTH: Double
 }
 
 /** [docs](https://nodejs.org/api/buffer.html#class-buffer) */
 @JsName("Buffer")
-internal external class JsBuffer {
-    internal val length: Number
+internal expect class JsBuffer {
+
+    internal val length: Double
 
     internal fun fill()
-    internal fun readInt8(offset: Number): Number
-    internal fun toString(encoding: String, start: Number, end: Number): String
+    internal fun readInt8(offset: Double): Byte
+    internal fun writeInt8(value: Byte, offset: Double)
+    internal fun toString(encoding: String, start: Double, end: Double): String
 
     internal companion object {
         // Always need to check for FsJsNode first
         @DelicateFileApi
-        internal fun alloc(size: Number): JsBuffer
-        // Always need to check for FsJsNode first
-        @DelicateFileApi
-        internal fun isBuffer(obj: dynamic): Boolean
+        internal fun alloc(size: Double): JsBuffer
+//        // Always need to check for FsJsNode first
+//        @DelicateFileApi
+//        internal fun isBuffer(obj: dynamic/JsAny): Boolean
     }
 }

@@ -17,6 +17,10 @@
 
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.JsError
+import io.matthewnelson.kmp.file.internal.WasmJsException
+import io.matthewnelson.kmp.file.internal.wasmJsTryCatch
+
 /**
  * Helper for calling externally defined code in order to propagate a proper
  * JS [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
@@ -40,8 +44,20 @@ package io.matthewnelson.kmp.file
  *         }
  *     }
  * */
+@DelicateFileApi
 // @Throws(Throwable::class)
-public actual inline fun <T: Any?> jsExternTryCatch(block: () -> T): T = block()
+public actual inline fun <T: Any?> jsExternTryCatch(crossinline block: () -> T): T {
+    var r: Any? = null
+    val err = wasmJsTryCatch { r = block() }
+    if (err != null) {
+        val m = err.message?.ifBlank { null }
+        val c = err.code?.ifBlank { null }
+        throw WasmJsException(message = m, code = c)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    return r as T
+}
 
 /**
  * Attempts to retrieve the `code` from an exception thrown from JavaScript.
@@ -49,8 +65,12 @@ public actual inline fun <T: Any?> jsExternTryCatch(block: () -> T): T = block()
  *
  * @see [toIOException]
  * */
-public actual val Throwable.errorCodeOrNull: String? get() = try {
-    asDynamic().code as String
-} catch (_: Throwable) {
-    null
+public actual val Throwable.errorCodeOrNull: String? get() {
+    if (this is WasmJsException) return code
+    if (this is JsException) {
+        val t = thrownValue ?: return null
+        if (t !is JsError) return null
+        return t.code
+    }
+    return null
 }

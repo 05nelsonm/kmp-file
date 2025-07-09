@@ -19,6 +19,7 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
+import io.matthewnelson.kmp.file.DelicateFileApi
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
@@ -27,23 +28,31 @@ import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
+import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
-import io.matthewnelson.kmp.file.internal.node.ModuleOs
 import io.matthewnelson.kmp.file.internal.node.ModulePath
-import io.matthewnelson.kmp.file.internal.toNotLong
+import io.matthewnelson.kmp.file.internal.node.nodeModuleBuffer
+import io.matthewnelson.kmp.file.internal.node.nodeModuleFs
+import io.matthewnelson.kmp.file.internal.node.nodeOptionsMkDir
+import io.matthewnelson.kmp.file.internal.node.nodeOptionsRmDir
+import io.matthewnelson.kmp.file.internal.node.nodeModuleOs
+import io.matthewnelson.kmp.file.internal.node.nodeModulePath
+import io.matthewnelson.kmp.file.jsExternTryCatch
 import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.stat
 import io.matthewnelson.kmp.file.toFile
 import io.matthewnelson.kmp.file.toIOException
 
+@OptIn(DelicateFileApi::class)
 internal class FsJsNode private constructor(
     internal val buffer: ModuleBuffer,
     internal val fs: ModuleFs,
@@ -52,8 +61,17 @@ internal class FsJsNode private constructor(
     internal override val tempDirectory: Path,
 ): FsJs(info = FsInfo.of(name = "FsJsNode", isPosix = !isWindows)) {
 
-    internal override val dirSeparator: Char = path.sep.firstOrNull() ?: if (isWindows) '\\' else '/'
-    internal override val pathSeparator: Char = path.delimiter.firstOrNull() ?: if (isWindows) ';' else ':'
+    // Node is single threaded and the API is synchronous such that
+    // a single buffer can be used for all read/write operations.
+    //
+    // Until Kotlin provides better interop between native JS and ByteArray,
+    // we are left copying bytes to/from a buffer.
+    @Suppress("PrivatePropertyName")
+    @OptIn(DelicateFileApi::class)
+    private val BUF: JsBuffer = JsBuffer.alloc((1024 * 16).toDouble())
+
+    internal override val dirSeparator: String = path.sep
+    internal override val pathSeparator: String = path.delimiter
 
     internal override fun basename(path: Path): Path = this.path.basename(path)
     internal override fun dirname(path: Path): Path = this.path.dirname(path)
@@ -64,9 +82,9 @@ internal class FsJsNode private constructor(
         // something like `\path` as being absolute.
         // This is wrong. `path` is relative to the
         // current working drive in this instance.
-        if (isWindows && p.startsWith(dirSeparator)) {
+        if (isWindows && p.startsWith(SysDirSep)) {
             // Check for UNC path `\\server_name`
-            return p.length > 1 && p[1] == dirSeparator
+            return p.length > 1 && p[1] == SysDirSep
         }
 
         return path.isAbsolute(p)
@@ -87,7 +105,7 @@ internal class FsJsNode private constructor(
         }
 
         try {
-            fs.chmodSync(file.path, m)
+            jsExternTryCatch { fs.chmodSync(file.path, m) }
         } catch (t: Throwable) {
             val e = t.toIOException(file)
             if (e is FileNotFoundException && !mustExist) return
@@ -99,7 +117,7 @@ internal class FsJsNode private constructor(
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
         if (isWindows && !ignoreReadOnly) {
             try {
-                fs.accessSync(file.path, fs.constants.W_OK)
+                jsExternTryCatch { fs.accessSync(file.path, fs.constants.W_OK) }
                 // read-only = false
             } catch (t: Throwable) {
                 // read-only = true
@@ -110,7 +128,7 @@ internal class FsJsNode private constructor(
         }
 
         try {
-            fs.unlinkSync(file.path)
+            jsExternTryCatch { fs.unlinkSync(file.path) }
             return
         } catch (t: Throwable) {
             if (t.errorCodeOrNull == "ENOENT") {
@@ -119,13 +137,11 @@ internal class FsJsNode private constructor(
             }
         }
 
-        val options = js("{}")
-        options["force"] = false
-        options["recursive"] = false
+        val options = nodeOptionsRmDir(force = false, recursive = false)
 
         // Could be a directory
         try {
-            fs.rmdirSync(file.path, options)
+            jsExternTryCatch { fs.rmdirSync(file.path, options) }
         } catch (t: Throwable) {
             val e = t.toIOException(file)
             if (e is FileNotFoundException && !mustExist) return
@@ -151,14 +167,14 @@ internal class FsJsNode private constructor(
             // So, remove the read-only attribute from the directory and try again
             // to delete it.
             try {
-                fs.chmodSync(file.path, "666")
+                jsExternTryCatch { fs.chmodSync(file.path, "666") }
             } catch (tt: Throwable) {
                 e.addSuppressed(tt)
                 throw e
             }
 
             try {
-                fs.rmdirSync(file.path, options)
+                jsExternTryCatch { fs.rmdirSync(file.path, options) }
                 return // success
             } catch (tt: Throwable) {
                 e.addSuppressed(tt)
@@ -171,7 +187,7 @@ internal class FsJsNode private constructor(
     // @Throws(IOException::class)
     internal override fun exists(file: File): Boolean {
         try {
-            fs.accessSync(file.path, fs.constants.F_OK)
+            jsExternTryCatch { fs.accessSync(file.path, fs.constants.F_OK) }
             return true
         } catch (t: Throwable) {
             val e = t.toIOException(file)
@@ -182,13 +198,14 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
-        val options = js("{}")
-        options["recursive"] = false
-        // Not a thing for directories on Windows
-        if (!isWindows) options["mode"] = mode.value
+        val options = if (isWindows) {
+            nodeOptionsMkDir(recursive = false)
+        } else {
+            nodeOptionsMkDir(recursive = false, mode = mode.value)
+        }
 
         try {
-            fs.mkdirSync(dir.path, options)
+            jsExternTryCatch { fs.mkdirSync(dir.path, options) }
         } catch (t: Throwable) {
             val e = t.toIOException(dir)
             if (e is FileAlreadyExistsException && !mustCreate) return
@@ -214,7 +231,7 @@ internal class FsJsNode private constructor(
     // @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = try {
-            fs.openSync(file.path, fs.constants.O_RDONLY)
+            jsExternTryCatch { fs.openSync(file.path, fs.constants.O_RDONLY) }
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
@@ -235,7 +252,7 @@ internal class FsJsNode private constructor(
                 is OpenExcl.MustExist -> flags = "r+"
             }
             val mode = if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-            val fd = fs.openSync(file.path, flags, mode)
+            val fd = jsExternTryCatch { fs.openSync(file.path, flags, mode) }
             val s = JsNodeFileStream(fd, canRead = flags == "r+", canWrite = true)
 
             if (s.canRead) {
@@ -268,7 +285,7 @@ internal class FsJsNode private constructor(
                 is OpenExcl.MustExist -> 0
             }
 
-            val fd = fs.openSync(file.path, flags, excl.mode)
+            val fd = jsExternTryCatch { fs.openSync(file.path, flags, excl.mode) }
             JsNodeFileStream(fd, canRead = false, canWrite = true)
         }
     } catch (t: Throwable) {
@@ -284,14 +301,14 @@ internal class FsJsNode private constructor(
         }
 
         val fd = if (isWindows && excl is OpenExcl.MustExist) {
-            fs.openSync(file.path, "r+", mode)
+            jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
         } else {
             val flags = fs.constants.O_RDWR or when (excl) {
                 is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
                 is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
                 is OpenExcl.MustExist -> 0
             }
-            fs.openSync(file.path, flags, mode)
+            jsExternTryCatch { fs.openSync(file.path, flags, mode) }
         }
 
         JsNodeFileStream(fd, canRead = true, canWrite = true)
@@ -301,7 +318,7 @@ internal class FsJsNode private constructor(
 
     // @Throws(IOException::class)
     override fun realpath(path: Path): Path = try {
-        fs.realpathSync(path)
+        jsExternTryCatch { fs.realpathSync(path) }
     } catch (t: Throwable) {
         throw t.toIOException(path.toFile())
     }
@@ -309,14 +326,15 @@ internal class FsJsNode private constructor(
     internal companion object {
 
         internal val INSTANCE: FsJsNode? by lazy {
-            if (!isNodeJs()) return@lazy null
-
-            val os = require<ModuleOs>(module = "os")
+            val os = nodeModuleOs() ?: return@lazy null
+            val buffer = nodeModuleBuffer() ?: return@lazy null
+            val fs = nodeModuleFs() ?: return@lazy null
+            val path = nodeModulePath() ?: return@lazy null
 
             FsJsNode(
-                buffer = require(module = "buffer"),
-                fs = require(module = "fs"),
-                path = require(module = "path"),
+                buffer = buffer,
+                fs = fs,
+                path = path,
                 tempDirectory = os.tmpdir(),
                 isWindows = os.platform() == "win32",
             )
@@ -324,13 +342,13 @@ internal class FsJsNode private constructor(
     }
 
     private inner class JsNodeFileStream(
-        fd: Number,
+        fd: Double,
         canRead: Boolean,
         canWrite: Boolean,
     ): AbstractFileStream(canRead, canWrite) {
 
         private var _position: Long = 0L
-        private var _fd: Number? = fd
+        private var _fd: Double? = fd
 
         override fun isOpen(): Boolean = _fd != null
 
@@ -356,27 +374,45 @@ internal class FsJsNode private constructor(
             if (buf.isEmpty()) return 0
             if (len == 0) return 0
 
-            val read = try {
-                fs.readSync(
-                    fd = fd,
-                    buffer = buf,
-                    offset = offset,
-                    length = len,
-                    position = _position.toDouble(),
-                )
-            } catch (t: Throwable) {
-                throw t.toIOException()
+            var remainder = len
+            var pos = offset
+            var total = 0
+            while (remainder > 0) {
+                val length = minOf(BUF.length.toInt(), remainder)
+
+                val read = try {
+                    jsExternTryCatch {
+                        fs.readSync(
+                            fd = fd,
+                            buffer = BUF,
+                            offset = 0,
+                            length = length,
+                            position = _position.toDouble(),
+                        )
+                    }
+                } catch (t: Throwable) {
+                    throw t.toIOException()
+                }
+
+                if (read == 0) break
+
+                for (i in 0 until read) {
+                    buf[pos++] = BUF.readInt8(i.toDouble())
+                }
+
+                total += read
+                remainder -= read
+                _position += read
             }
-            if (read == 0) return -1
-            _position += read
-            return read
+
+            return if (total == 0) -1 else total
         }
 
         override fun size(): Long {
             if (!canRead) return super.size()
             val fd = _fd ?: throw fileStreamClosed()
             val stat = try {
-                fs.fstatSync(fd)
+                jsExternTryCatch { fs.fstatSync(fd) }
             } catch (t: Throwable) {
                 throw t.toIOException()
             }
@@ -388,7 +424,7 @@ internal class FsJsNode private constructor(
             val fd = _fd ?: throw fileStreamClosed()
             require(new >= 0L) { "new[$new] < 0" }
             try {
-                fs.ftruncateSync(fd, new.toNotLong())
+                jsExternTryCatch { fs.ftruncateSync(fd, new.toDouble()) }
             } catch (t: Throwable) {
                 throw t.toIOException()
             }
@@ -401,7 +437,7 @@ internal class FsJsNode private constructor(
             val fd = _fd ?: throw fileStreamClosed()
             if (isWindows) return
             try {
-                fs.fsyncSync(fd)
+                jsExternTryCatch { fs.fsyncSync(fd) }
             } catch (t: Throwable) {
                 throw t.toIOException()
             }
@@ -415,37 +451,46 @@ internal class FsJsNode private constructor(
             if (buf.isEmpty()) return
             if (len == 0) return
 
-            var total = 0
-            while (total < len) {
+            var remainder = len
+            var pos = offset
+            while (remainder > 0) {
+                val length = minOf(BUF.length.toInt(), remainder)
+
+                for (i in 0 until length) {
+                    BUF.writeInt8(buf[pos++], i.toDouble())
+                }
+
                 // If it's write-only, modification of position is not supported
                 // from the interface so use whatever the current position is
                 // for the descriptor.
-                val pos: Long? = if (canRead) _position + total else null
+                val position = if (canRead) _position.toDouble() else null
 
                 val bytesWritten = try {
-                    fs.writeSync(
-                        fd = fd,
-                        buffer = buf,
-                        offset = offset + total,
-                        length = len - total,
-                        position = pos?.toDouble(),
-                    )
+                    jsExternTryCatch {
+                        fs.writeSync(
+                            fd = fd,
+                            buffer = BUF,
+                            offset = 0,
+                            length = length,
+                            position = position,
+                        )
+                    }
                 } catch (t: Throwable) {
                     throw t.toIOException()
                 }
 
                 if (bytesWritten == 0) throw IOException("write == 0")
-                total += bytesWritten
-            }
 
-            if (canRead) _position += total
+                remainder -= bytesWritten
+                if (canRead) _position += bytesWritten
+            }
         }
 
         override fun close() {
             val fd = _fd ?: return
             _fd = null
             try {
-                fs.closeSync(fd)
+                jsExternTryCatch { fs.closeSync(fd) }
             } catch (t: Throwable) {
                 throw t.toIOException()
             }
@@ -454,18 +499,3 @@ internal class FsJsNode private constructor(
         override fun toString(): String = "JsNodeFileStream@" + hashCode().toString()
     }
 }
-
-private fun isNodeJs(): Boolean = js(
-"""
-(typeof process !== 'undefined' 
-    && process.versions != null 
-    && process.versions.node != null) ||
-(typeof window !== 'undefined' 
-    && typeof window.process !== 'undefined' 
-    && window.process.versions != null 
-    && window.process.versions.node != null)
-"""
-) as Boolean
-
-@Suppress("UNUSED")
-private fun <T> require(module: String): T = js("eval('require')(module)").unsafeCast<T>()

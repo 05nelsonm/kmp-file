@@ -13,35 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("PropertyName")
+@file:Suppress("PropertyName", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
 package io.matthewnelson.kmp.file.internal.node
 
+import io.matthewnelson.kmp.file.internal.js.JsObject
 import io.matthewnelson.kmp.file.internal.Path
+import kotlin.js.JsName
 
 /** [docs](https://nodejs.org/api/fs.html) */
 internal external interface ModuleFs {
     fun accessSync(path: Path, mode: Int)
     fun chmodSync(path: Path, mode: String)
-    fun closeSync(fd: Number)
-    fun fstatSync(fd: Number): JsStats
-    fun fsyncSync(fd: Number)
-    fun ftruncateSync(fd: Number, len: Number)
+    fun closeSync(fd: Double)
+    fun fstatSync(fd: Double): JsStats
+    fun fsyncSync(fd: Double)
+    fun ftruncateSync(fd: Double, len: Double)
     fun lstatSync(path: Path): JsStats
-    fun mkdirSync(path: Path, options: dynamic): String?
-    fun openSync(path: Path, flags: Int): Number
-    fun openSync(path: Path, flags: Int, mode: String): Number
-    fun openSync(path: Path, flags: String, mode: String): Number // Windows
-    fun readSync(fd: Number, buffer: ByteArray, offset: Int, length: Int, position: Number): Int
+    fun mkdirSync(path: Path, options: JsObject): String?
+    fun openSync(path: Path, flags: Int): Double
+    fun openSync(path: Path, flags: Int, mode: String): Double
+    fun openSync(path: Path, flags: String, mode: String): Double // Windows
+    fun readSync(fd: Double, buffer: JsBuffer, offset: Int, length: Int, position: Double): Int
     fun readFileSync(path: Path): JsBuffer
     fun realpathSync(path: Path): Path
-    fun rmdirSync(path: Path, options: dynamic)
+    fun rmdirSync(path: Path, options: JsObject)
     fun statSync(path: Path): JsStats
     fun unlinkSync(path: Path)
-    fun writeSync(fd: Number, buffer: ByteArray, offset: Int, length: Int, position: Number?): Int
+    fun writeSync(fd: Double, buffer: JsBuffer, offset: Int, length: Int, position: Double?): Int
     fun writeFileSync(path: Path, data: JsBuffer)
-    fun writeFileSync(path: Path, data: ByteArray)
-    fun writeFileSync(path: Path, data: String)
 
     val constants: ConstantsFs
 }
@@ -81,9 +81,9 @@ internal external interface ConstantsFs {
 
 /** [docs](https://nodejs.org/api/fs.html#class-fsstats) */
 @JsName("Stats")
-internal external class JsStats {
-    internal val mode: Number
-    internal val size: Number
+internal expect class JsStats {
+    internal val mode: Int
+    internal val size: Double
     internal fun isFile(): Boolean
     internal fun isDirectory(): Boolean
     internal fun isSymbolicLink(): Boolean

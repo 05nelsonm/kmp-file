@@ -23,13 +23,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-internal inline fun Number.toNotLong(): Number {
-    if (this !is Long) return this
-
-    // Long
-    return if (this in Int.MIN_VALUE..Int.MAX_VALUE) toInt() else toDouble()
-}
-
 //@Throws(Exception::class)
 @OptIn(ExperimentalContracts::class)
 internal inline fun FsJsNode.Companion.require(

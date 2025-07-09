@@ -34,7 +34,7 @@ public class FsInfo private constructor(
      * - Jvm:
      *     - Windows: `FsJvmNioNonPosix`
      *     - Else: `FsJvmNioPosix`
-     * - Js:
+     * - Js/WasmJs:
      *     - Node: `FsJsNode`
      *     - Browser: `FsJsBrowser`
      *         - NOTE: Implementation is non-operational outside of path resolution

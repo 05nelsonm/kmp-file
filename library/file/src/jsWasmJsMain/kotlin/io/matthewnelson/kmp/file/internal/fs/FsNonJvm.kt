@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
 package io.matthewnelson.kmp.file.internal.fs
 
@@ -25,8 +25,8 @@ internal typealias FsJs = FsNonJvm
 internal actual sealed class FsNonJvm(info: FsInfo): Fs.NonJvm(info) {
 
     internal abstract val isWindows: Boolean
-    internal abstract val dirSeparator: Char
-    internal abstract val pathSeparator: Char
+    internal abstract val dirSeparator: String
+    internal abstract val pathSeparator: String
     internal abstract val tempDirectory: Path
 
     internal abstract fun basename(path: Path): Path
