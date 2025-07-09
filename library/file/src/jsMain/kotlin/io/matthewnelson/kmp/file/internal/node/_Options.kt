@@ -36,3 +36,10 @@ internal actual fun nodeOptionsRmDir(force: Boolean, recursive: Boolean): JsObje
     o["recursive"] = recursive
     return o
 }
+
+internal actual fun nodeOptionsWriteFile(mode: String, flag: String): JsObject {
+    val o = js("({})")
+    o["mode"] = mode
+    o["flag"] = flag
+    return o
+}

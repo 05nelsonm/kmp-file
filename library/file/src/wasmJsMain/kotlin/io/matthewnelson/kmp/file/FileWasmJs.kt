@@ -17,9 +17,9 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.JsError
-import io.matthewnelson.kmp.file.internal.WasmJsException
-import io.matthewnelson.kmp.file.internal.wasmJsTryCatch
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 /**
  * Helper for calling externally defined code in order to propagate a proper
@@ -28,6 +28,9 @@ import io.matthewnelson.kmp.file.internal.wasmJsTryCatch
  * wrapped in a function call and run from Js within its own try/catch block. If
  * an Error was caught, it is returned to Kotlin code, converted to [Throwable],
  * and then thrown.
+ *
+ * **NOTE:** This should only be utilized for externally defined calls, not general
+ * kotlin code.
  *
  * e.g.
  *
@@ -43,18 +46,24 @@ import io.matthewnelson.kmp.file.internal.wasmJsTryCatch
  *             throw t
  *         }
  *     }
+ *
+ * @see [errorCodeOrNull]
+ * @see [toIOException]
+ *
+ * @throws [Throwable] If [block] throws exception
  * */
 @DelicateFileApi
 // @Throws(Throwable::class)
+@OptIn(ExperimentalContracts::class)
 public actual inline fun <T: Any?> jsExternTryCatch(crossinline block: () -> T): T {
-    var r: Any? = null
-    val err = wasmJsTryCatch { r = block() }
-    if (err != null) {
-        val m = err.message?.ifBlank { null }
-        val c = err.code?.ifBlank { null }
-        throw WasmJsException(message = m, code = c)
+    @Suppress("LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
 
+    var r: Any? = null
+    @Suppress("LEAKED_IN_PLACE_LAMBDA")
+    internalWasmJsExternTryCatch { r = block() }
     @Suppress("UNCHECKED_CAST")
     return r as T
 }
@@ -73,4 +82,35 @@ public actual val Throwable.errorCodeOrNull: String? get() {
         return t.code
     }
     return null
+}
+
+@PublishedApi
+// @Throws(WasmJsException::class)
+internal fun internalWasmJsExternTryCatch(block: () -> Unit) {
+    val err = wasmJsTryCatch(block) ?: return
+    val message = err.message?.ifBlank { null }
+    val code = err.code?.ifBlank { null }
+    throw WasmJsException(message, code)
+}
+
+private class WasmJsException(message: String?, val code: String?): Throwable(message)
+
+@Suppress("UNUSED")
+private fun wasmJsTryCatch(block: () -> Unit): JsError? = js(code =
+"""{
+    try {
+        block();
+        return null;
+    } catch (e) {
+        if (e instanceof Error) {
+            return e;
+        }
+        return Error(e + "");
+    }
+}""")
+
+@JsName("Error")
+private external class JsError: JsAny {
+    val message: String?
+    val code: String?
 }

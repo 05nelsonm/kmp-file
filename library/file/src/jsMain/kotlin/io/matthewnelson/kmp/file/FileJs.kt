@@ -17,6 +17,10 @@
 
 package io.matthewnelson.kmp.file
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * Helper for calling externally defined code in order to propagate a proper
  * JS [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
@@ -24,6 +28,9 @@ package io.matthewnelson.kmp.file
  * wrapped in a function call and run from Js within its own try/catch block. If
  * an Error was caught, it is returned to Kotlin code, converted to [Throwable],
  * and then thrown.
+ *
+ * **NOTE:** This should only be utilized for externally defined calls, not general
+ * kotlin code.
  *
  * e.g.
  *
@@ -39,9 +46,21 @@ package io.matthewnelson.kmp.file
  *             throw t
  *         }
  *     }
+ *
+ * @see [errorCodeOrNull]
+ * @see [toIOException]
+ *
+ * @throws [Throwable] If [block] throws exception
  * */
 // @Throws(Throwable::class)
-public actual inline fun <T: Any?> jsExternTryCatch(block: () -> T): T = block()
+@OptIn(ExperimentalContracts::class)
+public actual inline fun <T: Any?> jsExternTryCatch(block: () -> T): T {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+
+    return block()
+}
 
 /**
  * Attempts to retrieve the `code` from an exception thrown from JavaScript.
@@ -54,3 +73,22 @@ public actual val Throwable.errorCodeOrNull: String? get() = try {
 } catch (_: Throwable) {
     null
 }
+
+
+
+// --- DEPRECATED ---
+
+/**
+ * DEPRECATED
+ * @throws [IOException]
+ * @throws [UnsupportedOperationException]
+ * @suppress
+ * */
+@Deprecated(
+    message = "Missing file exclusivity parameter. Use other write function.",
+    replaceWith = ReplaceWith(
+        expression = "this.write(excl = null, data)",
+    )
+)
+//@Throws(IOException::class)
+public fun File.write(data: Buffer) { write(excl = null, data) }

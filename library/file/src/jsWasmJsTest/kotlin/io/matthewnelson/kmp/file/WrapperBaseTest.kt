@@ -18,11 +18,14 @@ package io.matthewnelson.kmp.file
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
 @OptIn(DelicateFileApi::class)
 abstract class WrapperBaseTest {
+
+    private val checker = permissionChecker()
 
     @Test
     fun givenBufferAlloc_whenExceedsIntMax_thenConvertsToDoubleUnderTheHood() = skipTestIf(isJsBrowser) {
@@ -80,6 +83,46 @@ abstract class WrapperBaseTest {
             assertEquals(65535L, Buffer.MAX_LENGTH.toLong())
         } else {
             assertTrue(Buffer.MAX_LENGTH.toLong() > 65535L)
+        }
+    }
+
+    @Test
+    fun givenBuffer_whenWriteFileWindows_thenPermissionsAreAsExpected() {
+        val checker = checker
+        if (checker !is PermissionChecker.Windows) {
+            println("Skipping...")
+            return
+        }
+
+        val b = Buffer.alloc(20)
+        for (i in 0 until b.length.toInt()) { b[i] = 1 }
+        val tmp = randomTemp()
+        try {
+            tmp.write(excl = OpenExcl.MustCreate.of("400"), data = b)
+            assertTrue(checker.isReadOnly(tmp), "is read-only")
+        } finally {
+            tmp.delete2(ignoreReadOnly = true)
+        }
+    }
+
+    @Test
+    fun givenBuffer_whenWriteFilePosix_thenPermissionsAreAsExpected() {
+        val checker = checker
+        if (checker !is PermissionChecker.Posix) {
+            println("Skipping...")
+            return
+        }
+
+        val b = Buffer.alloc(20)
+        for (i in 0 until b.length.toInt()) { b[i] = 1 }
+        val tmp = randomTemp()
+        try {
+            tmp.write(excl = OpenExcl.MustCreate.of("400"), data = b)
+            assertTrue(checker.canRead(tmp), "canRead")
+            assertFalse(checker.canWrite(tmp), "canWrite")
+            assertFalse(checker.canExecute(tmp), "canExecute")
+        } finally {
+            tmp.delete2(ignoreReadOnly = true)
         }
     }
 }
