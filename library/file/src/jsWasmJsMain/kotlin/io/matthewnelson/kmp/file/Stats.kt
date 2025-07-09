@@ -13,22 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.fs.FsJsNode
-import io.matthewnelson.kmp.file.internal.require
-import kotlin.test.Test
+import io.matthewnelson.kmp.file.internal.node.JsStats
 
-class DeleteJsUnitTest: DeleteNonJvmBaseTest() {
+/**
+ * A wrapper value class for a Node.js filesystem [Stats](https://nodejs.org/api/fs.html#class-fsstats)
+ * object.
+ *
+ * @see [stat]
+ * @see [lstat]
+ * */
+public expect value class Stats internal constructor(private val value: JsStats) {
 
-    override fun setReadOnly(dir: File) {
-        try {
-            FsJsNode.require().fs.chmodSync(dir.path, "444")
-        } catch (t: Throwable) {
-            t.toIOException(dir)
-        }
-    }
+    public val mode: Int
+    public val size: Number
 
-    @Test
-    fun stub() {}
+    public val isFile: Boolean
+    public val isDirectory: Boolean
+    public val isSymbolicLink: Boolean
+
+//    public fun unwrap(): dynamic/JsAny
+
+    /** @suppress */
+    public override fun toString(): String
 }

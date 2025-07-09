@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.JsStats
 import io.matthewnelson.kmp.file.internal.require
+import kotlin.js.unsafeCast
 
 /**
  * A wrapper value class for a Node.js [Buffer](https://nodejs.org/api/buffer.html#class-buffer)
@@ -78,11 +79,11 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
 
     /**
      * Unwraps the [Buffer] value class, returning the underlying Node.js Buffer
-     * as a dynamic object.
+     * as a [JsAny] object.
      *
      * @see [Companion.wrap]
      * */
-    public fun unwrap(): dynamic = value.asDynamic()
+    public fun unwrap(): JsAny = value
 
     /** @suppress */
     public actual override fun toString(): String = "Buffer@${hashCode()}"
@@ -107,7 +108,7 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
         public actual fun alloc(size: Number): Buffer = try {
             FsJsNode.require()
             @OptIn(DelicateFileApi::class)
-            val b = JsBuffer.alloc(size.toDouble())
+            val b = jsExternTryCatch { JsBuffer.alloc(size.toDouble()) }
             Buffer(b)
         } catch (t: Throwable) {
             if (t is IllegalArgumentException) throw t
@@ -118,7 +119,7 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
         /**
          * Wraps the dynamic object in the [Buffer] value class.
          *
-         * @param [buffer] The Node.js Buffer dynamic object to wrap
+         * @param [buffer] The Node.js Buffer [JsAny] object to wrap
          *
          * @return The Node.js Buffer wrapped in the [Buffer] value class.
          *
@@ -128,13 +129,13 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
          * @throws [UnsupportedOperationException] If Node.js is not being used.
          * */
         // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
-        public fun wrap(buffer: dynamic): Buffer {
+        public fun wrap(buffer: JsAny): Buffer {
             FsJsNode.require()
             @OptIn(DelicateFileApi::class)
             if (!JsBuffer.isBuffer(buffer)) {
                 throw IllegalArgumentException("Object is not a Buffer")
             }
-            return Buffer(buffer.unsafeCast<JsBuffer>())
+            return Buffer(buffer.unsafeCast())
         }
     }
 }
@@ -159,7 +160,7 @@ public actual value class Stats internal constructor(private val value: JsStats)
      * Unwraps the [Stats] value class, returning the underlying Node.js Stats
      * as a dynamic object.
      * */
-    public fun unwrap(): dynamic = value.asDynamic()
+    public fun unwrap(): JsAny = value
 
     /** @suppress */
     public actual override fun toString(): String = "Stats@${hashCode()}"

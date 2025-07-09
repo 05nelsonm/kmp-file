@@ -21,17 +21,19 @@ import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.commonDriveRootOrNull
+import io.matthewnelson.kmp.file.internal.js.jsNavigator
 import io.matthewnelson.kmp.file.path
 
 internal class FsJsBrowser private constructor(
     internal override val isWindows: Boolean,
 ): FsJs(info = FsInfo.of(name = "FsJsBrowser", isPosix = !isWindows)) {
 
-    internal override val dirSeparator: Char = if (isWindows) '\\' else '/'
-    internal override val pathSeparator: Char = if (isWindows) ';' else ':'
+    internal override val dirSeparator: String = if (isWindows) "\\" else "/"
+    internal override val pathSeparator: String = if (isWindows) ";" else ":"
     internal override val tempDirectory: Path = "/tmp"
 
     internal override fun basename(path: Path): Path {
@@ -49,16 +51,16 @@ internal class FsJsBrowser private constructor(
         if (p.isEmpty()) return false
 
         return if (isWindows) {
-            if (p[0] == dirSeparator) {
+            if (p[0] == SysDirSep) {
                 // UNC path (rooted):    `\\server_name`
                 // Otherwise (relative): `\` or `\Windows`
-                p.length > 1 && p[1] == dirSeparator
+                p.length > 1 && p[1] == SysDirSep
             } else {
                 // Check for a rooted drive 'F:\'
                 p.commonDriveRootOrNull() != null
             }
         } else {
-            p[0] == dirSeparator
+            p[0] == SysDirSep
         }
     }
 
@@ -121,7 +123,7 @@ internal class FsJsBrowser private constructor(
             //
             // https://developer.mozilla.org/en-US/docs/Web/API/Navigator/platform
             val platform = try {
-                js("window ? window.navigator : self.navigator").platform as String
+                jsNavigator().platform
             } catch (_: Throwable) {
                 ""
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.toFile
 
-internal actual inline fun platformDirSeparator(): Char = FsJs.INSTANCE.dirSeparator.firstOrNull() ?: if (IsWindows) '\\' else '/'
+internal actual inline fun platformTempDirectory(): File = FsJs.INSTANCE.tempDirectory.toFile()
 
-internal actual inline fun platformPathSeparator(): Char = FsJs.INSTANCE.pathSeparator.firstOrNull() ?: if (IsWindows) ';' else ':'
+internal actual val IsWindows: Boolean get() = FsJs.INSTANCE.isWindows

@@ -406,19 +406,6 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             return ch.size()
         }
 
-        override fun flush() {
-            if (!canWrite) return super.flush()
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            ch.force(true)
-        }
-
-        override fun write(buf: ByteArray, offset: Int, len: Int) {
-            if (!canWrite) return super.write(buf, offset, len)
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            val bb = ByteBuffer.wrap(buf, offset, len)
-            ch.write(bb)
-        }
-
         override fun size(new: Long): FileStream.ReadWrite {
             if (!canRead || !canWrite) return super.size(new)
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
@@ -434,6 +421,19 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 ch.truncate(new)
             }
             return this
+        }
+
+        override fun flush() {
+            if (!canWrite) return super.flush()
+            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            ch.force(true)
+        }
+
+        override fun write(buf: ByteArray, offset: Int, len: Int) {
+            if (!canWrite) return super.write(buf, offset, len)
+            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            val bb = ByteBuffer.wrap(buf, offset, len)
+            ch.write(bb)
         }
 
         override fun close() {
