@@ -110,7 +110,6 @@ public inline operator fun Buffer.get(index: Number): Byte = readInt8(index)
  * */
 public inline operator fun Buffer.set(index: Number, value: Byte) { writeInt8(index, value) }
 
-@Suppress("NOTHING_TO_INLINE")
 @Throws(IndexOutOfBoundsException::class)
 internal inline fun Buffer.commonReadInt8(index: Number): Byte {
     val i = index.toDouble()
@@ -119,7 +118,6 @@ internal inline fun Buffer.commonReadInt8(index: Number): Byte {
     return value.readInt8(offset = i)
 }
 
-@Suppress("NOTHING_TO_INLINE")
 @Throws(IndexOutOfBoundsException::class)
 internal inline fun Buffer.commonWriteInt8(index: Number, byte: Byte) {
     val i = index.toDouble()
@@ -128,7 +126,6 @@ internal inline fun Buffer.commonWriteInt8(index: Number, byte: Byte) {
     value.writeInt8(value = byte, offset = i)
 }
 
-@Suppress("NOTHING_TO_INLINE")
 internal inline fun Buffer.commonToUtf8(start: Number, end: Number): String {
     return value.toString(encoding = "utf8", start = start.toDouble(), end = end.toDouble())
 }

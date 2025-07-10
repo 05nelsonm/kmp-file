@@ -61,7 +61,7 @@ public actual inline fun <T: Any?> jsExternTryCatch(crossinline block: () -> T):
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
 
-    var r: Any? = null
+    var r: T? = null
     @Suppress("LEAKED_IN_PLACE_LAMBDA")
     internalWasmJsExternTryCatch { r = block() }
     @Suppress("UNCHECKED_CAST")
