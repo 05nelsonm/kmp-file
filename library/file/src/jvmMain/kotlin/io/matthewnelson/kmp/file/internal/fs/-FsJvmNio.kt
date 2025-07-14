@@ -24,6 +24,7 @@ import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
@@ -331,21 +332,21 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
     @Suppress("RemoveRedundantQualifierName")
     protected fun Throwable.mapNioException(file: File): Throwable = when(this) {
         is java.nio.file.FileSystemException -> when (this) {
-            is java.nio.file.AccessDeniedException -> AccessDeniedException(file, otherFile?.toFile(), reason)
+            is java.nio.file.AccessDeniedException -> AccessDeniedException(file, otherFile?.toFile(), reason).alsoAddSuppressed(this)
 //            is java.nio.file.AtomicMoveNotSupportedException -> // TODO
-            is java.nio.file.DirectoryNotEmptyException -> DirectoryNotEmptyException(file)
-            is java.nio.file.FileAlreadyExistsException -> FileAlreadyExistsException(file, otherFile?.toFile(), reason)
+            is java.nio.file.DirectoryNotEmptyException -> DirectoryNotEmptyException(file).alsoAddSuppressed(this)
+            is java.nio.file.FileAlreadyExistsException -> FileAlreadyExistsException(file, otherFile?.toFile(), reason).alsoAddSuppressed(this)
 //            is java.nio.file.FileSystemLoopException -> // TODO
-            is java.nio.file.NoSuchFileException -> FileNotFoundException(message)
-            is java.nio.file.NotDirectoryException -> NotDirectoryException(file)
+            is java.nio.file.NoSuchFileException -> FileNotFoundException(message).alsoAddSuppressed(this)
+            is java.nio.file.NotDirectoryException -> NotDirectoryException(file).alsoAddSuppressed(this)
 //            is java.nio.file.NotLinkException -> // TODO
             else -> if (this::class.qualifiedName == "java.nio.file.FileSystemException") {
                 if (reason?.equals("Not a directory", ignoreCase = true) == true) {
                     // Sometimes occurs if createDirectory is attempted whereby
                     // a segment in the path is an existing regular file.
-                    NotDirectoryException(file)
+                    NotDirectoryException(file).alsoAddSuppressed(this)
                 } else {
-                    FileSystemException(file, otherFile?.toFile(), reason)
+                    FileSystemException(file, otherFile?.toFile(), reason).alsoAddSuppressed(this)
                 }
             } else {
                 this

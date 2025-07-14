@@ -31,6 +31,7 @@ import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
+import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.toFile
@@ -401,16 +402,16 @@ internal class FsJvmAndroid private constructor(
             t is SecurityException -> t.toAccessDeniedException(file ?: "".toFile())
             c is SecurityException -> c.toAccessDeniedException(file ?: "".toFile())
             m == null -> IOException(c)
-            m.contains("EINTR") -> InterruptedIOException(m)
-            m.contains("EINVAL") -> IllegalArgumentException(m)
-            m.contains("ENOENT") -> fileNotFoundException(file, null, m)
+            m.contains("EINTR") -> InterruptedIOException(m).alsoAddSuppressed(c)
+            m.contains("EINVAL") -> IllegalArgumentException(m).alsoAddSuppressed(c)
+            m.contains("ENOENT") -> fileNotFoundException(file, null, m).alsoAddSuppressed(c)
             file != null -> when {
-                m.contains("EACCES") -> AccessDeniedException(file, other, m)
-                m.contains("EEXIST") -> FileAlreadyExistsException(file, other, m)
-                m.contains("ENOTDIR") -> NotDirectoryException(file)
-                m.contains("ENOTEMPTY") -> DirectoryNotEmptyException(file)
-                m.contains("EPERM") -> AccessDeniedException(file, other, m)
-                else -> FileSystemException(file, other, m)
+                m.contains("EACCES") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
+                m.contains("EEXIST") -> FileAlreadyExistsException(file, other, m).alsoAddSuppressed(c)
+                m.contains("ENOTDIR") -> NotDirectoryException(file).alsoAddSuppressed(c)
+                m.contains("ENOTEMPTY") -> DirectoryNotEmptyException(file).alsoAddSuppressed(c)
+                m.contains("EPERM") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
+                else -> FileSystemException(file, other, m).alsoAddSuppressed(c)
             }
             else -> IOException(m)
         }

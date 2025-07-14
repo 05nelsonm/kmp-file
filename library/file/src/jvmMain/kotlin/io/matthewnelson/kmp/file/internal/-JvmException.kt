@@ -23,7 +23,12 @@ import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileSystemException
 
 internal inline fun SecurityException.toAccessDeniedException(file: File): AccessDeniedException {
-    return AccessDeniedException(file, reason = "SecurityException[${message}]")
+    return AccessDeniedException(file, reason = "SecurityException").alsoAddSuppressed(this)
+}
+
+internal inline fun <T: Throwable> T.alsoAddSuppressed(t: Throwable): T {
+    addSuppressed(t)
+    return this
 }
 
 internal actual inline fun fileAlreadyExistsException(
