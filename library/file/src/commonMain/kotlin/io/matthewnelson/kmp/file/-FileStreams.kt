@@ -15,26 +15,39 @@
  **/
 package io.matthewnelson.kmp.file
 
+import kotlin.jvm.JvmSynthetic
+
 // Strictly for supporting isInstance checks
-internal class FileStreamReadOnly internal constructor(private val s: AbstractFileStream): FileStream.Read by s {
+internal class FileStreamReadOnly private constructor(private val s: AbstractFileStream): FileStream.Read by s {
     init { check(s.canRead) { "AbstractFileStream.canRead != true" } }
     override fun position(new: Long): FileStream.Read { s.position(new); return this }
     override fun equals(other: Any?): Boolean = other is FileStreamReadOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
     override fun toString(): String = s.toString()
+    internal companion object {
+        @JvmSynthetic
+        @Throws(IllegalStateException::class)
+        internal fun of(s: AbstractFileStream): FileStreamReadOnly = FileStreamReadOnly(s)
+    }
 }
 
 // Strictly for supporting isInstance checks
-internal class FileStreamWriteOnly internal constructor(private val s: AbstractFileStream): FileStream.Write by s {
+internal class FileStreamWriteOnly private constructor(private val s: AbstractFileStream): FileStream.Write by s {
     init { check(s.canWrite) { "AbstractFileStream.canWrite != true" } }
     override fun equals(other: Any?): Boolean = other is FileStreamWriteOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
     override fun toString(): String = s.toString()
+    internal companion object {
+        @JvmSynthetic
+        @Throws(IllegalStateException::class)
+        internal fun of(s: AbstractFileStream): FileStreamWriteOnly = FileStreamWriteOnly(s)
+    }
 }
 
 internal abstract class AbstractFileStream internal constructor(
     internal val canRead: Boolean,
     internal val canWrite: Boolean,
+    init: Any,
 ): FileStream.ReadWrite {
 
     init {
@@ -69,5 +82,15 @@ internal abstract class AbstractFileStream internal constructor(
     // ReadWrite
     override fun size(new: Long): FileStream.ReadWrite {
         throw IllegalStateException("FileStream is not O_RDWR")
+    }
+
+    protected companion object {
+        @get:JvmSynthetic
+        @Suppress("RedundantVisibilityModifier")
+        internal val INIT = Any()
+    }
+
+    init {
+        check(init == INIT) { "AbstractFileStream cannot be extended." }
     }
 }

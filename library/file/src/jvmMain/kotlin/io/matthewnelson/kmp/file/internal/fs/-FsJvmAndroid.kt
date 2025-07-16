@@ -164,7 +164,7 @@ internal class FsJvmAndroid private constructor(
         fd: FileDescriptor,
         canRead: Boolean,
         canWrite: Boolean,
-    ): AbstractFileStream(canRead, canWrite) {
+    ): AbstractFileStream(canRead, canWrite, INIT) {
 
         @Volatile
         private var _fd: FileDescriptor? = fd

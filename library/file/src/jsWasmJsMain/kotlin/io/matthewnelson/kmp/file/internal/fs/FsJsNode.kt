@@ -345,7 +345,7 @@ internal class FsJsNode private constructor(
         fd: Double,
         canRead: Boolean,
         canWrite: Boolean,
-    ): AbstractFileStream(canRead, canWrite) {
+    ): AbstractFileStream(canRead, canWrite, INIT) {
 
         private var _position: Long = 0L
         private var _fd: Double? = fd

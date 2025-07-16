@@ -40,7 +40,7 @@ internal class UnixFileStream(
     fd: Int,
     canRead: Boolean,
     canWrite: Boolean,
-): AbstractFileStream(canRead, canWrite) {
+): AbstractFileStream(canRead, canWrite, INIT) {
 
     init { if (fd == -1) throw errnoToIOException(errno) }
 

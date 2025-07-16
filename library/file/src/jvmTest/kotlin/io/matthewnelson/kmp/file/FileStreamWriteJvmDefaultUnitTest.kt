@@ -30,7 +30,7 @@ class FileStreamWriteJvmDefaultUnitTest: FileStreamWriteJvmSharedTest() {
     override fun File.testOpen(excl: OpenExcl?, appending: Boolean): FileStream.Write {
         val e = excl ?: OpenExcl.MaybeCreate.DEFAULT
         val s = DEFAULT.openWrite(this, e, appending)
-        return FileStreamWriteOnly(s)
+        return FileStreamWriteOnly.of(s)
     }
 
     @Test

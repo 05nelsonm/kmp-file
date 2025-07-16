@@ -438,7 +438,7 @@ public fun File.resolve(relative: String): File {
 @Throws(IOException::class)
 public fun File.openRead(): FileStream.Read {
     val s = Fs.get().openRead(this)
-    return FileStreamReadOnly(s)
+    return FileStreamReadOnly.of(s)
 }
 
 /**
@@ -500,7 +500,7 @@ public fun File.openReadWrite(excl: OpenExcl?): FileStream.ReadWrite {
 @Throws(IOException::class)
 public fun File.openWrite(excl: OpenExcl?, appending: Boolean): FileStream.Write {
     val s = Fs.get().openWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT, appending)
-    return FileStreamWriteOnly(s)
+    return FileStreamWriteOnly.of(s)
 }
 
 /**

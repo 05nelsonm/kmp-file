@@ -184,7 +184,9 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
         return closeable
     }
 
-    private class WriteOnlyFileStream(fos: FileOutputStream): AbstractFileStream(canRead = false, canWrite = true) {
+    private class WriteOnlyFileStream(
+        fos: FileOutputStream,
+    ): AbstractFileStream(canRead = false, canWrite = true, INIT) {
 
         @Volatile
         private var _fos: FileOutputStream? = fos
@@ -217,7 +219,7 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
         raf: RandomAccessFile,
         canRead: Boolean,
         canWrite: Boolean,
-    ): AbstractFileStream(canRead = canRead, canWrite = canWrite) {
+    ): AbstractFileStream(canRead, canWrite, INIT) {
 
         @Volatile
         private var _raf: RandomAccessFile? = raf

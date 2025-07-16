@@ -57,7 +57,7 @@ internal class MinGWFileStream(
     h: HANDLE,
     canRead: Boolean,
     canWrite: Boolean,
-): AbstractFileStream(canRead, canWrite) {
+): AbstractFileStream(canRead, canWrite, INIT) {
 
     init { if (h == INVALID_HANDLE_VALUE) throw lastErrorToIOException() }
 
