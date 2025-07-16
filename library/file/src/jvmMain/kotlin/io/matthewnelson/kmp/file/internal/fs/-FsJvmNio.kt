@@ -364,7 +364,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         channel: FileChannel,
         canRead: Boolean,
         canWrite: Boolean,
-    ): AbstractFileStream(canRead = canRead, canWrite = canWrite) {
+    ): AbstractFileStream(canRead, canWrite, INIT) {
 
         @Volatile
         private var _ch: FileChannel? = channel

@@ -29,7 +29,7 @@ class FileStreamReadJvmDefaultUnitTest: FileStreamReadJvmSharedTest() {
 
     override fun File.testOpen(): FileStream.Read {
         val s = DEFAULT.openRead(this)
-        return FileStreamReadOnly(s)
+        return FileStreamReadOnly.of(s)
     }
 
     @Test
