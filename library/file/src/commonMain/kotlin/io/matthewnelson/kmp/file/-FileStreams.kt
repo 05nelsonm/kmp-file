@@ -15,11 +15,12 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.disappearingCheck
 import kotlin.jvm.JvmSynthetic
 
 // Strictly for supporting isInstance checks
 internal class FileStreamReadOnly private constructor(private val s: AbstractFileStream): FileStream.Read by s {
-    init { check(s.canRead) { "AbstractFileStream.canRead != true" } }
+    init { disappearingCheck(condition = { s.canRead }) { "AbstractFileStream.canRead != true" } }
     override fun position(new: Long): FileStream.Read { s.position(new); return this }
     override fun equals(other: Any?): Boolean = other is FileStreamReadOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
@@ -33,7 +34,7 @@ internal class FileStreamReadOnly private constructor(private val s: AbstractFil
 
 // Strictly for supporting isInstance checks
 internal class FileStreamWriteOnly private constructor(private val s: AbstractFileStream): FileStream.Write by s {
-    init { check(s.canWrite) { "AbstractFileStream.canWrite != true" } }
+    init { disappearingCheck(condition = { s.canWrite }) { "AbstractFileStream.canWrite != true" } }
     override fun equals(other: Any?): Boolean = other is FileStreamWriteOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
     override fun toString(): String = s.toString()
@@ -50,9 +51,7 @@ internal abstract class AbstractFileStream internal constructor(
     init: Any,
 ): FileStream.ReadWrite {
 
-    init {
-        if (!canRead && !canWrite) throw IllegalStateException("!canRead && !canWrite")
-    }
+    init { disappearingCheck(condition = { canRead || canWrite }) { "!canRead && !canWrite" } }
 
     final override fun read(buf: ByteArray): Int = read(buf, 0, buf.size)
     final override fun write(buf: ByteArray) { write(buf, 0, buf.size) }

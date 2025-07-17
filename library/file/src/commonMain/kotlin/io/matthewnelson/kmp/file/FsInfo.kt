@@ -15,11 +15,13 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.KMP_FILE_VERSION
+import io.matthewnelson.kmp.file.internal.disappearingCheck
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmSynthetic
 
 /**
- * Information about the filesystem backing the kmp-file API.
+ * Information about the filesystem backing the `kmp-file` API.
  *
  * @see [SysFsInfo]
  * */
@@ -52,7 +54,12 @@ public class FsInfo private constructor(
     public val isPosix: Boolean,
 ) {
 
-    internal companion object {
+    public companion object {
+
+        /**
+         * The `kmp-file` version (e.g. `0.4.0`)
+         * */
+        public const val VERSION: String = KMP_FILE_VERSION
 
         @JvmSynthetic
         internal fun of(
@@ -65,8 +72,8 @@ public class FsInfo private constructor(
     }
 
     init {
-        check(name.isNotEmpty()) { "name cannot be empty" }
-        check(name.indexOfFirst { it.isWhitespace() } == -1) { "name cannot contain whitespace" }
+        disappearingCheck(condition = { name.isNotEmpty() }) { "name cannot be empty" }
+        disappearingCheck(condition = { name.indexOfFirst { it.isWhitespace() } == -1 }) { "name cannot contain whitespace" }
     }
 
     /** @suppress */
