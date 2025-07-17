@@ -345,9 +345,9 @@ internal class FsJvmAndroid private constructor(
             file.delete()
         } catch (_: Throwable) {}
 
-        if (result != null) {
+        if (result == null) {
             try {
-                println("KMP-FILE: O_CLOEXEC for API[${ANDROID.SDK_INT}] found to be $result")
+                System.err.println("KMP-FILE: Failed to determine O_CLOEXEC value for API[${ANDROID.SDK_INT}]")
             } catch (_: Throwable) {}
         }
 
