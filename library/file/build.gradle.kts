@@ -17,7 +17,7 @@ plugins {
     id("configuration")
 }
 
-private val testConfig = TestConfigInject()
+private val configInject = ConfigInject()
 
 kmpConfiguration {
     configureShared(java9ModuleName = "io.matthewnelson.kmp.file", publish = true) {
@@ -28,9 +28,13 @@ kmpConfiguration {
         }
 
         common {
+            sourceSetMain {
+                kotlin.srcDir(configInject.runtimeConfigSrcDir)
+            }
+
             sourceSetTest {
                 kotlin.srcDir("src/commonTestShared/kotlin")
-                kotlin.srcDir(testConfig.testConfigSrcDir)
+                kotlin.srcDir(configInject.testConfigSrcDir)
 
                 dependencies {
                     implementation(libs.encoding.base16)
@@ -41,36 +45,80 @@ kmpConfiguration {
     }
 }
 
-private class TestConfigInject {
-    // Inject project directory path for tests
-    val testConfigSrcDir: File by lazy {
-        val kotlinSrcDir = layout
+private class ConfigInject {
+
+    private val generatedSourcesDir by lazy {
+        layout
             .buildDirectory
             .get()
             .asFile
             .resolve("generated")
             .resolve("sources")
+    }
+
+    val runtimeConfigSrcDir: File by lazy {
+        val kotlinSrcDir = generatedSourcesDir
+            .resolve("runtime")
+            .resolve("commonMain")
+            .resolve("kotlin")
+
+        val pkgInternal = kotlinSrcDir
+            .resolve(PKG_NAME.replace('.', File.separatorChar))
+            .resolve("internal")
+
+        pkgInternal.mkdirs()
+
+        val text = StringBuilder("package ").apply {
+            append(PKG_NAME).append(".internal")
+            appendLine().appendLine()
+
+            append("internal const val KMP_FILE_VERSION: String = \"")
+            append(version.toString()).appendLine('"')
+            appendLine()
+
+            appendLine("@Throws(IllegalStateException::class)")
+            appendLine("internal inline fun disappearingCheck(")
+            appendLine("    condition: () -> Boolean,")
+            appendLine("    lazyMessage: () -> Any,")
+            append(") { ")
+
+            if (version.toString().endsWith("-SNAPSHOT")) {
+                appendLine("check(condition(), lazyMessage) }")
+            } else {
+                appendLine("/* no-op */ }")
+            }
+
+        }.toString()
+
+        pkgInternal.resolve("-KmpFileConfig.kt").writeText(text)
+
+        kotlinSrcDir
+    }
+
+    val testConfigSrcDir: File by lazy {
+        val kotlinSrcDir = generatedSourcesDir
             .resolve("testConfig")
             .resolve("commonTest")
             .resolve("kotlin")
 
-        val core = kotlinSrcDir
-            .resolve("io")
-            .resolve("matthewnelson")
-            .resolve("kmp")
-            .resolve("file")
+        val pkg = kotlinSrcDir
+            .resolve(PKG_NAME.replace('.', File.separatorChar))
 
-        core.mkdirs()
+        pkg.mkdirs()
 
         val path = projectDir.canonicalPath.replace("\\", "\\\\")
 
-        core.resolve("TestConfig.kt").writeText("""
-            package io.matthewnelson.kmp.file
+        pkg.resolve("TestConfig.kt").writeText("""
+            package $PKG_NAME
 
             internal const val PROJECT_DIR_PATH: String = "$path"
 
         """.trimIndent())
 
         kotlinSrcDir
+    }
+
+    private companion object {
+        private const val PKG_NAME = "io.matthewnelson.kmp.file"
     }
 }

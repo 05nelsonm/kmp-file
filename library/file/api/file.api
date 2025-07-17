@@ -43,12 +43,17 @@ public abstract interface class io/matthewnelson/kmp/file/FileStream$Write : io/
 }
 
 public final class io/matthewnelson/kmp/file/FsInfo {
+	public static final field Companion Lio/matthewnelson/kmp/file/FsInfo$Companion;
+	public static final field VERSION Ljava/lang/String;
 	public final field isPosix Z
 	public final field name Ljava/lang/String;
 	public synthetic fun <init> (Ljava/lang/String;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/matthewnelson/kmp/file/FsInfo$Companion {
 }
 
 public final class io/matthewnelson/kmp/file/JvmFileStreamKt {

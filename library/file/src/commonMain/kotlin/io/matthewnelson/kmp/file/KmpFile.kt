@@ -67,7 +67,7 @@ public val SysPathSep: Char = platformPathSeparator()
 public val SysTempDir: File = platformTempDirectory()
 
 /**
- * Information about the FileSystem that is backing [File].
+ * Information about the FileSystem that is backing the [File] API.
  *
  * @see [FsInfo]
  * */
@@ -468,9 +468,8 @@ public fun File.openRead(): FileStream.Read {
 @Throws(IOException::class)
 public fun File.openReadWrite(excl: OpenExcl?): FileStream.ReadWrite {
     val s = Fs.get().openReadWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT)
-    // TODO: Disappearing check whereby non-SNAPSHOT version does nothing.
-    check(s.canRead) { "!canRead" }
-    check(s.canWrite) { "!canWrite" }
+    disappearingCheck(condition = { s.canRead }) { "!canRead" }
+    disappearingCheck(condition = { s.canWrite }) { "!canWrite" }
     return s
 }
 
