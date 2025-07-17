@@ -28,6 +28,7 @@ import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.SysTempDir
 import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
@@ -35,6 +36,7 @@ import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.toFile
+import io.matthewnelson.kmp.file.wrapIOException
 import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -42,6 +44,7 @@ import java.io.InterruptedIOException
 import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.util.UUID
 import kotlin.concurrent.Volatile
 
 /**
@@ -151,13 +154,41 @@ internal class FsJvmAndroid private constructor(
 
     @Throws(IOException::class)
     private fun File.open(flags: Int, excl: OpenExcl): FileDescriptor {
-        val mode = MODE_MASK.convert(excl._mode)
-        val flags = flags or const.O_CLOEXEC or when (excl) {
+        val m = MODE_MASK.convert(excl._mode)
+        var f = flags or when (excl) {
             is OpenExcl.MaybeCreate -> const.O_CREAT
             is OpenExcl.MustCreate -> const.O_CREAT or const.O_EXCL
             is OpenExcl.MustExist -> 0
         }
-        return wrapErrnoException(this) { open.invoke(null, path, flags, mode) as FileDescriptor }
+
+        f = f or (__O_CLOEXEC ?: 0)
+
+        val fd = wrapErrnoException(this) { open.invoke(null, path, f, m) as FileDescriptor }
+
+        if (__O_CLOEXEC != null) return fd
+        if (os.fcntlVoid == null) return fd
+
+        var fcntl = os.fcntlInt
+        val isFcntlInt = if (fcntl != null) {
+            true
+        } else {
+            fcntl = os.fcntlLong
+            false
+        }
+        if (fcntl == null) return fd
+
+        try {
+            wrapErrnoException(this) {
+                f = os.fcntlVoid.invoke(null, fd, const.F_GETFD) as Int
+                f = f or const.FD_CLOEXEC
+                fcntl.invoke(null, fd, const.F_SETFD, if (isFcntlInt) f else f.toLong())
+            }
+        } catch (t: Throwable) {
+            fd.doClose(null)?.let { tt -> t.addSuppressed(tt) }
+            throw t.wrapIOException()
+        }
+
+        return fd
     }
 
     private inner class AndroidFileStream(
@@ -239,7 +270,7 @@ internal class FsJvmAndroid private constructor(
             }
             if (fd == null) return
 
-            var threw: IOException? = null
+            var threw: Throwable? = null
 
             if (fis != null) {
                 try {
@@ -263,26 +294,64 @@ internal class FsJvmAndroid private constructor(
 
             // Android does not close the underlying FileDescriptor when using it with
             // File{Input/Output}Stream because we opened it. Ownership lies with us.
-            try {
-                while (true) {
-                    try {
-                        wrapErrnoException(null) { close.invoke(null, fd) }
-                        break
-                    } catch (_: InterruptedIOException) {
-                        // EINTR
-                    }
-                }
-            } catch (e: IOException) {
-                if (threw != null) {
-                    e.addSuppressed(threw)
-                }
-                threw = e
-            }
+            threw = fd.doClose(threw)
 
             if (threw != null) throw threw
         }
 
         override fun toString(): String = "AndroidFileStream@" + hashCode().toString()
+    }
+
+    // Android API 26 and below does not have OsConstants.O_CLOEXEC available,
+    // even though it is present in NDK for API 21+.
+    //
+    // This is a one time check for API 26 and below to verify supplemental value
+    // of 524288 by opening a temporary file with it and then verifying via fcntl
+    // that it has the FD_CLOEXEC flag.
+    //
+    // If it does not, or a failure to open the descriptor occurs, then null is
+    // returned and a supplemental implementation for setting FD_CLOEXEC via fcntl
+    // is had for each open.
+    private val __O_CLOEXEC: Int? by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        if (const.O_CLOEXEC != null) return@lazy const.O_CLOEXEC
+        if (os.fcntlVoid == null) return@lazy null
+
+        val O_CLOEXEC = 524288
+        val m = MODE_MASK.convert(Mode.DEFAULT_FILE)
+        val f = const.O_WRONLY or const.O_TRUNC or O_CLOEXEC or const.O_CREAT or const.O_EXCL
+        val file = SysTempDir.resolve(UUID.randomUUID().toString())
+
+        try {
+            file.deleteOnExit()
+        } catch (_: Throwable) {}
+
+        var fd: FileDescriptor? = null
+        val result = try {
+            fd = os.open.invoke(null, file.path, f, m) as FileDescriptor
+            val flags = os.fcntlVoid.invoke(null, fd, const.F_GETFD) as Int
+            if ((flags or const.FD_CLOEXEC) == flags) {
+                // We have the correct value for O_CLOEXEC
+                O_CLOEXEC
+            } else {
+                null
+            }
+        } catch (_: Throwable) {
+            null
+        }
+
+        fd?.doClose(null)
+
+        try {
+            file.delete()
+        } catch (_: Throwable) {}
+
+        if (result != null) {
+            try {
+                println("KMP-FILE: O_CLOEXEC for API[${ANDROID.SDK_INT}] found to be $result")
+            } catch (_: Throwable) {}
+        }
+
+        result
     }
 
     // android.system.Os
@@ -292,6 +361,7 @@ internal class FsJvmAndroid private constructor(
         val chmod: Method
         /** `close(fd: FileDescriptor)` */
         val close: Method
+
         /** `fstat(fd: FileDescriptor): StructStat` */
         val fstat: Method
         /** `ftruncate(fd: FileDescriptor, length: Long)` */
@@ -305,6 +375,29 @@ internal class FsJvmAndroid private constructor(
         /** `remove(path: String)` */
         val remove: Method
 
+        /**
+         * `fcntlInt(fd: FileDescriptor, cmd: Int, arg: Int): Int`
+         *
+         * Available for API 23+, but only resolved for API 26 and below to set
+         * [OsConstants.FD_CLOEXEC], if [FsJvmAndroid.__O_CLOEXEC] is unavailable.
+         * */
+        val fcntlInt: Method?
+
+        /**
+         * `fcntlLong(fd: FileDescriptor, cmd: Int, arg: Long): Int`
+         *
+         * Available for API 21-22, but only resolved for API 26 and below to set
+         * [OsConstants.FD_CLOEXEC], if [FsJvmAndroid.__O_CLOEXEC] is unavailable.
+         * */
+        val fcntlLong: Method?
+
+        /**
+         * `fcntlVoid(fd: FileDescriptor, cmd: Int): Int`
+         *
+         * Only resolved for API 26 and below, as [OsConstants.O_CLOEXEC] is available.
+         * */
+        val fcntlVoid: Method?
+
         init {
             val clazz = Class.forName("android.system.Os")
 
@@ -316,14 +409,59 @@ internal class FsJvmAndroid private constructor(
             mkdir = clazz.getMethod("mkdir", String::class.java, Int::class.javaPrimitiveType)
             open = clazz.getMethod("open", String::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
             remove = clazz.getMethod("remove", String::class.java)
+
+            fcntlInt = if ((ANDROID.SDK_INT ?: 0) in 23..26) {
+                try {
+                    clazz.getMethod(
+                        "fcntlInt",
+                        FileDescriptor::class.java,
+                        Int::class.javaPrimitiveType,
+                        Int::class.javaPrimitiveType,
+                    )
+                } catch (_: Throwable) {
+                    null
+                }
+            } else {
+                null
+            }
+            fcntlLong = if ((ANDROID.SDK_INT ?: 0) in 21..22) {
+                try {
+                    clazz.getMethod(
+                        "fcntlLong",
+                        FileDescriptor::class.java,
+                        Int::class.javaPrimitiveType,
+                        Long::class.javaPrimitiveType,
+                    )
+                } catch (_: Throwable) {
+                    null
+                }
+            } else {
+                null
+            }
+            fcntlVoid = if ((ANDROID.SDK_INT ?: 0) in 21..26) {
+                try {
+                    clazz.getMethod(
+                        "fcntlVoid",
+                        FileDescriptor::class.java,
+                        Int::class.javaPrimitiveType,
+                    )
+                } catch (_: Throwable) {
+                    null
+                }
+            } else {
+                null
+            }
         }
     }
 
     // android.system.OsConstants
     private class OsConstants {
 
+        val FD_CLOEXEC: Int
+        val F_GETFD: Int
+        val F_SETFD: Int
+
         val O_APPEND: Int
-        val O_CLOEXEC: Int
         val O_CREAT: Int
         val O_EXCL: Int
         val O_RDONLY: Int
@@ -344,18 +482,17 @@ internal class FsJvmAndroid private constructor(
         val S_IWOTH: Int
         val S_IXOTH: Int
 
+        // API 27+
+        val O_CLOEXEC: Int?
+
         init {
             val clazz = Class.forName("android.system.OsConstants")
 
+            FD_CLOEXEC = clazz.getField("FD_CLOEXEC").getInt(null)
+            F_GETFD = clazz.getField("F_GETFD").getInt(null)
+            F_SETFD = clazz.getField("F_SETFD").getInt(null)
+
             O_APPEND = clazz.getField("O_APPEND").getInt(null)
-            O_CLOEXEC = if ((ANDROID.SDK_INT ?: 0) >= 27) {
-                clazz.getField("O_CLOEXEC").getInt(null)
-            } else {
-                // TODO: Should be 524288, but need to verify on Android native
-                //  side for multiple API levels, architectures, as well as
-                //  bionic source code.
-                0
-            }
             O_CREAT = clazz.getField("O_CREAT").getInt(null)
             O_EXCL = clazz.getField("O_EXCL").getInt(null)
             O_RDONLY = clazz.getField("O_RDONLY").getInt(null)
@@ -375,6 +512,12 @@ internal class FsJvmAndroid private constructor(
             S_IROTH = clazz.getField("S_IROTH").getInt(null)
             S_IWOTH = clazz.getField("S_IWOTH").getInt(null)
             S_IXOTH = clazz.getField("S_IXOTH").getInt(null)
+
+            O_CLOEXEC = if ((ANDROID.SDK_INT ?: 0) >= 27) {
+                clazz.getField("O_CLOEXEC").getInt(null)
+            } else {
+                null
+            }
         }
     }
 
@@ -388,6 +531,28 @@ internal class FsJvmAndroid private constructor(
             val clazz = Class.forName("android.system.StructStat")
             st_size = clazz.getField("st_size")
         }
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun FileDescriptor.doClose(threw: Throwable?): Throwable? {
+        var t: Throwable? = threw
+        val fd = this
+        try {
+            while (true) {
+                try {
+                    wrapErrnoException(null) { close.invoke(null, fd) }
+                    break
+                } catch (_: InterruptedIOException) {
+                    // EINTR
+                }
+            }
+        } catch (e: IOException) {
+            if (t != null) {
+                e.addSuppressed(t)
+            }
+            t = e
+        }
+        return t
     }
 
     // android.system.ErrnoException
