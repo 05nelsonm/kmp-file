@@ -306,7 +306,7 @@ internal class FsJvmAndroid private constructor(
     // even though it is present in NDK for API 21+.
     //
     // This is a one time check for API 26 and below to verify supplemental value
-    // of 524288 by opening a temporary file with it and then verifying via fcntl
+    // of 0x80000 by opening a temporary file with it and then verifying via fcntl
     // that it has the FD_CLOEXEC flag.
     //
     // If it does not, or a failure to open the descriptor occurs, then null is
@@ -316,7 +316,7 @@ internal class FsJvmAndroid private constructor(
         if (const.O_CLOEXEC != null) return@lazy const.O_CLOEXEC
         if (os.fcntlVoid == null) return@lazy null
 
-        val O_CLOEXEC = 524288
+        val O_CLOEXEC = 0x80000 // 524288
         val m = MODE_MASK.convert(Mode.DEFAULT_FILE)
         val f = const.O_WRONLY or const.O_TRUNC or O_CLOEXEC or const.O_CREAT or const.O_EXCL
         val file = SysTempDir.resolve(UUID.randomUUID().toString())
