@@ -70,8 +70,8 @@ internal class FsJsNode private constructor(
     @OptIn(DelicateFileApi::class)
     private val BUF: JsBuffer = JsBuffer.alloc((1024 * 16).toDouble())
 
-    internal override val dirSeparator: String = path.sep
-    internal override val pathSeparator: String = path.delimiter
+    internal override val dirSeparator: String get() = path.sep
+    internal override val pathSeparator: String get() = path.delimiter
 
     internal override fun basename(path: Path): Path = this.path.basename(path)
     internal override fun dirname(path: Path): Path = this.path.dirname(path)
@@ -90,7 +90,7 @@ internal class FsJsNode private constructor(
         return path.isAbsolute(p)
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
         val m = if (isWindows) {
             try {
@@ -113,7 +113,7 @@ internal class FsJsNode private constructor(
         }
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
         if (isWindows && !ignoreReadOnly) {
             try {
@@ -184,7 +184,7 @@ internal class FsJsNode private constructor(
         }
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun exists(file: File): Boolean {
         try {
             jsExternTryCatch { fs.accessSync(file.path, fs.constants.F_OK) }
@@ -196,7 +196,7 @@ internal class FsJsNode private constructor(
         }
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
         val options = if (isWindows) {
             nodeOptionsMkDir(recursive = false)
@@ -228,7 +228,7 @@ internal class FsJsNode private constructor(
         }
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = try {
             jsExternTryCatch { fs.openSync(file.path, fs.constants.O_RDONLY) }
@@ -238,7 +238,31 @@ internal class FsJsNode private constructor(
         return JsNodeFileStream(fd, canRead = true, canWrite = false)
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream = try {
+        val mode = if (isWindows) {
+            if (excl._mode.containsOwnerWriteAccess) "666" else "444"
+        } else {
+            excl.mode
+        }
+
+        val fd = if (isWindows && excl is OpenExcl.MustExist) {
+            jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
+        } else {
+            val flags = fs.constants.O_RDWR or when (excl) {
+                is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
+                is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
+                is OpenExcl.MustExist -> 0
+            }
+            jsExternTryCatch { fs.openSync(file.path, flags, mode) }
+        }
+
+        JsNodeFileStream(fd, canRead = true, canWrite = true)
+    } catch (t: Throwable) {
+        throw t.toIOException(file)
+    }
+
+    @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream = try {
         if (isWindows) {
             var flags = if (appending) "a" else "w"
@@ -292,31 +316,7 @@ internal class FsJsNode private constructor(
         throw t.toIOException(file)
     }
 
-    // @Throws(IOException::class)
-    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream = try {
-        val mode = if (isWindows) {
-            if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-        } else {
-            excl.mode
-        }
-
-        val fd = if (isWindows && excl is OpenExcl.MustExist) {
-            jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
-        } else {
-            val flags = fs.constants.O_RDWR or when (excl) {
-                is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
-                is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
-                is OpenExcl.MustExist -> 0
-            }
-            jsExternTryCatch { fs.openSync(file.path, flags, mode) }
-        }
-
-        JsNodeFileStream(fd, canRead = true, canWrite = true)
-    } catch (t: Throwable) {
-        throw t.toIOException(file)
-    }
-
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     override fun realpath(path: Path): Path = try {
         jsExternTryCatch { fs.realpathSync(path) }
     } catch (t: Throwable) {

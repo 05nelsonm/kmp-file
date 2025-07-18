@@ -20,6 +20,7 @@ package io.matthewnelson.kmp.file.internal.fs
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FsInfo
+import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.internal.Mode
@@ -32,8 +33,8 @@ internal class FsJsBrowser private constructor(
     internal override val isWindows: Boolean,
 ): FsJs(info = FsInfo.of(name = "FsJsBrowser", isPosix = !isWindows)) {
 
-    internal override val dirSeparator: String = if (isWindows) "\\" else "/"
-    internal override val pathSeparator: String = if (isWindows) ";" else ":"
+    internal override val dirSeparator: String get() = if (isWindows) "\\" else "/"
+    internal override val pathSeparator: String get() = if (isWindows) ";" else ":"
     internal override val tempDirectory: Path = "/tmp"
 
     internal override fun basename(path: Path): Path {
@@ -64,51 +65,44 @@ internal class FsJsBrowser private constructor(
         }
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
         throw UnsupportedOperationException("chmod is not supported on $this.")
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
-        // TODO
         throw UnsupportedOperationException("delete is not supported on $this.")
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun exists(file: File): Boolean {
-        // TODO
         throw UnsupportedOperationException("exists is not supported on $this.")
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
-        // TODO
         throw UnsupportedOperationException("mkdir is not supported on $this.")
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
-        // TODO
         throw UnsupportedOperationException("openRead is not supported on $this.")
     }
 
-    // @Throws(IOException::class)
-    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        // TODO
-        throw UnsupportedOperationException("openWrite is not supported on $this.")
-    }
-
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
     internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
-        // TODO
         throw UnsupportedOperationException("openReadWrite is not supported on $this.")
     }
 
-    // @Throws(IOException::class)
+    @Throws(IOException::class)
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        throw UnsupportedOperationException("openWrite is not supported on $this.")
+    }
+
+    @Throws(IOException::class)
     override fun realpath(path: Path): Path {
-        // TODO: Maybe? >> return if (path.isEmpty() || path == ".") "/" else path
-        throw UnsupportedOperationException("mkdir is not supported on $this.")
+        throw UnsupportedOperationException("realpath is not supported on $this.")
     }
 
     internal companion object {
