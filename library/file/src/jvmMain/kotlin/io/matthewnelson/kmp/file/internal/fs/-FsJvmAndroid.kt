@@ -74,6 +74,55 @@ internal class FsJvmAndroid private constructor(
         S_IXOTH = const.S_IXOTH,
     )
 
+    // Android API 26 and below does not have OsConstants.O_CLOEXEC available,
+    // even though it is present in NDK for API 21+.
+    //
+    // This is a one time check for API 26 and below to verify supplemental value
+    // of 0x80000 by opening a temporary file with it and then verifying via fcntl
+    // that it has the FD_CLOEXEC flag.
+    private val __O_CLOEXEC: Int? by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        if (const.O_CLOEXEC != null) return@lazy const.O_CLOEXEC
+        if (os.fcntlVoid == null) return@lazy null
+
+        @Suppress("LocalVariableName")
+        val O_CLOEXEC = 0x80000 // 524288
+        val m = MODE_MASK.convert(Mode.DEFAULT_FILE)
+        val f = const.O_WRONLY or const.O_TRUNC or O_CLOEXEC or const.O_CREAT or const.O_EXCL
+        val tmp = SysTempDir.resolve(UUID.randomUUID().toString())
+
+        try {
+            tmp.deleteOnExit()
+        } catch (_: Throwable) {}
+
+        var fd: FileDescriptor? = null
+        val result = try {
+            fd = os.open.invoke(null, tmp.path, f, m) as FileDescriptor
+            val flags = os.fcntlVoid.invoke(null, fd, const.F_GETFD) as Int
+            if ((flags or const.FD_CLOEXEC) == flags) {
+                // We have the correct value for O_CLOEXEC
+                O_CLOEXEC
+            } else {
+                null
+            }
+        } catch (_: Throwable) {
+            null
+        }
+
+        fd?.doClose(null)
+
+        try {
+            tmp.delete()
+        } catch (_: Throwable) {}
+
+        if (result == null) {
+            try {
+                System.err.println("KMP-FILE: Failed to determine O_CLOEXEC value for API[${ANDROID.SDK_INT}]")
+            } catch (_: Throwable) {}
+        }
+
+        result
+    }
+
     @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
         val m = MODE_MASK.convert(mode)
@@ -152,6 +201,13 @@ internal class FsJvmAndroid private constructor(
         }
     }
 
+    private class DoFcntl(
+        val deleteFileOnFailure: Boolean,
+        val fcntlVoid: Method,
+        val isFcntlInt: Boolean,
+        val fcntl: Method,
+    )
+
     @Throws(IOException::class)
     private fun File.open(flags: Int, excl: OpenExcl): FileDescriptor {
         val m = MODE_MASK.convert(excl._mode)
@@ -163,32 +219,100 @@ internal class FsJvmAndroid private constructor(
 
         f = f or (__O_CLOEXEC ?: 0)
 
+        val doFcntl = run {
+            if (__O_CLOEXEC != null) return@run null
+            val fcntlVoid = os.fcntlVoid ?: return@run null
+
+            var fcntl = os.fcntlInt
+            val isFcntlInt = if (fcntl != null) {
+                true
+            } else {
+                fcntl = os.fcntlLong
+                false
+            }
+            if (fcntl == null) return@run null
+
+            val deleteFileOnFailure = when (excl) {
+                is OpenExcl.MaybeCreate -> !exists(this)
+                is OpenExcl.MustCreate -> true
+                is OpenExcl.MustExist -> false
+            }
+
+            DoFcntl(deleteFileOnFailure, fcntlVoid, isFcntlInt, fcntl)
+        }
+
         val fd = wrapErrnoException(this) { open.invoke(null, path, f, m) as FileDescriptor }
 
-        if (__O_CLOEXEC != null) return fd
-        if (os.fcntlVoid == null) return fd
-
-        var fcntl = os.fcntlInt
-        val isFcntlInt = if (fcntl != null) {
-            true
-        } else {
-            fcntl = os.fcntlLong
-            false
-        }
-        if (fcntl == null) return fd
+        if (doFcntl == null) return fd
 
         try {
             wrapErrnoException(this) {
-                f = os.fcntlVoid.invoke(null, fd, const.F_GETFD) as Int
+                f = doFcntl.fcntlVoid.invoke(null, fd, const.F_GETFD) as Int
                 f = f or const.FD_CLOEXEC
-                fcntl.invoke(null, fd, const.F_SETFD, if (isFcntlInt) f else f.toLong())
+                doFcntl.fcntl.invoke(null, fd, const.F_SETFD, if (doFcntl.isFcntlInt) f else f.toLong())
             }
         } catch (t: Throwable) {
             fd.doClose(null)?.let { tt -> t.addSuppressed(tt) }
+            if (doFcntl.deleteFileOnFailure) {
+                try {
+                    delete(this, ignoreReadOnly = true, mustExist = false)
+                } catch (e: IOException) {
+                    t.addSuppressed(e)
+                }
+            }
             throw t.wrapIOException()
         }
 
         return fd
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun FileDescriptor.doClose(threw: Throwable?): Throwable? {
+        var t: Throwable? = threw
+        val fd = this
+        try {
+            while (true) {
+                try {
+                    wrapErrnoException(null) { close.invoke(null, fd) }
+                    break
+                } catch (_: InterruptedIOException) {
+                    // EINTR
+                }
+            }
+        } catch (e: IOException) {
+            if (t != null) {
+                e.addSuppressed(t)
+            }
+            t = e
+        }
+        return t
+    }
+
+    // android.system.ErrnoException
+    @Throws(IllegalArgumentException::class, IOException::class)
+    private inline fun <T: Any?> wrapErrnoException(file: File?, other: File? = null, block: Os.() -> T): T = try {
+        block(os)
+    } catch (t: Throwable) {
+        val c = if (t is InvocationTargetException) t.cause ?: t else t
+        val m = c.message
+
+        throw when {
+            t is SecurityException -> t.toAccessDeniedException(file ?: "".toFile())
+            c is SecurityException -> c.toAccessDeniedException(file ?: "".toFile())
+            m == null -> IOException(c)
+            m.contains("EINTR") -> InterruptedIOException(m).alsoAddSuppressed(c)
+            m.contains("EINVAL") -> IllegalArgumentException(m).alsoAddSuppressed(c)
+            m.contains("ENOENT") -> fileNotFoundException(file, null, m).alsoAddSuppressed(c)
+            file != null -> when {
+                m.contains("EACCES") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
+                m.contains("EEXIST") -> FileAlreadyExistsException(file, other, m).alsoAddSuppressed(c)
+                m.contains("ENOTDIR") -> NotDirectoryException(file).alsoAddSuppressed(c)
+                m.contains("ENOTEMPTY") -> DirectoryNotEmptyException(file).alsoAddSuppressed(c)
+                m.contains("EPERM") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
+                else -> FileSystemException(file, other, m).alsoAddSuppressed(c)
+            }
+            else -> IOException(m)
+        }
     }
 
     private inner class AndroidFileStream(
@@ -294,64 +418,10 @@ internal class FsJvmAndroid private constructor(
 
             // Android does not close the underlying FileDescriptor when using it with
             // File{Input/Output}Stream because we opened it. Ownership lies with us.
-            threw = fd.doClose(threw)
-
-            if (threw != null) throw threw
+            fd.doClose(threw)?.let { throw it }
         }
 
         override fun toString(): String = "AndroidFileStream@" + hashCode().toString()
-    }
-
-    // Android API 26 and below does not have OsConstants.O_CLOEXEC available,
-    // even though it is present in NDK for API 21+.
-    //
-    // This is a one time check for API 26 and below to verify supplemental value
-    // of 0x80000 by opening a temporary file with it and then verifying via fcntl
-    // that it has the FD_CLOEXEC flag.
-    //
-    // If it does not, or a failure to open the descriptor occurs, then null is
-    // returned and a supplemental implementation for setting FD_CLOEXEC via fcntl
-    // is had for each open.
-    private val __O_CLOEXEC: Int? by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        if (const.O_CLOEXEC != null) return@lazy const.O_CLOEXEC
-        if (os.fcntlVoid == null) return@lazy null
-
-        val O_CLOEXEC = 0x80000 // 524288
-        val m = MODE_MASK.convert(Mode.DEFAULT_FILE)
-        val f = const.O_WRONLY or const.O_TRUNC or O_CLOEXEC or const.O_CREAT or const.O_EXCL
-        val file = SysTempDir.resolve(UUID.randomUUID().toString())
-
-        try {
-            file.deleteOnExit()
-        } catch (_: Throwable) {}
-
-        var fd: FileDescriptor? = null
-        val result = try {
-            fd = os.open.invoke(null, file.path, f, m) as FileDescriptor
-            val flags = os.fcntlVoid.invoke(null, fd, const.F_GETFD) as Int
-            if ((flags or const.FD_CLOEXEC) == flags) {
-                // We have the correct value for O_CLOEXEC
-                O_CLOEXEC
-            } else {
-                null
-            }
-        } catch (_: Throwable) {
-            null
-        }
-
-        fd?.doClose(null)
-
-        try {
-            file.delete()
-        } catch (_: Throwable) {}
-
-        if (result == null) {
-            try {
-                System.err.println("KMP-FILE: Failed to determine O_CLOEXEC value for API[${ANDROID.SDK_INT}]")
-            } catch (_: Throwable) {}
-        }
-
-        result
     }
 
     // android.system.Os
@@ -530,55 +600,6 @@ internal class FsJvmAndroid private constructor(
         init {
             val clazz = Class.forName("android.system.StructStat")
             st_size = clazz.getField("st_size")
-        }
-    }
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun FileDescriptor.doClose(threw: Throwable?): Throwable? {
-        var t: Throwable? = threw
-        val fd = this
-        try {
-            while (true) {
-                try {
-                    wrapErrnoException(null) { close.invoke(null, fd) }
-                    break
-                } catch (_: InterruptedIOException) {
-                    // EINTR
-                }
-            }
-        } catch (e: IOException) {
-            if (t != null) {
-                e.addSuppressed(t)
-            }
-            t = e
-        }
-        return t
-    }
-
-    // android.system.ErrnoException
-    @Throws(IllegalArgumentException::class, IOException::class)
-    private inline fun <T: Any?> wrapErrnoException(file: File?, other: File? = null, block: Os.() -> T): T = try {
-        block(os)
-    } catch (t: Throwable) {
-        val c = if (t is InvocationTargetException) t.cause ?: t else t
-        val m = c.message
-
-        throw when {
-            t is SecurityException -> t.toAccessDeniedException(file ?: "".toFile())
-            c is SecurityException -> c.toAccessDeniedException(file ?: "".toFile())
-            m == null -> IOException(c)
-            m.contains("EINTR") -> InterruptedIOException(m).alsoAddSuppressed(c)
-            m.contains("EINVAL") -> IllegalArgumentException(m).alsoAddSuppressed(c)
-            m.contains("ENOENT") -> fileNotFoundException(file, null, m).alsoAddSuppressed(c)
-            file != null -> when {
-                m.contains("EACCES") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
-                m.contains("EEXIST") -> FileAlreadyExistsException(file, other, m).alsoAddSuppressed(c)
-                m.contains("ENOTDIR") -> NotDirectoryException(file).alsoAddSuppressed(c)
-                m.contains("ENOTEMPTY") -> DirectoryNotEmptyException(file).alsoAddSuppressed(c)
-                m.contains("EPERM") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
-                else -> FileSystemException(file, other, m).alsoAddSuppressed(c)
-            }
-            else -> IOException(m)
         }
     }
 }
