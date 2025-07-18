@@ -18,13 +18,7 @@
 package io.matthewnelson.kmp.file.internal
 
 import kotlinx.cinterop.*
-import platform.posix.__xpg_basename
 import platform.posix.dirname
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual inline fun MemScope.platformBasename(
-    path: Path,
-): CPointer<ByteVar>? = __xpg_basename(path.cstr.ptr)
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual inline fun MemScope.platformDirname(

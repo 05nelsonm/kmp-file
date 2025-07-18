@@ -15,14 +15,26 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class NameUnitTest {
 
     @Test
-    fun givenFile_whenName_thenIsAsExpected() = skipTestIf(isJsBrowser) {
+    fun givenFile_whenName_thenIsAsExpected() {
         assertEquals("lorem_ipsum", FILE_LOREM_IPSUM.name)
         assertEquals("abc123", "/some/path".toFile().resolve("abc123").name)
+        assertEquals("", "".toFile().name)
+        assertEquals(".", ".".toFile().name)
+        assertEquals("..", "..".toFile().name)
+
+        if (IsWindows) {
+            assertEquals("", "\\\\\\".toFile().name)
+            assertEquals("", "C:".toFile().name)
+        } else {
+            assertEquals("", "//".toFile().name)
+            assertEquals("C:", "C:".toFile().name)
+        }
     }
 }
