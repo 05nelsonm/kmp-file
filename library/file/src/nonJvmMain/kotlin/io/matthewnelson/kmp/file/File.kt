@@ -19,7 +19,7 @@ package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
-import io.matthewnelson.kmp.file.internal.basename
+import io.matthewnelson.kmp.file.internal.commonDriveOrNull
 import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.commonMkdirs
 import io.matthewnelson.kmp.file.internal.parentOrNull
@@ -58,7 +58,12 @@ public actual class File: Comparable<File> {
 
     // use .name
     @PublishedApi
-    internal actual fun getName(): String = _path.basename()
+    internal actual fun getName(): String {
+        val iLast = _path.indexOfLast { c -> c == SysDirSep }
+        if (iLast != -1) return _path.substring(iLast + 1)
+        if (_path.length == 2 && _path.commonDriveOrNull() != null) return ""
+        return _path
+    }
     // use .parentPath
     @PublishedApi
     internal actual fun getParent(): String? = _path.parentOrNull()

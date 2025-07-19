@@ -20,14 +20,6 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.internal.fs.FsJs
 
 /**
- * Returns the last segment of the [Path], or the [Path]
- * if no separators are present.
- *
- * @see [io.matthewnelson.kmp.file.File.getName]
- * */
-internal actual inline fun Path.basename(): String = FsJs.INSTANCE.basename(this)
-
-/**
  * Returns an empty string or the [Path]
  *
  * @see [io.matthewnelson.kmp.file.File.getParent]

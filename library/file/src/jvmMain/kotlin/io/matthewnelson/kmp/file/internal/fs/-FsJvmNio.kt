@@ -43,6 +43,12 @@ import kotlin.text.startsWith
 @Suppress("NewApi")
 internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info) {
 
+    @Throws(IOException::class)
+    internal final override fun openRead(file: File): AbstractFileStream {
+        val options = mutableSetOf(StandardOpenOption.READ)
+        return file.openNio(OpenExcl.MustExist, options, attrs = null)
+    }
+
     internal companion object {
 
         // MUST check for existence of java.nio.file.Files
@@ -60,12 +66,6 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         }
     }
 
-    @Throws(IOException::class)
-    internal final override fun openRead(file: File): AbstractFileStream {
-        val options = mutableSetOf(StandardOpenOption.READ)
-        return file.open(excl = OpenExcl.MustExist, options, attrs = null)
-    }
-
     // Windows
     private class NonPosix: FsJvmNio(info = FsInfo.of(name = "FsJvmNioNonPosix", isPosix = false)) {
 
@@ -77,7 +77,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         @Throws(IOException::class)
         internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
             checkThread()
-            val path = file.toSafePath()
+            val path = file.toNioPath()
             try {
                 Files.delete(path)
             } catch (t: Throwable) {
@@ -116,7 +116,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
 
         @Throws(IOException::class)
         internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
-            val path = dir.toSafePath()
+            val path = dir.toNioPath()
             try {
                 Files.createDirectory(path)
             } catch (t: Throwable) {
@@ -145,6 +145,16 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         }
 
         @Throws(IOException::class)
+        internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+            val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
+                add(StandardOpenOption.READ)
+                add(StandardOpenOption.WRITE)
+            }
+
+            return file.openNonPosix(excl, options)
+        }
+
+        @Throws(IOException::class)
         internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
             val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
                 add(StandardOpenOption.WRITE)
@@ -155,20 +165,10 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 }
             }
 
-            return file.open(excl, options)
+            return file.openNonPosix(excl, options)
         }
 
-        @Throws(IOException::class)
-        internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
-            val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
-                add(StandardOpenOption.READ)
-                add(StandardOpenOption.WRITE)
-            }
-
-            return file.open(excl, options)
-        }
-
-        private inline fun File.open(excl: OpenExcl, options: LinkedHashSet<StandardOpenOption>): NioFileStream {
+        private inline fun File.openNonPosix(excl: OpenExcl, options: LinkedHashSet<StandardOpenOption>): NioFileStream {
             val doChmod = when {
                 excl._mode == Mode.DEFAULT_FILE -> false
                 IsWindows -> if (excl._mode.containsOwnerWriteAccess) false else null
@@ -179,7 +179,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 is OpenExcl.MustExist -> false
             }
 
-            val s = open(excl, options, attrs = null)
+            val s = openNio(excl, options, attrs = null)
             if (doChmod) {
                 try {
                     chmod(this, excl._mode, mustExist = true)
@@ -207,7 +207,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
 
         @Throws(IOException::class)
         internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
-            val path = file.toSafePath()
+            val path = file.toNioPath()
             val perms = mode.toPosixFilePermissions()
 
             try {
@@ -222,7 +222,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         @Throws(IOException::class)
         internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
             checkThread()
-            val path = file.toSafePath()
+            val path = file.toNioPath()
             try {
                 Files.delete(path)
             } catch (t: Throwable) {
@@ -234,7 +234,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
 
         @Throws(IOException::class)
         internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
-            val path = dir.toSafePath()
+            val path = dir.toNioPath()
             val perms = mode.toPosixFilePermissions()
             val attrs = PosixFilePermissions.asFileAttribute(perms)
 
@@ -248,6 +248,15 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         }
 
         @Throws(IOException::class)
+        internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+            val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
+                add(StandardOpenOption.READ)
+                add(StandardOpenOption.WRITE)
+            }
+            return file.openPosix(excl, options)
+        }
+
+        @Throws(IOException::class)
         internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
             val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
                 add(StandardOpenOption.WRITE)
@@ -257,22 +266,13 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                     add(StandardOpenOption.TRUNCATE_EXISTING)
                 }
             }
-            return file.open(excl, options)
+            return file.openPosix(excl, options)
         }
 
-        @Throws(IOException::class)
-        internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
-            val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
-                add(StandardOpenOption.READ)
-                add(StandardOpenOption.WRITE)
-            }
-            return file.open(excl, options)
-        }
-
-        private inline fun File.open(excl: OpenExcl, options: LinkedHashSet<StandardOpenOption>): NioFileStream {
+        private inline fun File.openPosix(excl: OpenExcl, options: LinkedHashSet<StandardOpenOption>): NioFileStream {
             val perms = excl._mode.toPosixFilePermissions()
             val attrs = PosixFilePermissions.asFileAttribute(perms)
-            return open(excl, options, attrs)
+            return openNio(excl, options, attrs)
         }
 
         private fun Mode.toPosixFilePermissions(): Set<PosixFilePermission> {
@@ -297,8 +297,8 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
     }
 
     @Throws(IOException::class)
-    protected fun File.open(excl: OpenExcl, options: MutableSet<StandardOpenOption>, attrs: FileAttribute<*>?): NioFileStream {
-        val path = toSafePath()
+    protected fun File.openNio(excl: OpenExcl, options: MutableSet<StandardOpenOption>, attrs: FileAttribute<*>?): NioFileStream {
+        val path = toNioPath()
 
         when (excl) {
             is OpenExcl.MaybeCreate -> options.add(StandardOpenOption.CREATE)
@@ -323,7 +323,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
     }
 
     @Throws(IOException::class)
-    protected inline fun File.toSafePath(): Path = try {
+    protected inline fun File.toNioPath(): Path = try {
         toPath()
     } catch (e: InvalidPathException) {
         throw e.wrapIOException()

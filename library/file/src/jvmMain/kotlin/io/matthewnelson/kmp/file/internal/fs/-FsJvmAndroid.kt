@@ -163,15 +163,15 @@ internal class FsJvmAndroid private constructor(
     }
 
     @Throws(IOException::class)
-    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl)
-        return AndroidFileStream(fd, canRead = false, canWrite = true)
-    }
-
-    @Throws(IOException::class)
     internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
         val fd = file.open(const.O_RDWR, excl)
         return AndroidFileStream(fd, canRead = true, canWrite = true)
+    }
+
+    @Throws(IOException::class)
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl)
+        return AndroidFileStream(fd, canRead = false, canWrite = true)
     }
 
     internal companion object {

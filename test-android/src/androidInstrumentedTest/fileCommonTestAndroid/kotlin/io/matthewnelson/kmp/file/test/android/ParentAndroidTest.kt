@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file
+package io.matthewnelson.kmp.file.test.android
 
+import io.matthewnelson.kmp.file.ParentSharedTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
-class ParentUnitTest: ParentSharedTest() {
+class ParentAndroidTest: ParentSharedTest() {
 
     @Test
+    @Ignore
     fun stub() {}
 }

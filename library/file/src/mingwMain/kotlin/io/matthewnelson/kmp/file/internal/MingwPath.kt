@@ -22,13 +22,7 @@ import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.MemScope
 import kotlinx.cinterop.cstr
-import platform.posix.basename
 import platform.posix.dirname
-
-@OptIn(ExperimentalForeignApi::class)
-internal actual inline fun MemScope.platformBasename(
-    path: Path,
-): CPointer<ByteVar>? = basename(path.cstr.ptr)
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual inline fun MemScope.platformDirname(

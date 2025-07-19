@@ -131,15 +131,15 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
     }
 
     @Throws(IOException::class)
-    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val fos = file.open(excl, openCloseable = { FileOutputStream(file, /* append = */ appending) })
-        return WriteOnlyFileStream(fos)
-    }
-
-    @Throws(IOException::class)
     override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
         val raf = file.open(excl, openCloseable = { RandomAccessFile(file, "rw") })
         return RandomAccessFileStream(raf, canRead = true, canWrite = true)
+    }
+
+    @Throws(IOException::class)
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        val fos = file.open(excl, openCloseable = { FileOutputStream(file, /* append = */ appending) })
+        return WriteOnlyFileStream(fos)
     }
 
     @Throws(IOException::class)

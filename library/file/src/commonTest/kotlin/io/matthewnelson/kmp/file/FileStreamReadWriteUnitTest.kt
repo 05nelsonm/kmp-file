@@ -18,7 +18,6 @@ package io.matthewnelson.kmp.file
 import kotlin.test.Test
 
 class FileStreamReadWriteUnitTest: FileStreamReadWriteSharedTest() {
-
     override val checker: PermissionChecker? = permissionChecker()
 
     @Test
