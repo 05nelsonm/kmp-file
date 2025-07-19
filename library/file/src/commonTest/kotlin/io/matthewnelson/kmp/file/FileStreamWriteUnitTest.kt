@@ -20,7 +20,6 @@ package io.matthewnelson.kmp.file
 import kotlin.test.Test
 
 expect class FileStreamWriteUnitTest: FileStreamWriteSharedTest {
-
     override val checker: PermissionChecker?
 
     @Test
