@@ -17,43 +17,10 @@ package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
-class NormalizeUnitTest {
+class NormalizeUnitTest: NormalizeSharedTest() {
+    override val isWindows: Boolean = IsWindows
 
     @Test
-    fun givenFile_whenNormalize_thenResolvesAsExpected() {
-        val s = SysDirSep
-        assertEquals("${s}rooted${s}path", "/rooted/path".toFile().normalize().path)
-        assertEquals("${s}rooted", "/../rooted/path/..".toFile().normalize().path)
-        assertEquals("${s}path", "/rooted/../path".toFile().normalize().path)
-        assertEquals("$s", "/rooted/../../path/..".toFile().normalize().path)
-        assertEquals("${s}rooted", "/rooted/./path/..".toFile().normalize().path)
-
-        assertEquals("relative${s}path", "relative/path".toFile().normalize().path)
-        assertEquals("relative", "relative/path/..".toFile().normalize().path)
-        assertEquals("path", "relative/../path".toFile().normalize().path)
-        assertEquals("", "relative/../path/..".toFile().normalize().path)
-        assertEquals("relative", "relative/o/./.././path/..".toFile().normalize().path)
-        assertEquals("..${s}..${s}relative", "../../relative/path/..".toFile().normalize().path)
-
-        if (!IsWindows) return
-
-        assertEquals("\\\\server_name\\path", "\\\\server_name\\path".toFile().normalize().path)
-        assertEquals("\\\\server_name", "\\\\server_name\\path\\..\\..\\..".toFile().normalize().path)
-        assertEquals("\\\\server_name\\path", "\\\\server_name\\..\\path\\.\\.".toFile().normalize().path)
-        assertEquals("\\\\", "\\\\..".toFile().normalize().path)
-        assertEquals("\\\\", "\\\\.".toFile().normalize().path)
-        assertEquals("C:\\path", "C:\\rooted\\..\\path".toFile().normalize().path)
-        assertEquals("\\", "\\rooted\\..\\path\\..".toFile().normalize().path)
-        assertEquals("\\rooted", "\\rooted\\.\\path\\.\\..".toFile().normalize().path)
-
-        assertEquals("C:relative\\path", "C:relative\\path".toFile().normalize().path)
-
-        assertEquals("C:path", "C:relative\\..\\path".toFile().normalize().path)
-        assertEquals("C:relative", "C:relative\\path\\..".toFile().normalize().path)
-        assertEquals("C:", "C:relative\\..\\path\\..".toFile().normalize().path)
-        assertEquals("C:", "C:relative\\..\\..\\.\\path\\..".toFile().normalize().path)
-        assertEquals("C:relative\\path", "C:relative\\.\\path".toFile().normalize().path)
-    }
+    fun stub() {}
 }

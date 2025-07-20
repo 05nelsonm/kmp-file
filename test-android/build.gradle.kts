@@ -73,9 +73,9 @@ kmpConfiguration {
             sourceSetTestInstrumented {
                 // Symlinks are not a thing on Windows, so...
                 if (!HostManager.hostIsMingw) {
-                    kotlin.srcDir("src/androidInstrumentedTest/fileCommonTestShared")
-                    kotlin.srcDir("src/androidInstrumentedTest/fileCommonTestAndroid")
-                    kotlin.srcDir("src/androidInstrumentedTest/fileJvmTestShared")
+                    kotlin.srcDir("src/androidInstrumentedTest/fileCommonTestShared/kotlin")
+                    kotlin.srcDir("src/androidInstrumentedTest/fileCommonTestAndroid/kotlin")
+                    kotlin.srcDir("src/androidInstrumentedTest/fileJvmTestShared/kotlin")
                 }
 
                 dependencies {

@@ -21,7 +21,6 @@ import io.matthewnelson.kmp.file.internal.Path
 internal external interface ModulePath {
     val sep: String
     val delimiter: String
-    fun basename(path: Path): String
     fun dirname(path: Path): Path
     fun isAbsolute(path: Path): Boolean
 }

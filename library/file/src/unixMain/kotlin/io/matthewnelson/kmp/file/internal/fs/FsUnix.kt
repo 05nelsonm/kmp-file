@@ -112,16 +112,16 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     }
 
     @Throws(IOException::class)
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        val fd = file.open(O_RDWR, excl)
+        return UnixFileStream(fd, canRead = true, canWrite = true)
+    }
+
+    @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
         val flags = O_WRONLY or (if (appending) O_APPEND else O_TRUNC)
         val fd = file.open(flags, excl)
         return UnixFileStream(fd, canRead = false, canWrite = true)
-    }
-
-    @Throws(IOException::class)
-    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
-        val fd = file.open(O_RDWR, excl)
-        return UnixFileStream(fd, canRead = true, canWrite = true)
     }
 
     @Throws(IOException::class)
