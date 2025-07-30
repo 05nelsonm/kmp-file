@@ -73,8 +73,6 @@ internal class FsJsNode private constructor(
     internal override val dirSeparator: String get() = path.sep
     internal override val pathSeparator: String get() = path.delimiter
 
-    internal override fun dirname(path: Path): Path = this.path.dirname(path)
-
     internal override fun isAbsolute(file: File): Boolean {
         val p = file.path
         // Node.js windows implementation declares

@@ -21,41 +21,83 @@ import kotlin.test.assertNull
 
 abstract class ParentSharedTest {
 
+    protected abstract val isWindows: Boolean
+
     @Test
-    fun givenFile_whenEmpty_thenReturnsNull() = skipTestIf(isJsBrowser) {
+    fun givenFile_whenEmpty_thenReturnsNull() {
         assertNull("".toFile().parentPath)
     }
 
     @Test
-    fun givenFile_whenNoPathSeparator_thenReturnsNull() = skipTestIf(isJsBrowser) {
+    fun givenFile_whenDot_thenReturnsNull() {
+        assertNull(".".toFile().parentPath)
+    }
+
+    @Test
+    fun givenFile_whenDotDot_thenReturnsNull() {
+        assertNull("..".toFile().parentPath)
+    }
+
+    @Test
+    fun givenFile_whenSlash_thenReturnsNull() {
+        assertNull("$SysDirSep".toFile().parentPath)
+    }
+
+    @Test
+    fun givenFile_whenNoPathSeparator_thenReturnsNull() {
         assertNull(randomName().toFile().parentPath)
     }
 
     @Test
-    fun givenFile_whenParentDirNameIsSpace_thenReturnsSpace() = skipTestIf(isJsBrowser) {
+    fun givenFile_whenParentDirNameIsSpace_thenReturnsSpace() {
         val expected = " "
         assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
     @Test
-    fun givenFile_whenParentIsDot_thenReturnsNull() = skipTestIf(isJsBrowser) {
+    fun givenFile_whenParentIsDot_thenReturnsNull() {
         val expected = "."
         assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
     @Test
-    fun givenFile_whenParentIsDotDot_thenReturnsNull() = skipTestIf(isJsBrowser) {
+    fun givenFile_whenParentIsDotDot_thenReturnsNull() {
         val expected = ".."
         assertEquals(expected, expected.toFile().resolve("anything").parentPath)
     }
 
     @Test
-    fun givenFile_whenHasTrailingSlashes_thenIgnoresThem() = skipTestIf(isJsBrowser) {
+    fun givenFile_whenHasTrailingSlashes_thenIgnoresThem() {
         val path = buildString {
             append(' ')
             repeat(3) { append(SysDirSep) }
         }
 
         assertNull(path.toFile().parentPath)
+    }
+
+    @Test
+    fun givenFile_whenWindows_thenDriveReturnsNull() = skipTestIf(!isWindows) {
+        assertNull("C:".toFile().parentPath)
+    }
+
+    @Test
+    fun givenFile_whenWindows_thenRootedDriveReturnsNull() = skipTestIf(!isWindows) {
+        assertNull("C:\\".toFile().parentPath)
+    }
+
+    @Test
+    fun givenFile_whenWindows_thenRootedDriveAbsolutePathReturnDriveRoot() = skipTestIf(!isWindows) {
+        assertEquals("C:\\", "C:\\something".toFile().parentPath)
+    }
+
+    @Test
+    fun givenFile_whenWindows_thenRelativeDriveReturnsDrive() = skipTestIf(!isWindows) {
+        assertEquals("C:", "C:relative".toFile().parentPath)
+    }
+
+    @Test
+    fun givenFile_whenWindows_thenUNCRootReturnNull() = skipTestIf(!isWindows) {
+        assertNull("\\\\unc_server".toFile().parentPath)
     }
 }

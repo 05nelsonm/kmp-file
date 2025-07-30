@@ -17,12 +17,12 @@
 
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.commonDriveOrNull
 import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.commonMkdirs
-import io.matthewnelson.kmp.file.internal.parentOrNull
 import io.matthewnelson.kmp.file.internal.resolveSlashes
 import io.matthewnelson.kmp.file.internal.toMode
 
@@ -66,7 +66,46 @@ public actual class File: Comparable<File> {
     }
     // use .parentPath
     @PublishedApi
-    internal actual fun getParent(): String? = _path.parentOrNull()
+    internal actual fun getParent(): String? {
+        if (_path == ".") return null
+        if (_path.length == 1 && _path[0] == SysDirSep) return null
+        if (_path.endsWith("..")) {
+            if (_path.length == 2) return null
+            if (_path.endsWith("${SysDirSep}..")) return null
+        }
+
+        val iLast = _path.indexOfLast { c -> c == SysDirSep }
+        if (iLast == -1) {
+            val drive = _path.commonDriveOrNull()
+            return if (drive != null) {
+                if (_path.length == 2) null else drive
+            } else {
+                null
+            }
+        }
+
+        if (iLast == 2) {
+            val drive = _path.commonDriveOrNull()
+            if (drive != null) {
+                return if (_path.length == 3) null else "${drive}${SysDirSep}"
+            }
+        }
+
+        if (iLast == 1 && IsWindows) {
+            // UNC path (no parent)
+            if (_path[0] == SysDirSep) return null
+        }
+
+        if (iLast == 0) {
+            // Something like /abc
+            return "$SysDirSep"
+        }
+
+        val ret = _path.substring(startIndex = 0, endIndex = iLast)
+        if (ret.isEmpty()) return null
+        if (ret == _path) return null
+        return ret
+    }
     // use .parentFile
     @PublishedApi
     internal actual fun getParentFile(): File? {

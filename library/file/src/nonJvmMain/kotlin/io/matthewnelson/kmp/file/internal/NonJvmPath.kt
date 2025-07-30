@@ -19,18 +19,6 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.SysDirSep
 
-internal inline fun Path.parentOrNull(): Path? {
-    if (!contains(SysDirSep)) return null
-
-    val parent = dirname()
-
-    return when {
-        parent.isEmpty() -> null
-        parent == this -> null
-        else -> parent
-    }
-}
-
 internal inline fun Path.resolveSlashes(): Path {
     if (isEmpty()) return this
     var result = this
@@ -67,10 +55,3 @@ internal inline fun Path.resolveSlashes(): Path {
 
     return rootSlashes + result
 }
-
-/**
- * Returns an empty string or the [Path]
- *
- * @see [io.matthewnelson.kmp.file.File.getParent]
- * */
-internal expect inline fun Path.dirname(): Path
