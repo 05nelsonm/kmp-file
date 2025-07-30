@@ -20,6 +20,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 
 class ParentAndroidTest: ParentSharedTest() {
+    override val isWindows: Boolean = false
 
     @Test
     @Ignore

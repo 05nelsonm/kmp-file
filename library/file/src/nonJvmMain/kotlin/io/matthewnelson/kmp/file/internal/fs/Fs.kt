@@ -27,10 +27,9 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.commonDriveOrNull
 import io.matthewnelson.kmp.file.internal.commonNormalize
-import io.matthewnelson.kmp.file.internal.parentOrNull
 import io.matthewnelson.kmp.file.internal.resolveSlashes
+import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
-import io.matthewnelson.kmp.file.toFile
 
 internal actual sealed class Fs private constructor(internal actual val info: FsInfo) {
 
@@ -120,14 +119,14 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
             if (p.isEmpty()) return realpath(".")
 
             val resolved = absolutePath(file).commonNormalize()
-            var existingPath = resolved
+            var existing = File(resolved, direct = null)
             while (true) {
-                if (exists(existingPath.toFile())) break
-                val parent = existingPath.parentOrNull() ?: break
-                existingPath = parent
+                if (exists(existing)) break
+                val parent = existing.parentFile ?: break
+                existing = parent
             }
 
-            return resolved.replaceFirst(existingPath, realpath(existingPath))
+            return resolved.replaceFirst(existing.path, realpath(existing.path))
         }
 
         @Throws(IOException::class)

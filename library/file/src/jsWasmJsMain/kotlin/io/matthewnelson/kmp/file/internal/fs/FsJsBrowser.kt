@@ -37,11 +37,6 @@ internal class FsJsBrowser private constructor(
     internal override val pathSeparator: String get() = if (isWindows) ";" else ":"
     internal override val tempDirectory: Path = "/tmp"
 
-    internal override fun dirname(path: Path): Path {
-        // TODO
-        throw UnsupportedOperationException("FileSystem[$this] not available.")
-    }
-
     internal override fun isAbsolute(file: File): Boolean {
         val p = file.path
         if (p.isEmpty()) return false

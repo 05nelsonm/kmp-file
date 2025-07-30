@@ -15,9 +15,11 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 
 class ParentUnitTest: ParentSharedTest() {
+    override val isWindows: Boolean = IsWindows
 
     @Test
     fun stub() {}

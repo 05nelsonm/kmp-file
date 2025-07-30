@@ -29,8 +29,6 @@ internal actual sealed class FsNonJvm(info: FsInfo): Fs.NonJvm(info) {
     internal abstract val pathSeparator: String
     internal abstract val tempDirectory: Path
 
-    internal abstract fun dirname(path: Path): Path
-
     internal actual companion object {
         internal actual val INSTANCE: FsNonJvm by lazy {
             FsJsNode.INSTANCE
