@@ -97,7 +97,14 @@ abstract class ParentSharedTest {
     }
 
     @Test
-    fun givenFile_whenWindows_thenUNCRootReturnNull() = skipTestIf(!isWindows) {
-        assertNull("\\\\unc_server".toFile().parentPath)
+    fun givenFile_whenWindows_thenUNCRootReturnSlashSlash() = skipTestIf(!isWindows) {
+        assertEquals("\\\\", "\\\\unc_server".toFile().parentPath)
+    }
+
+    @Test
+    fun givenFile_whenWindows_thenUNCSlashSlashReturnsNull() = skipTestIf(!isWindows) {
+        val file = "\\\\".toFile()
+        assertEquals("\\\\", file.path)
+        assertEquals(null, file.parentPath)
     }
 }

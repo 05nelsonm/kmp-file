@@ -92,8 +92,10 @@ public actual class File: Comparable<File> {
         }
 
         if (iLast == 1 && IsWindows) {
-            // UNC path (no parent)
-            if (_path[0] == SysDirSep) return null
+            if (_path[0] == SysDirSep) {
+                // UNC path
+                return if (_path.length == 2) null else "${SysDirSep}${SysDirSep}"
+            }
         }
 
         if (iLast == 0) {
