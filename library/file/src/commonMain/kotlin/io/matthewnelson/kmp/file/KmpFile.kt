@@ -229,6 +229,39 @@ public fun File.canonicalFile2(): File {
 }
 
 /**
+ * Removes all `.` and resolves all possible `..` for the provided [path].
+ *
+ * @return The normalized [File]
+ * */
+public fun File.normalize(): File {
+    val normalized = path.commonNormalize()
+    if (normalized == path) return this
+    return File(normalized)
+}
+
+/**
+ * Resolves the [File] for provided [relative]. If [relative]
+ * is absolute, returns [relative], otherwise will concatenate
+ * the [File.path]s.
+ *
+ * @return The resolved [File]
+ * */
+public fun File.resolve(relative: File): File {
+    return platformResolve(relative)
+}
+
+/**
+ * Resolves the [File] for provided [relative]. If [relative]
+ * is absolute, returns [relative], otherwise will concatenate
+ * the [File.path]s.
+ *
+ * @return The resolved [File]
+ * */
+public fun File.resolve(relative: String): File {
+    return resolve(relative.toFile())
+}
+
+/**
  * Modifies file or directory permissiveness.
  *
  * **NOTE:** On Windows this will only modify the `read-only` attribute
@@ -383,39 +416,6 @@ public fun File.mkdir2(mode: String?, mustCreate: Boolean = false): File {
 @Throws(IOException::class)
 public fun File.mkdirs2(mode: String?, mustCreate: Boolean = false): File {
     return Fs.get().commonMkdirs(this, mode, mustCreate)
-}
-
-/**
- * Removes all `.` and resolves all possible `..` for the provided [path].
- *
- * @return The normalized [File]
- * */
-public fun File.normalize(): File {
-    val normalized = path.commonNormalize()
-    if (normalized == path) return this
-    return File(normalized)
-}
-
-/**
- * Resolves the [File] for provided [relative]. If [relative]
- * is absolute, returns [relative], otherwise will concatenate
- * the [File.path]s.
- *
- * @return The resolved [File]
- * */
-public fun File.resolve(relative: File): File {
-    return platformResolve(relative)
-}
-
-/**
- * Resolves the [File] for provided [relative]. If [relative]
- * is absolute, returns [relative], otherwise will concatenate
- * the [File.path]s.
- *
- * @return The resolved [File]
- * */
-public fun File.resolve(relative: String): File {
-    return resolve(relative.toFile())
 }
 
 /**
