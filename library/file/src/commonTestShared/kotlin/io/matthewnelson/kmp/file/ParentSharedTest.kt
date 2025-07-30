@@ -39,6 +39,18 @@ abstract class ParentSharedTest {
     }
 
     @Test
+    fun givenFile_whenSlashDotDot_thenReturnsSlash() {
+        val expected = "$SysDirSep"
+        assertEquals(expected, expected.toFile().resolve("..").parentPath)
+    }
+
+    @Test
+    fun givenFile_whenSomethingSlashDotDot_thenReturnsNull() {
+        val expected = "something"
+        assertEquals(expected,expected.toFile().resolve("..").parentPath)
+    }
+
+    @Test
     fun givenFile_whenSlash_thenReturnsNull() {
         assertNull("$SysDirSep".toFile().parentPath)
     }

@@ -67,11 +67,12 @@ public actual class File: Comparable<File> {
     // use .parentPath
     @PublishedApi
     internal actual fun getParent(): String? {
-        if (_path == ".") return null
-        if (_path.length == 1 && _path[0] == SysDirSep) return null
-        if (_path.endsWith("..")) {
-            if (_path.length == 2) return null
-            if (_path.endsWith("${SysDirSep}..")) return null
+        if (_path.length == 1) {
+            val p0 = _path[0]
+            if (p0 == '.' || p0 == SysDirSep) return null
+        }
+        if (_path.length == 2) {
+            if (_path[0] == '.' && _path[1] == '.') return null
         }
 
         val iLast = _path.indexOfLast { c -> c == SysDirSep }
