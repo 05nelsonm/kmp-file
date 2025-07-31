@@ -21,6 +21,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIsNot
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
@@ -40,6 +41,22 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     fun givenOpenWrite_whenFlush_thenIsFunctional() = runTest { tmp ->
         tmp.testOpen(null, false).use { s ->
             s.flush()
+        }
+    }
+
+    @Test
+    fun givenWriteStream_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
+        tmp.mkdirs2(mode = null, mustCreate = true)
+        var s: FileStream.Write? = null
+        try {
+            s = tmp.testOpen(excl = null, appending = false)
+            fail("open should have failed because is directory...")
+        } catch (_: IOException) {
+            // pass
+        } finally {
+            try {
+                s?.close()
+            } catch (_: Throwable) {}
         }
     }
 

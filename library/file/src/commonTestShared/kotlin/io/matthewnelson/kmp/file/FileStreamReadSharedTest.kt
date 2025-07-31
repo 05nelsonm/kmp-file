@@ -22,6 +22,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIsNot
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
 
@@ -45,6 +46,22 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             s.close()
             assertFalse(s.isOpen())
             assertStreamClosed { s.read(ByteArray(1)) }
+        }
+    }
+
+    @Test
+    fun givenReadStream_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
+        tmp.mkdirs2(mode = null, mustCreate = true)
+        var s: FileStream.Read? = null
+        try {
+            s = tmp.testOpen()
+            fail("open should have failed because is a directory...")
+        } catch (_: IOException) {
+            // pass
+        } finally {
+            try {
+                s?.close()
+            } catch (_: Throwable) {}
         }
     }
 

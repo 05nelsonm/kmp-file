@@ -27,6 +27,7 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.UnixFileStream
+import io.matthewnelson.kmp.file.internal.commonCheckOpenReadIsNotADir
 import io.matthewnelson.kmp.file.internal.errnoToIllegalArgumentOrIOException
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
 import io.matthewnelson.kmp.file.path
@@ -109,6 +110,7 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = file.open(O_RDONLY, OpenExcl.MustExist)
         return UnixFileStream(fd, canRead = true, canWrite = false)
+            .commonCheckOpenReadIsNotADir()
     }
 
     @Throws(IOException::class)

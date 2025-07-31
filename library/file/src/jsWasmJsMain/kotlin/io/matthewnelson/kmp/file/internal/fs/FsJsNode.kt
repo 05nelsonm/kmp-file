@@ -34,6 +34,7 @@ import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.checkBounds
+import io.matthewnelson.kmp.file.internal.commonCheckOpenReadIsNotADir
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
@@ -232,7 +233,9 @@ internal class FsJsNode private constructor(
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
+
         return JsNodeFileStream(fd, canRead = true, canWrite = false)
+            .commonCheckOpenReadIsNotADir()
     }
 
     @Throws(IOException::class)
@@ -243,7 +246,9 @@ internal class FsJsNode private constructor(
             excl.mode
         }
 
+        var checkIsNotADir = false
         val fd = if (isWindows && excl is OpenExcl.MustExist) {
+            checkIsNotADir = true
             jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
         } else {
             val flags = fs.constants.O_RDWR or when (excl) {
@@ -254,7 +259,9 @@ internal class FsJsNode private constructor(
             jsExternTryCatch { fs.openSync(file.path, flags, mode) }
         }
 
-        JsNodeFileStream(fd, canRead = true, canWrite = true)
+        val s = JsNodeFileStream(fd, canRead = true, canWrite = true)
+        if (checkIsNotADir) s.commonCheckOpenReadIsNotADir()
+        s
     } catch (t: Throwable) {
         throw t.toIOException(file)
     }

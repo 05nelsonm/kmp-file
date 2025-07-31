@@ -33,6 +33,7 @@ import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
+import io.matthewnelson.kmp.file.internal.commonCheckOpenReadIsNotADir
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.toFile
@@ -160,6 +161,7 @@ internal class FsJvmAndroid private constructor(
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = file.open(const.O_RDONLY, OpenExcl.MustExist)
         return AndroidFileStream(fd, canRead = true, canWrite = false)
+            .commonCheckOpenReadIsNotADir()
     }
 
     @Throws(IOException::class)
