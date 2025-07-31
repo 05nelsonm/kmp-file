@@ -233,11 +233,9 @@ internal class FsJsNode private constructor(
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
-        val s = JsNodeFileStream(fd, canRead = true, canWrite = false)
-        if (!isWindows) {
-            s.commonCheckOpenReadIsNotADir()
-        }
-        return s
+
+        return JsNodeFileStream(fd, canRead = true, canWrite = false)
+            .commonCheckOpenReadIsNotADir()
     }
 
     @Throws(IOException::class)
@@ -248,7 +246,9 @@ internal class FsJsNode private constructor(
             excl.mode
         }
 
+        var checkIsNotADir = false
         val fd = if (isWindows && excl is OpenExcl.MustExist) {
+            checkIsNotADir = true
             jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
         } else {
             val flags = fs.constants.O_RDWR or when (excl) {
@@ -259,7 +259,9 @@ internal class FsJsNode private constructor(
             jsExternTryCatch { fs.openSync(file.path, flags, mode) }
         }
 
-        JsNodeFileStream(fd, canRead = true, canWrite = true)
+        val s = JsNodeFileStream(fd, canRead = true, canWrite = true)
+        if (checkIsNotADir) s.commonCheckOpenReadIsNotADir()
+        s
     } catch (t: Throwable) {
         throw t.toIOException(file)
     }
