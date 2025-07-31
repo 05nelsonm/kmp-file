@@ -25,6 +25,7 @@ import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
+import io.matthewnelson.kmp.file.internal.commonCheckOpenReadIsNotADir
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
@@ -44,7 +45,7 @@ import kotlin.text.startsWith
 internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info) {
 
     @Throws(IOException::class)
-    internal final override fun openRead(file: File): AbstractFileStream {
+    internal override fun openRead(file: File): AbstractFileStream {
         val options = mutableSetOf(StandardOpenOption.READ)
         return file.openNio(OpenExcl.MustExist, options, attrs = null)
     }
@@ -245,6 +246,11 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 if (e is FileAlreadyExistsException && !mustCreate) return
                 throw e
             }
+        }
+
+        @Throws(IOException::class)
+        internal override fun openRead(file: File): AbstractFileStream {
+            return super.openRead(file).commonCheckOpenReadIsNotADir()
         }
 
         @Throws(IOException::class)

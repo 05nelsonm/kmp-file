@@ -34,6 +34,7 @@ import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.checkBounds
+import io.matthewnelson.kmp.file.internal.commonCheckOpenReadIsNotADir
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
@@ -232,7 +233,11 @@ internal class FsJsNode private constructor(
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
-        return JsNodeFileStream(fd, canRead = true, canWrite = false)
+        val s = JsNodeFileStream(fd, canRead = true, canWrite = false)
+        if (!isWindows) {
+            s.commonCheckOpenReadIsNotADir()
+        }
+        return s
     }
 
     @Throws(IOException::class)
