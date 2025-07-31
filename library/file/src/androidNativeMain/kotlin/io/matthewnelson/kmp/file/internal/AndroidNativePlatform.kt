@@ -140,7 +140,24 @@ private fun locateCacheDirOrNull(packageName: String?): Path? {
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
 private inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path? {
-    val dir = opendir("/mnt/user") ?: throw errnoToIOException(errno)
+    val dir = run {
+        val flags = O_RDONLY or O_CLOEXEC or O_DIRECTORY
+        val fd = ignoreEINTR { open("/mnt/user", flags, 0) }
+        if (fd == -1) throw errnoToIOException(errno)
+
+        val dir = fdopendir(fd)
+        if (dir == null) {
+            val e = errnoToIOException(errno)
+            if (ignoreEINTR { close(fd) } == -1) {
+                val ee = errnoToIOException(errno)
+                e.addSuppressed(ee)
+            }
+            throw e
+        }
+
+        dir
+    }
+
     var path: Path? = null
     try {
         var entry: CPointer<dirent>? = readdir(dir)
