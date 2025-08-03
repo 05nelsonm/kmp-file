@@ -128,7 +128,7 @@ public inline val File.parentFile: File? get() = getParentFile()
 @get:JvmName("pathOf")
 public inline val File.path: String get() = getPath()
 
-/** *
+/**
  * If this abstract pathname is already absolute, then the pathname
  * string is simply returned.
  *
@@ -153,7 +153,7 @@ public fun File.absolutePath2(): String {
     return Fs.get().absolutePath(this)
 }
 
-/** *
+/**
  * If this abstract pathname is already absolute, then the pathname
  * [File] is simply returned.
  *
