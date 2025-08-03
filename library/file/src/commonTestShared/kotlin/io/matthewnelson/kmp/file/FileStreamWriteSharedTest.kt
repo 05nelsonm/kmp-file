@@ -59,7 +59,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
                 var s: FileStream.Write? = null
                 try {
                     s = tmp.testOpen(excl = excl, appending = appending)
-                    fail("open should have failed because is directory...")
+                    fail("open should have failed because is directory... >> $excl >> APPENDING[$appending]")
                 } catch (_: IOException) {
                     // pass
                 } finally {

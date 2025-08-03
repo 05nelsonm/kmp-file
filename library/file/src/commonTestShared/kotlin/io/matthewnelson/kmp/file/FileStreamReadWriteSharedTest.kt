@@ -81,7 +81,7 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
             var s: FileStream.ReadWrite? = null
             try {
                 s = tmp.testOpen(excl = excl)
-                fail("open should have failed because is directory...")
+                fail("open should have failed because is directory... >> $excl")
             } catch (_: IOException) {
                 // pass
             } finally {
