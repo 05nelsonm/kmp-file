@@ -25,7 +25,7 @@ import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
-import io.matthewnelson.kmp.file.internal.commonCheckOpenReadIsNotADir
+import io.matthewnelson.kmp.file.internal.commonCheckIsNotDir
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
@@ -250,7 +250,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
 
         @Throws(IOException::class)
         internal override fun openRead(file: File): AbstractFileStream {
-            return super.openRead(file).commonCheckOpenReadIsNotADir()
+            return super.openRead(file).commonCheckIsNotDir()
         }
 
         @Throws(IOException::class)

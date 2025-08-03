@@ -34,7 +34,7 @@ import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.checkBounds
-import io.matthewnelson.kmp.file.internal.commonCheckOpenReadIsNotADir
+import io.matthewnelson.kmp.file.internal.commonCheckIsNotDir
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
@@ -234,8 +234,7 @@ internal class FsJsNode private constructor(
             throw t.toIOException(file)
         }
 
-        return JsNodeFileStream(fd, canRead = true, canWrite = false)
-            .commonCheckOpenReadIsNotADir()
+        return JsNodeFileStream(fd, canRead = true, canWrite = false).commonCheckIsNotDir()
     }
 
     @Throws(IOException::class)
@@ -246,9 +245,7 @@ internal class FsJsNode private constructor(
             excl.mode
         }
 
-        var checkIsNotADir = false
         val fd = if (isWindows && excl is OpenExcl.MustExist) {
-            checkIsNotADir = true
             jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
         } else {
             val flags = fs.constants.O_RDWR or when (excl) {
@@ -260,7 +257,7 @@ internal class FsJsNode private constructor(
         }
 
         val s = JsNodeFileStream(fd, canRead = true, canWrite = true)
-        if (checkIsNotADir) s.commonCheckOpenReadIsNotADir()
+        if (isWindows) s.commonCheckIsNotDir()
         s
     } catch (t: Throwable) {
         throw t.toIOException(file)
@@ -282,6 +279,20 @@ internal class FsJsNode private constructor(
             val mode = if (excl._mode.containsOwnerWriteAccess) "666" else "444"
             val fd = jsExternTryCatch { fs.openSync(file.path, flags, mode) }
             val s = JsNodeFileStream(fd, canRead = flags == "r+", canWrite = true)
+
+            try {
+                if (jsExternTryCatch { fs.fstatSync(fd) }.isDirectory()) {
+                    throw FileNotFoundException("$file: Is a directory")
+                }
+            } catch (t: Throwable) {
+                val e = t.toIOException(file)
+                try {
+                    s.close()
+                } catch (ee: IOException) {
+                    e.addSuppressed(ee)
+                }
+                throw e
+            }
 
             if (s.canRead) {
                 // Will only be the case when OpenExcl.MustExist.

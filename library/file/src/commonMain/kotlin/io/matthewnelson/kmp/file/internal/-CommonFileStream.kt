@@ -26,7 +26,7 @@ import io.matthewnelson.kmp.file.IOException
 // This should only be used for POSIX filesystems in Fs.openRead, before returning
 // the stream.
 @Throws(IOException::class)
-internal inline fun AbstractFileStream.commonCheckOpenReadIsNotADir(): AbstractFileStream {
+internal inline fun <T: AbstractFileStream> T.commonCheckIsNotDir(): T {
     disappearingCheck(condition = { canRead }) { "!AbstractFileStream.canRead" }
 
     try {
