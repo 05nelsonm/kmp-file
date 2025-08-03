@@ -45,18 +45,29 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenWriteStream_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
+    fun givenOpenWrite_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
         tmp.mkdirs2(mode = null, mustCreate = true)
-        var s: FileStream.Write? = null
-        try {
-            s = tmp.testOpen(excl = null, appending = false)
-            fail("open should have failed because is directory...")
-        } catch (_: IOException) {
-            // pass
-        } finally {
-            try {
-                s?.close()
-            } catch (_: Throwable) {}
+        arrayOf(
+            OpenExcl.MaybeCreate.DEFAULT,
+            OpenExcl.MustCreate.DEFAULT,
+            OpenExcl.MustExist,
+        ).forEach { excl ->
+            arrayOf(
+                true,
+                false,
+            ).forEach { appending ->
+                var s: FileStream.Write? = null
+                try {
+                    s = tmp.testOpen(excl = excl, appending = appending)
+                    fail("open should have failed because is directory... >> $excl >> APPENDING[$appending]")
+                } catch (_: IOException) {
+                    // pass
+                } finally {
+                    try {
+                        s?.close()
+                    } catch (_: Throwable) {}
+                }
+            }
         }
     }
 

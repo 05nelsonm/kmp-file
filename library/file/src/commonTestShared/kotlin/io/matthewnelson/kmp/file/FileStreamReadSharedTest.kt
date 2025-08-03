@@ -50,7 +50,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenReadStream_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
+    fun givenOpenRead_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
         tmp.mkdirs2(mode = null, mustCreate = true)
         var s: FileStream.Read? = null
         try {

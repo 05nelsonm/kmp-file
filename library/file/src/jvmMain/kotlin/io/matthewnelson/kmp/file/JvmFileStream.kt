@@ -31,10 +31,12 @@ import kotlin.concurrent.Volatile
  *
  * @see [use]
  * @see [openRead]
+ * @see [openReadWrite]
  * @see [openWrite]
  * @see [openAppending]
  * @see [Read]
  * @see [Write]
+ * @see [ReadWrite]
  * */
 public actual sealed interface FileStream: Closeable {
 

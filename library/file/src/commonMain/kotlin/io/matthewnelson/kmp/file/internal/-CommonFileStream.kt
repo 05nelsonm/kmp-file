@@ -20,15 +20,21 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.IOException
 
-// POSIX open when using O_RDONLY will succeed if the pathname argument is an
-// existing directory. Attempts to read it will result in an EISDIR errno.
-//
-// This should only be used for POSIX filesystems in Fs.openRead, before returning
-// the stream.
-@Throws(IOException::class)
-internal inline fun AbstractFileStream.commonCheckOpenReadIsNotADir(): AbstractFileStream {
-    disappearingCheck(condition = { canRead }) { "!AbstractFileStream.canRead" }
-
+/**
+ * POSIX open when using O_RDONLY will succeed if the pathname argument is an
+ * existing directory. Attempting to read it will result in an EISDIR errno.
+ *
+ * Additionally, Node.js when on Windows must **ALWAYS** be checked.
+ *
+ * This is meant to be utilized by [io.matthewnelson.kmp.file.internal.fs.Fs]
+ * open functions for the appropriate platform, before returning the
+ * [AbstractFileStream].
+ *
+ * @throws [IOException] If read fails (is a directory)
+ * @throws [IllegalStateException] if [AbstractFileStream.canRead] is `false`
+ * */
+@Throws(IOException::class, IllegalStateException::class)
+internal inline fun <T: AbstractFileStream> T.commonCheckIsNotDir(): T {
     try {
         if (read(ByteArray(1)) > 0) {
             position(new = 0L)

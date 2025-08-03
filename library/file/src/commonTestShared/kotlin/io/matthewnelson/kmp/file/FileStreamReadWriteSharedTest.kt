@@ -21,6 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
 
@@ -42,7 +43,7 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenExclMustCreate_thenThrowsFileAlreadyExistsException() = runTest { tmp ->
+    fun givenOpenReadWrite_whenExclMustCreate_thenThrowsFileAlreadyExistsException() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
         assertFailsWith<FileAlreadyExistsException> {
             tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT).close()
@@ -70,7 +71,29 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
     }
 
     @Test
-    fun givenOpenReadWrite_whenFileIsResized_thenPositionIsAdjustedAsExpected() = runTest { tmp ->
+    fun givenOpenReadWrite_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
+        tmp.mkdirs2(mode = null, mustCreate = true)
+        arrayOf(
+            OpenExcl.MaybeCreate.DEFAULT,
+            OpenExcl.MustCreate.DEFAULT,
+//            OpenExcl.MustExist, // FileStreamReadSharedTest already tested this
+        ).forEach { excl ->
+            var s: FileStream.ReadWrite? = null
+            try {
+                s = tmp.testOpen(excl = excl)
+                fail("open should have failed because is directory... >> $excl")
+            } catch (_: IOException) {
+                // pass
+            } finally {
+                try {
+                    s?.close()
+                } catch (_: Throwable) {}
+            }
+        }
+    }
+
+    @Test
+    fun givenReadWriteStream_whenFileIsResized_thenPositionIsAdjustedAsExpected() = runTest { tmp ->
         val data = "Hello World!".encodeToByteArray()
         tmp.writeBytes(excl = null, data)
 
