@@ -172,7 +172,7 @@ public actual sealed interface FileStream: Closeable {
      *
      * @see [openReadWrite]
      * */
-    public actual sealed interface ReadWrite: Read, Write {
+    public actual sealed class ReadWrite protected actual constructor(): Read, Write {
 
         /**
          * Sets the current position of the file pointer to [new]. This is
@@ -187,10 +187,11 @@ public actual sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public actual override fun position(new: Long): ReadWrite
+        public actual abstract override fun position(new: Long): ReadWrite
 
         /**
-         * Modifies the size of the [File] for which this [ReadWrite] stream belongs.
+         * Modifies the size of the [File] for which this [ReadWrite] stream belongs. This
+         * is akin to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
          *
          * If [new] is greater than the current [Read.size], then the [File] is extended
          * whereby the extended portion reads as `0` bytes. If [new] is less than the
@@ -208,7 +209,7 @@ public actual sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public actual fun size(new: Long): ReadWrite
+        public actual abstract fun size(new: Long): ReadWrite
 
         /**
          * Writes the entire contents of [buf] to the [File] for which this [ReadWrite]
@@ -220,7 +221,7 @@ public actual sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public actual override fun write(buf: ByteArray)
+        public actual abstract override fun write(buf: ByteArray)
 
         /**
          * Writes [len] number of bytes from [buf], starting at index [offset], to the
@@ -236,7 +237,7 @@ public actual sealed interface FileStream: Closeable {
          * @throws [IndexOutOfBoundsException] If [offset] or [len] are inappropriate.
          * */
         @Throws(IOException::class)
-        public actual override fun write(buf: ByteArray, offset: Int, len: Int)
+        public actual abstract override fun write(buf: ByteArray, offset: Int, len: Int)
     }
 }
 
