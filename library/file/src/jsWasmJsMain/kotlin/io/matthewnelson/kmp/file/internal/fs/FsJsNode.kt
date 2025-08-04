@@ -36,7 +36,6 @@ import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.checkBounds
-import io.matthewnelson.kmp.file.internal.commonCheckIsNotDir
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
@@ -231,12 +230,12 @@ internal class FsJsNode private constructor(
     @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = try {
-            jsExternTryCatch { fs.openSync(file.path, fs.constants.O_RDONLY) }
+            jsExternTryCatch { fs.openSync(file.path, fs.constants.O_RDONLY) }.checkIsNotADir()
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
 
-        return JsNodeFileStream(fd, canRead = true, canWrite = false).commonCheckIsNotDir()
+        return JsNodeFileStream(fd, canRead = true, canWrite = false)
     }
 
     @Throws(IOException::class)
@@ -257,10 +256,9 @@ internal class FsJsNode private constructor(
             }
             jsExternTryCatch { fs.openSync(file.path, flags, mode) }
         }
+        if (isWindows) fd.checkIsNotADir()
 
-        val s = JsNodeFileStream(fd, canRead = true, canWrite = true)
-        if (isWindows) s.commonCheckIsNotDir()
-        s
+        JsNodeFileStream(fd, canRead = true, canWrite = true)
     } catch (t: Throwable) {
         throw t.toIOException(file)
     }
@@ -279,22 +277,8 @@ internal class FsJsNode private constructor(
                 is OpenExcl.MustExist -> flags = "r+"
             }
             val mode = if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-            val fd = jsExternTryCatch { fs.openSync(file.path, flags, mode) }
+            val fd = jsExternTryCatch { fs.openSync(file.path, flags, mode) }.checkIsNotADir()
             val s = JsNodeFileStream(fd, canRead = flags == "r+", canWrite = true)
-
-            try {
-                if (jsExternTryCatch { fs.fstatSync(fd) }.isDirectory()) {
-                    throw FileNotFoundException("$file: Is a directory")
-                }
-            } catch (t: Throwable) {
-                val e = t.toIOException(file)
-                try {
-                    s.close()
-                } catch (ee: IOException) {
-                    e.addSuppressed(ee)
-                }
-                throw e
-            }
 
             if (s.canRead) {
                 // Will only be the case when OpenExcl.MustExist.
@@ -356,6 +340,25 @@ internal class FsJsNode private constructor(
                 isWindows = os.platform() == "win32",
             )
         }
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    @Throws(FileNotFoundException::class)
+    private inline fun Double.checkIsNotADir(): Double {
+        try {
+            if (jsExternTryCatch { fs.fstatSync(this) }.isDirectory()) {
+                throw FileNotFoundException("Is a directory")
+            }
+        } catch (t: Throwable) {
+            val e = t.toIOException()
+            try {
+                jsExternTryCatch { fs.closeSync(this) }
+            } catch (t: Throwable) {
+                e.addSuppressed(t)
+            }
+            throw e
+        }
+        return this
     }
 
     private inner class JsNodeFileStream(

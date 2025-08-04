@@ -19,6 +19,7 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
@@ -27,14 +28,16 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.UnixFileStream
-import io.matthewnelson.kmp.file.internal.commonCheckIsNotDir
 import io.matthewnelson.kmp.file.internal.errnoToIllegalArgumentOrIOException
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.alloc
 import kotlinx.cinterop.convert
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
 import platform.posix.EEXIST
 import platform.posix.ENOENT
@@ -46,6 +49,8 @@ import platform.posix.O_RDONLY
 import platform.posix.O_RDWR
 import platform.posix.O_TRUNC
 import platform.posix.O_WRONLY
+import platform.posix.S_IFDIR
+import platform.posix.S_IFMT
 import platform.posix.S_IRGRP
 import platform.posix.S_IROTH
 import platform.posix.S_IRUSR
@@ -56,11 +61,14 @@ import platform.posix.S_IXGRP
 import platform.posix.S_IXOTH
 import platform.posix.S_IXUSR
 import platform.posix.chmod
+import platform.posix.close
 import platform.posix.errno
 import platform.posix.free
+import platform.posix.fstat
 import platform.posix.mkdir
 import platform.posix.realpath
 import platform.posix.remove
+import platform.posix.stat
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
 internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix = true)) {
@@ -109,7 +117,26 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = file.open(O_RDONLY, OpenExcl.MustExist)
-        return UnixFileStream(fd, canRead = true, canWrite = false).commonCheckIsNotDir()
+
+        val e = memScoped {
+            val stat = alloc<stat>()
+            if (fstat(fd, stat.ptr) != 0) {
+                return@memScoped errnoToIOException(errno)
+            }
+            if ((stat.st_mode.toInt() and S_IFMT) == S_IFDIR) {
+                return@memScoped FileNotFoundException("Is a directory")
+            }
+            null
+        }
+        if (e != null) {
+            if (ignoreEINTR { close(fd) } != 0) {
+                val ee = errnoToIOException(errno)
+                e.addSuppressed(ee)
+            }
+            throw e
+        }
+
+        return UnixFileStream(fd, canRead = true, canWrite = false)
     }
 
     @Throws(IOException::class)
