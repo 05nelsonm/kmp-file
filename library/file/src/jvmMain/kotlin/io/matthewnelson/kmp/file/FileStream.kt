@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file
 
@@ -239,27 +239,50 @@ public actual sealed interface FileStream: Closeable {
         @Throws(IOException::class)
         public actual abstract override fun write(buf: ByteArray, offset: Int, len: Int)
     }
+
+    public companion object {
+
+        /**
+         * Converts the provided [FileStream.Read] to an [InputStream].
+         *
+         * **NOTE:** [InputStream.skip] supports negative values (skipping backwards).
+         * **NOTE:** [InputStream.available] is implemented.
+         *
+         * @param [closeParentOnClose] If `true`, closure of the [InputStream] will also
+         *   close the [FileStream.Read]. If `false`, only the [InputStream] will be
+         *   closed when [InputStream.close] is called.
+         *
+         * @return An [InputStream].
+         *
+         * @throws [IOException] If [FileStream.isOpen] is `false`.
+         * */
+        @JvmStatic
+        @Throws(IOException::class)
+        public fun Read.asInputStream(closeParentOnClose: Boolean): InputStream {
+            return asInputStream(this, closeParentOnClose)
+        }
+
+        /**
+         * Converts the provided [FileStream.Write] to an [OutputStream].
+         *
+         * @param [closeParentOnClose] If `true`, closure of the [OutputStream] will also
+         *   close the [FileStream.Write]. If `false`, only the [OutputStream] will be
+         *   closed when [OutputStream.close] is called.
+         *
+         * @throws [IOException] If [FileStream.isOpen] is `false`.
+         * */
+        @JvmStatic
+        @Throws(IOException::class)
+        public fun Write.asOutputStream(closeParentOnClose: Boolean): OutputStream {
+            return asOutputStream(this, closeParentOnClose)
+        }
+    }
 }
 
-/**
- * Converts the provided [FileStream.Read] to an [InputStream].
- *
- * **NOTE:** [InputStream.skip] supports negative values (skipping backwards).
- * **NOTE:** [InputStream.available] is implemented.
- *
- * @param [closeParentOnClose] If `true`, closure of the [InputStream] will also
- *   close the [FileStream.Read]. If `false`, only the [InputStream] will be
- *   closed when [InputStream.close] is called.
- *
- * @return An [InputStream].
- *
- * @throws [IOException] If [FileStream.isOpen] is `false`.
- * */
 @Throws(IOException::class)
-public fun FileStream.Read.asInputStream(closeParentOnClose: Boolean): InputStream {
-    if (!isOpen()) throw fileStreamClosed()
-    if (this is AbstractFileStream && !canRead) throw IOException("AbstractFileStream.canRead != true")
-    val stream = this
+private inline fun asInputStream(stream: FileStream.Read, closeParentOnClose: Boolean): InputStream {
+    if (!stream.isOpen()) throw fileStreamClosed()
+    if (stream is AbstractFileStream && !stream.canRead) throw IOException("AbstractFileStream.canRead != true")
 
     return object : InputStream() {
 
@@ -302,20 +325,10 @@ public fun FileStream.Read.asInputStream(closeParentOnClose: Boolean): InputStre
     }
 }
 
-/**
- * Converts the provided [FileStream.Write] to an [OutputStream].
- *
- * @param [closeParentOnClose] If `true`, closure of the [OutputStream] will also
- *   close the [FileStream.Write]. If `false`, only the [OutputStream] will be
- *   closed when [OutputStream.close] is called.
- *
- * @throws [IOException] If [FileStream.isOpen] is `false`.
- * */
 @Throws(IOException::class)
-public fun FileStream.Write.asOutputStream(closeParentOnClose: Boolean): OutputStream {
-    if (!isOpen()) throw fileStreamClosed()
-    if (this is AbstractFileStream && !canWrite) throw IOException("AbstractFileStream.canWrite != true")
-    val stream = this
+private inline fun asOutputStream(stream: FileStream.Write, closeParentOnClose: Boolean): OutputStream {
+    if (!stream.isOpen()) throw fileStreamClosed()
+    if (stream is AbstractFileStream && !stream.canWrite) throw IOException("AbstractFileStream.canWrite != true")
 
     return object : OutputStream() {
 
@@ -345,7 +358,6 @@ public fun FileStream.Write.asOutputStream(closeParentOnClose: Boolean): OutputS
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
 private inline fun jvmStreamClosed(isInput: Boolean): IOException {
     val t = if (isInput) "Input" else "Output"
     return IOException(t + "Stream is closed")

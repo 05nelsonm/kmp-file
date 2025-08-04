@@ -368,22 +368,22 @@ internal class FsJsNode private constructor(
         override fun isOpen(): Boolean = _fd != null
 
         override fun position(): Long {
-            if (!canRead) return super.position()
             _fd ?: throw fileStreamClosed()
+            if (!canRead) return super.position()
             return _position
         }
 
         override fun position(new: Long): FileStream.ReadWrite {
-            if (!canRead) return super.position(new)
             _fd ?: throw fileStreamClosed()
+            if (!canRead) return super.position(new)
             require(new >= 0L) { "new[$new] < 0" }
             _position = new
             return this
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-            if (!canRead) return super.read(buf, offset, len)
             val fd = _fd ?: throw fileStreamClosed()
+            if (!canRead) return super.read(buf, offset, len)
 
             buf.checkBounds(offset, len)
             if (buf.isEmpty()) return 0
@@ -424,8 +424,8 @@ internal class FsJsNode private constructor(
         }
 
         override fun size(): Long {
-            if (!canRead) return super.size()
             val fd = _fd ?: throw fileStreamClosed()
+            if (!canRead) return super.size()
             val stat = try {
                 jsExternTryCatch { fs.fstatSync(fd) }
             } catch (t: Throwable) {
@@ -435,8 +435,8 @@ internal class FsJsNode private constructor(
         }
 
         override fun size(new: Long): FileStream.ReadWrite {
-            if (!canRead || !canWrite) return super.size(new)
             val fd = _fd ?: throw fileStreamClosed()
+            if (!canRead || !canWrite) return super.size(new)
             require(new >= 0L) { "new[$new] < 0" }
             try {
                 jsExternTryCatch { fs.ftruncateSync(fd, new.toDouble()) }
@@ -448,8 +448,8 @@ internal class FsJsNode private constructor(
         }
 
         override fun flush() {
-            if (!canWrite) return super.flush()
             val fd = _fd ?: throw fileStreamClosed()
+            if (!canWrite) return super.flush()
             if (isWindows) return
             try {
                 jsExternTryCatch { fs.fsyncSync(fd) }
@@ -459,8 +459,8 @@ internal class FsJsNode private constructor(
         }
 
         override fun write(buf: ByteArray, offset: Int, len: Int) {
-            if (!canWrite) return super.write(buf, offset, len)
             val fd = _fd ?: throw fileStreamClosed()
+            if (!canWrite) return super.write(buf, offset, len)
 
             buf.checkBounds(offset, len)
             if (buf.isEmpty()) return

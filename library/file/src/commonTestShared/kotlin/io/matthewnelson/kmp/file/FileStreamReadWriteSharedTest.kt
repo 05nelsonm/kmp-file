@@ -122,9 +122,15 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
             s.size(3L)
             assertEquals(1L, s.position())
 
+            // Ensure position changes to new when greater than new size
+            s.position(10L)
+            assertEquals(10L, s.position())
+            s.size(7L)
+            assertEquals(7L, s.position())
+
             // Ensure position does not change if new size is invalid
             assertFailsWith<IllegalArgumentException> { s.size(-1L) }
-            assertEquals(1L, s.position())
+            assertEquals(7L, s.position())
             // Even if position is greater than current size
             s.position(4L)
             assertFailsWith<IllegalArgumentException> { s.size(-1L) }

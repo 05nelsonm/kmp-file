@@ -333,27 +333,27 @@ internal class FsJvmAndroid private constructor(
         override fun isOpen(): Boolean = _fd != null
 
         override fun position(): Long {
-            if (!canRead) return super.position()
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            if (!canRead) return super.position()
             return wrapErrnoException(null) { lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long }
         }
 
         override fun position(new: Long): FileStream.ReadWrite {
-            if (!canRead) return super.position(new)
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            if (!canRead) return super.position(new)
             wrapErrnoException(null) { lseek.invoke(null, fd, new, const.SEEK_SET) }
             return this
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-            if (!canRead) return super.read(buf, offset, len)
-            val fis = synchronized(closeLock) { _fis } ?: throw fileStreamClosed()
+            val fis = synchronized(closeLock) { _fd ?: throw fileStreamClosed(); _fis }
+            if (fis == null) return super.read(buf, offset, len)
             return fis.read(buf, offset, len)
         }
 
         override fun size(): Long {
-            if (!canRead) return super.size()
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            if (!canRead) return super.size()
             return wrapErrnoException(null) {
                 val s = fstat.invoke(null, fd)
                 stat.st_size.getLong(s)
@@ -361,8 +361,8 @@ internal class FsJvmAndroid private constructor(
         }
 
         override fun size(new: Long): FileStream.ReadWrite {
-            if (!canRead || !canWrite) return super.size(new)
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            if (!canRead || !canWrite) return super.size(new)
             wrapErrnoException(null) {
                 val pos = lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long
                 ftruncate.invoke(null, fd, new)
@@ -372,20 +372,20 @@ internal class FsJvmAndroid private constructor(
         }
 
         override fun flush() {
-            if (!canWrite) return super.flush()
             val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            if (!canWrite) return super.flush()
             fd.sync()
         }
 
         override fun write(buf: ByteArray, offset: Int, len: Int) {
-            if (!canWrite) return super.write(buf, offset, len)
-            val fos = synchronized(closeLock) { _fos } ?: throw fileStreamClosed()
+            val fos = synchronized(closeLock) { _fd ?: throw fileStreamClosed(); _fos }
+            if (fos == null) return super.write(buf, offset, len)
             fos.write(buf, offset, len)
         }
 
         override fun close() {
             val (fd, fis, fos) = synchronized(closeLock) {
-                val fd = _fd
+                val fd = _fd ?: return
                 val fis = _fis
                 val fos = _fos
                 _fd = null
@@ -393,7 +393,6 @@ internal class FsJvmAndroid private constructor(
                 _fos = null
                 Triple(fd, fis, fos)
             }
-            if (fd == null) return
 
             var threw: Throwable? = null
 
