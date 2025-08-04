@@ -49,7 +49,7 @@ internal abstract class AbstractFileStream internal constructor(
     internal val canRead: Boolean,
     internal val canWrite: Boolean,
     init: Any,
-): FileStream.ReadWrite {
+): FileStream.ReadWrite() {
 
     init { disappearingCheck(condition = { canRead || canWrite }) { "!canRead && !canWrite" } }
 

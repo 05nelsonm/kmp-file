@@ -29,7 +29,7 @@ public abstract interface class io/matthewnelson/kmp/file/FileStream$Read : io/m
 	public abstract fun size ()J
 }
 
-public abstract interface class io/matthewnelson/kmp/file/FileStream$ReadWrite : io/matthewnelson/kmp/file/FileStream$Read, io/matthewnelson/kmp/file/FileStream$Write {
+public abstract class io/matthewnelson/kmp/file/FileStream$ReadWrite : io/matthewnelson/kmp/file/FileStream$Read, io/matthewnelson/kmp/file/FileStream$Write {
 	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
 	public abstract fun size (J)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
 	public abstract fun write ([B)V
