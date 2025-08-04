@@ -103,8 +103,14 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
     @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
-        // Not a thing. Ignore.
-        if (file.isDirectoryOrNull() == true) return
+        when (file.isDirectoryOrNull()) {
+            null -> {
+                if (errno == ENOENT && !mustExist) return
+                throw errnoToIOException(errno, file)
+            }
+            true -> return // Not a thing. Ignore.
+            false -> {}
+        }
 
         val attrs = try {
             FileAttributes(file)
@@ -328,7 +334,6 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
         return SetFileAttributesA(file.path, attrsNew)
     }
 
-    @Throws(IOException::class)
     private inline fun File.isDirectoryOrNull(): Boolean? = memScoped {
         val stat = alloc<_stat64>()
         if (_stat64(path, stat.ptr) == 0) {

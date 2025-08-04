@@ -35,6 +35,7 @@ import platform.windows.ERROR_ALREADY_EXISTS
 import platform.windows.ERROR_DIR_NOT_EMPTY
 import platform.windows.ERROR_FILE_EXISTS
 import platform.windows.ERROR_FILE_NOT_FOUND
+import platform.windows.ERROR_HANDLE_EOF
 import platform.windows.ERROR_NOACCESS
 import platform.windows.ERROR_NOT_EMPTY
 import platform.windows.ERROR_OPERATION_ABORTED
@@ -51,14 +52,17 @@ import platform.windows.SUBLANG_DEFAULT
  * returns it as an [IOException]. When the last error is [ERROR_FILE_NOT_FOUND] or
  * [ERROR_PATH_NOT_FOUND], then this function will return [FileNotFoundException].
  * When the last error is [ERROR_OPERATION_ABORTED], then this function will return
- * [InterruptedIOException].
+ * [InterruptedIOException]. When the last error is [ERROR_HANDLE_EOF], then this
+ * function returns [EOFException].
  *
  * @return The formatted error as an [IOException]
  *
  * @see [errnoToIOException]
  * */
 @ExperimentalForeignApi
-public inline fun lastErrorToIOException(): IOException = lastErrorToIOException(null)
+public inline fun lastErrorToIOException(
+    lastError: DWORD = GetLastError(),
+): IOException = lastErrorToIOException(file = null, lastError = lastError)
 
 /**
  * Retrieves the human-readable message for [GetLastError] via [FormatMessageA] and
@@ -81,12 +85,16 @@ public inline fun lastErrorToIOException(): IOException = lastErrorToIOException
  * @see [errnoToIOException]
  * */
 @ExperimentalForeignApi
-public fun lastErrorToIOException(file: File?, other: File? = null): IOException {
-    val lastError: DWORD = GetLastError()
+public fun lastErrorToIOException(
+    file: File?,
+    other: File? = null,
+    lastError: DWORD = GetLastError(),
+): IOException {
     val msg = lastErrorToString(lastError)
     val code = lastError.toInt()
 
     return when {
+        code == ERROR_HANDLE_EOF -> EOFException(msg)
         code == ERROR_FILE_NOT_FOUND -> fileNotFoundException(file, null, msg)
         code == ERROR_PATH_NOT_FOUND -> fileNotFoundException(file, null, msg)
         code == ERROR_OPERATION_ABORTED -> InterruptedIOException(msg)

@@ -103,8 +103,9 @@ internal class MinGWFileStream(
             }
 
             if (ret == FALSE) {
-                if (GetLastError().toInt() == ERROR_HANDLE_EOF) return@memScoped -1
-                val e = lastErrorToIOException()
+                val lastError = GetLastError()
+                if (lastError.toInt() == ERROR_HANDLE_EOF) return@memScoped -1
+                val e = lastErrorToIOException(lastError)
                 if (e is InterruptedIOException) {
                     e.bytesTransferred = bytesRead.value.toInt()
                 }

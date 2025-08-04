@@ -34,7 +34,6 @@ import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
-import io.matthewnelson.kmp.file.internal.commonCheckIsNotDir
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.toFile
@@ -160,7 +159,17 @@ internal class FsJvmAndroid private constructor(
     @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = file.open(const.O_RDONLY, OpenExcl.MustExist)
-        return AndroidFileStream(fd, canRead = true, canWrite = false).commonCheckIsNotDir()
+        try {
+            val isDirectory = wrapErrnoException(null) {
+                val s = fstat.invoke(null, fd)
+                (stat.st_mode.getInt(s) and const.S_IFMT) == const.S_IFDIR
+            }
+            if (isDirectory) throw FileNotFoundException("Is a directory")
+        } catch (e: IOException) {
+            fd.doClose(null)?.let { tt -> e.addSuppressed(tt) }
+            throw e.wrapIOException()
+        }
+        return AndroidFileStream(fd, canRead = true, canWrite = false)
     }
 
     @Throws(IOException::class)
@@ -298,8 +307,8 @@ internal class FsJvmAndroid private constructor(
         val m = c.message
 
         throw when {
-            t is SecurityException -> t.toAccessDeniedException(file ?: "".toFile())
             c is SecurityException -> c.toAccessDeniedException(file ?: "".toFile())
+            c is InterruptedIOException -> c
             m == null -> IOException(c)
             m.contains("EINTR") -> InterruptedIOException(m).alsoAddSuppressed(c)
             m.contains("EINVAL") -> IllegalArgumentException(m).alsoAddSuppressed(c)
@@ -552,6 +561,9 @@ internal class FsJvmAndroid private constructor(
         val S_IWOTH: Int
         val S_IXOTH: Int
 
+        val S_IFDIR: Int
+        val S_IFMT: Int
+
         // API 27+
         val O_CLOEXEC: Int?
 
@@ -583,6 +595,9 @@ internal class FsJvmAndroid private constructor(
             S_IWOTH = clazz.getField("S_IWOTH").getInt(null)
             S_IXOTH = clazz.getField("S_IXOTH").getInt(null)
 
+            S_IFDIR = clazz.getField("S_IFDIR").getInt(null)
+            S_IFMT = clazz.getField("S_IFMT").getInt(null)
+
             O_CLOEXEC = if ((ANDROID.SDK_INT ?: 0) >= 27) {
                 clazz.getField("O_CLOEXEC").getInt(null)
             } else {
@@ -594,11 +609,15 @@ internal class FsJvmAndroid private constructor(
     // android.system.StructStat
     private class StructStat {
 
+        /** `Int` */
+        val st_mode: Field
         /** `Long` */
         val st_size: Field
 
         init {
             val clazz = Class.forName("android.system.StructStat")
+
+            st_mode = clazz.getField("st_mode")
             st_size = clazz.getField("st_size")
         }
     }
