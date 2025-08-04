@@ -328,7 +328,6 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
         return SetFileAttributesA(file.path, attrsNew)
     }
 
-    @Throws(IOException::class)
     private inline fun File.isDirectoryOrNull(): Boolean? = memScoped {
         val stat = alloc<_stat64>()
         if (_stat64(path, stat.ptr) == 0) {

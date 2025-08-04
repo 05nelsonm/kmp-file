@@ -367,7 +367,7 @@ final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.km
 final fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/fWrite(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...): kotlin/Int // io.matthewnelson.kmp.file/fWrite|fWrite@kotlinx.cinterop.CPointer<platform.posix._iobuf>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [mingwX64]
-final fun io.matthewnelson.kmp.file/lastErrorToIOException(io.matthewnelson.kmp.file/File?, io.matthewnelson.kmp.file/File? = ...): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/lastErrorToIOException|lastErrorToIOException(io.matthewnelson.kmp.file.File?;io.matthewnelson.kmp.file.File?){}[0]
+final fun io.matthewnelson.kmp.file/lastErrorToIOException(io.matthewnelson.kmp.file/File?, io.matthewnelson.kmp.file/File? = ..., kotlin/UInt = ...): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/lastErrorToIOException|lastErrorToIOException(io.matthewnelson.kmp.file.File?;io.matthewnelson.kmp.file.File?;kotlin.UInt){}[0]
 
 // Targets: [mingwX64]
 final inline fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewnelson.kmp.file/setFDCLOEXEC() // io.matthewnelson.kmp.file/setFDCLOEXEC|setFDCLOEXEC@kotlinx.cinterop.CPointer<platform.posix._iobuf>(){}[0]
@@ -376,7 +376,7 @@ final inline fun (kotlinx.cinterop/CPointer<platform.posix/_iobuf>).io.matthewne
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/fOpen(kotlin/String, kotlin/Function1<kotlinx.cinterop/CPointer<platform.posix/_iobuf>, #A>): #A // io.matthewnelson.kmp.file/fOpen|fOpen@io.matthewnelson.kmp.file.File(kotlin.String;kotlin.Function1<kotlinx.cinterop.CPointer<platform.posix._iobuf>,0:0>){0§<kotlin.Any?>}[0]
 
 // Targets: [mingwX64]
-final inline fun io.matthewnelson.kmp.file/lastErrorToIOException(): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/lastErrorToIOException|lastErrorToIOException(){}[0]
+final inline fun io.matthewnelson.kmp.file/lastErrorToIOException(kotlin/UInt = ...): io.matthewnelson.kmp.file/IOException // io.matthewnelson.kmp.file/lastErrorToIOException|lastErrorToIOException(kotlin.UInt){}[0]
 
 // Targets: [wasmJs]
 final fun io.matthewnelson.kmp.file/internalWasmJsExternTryCatch(kotlin/Function0<kotlin/Unit>) // io.matthewnelson.kmp.file/internalWasmJsExternTryCatch|internalWasmJsExternTryCatch(kotlin.Function0<kotlin.Unit>){}[0]
