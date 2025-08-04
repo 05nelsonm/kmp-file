@@ -20,6 +20,8 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.InterruptedIOException
+import io.matthewnelson.kmp.file.bytesTransferred
 import io.matthewnelson.kmp.file.lastErrorToIOException
 import kotlinx.cinterop.AutofreeScope
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -88,6 +90,7 @@ internal class MinGWFileStream(
 
         return memScoped {
             val bytesRead = alloc<UIntVarOf<UInt>>()
+            bytesRead.value = 0u
 
             val ret = buf.usePinned { pinned ->
                 ReadFile(
@@ -101,7 +104,11 @@ internal class MinGWFileStream(
 
             if (ret == FALSE) {
                 if (GetLastError().toInt() == ERROR_HANDLE_EOF) return@memScoped -1
-                throw lastErrorToIOException()
+                val e = lastErrorToIOException()
+                if (e is InterruptedIOException) {
+                    e.bytesTransferred = bytesRead.value.toInt()
+                }
+                throw e
             }
 
             val read = bytesRead.value.toInt()
@@ -169,7 +176,13 @@ internal class MinGWFileStream(
                         lpOverlapped = null,
                     )
 
-                    if (ret == FALSE) throw lastErrorToIOException()
+                    if (ret == FALSE) {
+                        val e = lastErrorToIOException()
+                        if (e is InterruptedIOException) {
+                            e.bytesTransferred = total
+                        }
+                        throw e
+                    }
                     if (bytesWrite.value == 0u) throw IOException("write == 0")
                     total += bytesWrite.value.toInt()
                 }

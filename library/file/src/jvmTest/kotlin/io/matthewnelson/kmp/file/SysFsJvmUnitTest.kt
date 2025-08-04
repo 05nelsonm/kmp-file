@@ -16,12 +16,13 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.IsWindows
+import io.matthewnelson.kmp.file.internal.fs.Fs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SysFsInfoJvmUnitTest {
+class SysFsJvmUnitTest {
 
     @Test
     fun givenSysFsName_whenNotWindows_thenIsNioPosix() {
@@ -43,5 +44,10 @@ class SysFsInfoJvmUnitTest {
 
         assertEquals("FsJvmNioNonPosix", SysFsInfo.name)
         assertFalse(SysFsInfo.isPosix)
+    }
+
+    @Test
+    fun givenSysFs_whenGet_thenIsSameInstance() {
+        assertEquals(Fs.get(), Fs.get())
     }
 }

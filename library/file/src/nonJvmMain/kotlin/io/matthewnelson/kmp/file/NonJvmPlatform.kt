@@ -98,6 +98,28 @@ public actual class DirectoryNotEmptyException(
 ): FileSystemException(file, null, "Directory is not empty")
 
 /**
+ * Signals that an I/O operation has been interrupted. An [InterruptedIOException] is
+ * thrown to indicate that an input or output transfer has been terminated because
+ * the thread performing it was interrupted. The field [bytesTransferred] indicates
+ * how many bytes were successfully transferred before the interruption occurred.
+ *
+ * @see [bytesTransferred]
+ * */
+public actual open class InterruptedIOException: IOException {
+
+    @PublishedApi
+    @Suppress("PropertyName")
+    internal var _bytesTransferred: Int = 0
+
+    public actual constructor(): super()
+    public actual constructor(message: String?): super(message)
+}
+
+public actual inline var InterruptedIOException.bytesTransferred: Int
+    get() = _bytesTransferred
+    set(value) { _bytesTransferred = value }
+
+/**
  * Thrown when a thread is waiting, sleeping, or otherwise occupied, and the thread
  * is interrupted, either before or during the activity.
  * */

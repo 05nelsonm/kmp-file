@@ -64,6 +64,11 @@ public final class io/matthewnelson/kmp/file/FsInfo {
 public final class io/matthewnelson/kmp/file/FsInfo$Companion {
 }
 
+public final class io/matthewnelson/kmp/file/JvmPlatformKt {
+	public static final fun getBytesTransferred (Ljava/io/InterruptedIOException;)I
+	public static final fun setBytesTransferred (Ljava/io/InterruptedIOException;I)V
+}
+
 public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final field SysDirSep C
 	public static final field SysPathSep C

@@ -44,4 +44,9 @@ public actual class DirectoryNotEmptyException(
     file: File,
 ): FileSystemException(file, null, "Directory is not empty")
 
+public actual typealias InterruptedIOException = java.io.InterruptedIOException
+public actual inline var InterruptedIOException.bytesTransferred: Int
+    get() = this.bytesTransferred
+    set(value) { this.bytesTransferred = value }
+
 public actual typealias InterruptedException = java.lang.InterruptedException

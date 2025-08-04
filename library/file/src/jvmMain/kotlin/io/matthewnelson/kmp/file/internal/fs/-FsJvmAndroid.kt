@@ -26,6 +26,7 @@ import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysTempDir
@@ -41,7 +42,6 @@ import io.matthewnelson.kmp.file.wrapIOException
 import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.InterruptedIOException
 import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method

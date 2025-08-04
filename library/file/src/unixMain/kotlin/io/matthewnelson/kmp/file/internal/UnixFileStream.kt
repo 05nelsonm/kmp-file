@@ -18,6 +18,8 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.InterruptedIOException
+import io.matthewnelson.kmp.file.bytesTransferred
 import io.matthewnelson.kmp.file.errnoToIOException
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
@@ -75,13 +77,11 @@ internal class UnixFileStream(
         @OptIn(UnsafeNumber::class)
         @Suppress("RemoveRedundantCallsOfConversionMethods")
         val ret = buf.usePinned { pinned ->
-            ignoreEINTR {
-                platform.posix.read(
-                    fd,
-                    pinned.addressOf(offset),
-                    len.convert(),
-                ).toInt()
-            }
+            platform.posix.read(
+                fd,
+                pinned.addressOf(offset),
+                len.convert(),
+            ).toInt()
         }
 
         if (ret < 0) throw errnoToIOException(errno)
@@ -138,14 +138,18 @@ internal class UnixFileStream(
         buf.usePinned { pinned ->
             var total = 0
             while (total < len) {
-                val ret = ignoreEINTR {
-                    platform.posix.write(
-                        fd,
-                        pinned.addressOf(offset + total),
-                        (len - total).convert(),
-                    ).toInt()
+                val ret = platform.posix.write(
+                    fd,
+                    pinned.addressOf(offset + total),
+                    (len - total).convert(),
+                ).toInt()
+                if (ret < 0) {
+                    val e = errnoToIOException(errno)
+                    if (e is InterruptedIOException) {
+                        e.bytesTransferred = total
+                    }
+                    throw e
                 }
-                if (ret < 0) throw errnoToIOException(errno)
                 if (ret == 0) throw IOException("write == 0")
                 total += ret
             }

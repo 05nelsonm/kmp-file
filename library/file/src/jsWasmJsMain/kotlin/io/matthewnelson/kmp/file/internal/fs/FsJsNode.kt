@@ -26,9 +26,11 @@ import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
+import io.matthewnelson.kmp.file.bytesTransferred
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
@@ -406,7 +408,11 @@ internal class FsJsNode private constructor(
                         )
                     }
                 } catch (t: Throwable) {
-                    throw t.toIOException()
+                    val e = t.toIOException()
+                    if (e is InterruptedIOException) {
+                        e.bytesTransferred = total
+                    }
+                    throw e
                 }
 
                 if (read == 0) break
@@ -491,7 +497,11 @@ internal class FsJsNode private constructor(
                         )
                     }
                 } catch (t: Throwable) {
-                    throw t.toIOException()
+                    val e = t.toIOException()
+                    if (e is InterruptedIOException) {
+                        e.bytesTransferred = len - remainder
+                    }
+                    throw e
                 }
 
                 if (bytesWritten == 0) throw IOException("write == 0")

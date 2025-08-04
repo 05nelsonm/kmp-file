@@ -37,6 +37,7 @@ import platform.windows.ERROR_FILE_EXISTS
 import platform.windows.ERROR_FILE_NOT_FOUND
 import platform.windows.ERROR_NOACCESS
 import platform.windows.ERROR_NOT_EMPTY
+import platform.windows.ERROR_OPERATION_ABORTED
 import platform.windows.ERROR_PATH_NOT_FOUND
 import platform.windows.FORMAT_MESSAGE_FROM_SYSTEM
 import platform.windows.FORMAT_MESSAGE_IGNORE_INSERTS
@@ -49,6 +50,8 @@ import platform.windows.SUBLANG_DEFAULT
  * Retrieves the human-readable message for [GetLastError] via [FormatMessageA] and
  * returns it as an [IOException]. When the last error is [ERROR_FILE_NOT_FOUND] or
  * [ERROR_PATH_NOT_FOUND], then this function will return [FileNotFoundException].
+ * When the last error is [ERROR_OPERATION_ABORTED], then this function will return
+ * [InterruptedIOException].
  *
  * @return The formatted error as an [IOException]
  *
@@ -84,8 +87,9 @@ public fun lastErrorToIOException(file: File?, other: File? = null): IOException
     val code = lastError.toInt()
 
     return when {
-        code == ERROR_FILE_NOT_FOUND -> fileNotFoundException(file, "ERROR_FILE_NOT_FOUND", msg)
-        code == ERROR_PATH_NOT_FOUND -> fileNotFoundException(file, "ERROR_PATH_NOT_FOUND", msg)
+        code == ERROR_FILE_NOT_FOUND -> fileNotFoundException(file, null, msg)
+        code == ERROR_PATH_NOT_FOUND -> fileNotFoundException(file, null, msg)
+        code == ERROR_OPERATION_ABORTED -> InterruptedIOException(msg)
         file != null -> when (code) {
             ERROR_ACCESS_DENIED, ERROR_NOACCESS -> AccessDeniedException(file, other, msg)
             ERROR_ALREADY_EXISTS, ERROR_FILE_EXISTS -> FileAlreadyExistsException(file, other, msg)
