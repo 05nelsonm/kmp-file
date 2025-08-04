@@ -66,21 +66,21 @@ internal class MinGWFileStream(
     override fun isOpen(): Boolean = _h.value != null
 
     override fun position(): Long {
-        if (!canRead) return super.position()
         val h = _h.value ?: throw fileStreamClosed()
+        if (!canRead) return super.position()
         return memScoped { h.getPosition(scope = this) }
     }
 
     override fun position(new: Long): FileStream.ReadWrite {
-        if (!canRead) return super.position(new)
         val h = _h.value ?: throw fileStreamClosed()
+        if (!canRead) return super.position(new)
         h.setPosition(new)
         return this
     }
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-        if (!canRead) return super.read(buf, offset, len)
         val h = _h.value ?: throw fileStreamClosed()
+        if (!canRead) return super.read(buf, offset, len)
 
         buf.checkBounds(offset, len)
         if (buf.isEmpty()) return 0
@@ -110,8 +110,8 @@ internal class MinGWFileStream(
     }
 
     override fun size(): Long {
-        if (!canRead) return super.size()
         val h = _h.value ?: throw fileStreamClosed()
+        if (!canRead) return super.size()
 
         return memScoped {
             val size = alloc<LARGE_INTEGER>()
@@ -128,8 +128,8 @@ internal class MinGWFileStream(
     }
 
     override fun size(new: Long): FileStream.ReadWrite {
-        if (!canRead || !canWrite) return super.size(new)
         val h = _h.value ?: throw fileStreamClosed()
+        if (!canRead || !canWrite) return super.size(new)
         val pos = memScoped { h.getPosition(scope = this) }
         if (pos != new) h.setPosition(new)
         if (SetEndOfFile(h) == FALSE) throw lastErrorToIOException()
@@ -139,15 +139,15 @@ internal class MinGWFileStream(
     }
 
     override fun flush() {
-        if (!canWrite) return super.flush()
         val h = _h.value ?: throw fileStreamClosed()
+        if (!canWrite) return super.flush()
         val ret = FlushFileBuffers(hFile = h)
         if (ret == FALSE) throw lastErrorToIOException()
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {
-        if (!canWrite) return super.write(buf, offset, len)
         val h = _h.value ?: throw fileStreamClosed()
+        if (!canWrite) return super.write(buf, offset, len)
 
         buf.checkBounds(offset, len)
         if (buf.isEmpty()) return

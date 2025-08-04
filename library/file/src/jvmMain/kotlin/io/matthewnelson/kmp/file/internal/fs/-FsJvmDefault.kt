@@ -228,48 +228,48 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
         override fun isOpen(): Boolean = _raf != null
 
         override fun position(): Long {
-            if (!canRead) return super.position()
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            if (!canRead) return super.position()
             return raf.filePointer
         }
 
         override fun position(new: Long): FileStream.ReadWrite {
-            if (!canRead) return super.position(new)
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            if (!canRead) return super.position(new)
             require(new >= 0L) { "new[$new] < 0" }
             raf.seek(new)
             return this
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-            if (!canRead) return super.read(buf, offset, len)
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            if (!canRead) return super.read(buf, offset, len)
             return raf.read(buf, offset, len)
         }
 
         override fun size(): Long {
-            if (!canRead) return super.size()
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            if (!canRead) return super.size()
             return raf.length()
         }
 
         override fun size(new: Long): FileStream.ReadWrite {
-            if (!canRead || !canWrite) return super.size(new)
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            if (!canRead || !canWrite) return super.size(new)
             require(new >= 0L) { "new[$new] < 0" }
             raf.setLength(new)
             return this
         }
 
         override fun flush() {
-            if (!canWrite) return super.flush()
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            if (!canWrite) return super.flush()
             raf.fd.sync()
         }
 
         override fun write(buf: ByteArray, offset: Int, len: Int) {
-            if (!canWrite) return super.write(buf, offset, len)
             val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+            if (!canWrite) return super.write(buf, offset, len)
             raf.write(buf, offset, len)
         }
 

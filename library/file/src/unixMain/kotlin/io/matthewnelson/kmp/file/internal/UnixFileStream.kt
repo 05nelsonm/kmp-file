@@ -49,24 +49,24 @@ internal class UnixFileStream(
     override fun isOpen(): Boolean = _fd.value != null
 
     override fun position(): Long {
-        if (!canRead) return super.position()
         val fd = _fd.value ?: throw fileStreamClosed()
+        if (!canRead) return super.position()
         val ret = platformLSeek(fd, 0, SEEK_CUR)
         if (ret == -1L) throw errnoToIOException(errno)
         return ret
     }
 
     override fun position(new: Long): FileStream.ReadWrite {
-        if (!canRead) return super.position(new)
         val fd = _fd.value ?: throw fileStreamClosed()
+        if (!canRead) return super.position(new)
         val ret = platformLSeek(fd, new, SEEK_SET)
         if (ret == -1L) throw errnoToIllegalArgumentOrIOException(errno, null)
         return this
     }
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-        if (!canRead) return super.read(buf, offset, len)
         val fd = _fd.value ?: throw fileStreamClosed()
+        if (!canRead) return super.read(buf, offset, len)
 
         buf.checkBounds(offset, len)
         if (buf.isEmpty()) return 0
@@ -90,8 +90,8 @@ internal class UnixFileStream(
     }
 
     override fun size(): Long {
-        if (!canRead) return super.size()
         val fd = _fd.value ?: throw fileStreamClosed()
+        if (!canRead) return super.size()
 
         return memScoped {
             val stat = alloc<stat>()
@@ -103,8 +103,8 @@ internal class UnixFileStream(
     }
 
     override fun size(new: Long): FileStream.ReadWrite {
-        if (!canRead || !canWrite) return super.size(new)
         val fd = _fd.value ?: throw fileStreamClosed()
+        if (!canRead || !canWrite) return super.size(new)
         val pos = platformLSeek(fd, 0L, SEEK_CUR)
         if (pos == -1L) {
             throw errnoToIllegalArgumentOrIOException(errno, null)
@@ -119,15 +119,15 @@ internal class UnixFileStream(
     }
 
     override fun flush() {
-        if (!canWrite) return super.flush()
         val fd = _fd.value ?: throw fileStreamClosed()
+        if (!canWrite) return super.flush()
         if (fsync(fd) == 0) return
         throw errnoToIOException(errno)
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {
-        if (!canWrite) return super.write(buf, offset, len)
         val fd = _fd.value ?: throw fileStreamClosed()
+        if (!canWrite) return super.write(buf, offset, len)
 
         buf.checkBounds(offset, len)
         if (buf.isEmpty()) return

@@ -379,21 +379,21 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         override fun isOpen(): Boolean = _ch != null
 
         override fun position(): Long {
-            if (!canRead) return super.position()
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            if (!canRead) return super.position()
             return ch.position()
         }
 
         override fun position(new: Long): FileStream.ReadWrite {
-            if (!canRead) return super.position(new)
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            if (!canRead) return super.position(new)
             ch.position(new)
             return this
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-            if (!canRead) return super.read(buf, offset, len)
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            if (!canRead) return super.read(buf, offset, len)
             val bb = ByteBuffer.wrap(buf, offset, len)
             var total = 0
             while (total < len) {
@@ -408,22 +408,20 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         }
 
         override fun size(): Long {
-            if (!canRead) return super.size()
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            if (!canRead) return super.size()
             return ch.size()
         }
 
         override fun size(new: Long): FileStream.ReadWrite {
-            if (!canRead || !canWrite) return super.size(new)
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            if (!canRead || !canWrite) return super.size(new)
             val size = ch.size()
             if (new > size) {
-                val pos = ch.position()
                 val bb = ByteBuffer.wrap(ByteArray(1))
-                ch.position(new - 1L)
-                ch.write(bb)
-                // Set back to what it was previously
-                if (pos < new) ch.position(pos)
+                val pos = ch.position()
+                ch.write(bb, new - 1L)
+                if (pos > new) ch.position(new)
             } else {
                 ch.truncate(new)
             }
@@ -431,14 +429,14 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         }
 
         override fun flush() {
-            if (!canWrite) return super.flush()
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            if (!canWrite) return super.flush()
             ch.force(true)
         }
 
         override fun write(buf: ByteArray, offset: Int, len: Int) {
-            if (!canWrite) return super.write(buf, offset, len)
             val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+            if (!canWrite) return super.write(buf, offset, len)
             val bb = ByteBuffer.wrap(buf, offset, len)
             ch.write(bb)
         }
