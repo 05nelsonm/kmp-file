@@ -131,6 +131,15 @@ open class io.matthewnelson.kmp.file/InterruptedException : kotlin/Exception { /
     constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/InterruptedException.<init>|<init>(kotlin.String?){}[0]
 }
 
+open class io.matthewnelson.kmp.file/InterruptedIOException : io.matthewnelson.kmp.file/IOException { // io.matthewnelson.kmp.file/InterruptedIOException|null[0]
+    constructor <init>() // io.matthewnelson.kmp.file/InterruptedIOException.<init>|<init>(){}[0]
+    constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/InterruptedIOException.<init>|<init>(kotlin.String?){}[0]
+
+    final var _bytesTransferred // io.matthewnelson.kmp.file/InterruptedIOException._bytesTransferred|{}_bytesTransferred[0]
+        final fun <get-_bytesTransferred>(): kotlin/Int // io.matthewnelson.kmp.file/InterruptedIOException._bytesTransferred.<get-_bytesTransferred>|<get-_bytesTransferred>(){}[0]
+        final fun <set-_bytesTransferred>(kotlin/Int) // io.matthewnelson.kmp.file/InterruptedIOException._bytesTransferred.<set-_bytesTransferred>|<set-_bytesTransferred>(kotlin.Int){}[0]
+}
+
 sealed class io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/OpenExcl|null[0]
     final val mode // io.matthewnelson.kmp.file/OpenExcl.mode|{}mode[0]
         final fun <get-mode>(): kotlin/String // io.matthewnelson.kmp.file/OpenExcl.mode.<get-mode>|<get-mode>(){}[0]
@@ -180,6 +189,10 @@ final val io.matthewnelson.kmp.file/parentPath // io.matthewnelson.kmp.file/pare
     final inline fun (io.matthewnelson.kmp.file/File).<get-parentPath>(): kotlin/String? // io.matthewnelson.kmp.file/parentPath.<get-parentPath>|<get-parentPath>@io.matthewnelson.kmp.file.File(){}[0]
 final val io.matthewnelson.kmp.file/path // io.matthewnelson.kmp.file/path|@io.matthewnelson.kmp.file.File{}path[0]
     final inline fun (io.matthewnelson.kmp.file/File).<get-path>(): kotlin/String // io.matthewnelson.kmp.file/path.<get-path>|<get-path>@io.matthewnelson.kmp.file.File(){}[0]
+
+final var io.matthewnelson.kmp.file/bytesTransferred // io.matthewnelson.kmp.file/bytesTransferred|@io.matthewnelson.kmp.file.InterruptedIOException{}bytesTransferred[0]
+    final inline fun (io.matthewnelson.kmp.file/InterruptedIOException).<get-bytesTransferred>(): kotlin/Int // io.matthewnelson.kmp.file/bytesTransferred.<get-bytesTransferred>|<get-bytesTransferred>@io.matthewnelson.kmp.file.InterruptedIOException(){}[0]
+    final inline fun (io.matthewnelson.kmp.file/InterruptedIOException).<set-bytesTransferred>(kotlin/Int) // io.matthewnelson.kmp.file/bytesTransferred.<set-bytesTransferred>|<set-bytesTransferred>@io.matthewnelson.kmp.file.InterruptedIOException(kotlin.Int){}[0]
 
 final fun (io.matthewnelson.kmp.file/Closeable?).io.matthewnelson.kmp.file/doFinally(kotlin/Throwable?): kotlin/Throwable? // io.matthewnelson.kmp.file/doFinally|doFinally@io.matthewnelson.kmp.file.Closeable?(kotlin.Throwable?){}[0]
 final fun (io.matthewnelson.kmp.file/File).io.matthewnelson.kmp.file/absoluteFile2(): io.matthewnelson.kmp.file/File // io.matthewnelson.kmp.file/absoluteFile2|absoluteFile2@io.matthewnelson.kmp.file.File(){}[0]

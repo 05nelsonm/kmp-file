@@ -69,7 +69,7 @@ public actual inline fun <T: Any?> jsExternTryCatch(block: () -> T): T {
  * @see [toIOException]
  * */
 public actual val Throwable.errorCodeOrNull: String? get() = try {
-    asDynamic().code as String
+    asDynamic().code as String?
 } catch (_: Throwable) {
     null
 }

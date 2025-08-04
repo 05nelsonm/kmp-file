@@ -21,6 +21,7 @@ package io.matthewnelson.kmp.file
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmField
 import kotlin.jvm.JvmName
 
 /**
@@ -87,6 +88,22 @@ public expect class NotDirectoryException: FileSystemException
  * is not empty.
  * */
 public expect class DirectoryNotEmptyException: FileSystemException
+
+/**
+ * Signals that an I/O operation has been interrupted. An [InterruptedIOException] is
+ * thrown to indicate that an input or output transfer has been terminated because
+ * the thread performing it was interrupted. The field [bytesTransferred] indicates
+ * how many bytes were successfully transferred before the interruption occurred.
+ *
+ * @see [bytesTransferred]
+ * */
+public expect open class InterruptedIOException: IOException {
+//    public var bytesTransferred: Int // JvmField does not support
+    public constructor()
+    public constructor(message: String?)
+}
+
+public expect inline var InterruptedIOException.bytesTransferred: Int
 
 /**
  * Thrown when a thread is waiting, sleeping, or otherwise occupied, and the thread

@@ -224,16 +224,18 @@ public expect val Throwable.errorCodeOrNull: String?
 /**
  * Converts the throwable to an [IOException] if it is not already one. When
  * [errorCodeOrNull] is `ENOENT`, then this function will return [FileNotFoundException].
- * When the [errorCodeOrNull] starts with `ERR_FS_`, then this function will
- * return [FileSystemException].
+ * When the [errorCodeOrNull] is `EINTR`, then this function will return
+ * [InterruptedIOException]. When the [errorCodeOrNull] starts with `ERR_FS_`,
+ * then this function will return [FileSystemException].
  * */
 public fun Throwable.toIOException(): IOException = toIOException(null)
 
 /**
  * Converts the throwable to an [IOException] if it is not already one. When
  * [errorCodeOrNull] is `ENOENT`, then this function will return [FileNotFoundException].
- * When the [errorCodeOrNull] starts with `ERR_FS_`, then this function will
- * return a [FileSystemException].
+ * When the [errorCodeOrNull] is `EINTR`, then this function will return
+ * [InterruptedIOException]. When the [errorCodeOrNull] starts with `ERR_FS_`,
+ * then this function will return [FileSystemException].
  *
  * If the [file] parameter is non-null, an appropriate [FileSystemException] will
  * be returned for the given [errorCodeOrNull].
@@ -255,6 +257,7 @@ public fun Throwable.toIOException(file: File?, other: File? = null): IOExceptio
     val code = errorCodeOrNull
     return when {
         code == "ENOENT" -> fileNotFoundException(file, code, message)
+        code == "EINTR" -> InterruptedIOException(message)
         code?.startsWith("ERR_FS_") == true -> FileSystemException(file ?: "".toFile(), other, message)
         file != null -> when (code) {
             "EACCES", "EPERM" -> AccessDeniedException(file, other, message)

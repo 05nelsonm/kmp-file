@@ -30,7 +30,8 @@ import kotlin.contracts.contract
  * Converts [platform.posix.errno] to a string (e.g. [ENOENT] > `"ENOENT"`) as a prefix
  * for the human-readable error message retrieved via [strerror] and returns it as an
  * [IOException]. When [platform.posix.errno] is [ENOENT], then this function will return
- * [FileNotFoundException].
+ * [FileNotFoundException]. When [platform.posix.errno] is [EINTR], then this function
+ * will return [InterruptedIOException].
  *
  * @param [errno]
  *
@@ -43,7 +44,8 @@ public fun errnoToIOException(errno: Int): IOException = errnoToIOException(errn
  * Converts [platform.posix.errno] to a string (e.g. [ENOENT] > `"ENOENT"`) as a prefix
  * for the human-readable error message retrieved via [strerror] and returns it as an
  * [IOException]. When [platform.posix.errno] is [ENOENT], then this function will return
- * [FileNotFoundException].
+ * [FileNotFoundException]. When [platform.posix.errno] is [EINTR], then this function
+ * will return [InterruptedIOException].
  *
  * If and only if the [file] parameter is non-null, an appropriate [FileSystemException]
  * will be returned for the given [platform.posix.errno].
@@ -66,6 +68,7 @@ public fun errnoToIOException(errno: Int, file: File?, other: File? = null): IOE
 
     return when {
         errno == ENOENT -> fileNotFoundException(file, null, message)
+        errno == EINTR -> InterruptedIOException(message)
         file != null -> when (errno) {
             EACCES, EPERM -> AccessDeniedException(file, other, message)
             EEXIST -> FileAlreadyExistsException(file, other, message)
@@ -85,6 +88,7 @@ public fun errnoToIOException(errno: Int, file: File?, other: File? = null): IOE
  * This has been DEPRECATED and replaced by the [FileStream] API.
  *
  * @see [openRead]
+ * @see [openReadWrite]
  * @see [openWrite]
  * @see [openAppending]
  * @suppress
@@ -93,7 +97,7 @@ public fun errnoToIOException(errno: Int, file: File?, other: File? = null): IOE
 @ExperimentalForeignApi
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
-@Deprecated("Replaced by (File.openRead, File.openWrite, File.openAppending).use {} functionality.")
+@Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppending).use {} functionality.")
 public inline fun <T: Any?> File.fOpen(
     flags: String,
     block: (file: CPointer<FILE>) -> T,
@@ -144,13 +148,14 @@ public inline fun <T: Any?> File.fOpen(
  * This has been DEPRECATED and replaced by the [FileStream] API.
  *
  * @see [openRead]
+ * @see [openReadWrite]
  * @see [openWrite]
  * @see [openAppending]
  * @suppress
  * */
 @DelicateFileApi
 @ExperimentalForeignApi
-@Deprecated("Replaced by (File.openRead, File.openWrite, File.openAppending).use {} functionality.")
+@Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppending).use {} functionality.")
 public fun CPointer<FILE>.fRead(
     buf: ByteArray,
 ): Int = buf.usePinned { pinned ->
@@ -164,13 +169,14 @@ public fun CPointer<FILE>.fRead(
  * This has been DEPRECATED and replaced by the [FileStream] API.
  *
  * @see [openRead]
+ * @see [openReadWrite]
  * @see [openWrite]
  * @see [openAppending]
  * @suppress
  * */
 @DelicateFileApi
 @ExperimentalForeignApi
-@Deprecated("Replaced by (File.openRead, File.openWrite, File.openAppending).use {} functionality.")
+@Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppending).use {} functionality.")
 public fun CPointer<FILE>.fWrite(
     buf: ByteArray,
     offset: Int = 0,

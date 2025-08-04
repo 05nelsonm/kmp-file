@@ -24,6 +24,7 @@ import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.InterruptedException
+import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
@@ -32,7 +33,6 @@ import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.wrapIOException
-import java.io.InterruptedIOException
 import kotlin.Throws
 import kotlin.concurrent.Volatile
 
