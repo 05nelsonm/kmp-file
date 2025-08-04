@@ -19,7 +19,6 @@ package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.errnoToString
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
-import io.matthewnelson.kmp.file.internal.ignoreEINTR
 import kotlinx.cinterop.*
 import platform.posix.*
 import kotlin.contracts.ExperimentalContracts
@@ -159,10 +158,8 @@ public inline fun <T: Any?> File.fOpen(
 public fun CPointer<FILE>.fRead(
     buf: ByteArray,
 ): Int = buf.usePinned { pinned ->
-    ignoreEINTR {
-        @Suppress("DEPRECATION_ERROR")
-        fRead(buf = pinned.addressOf(0), numBytes = buf.size)
-    }
+    @Suppress("DEPRECATION_ERROR")
+    fRead(buf = pinned.addressOf(0), numBytes = buf.size)
 }
 
 /**
@@ -182,10 +179,8 @@ public fun CPointer<FILE>.fWrite(
     offset: Int = 0,
     len: Int = buf.size,
 ): Int = buf.usePinned { pinned ->
-    ignoreEINTR {
-        @Suppress("DEPRECATION_ERROR")
-        fWrite(buf = pinned.addressOf(offset), numBytes = len)
-    }
+    @Suppress("DEPRECATION_ERROR")
+    fWrite(buf = pinned.addressOf(offset), numBytes = len)
 }
 
 // Linux/AndroidNative targets only. All other platforms this is a no-op
