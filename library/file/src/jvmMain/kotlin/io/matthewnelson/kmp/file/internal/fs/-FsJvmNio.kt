@@ -24,18 +24,15 @@ import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.NioFileStream
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
-import io.matthewnelson.kmp.file.internal.commonCheckIsNotDir
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
-import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
-import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.*
 import java.nio.file.attribute.FileAttribute
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
-import kotlin.concurrent.Volatile
 import kotlin.io.AccessDeniedException
 import kotlin.text.equals
 import kotlin.text.forEach
@@ -43,12 +40,6 @@ import kotlin.text.startsWith
 
 @Suppress("NewApi")
 internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info) {
-
-    @Throws(IOException::class)
-    internal override fun openRead(file: File): AbstractFileStream {
-        val options = mutableSetOf(StandardOpenOption.READ)
-        return file.openNio(OpenExcl.MustExist, options, attrs = null)
-    }
 
     internal companion object {
 
@@ -69,11 +60,6 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
 
     // Windows
     private class NonPosix: FsJvmNio(info = FsInfo.of(name = "FsJvmNioNonPosix", isPosix = false)) {
-
-        @Throws(IOException::class)
-        internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
-            super.chmod(file, mode, mustExist)
-        }
 
         @Throws(IOException::class)
         internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
@@ -249,11 +235,6 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         }
 
         @Throws(IOException::class)
-        internal override fun openRead(file: File): AbstractFileStream {
-            return super.openRead(file).commonCheckIsNotDir()
-        }
-
-        @Throws(IOException::class)
         internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
             val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
                 add(StandardOpenOption.READ)
@@ -315,7 +296,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         val canRead = options.contains(StandardOpenOption.READ)
         val canWrite = options.contains(StandardOpenOption.WRITE)
 
-        val channel = try {
+        val ch = try {
             if (attrs == null) {
                 FileChannel.open(path, *options.toTypedArray())
             } else {
@@ -325,7 +306,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             throw t.mapNioException(this)
         }
 
-        return NioFileStream(channel, canRead, canWrite)
+        return NioFileStream.of(ch, canRead, canWrite, parent = null)
     }
 
     @Throws(IOException::class)
@@ -364,91 +345,5 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         }
         is SecurityException -> toAccessDeniedException(file)
         else -> this
-    }
-
-    protected class NioFileStream(
-        channel: FileChannel,
-        canRead: Boolean,
-        canWrite: Boolean,
-    ): AbstractFileStream(canRead, canWrite, INIT) {
-
-        @Volatile
-        private var _ch: FileChannel? = channel
-        private val closeLock = Any()
-
-        override fun isOpen(): Boolean = _ch != null
-
-        override fun position(): Long {
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            if (!canRead) return super.position()
-            return ch.position()
-        }
-
-        override fun position(new: Long): FileStream.ReadWrite {
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            if (!canRead) return super.position(new)
-            ch.position(new)
-            return this
-        }
-
-        override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            if (!canRead) return super.read(buf, offset, len)
-            val bb = ByteBuffer.wrap(buf, offset, len)
-            var total = 0
-            while (total < len) {
-                val read = ch.read(bb)
-                if (read == -1) {
-                    if (total == 0) total = -1
-                    break
-                }
-                total += read
-            }
-            return total
-        }
-
-        override fun size(): Long {
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            if (!canRead) return super.size()
-            return ch.size()
-        }
-
-        override fun size(new: Long): FileStream.ReadWrite {
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            if (!canRead || !canWrite) return super.size(new)
-            val size = ch.size()
-            if (new > size) {
-                val bb = ByteBuffer.wrap(ByteArray(1))
-                val pos = ch.position()
-                ch.write(bb, new - 1L)
-                if (pos > new) ch.position(new)
-            } else {
-                ch.truncate(new)
-            }
-            return this
-        }
-
-        override fun flush() {
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            if (!canWrite) return super.flush()
-            ch.force(true)
-        }
-
-        override fun write(buf: ByteArray, offset: Int, len: Int) {
-            val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
-            if (!canWrite) return super.write(buf, offset, len)
-            val bb = ByteBuffer.wrap(buf, offset, len)
-            ch.write(bb)
-        }
-
-        override fun close() {
-            synchronized(closeLock) {
-                val ch = _ch
-                _ch = null
-                ch
-            }?.close()
-        }
-
-        override fun toString(): String = "NioFileStream@" + hashCode().toString()
     }
 }

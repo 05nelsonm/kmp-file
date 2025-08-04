@@ -28,11 +28,13 @@ import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.NioFileStream
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.wrapIOException
+import java.io.FileInputStream
 import kotlin.Throws
 import kotlin.concurrent.Volatile
 
@@ -176,6 +178,20 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
             file.exists()
         } catch (t: SecurityException) {
             throw t.toAccessDeniedException(file)
+        }
+
+        internal override fun openRead(file: File): AbstractFileStream {
+            // Must obtain a channel from FileInputStream to ensure that the file
+            // does not point to a directory. Opening via FileChannel.open for
+            // read-only operations will succeed on Unix filesystems if file points
+            // to a directory, so.
+            val fis = try {
+                FileInputStream(file)
+            } catch (t: SecurityException) {
+                throw t.toAccessDeniedException(file)
+            }
+
+            return NioFileStream.of(fis.channel, canRead = true, canWrite = false, parent = fis)
         }
 
         @Throws(InterruptedIOException::class)

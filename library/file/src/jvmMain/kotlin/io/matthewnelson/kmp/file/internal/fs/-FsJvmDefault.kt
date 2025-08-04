@@ -23,21 +23,20 @@ import io.matthewnelson.kmp.file.Closeable
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
-import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
-import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.NioFileStream
+import io.matthewnelson.kmp.file.internal.RandomAccessFileStream
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
-import kotlin.concurrent.Volatile
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -47,11 +46,6 @@ import kotlin.contracts.contract
 internal class FsJvmDefault private constructor(): Fs.Jvm(
     info = FsInfo.of(name = "FsJvmDefault", isPosix = !IsWindows)
 ) {
-
-    @Throws(IOException::class)
-    internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
-        super.chmod(file, mode, mustExist)
-    }
 
     @Throws(IOException::class)
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
@@ -122,24 +116,17 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
     }
 
     @Throws(IOException::class)
-    internal override fun openRead(file: File): AbstractFileStream {
-        // Android's FileInputStream.skip implementation for API 23 and
-        // below does not allow skipping backwards for some dumb reason.
-        // So, use read-only RandomAccessFile instead.
-        val raf = RandomAccessFile(file, "r")
-        return RandomAccessFileStream(raf, canRead = true, canWrite = false)
-    }
-
-    @Throws(IOException::class)
     override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        // On Android with lower APIs (I believe 19 and below), RDWR FileChannel is
+        // broken for RandomAccessFile.channel. The implementation is trash
         val raf = file.open(excl, openCloseable = { RandomAccessFile(file, "rw") })
-        return RandomAccessFileStream(raf, canRead = true, canWrite = true)
+        return RandomAccessFileStream.of(raf, canRead = true, canWrite = true)
     }
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
         val fos = file.open(excl, openCloseable = { FileOutputStream(file, /* append = */ appending) })
-        return WriteOnlyFileStream(fos)
+        return NioFileStream.of(fos.channel, canRead = false, canWrite = true, parent = fos)
     }
 
     @Throws(IOException::class)
@@ -182,106 +169,6 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
         }
 
         return closeable
-    }
-
-    private class WriteOnlyFileStream(
-        fos: FileOutputStream,
-    ): AbstractFileStream(canRead = false, canWrite = true, INIT) {
-
-        @Volatile
-        private var _fos: FileOutputStream? = fos
-        private val closeLock = Any()
-
-        override fun isOpen(): Boolean = _fos != null
-
-        override fun flush() {
-            val fos = synchronized(closeLock) { _fos } ?: throw fileStreamClosed()
-            fos.fd.sync()
-        }
-
-        override fun write(buf: ByteArray, offset: Int, len: Int) {
-            val fos = synchronized(closeLock) { _fos } ?: throw fileStreamClosed()
-            fos.write(buf, offset, len)
-        }
-
-        override fun close() {
-            synchronized(closeLock) {
-                val fos = _fos
-                _fos = null
-                fos
-            }?.close()
-        }
-
-        override fun toString(): String = "WriteOnlyFileStream@" + hashCode().toString()
-    }
-
-    private class RandomAccessFileStream(
-        raf: RandomAccessFile,
-        canRead: Boolean,
-        canWrite: Boolean,
-    ): AbstractFileStream(canRead, canWrite, INIT) {
-
-        @Volatile
-        private var _raf: RandomAccessFile? = raf
-        private val closeLock = Any()
-
-        override fun isOpen(): Boolean = _raf != null
-
-        override fun position(): Long {
-            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            if (!canRead) return super.position()
-            return raf.filePointer
-        }
-
-        override fun position(new: Long): FileStream.ReadWrite {
-            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            if (!canRead) return super.position(new)
-            require(new >= 0L) { "new[$new] < 0" }
-            raf.seek(new)
-            return this
-        }
-
-        override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            if (!canRead) return super.read(buf, offset, len)
-            return raf.read(buf, offset, len)
-        }
-
-        override fun size(): Long {
-            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            if (!canRead) return super.size()
-            return raf.length()
-        }
-
-        override fun size(new: Long): FileStream.ReadWrite {
-            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            if (!canRead || !canWrite) return super.size(new)
-            require(new >= 0L) { "new[$new] < 0" }
-            raf.setLength(new)
-            return this
-        }
-
-        override fun flush() {
-            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            if (!canWrite) return super.flush()
-            raf.fd.sync()
-        }
-
-        override fun write(buf: ByteArray, offset: Int, len: Int) {
-            val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
-            if (!canWrite) return super.write(buf, offset, len)
-            raf.write(buf, offset, len)
-        }
-
-        override fun close() {
-            synchronized(closeLock) {
-                val raf = _raf
-                _raf = null
-                raf
-            }?.close()
-        }
-
-        override fun toString(): String = "RandomAccessFileStream@" + hashCode().toString()
     }
 
     internal companion object {
