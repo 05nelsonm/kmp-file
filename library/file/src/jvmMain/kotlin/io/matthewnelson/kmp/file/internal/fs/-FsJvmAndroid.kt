@@ -82,7 +82,12 @@ internal class FsJvmAndroid private constructor(
     // that it has the FD_CLOEXEC flag.
     private val __O_CLOEXEC: Int by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         if (const.O_CLOEXEC != 0) return@lazy const.O_CLOEXEC
-        if (os.fcntlVoid == null) return@lazy 0
+        if (os.fcntlVoid == null) {
+            try {
+                System.err.println("KMP-FILE: android.system.Os.fcntlVoid was null for API[${ANDROID.SDK_INT}]")
+            } catch (_: Throwable) {}
+            return@lazy 0
+        }
 
         @Suppress("LocalVariableName")
         val O_CLOEXEC = 0x80000 // 524288
@@ -337,91 +342,88 @@ internal class FsJvmAndroid private constructor(
         canWrite: Boolean,
     ): AbstractFileStream(canRead, canWrite, INIT) {
 
+        private inner class Closeables(val fd: FileDescriptor) {
+            val fis = if (canRead) FileInputStream(/* fdObj = */ fd) else null
+            val fos = if (canWrite) FileOutputStream(/* fdObj = */ fd) else null
+        }
+
         @Volatile
-        private var _fd: FileDescriptor? = fd
-        @Volatile
-        private var _fis: FileInputStream? = if (canRead) FileInputStream(/* fdObj = */ fd) else null
-        @Volatile
-        private var _fos: FileOutputStream? = if (canWrite) FileOutputStream(/* fdObj = */ fd) else null
+        private var _c: Closeables? = Closeables(fd)
         private val closeLock = Any()
 
-        override fun isOpen(): Boolean = _fd != null
+        override fun isOpen(): Boolean = _c != null
 
         override fun position(): Long {
-            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            val c = _c ?: throw fileStreamClosed()
             if (!canRead) return super.position()
-            return wrapErrnoException(null) { lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long }
+            return wrapErrnoException(null) { lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long }
         }
 
         override fun position(new: Long): FileStream.ReadWrite {
-            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            val c = _c ?: throw fileStreamClosed()
             if (!canRead) return super.position(new)
-            wrapErrnoException(null) { lseek.invoke(null, fd, new, const.SEEK_SET) }
+            wrapErrnoException(null) { lseek.invoke(null, c.fd, new, const.SEEK_SET) }
             return this
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-            val fis = synchronized(closeLock) { _fd ?: throw fileStreamClosed(); _fis }
-            if (fis == null) return super.read(buf, offset, len)
-            return fis.read(buf, offset, len)
+            val c = _c ?: throw fileStreamClosed()
+            if (c.fis == null) return super.read(buf, offset, len)
+            return c.fis.read(buf, offset, len)
         }
 
         override fun size(): Long {
-            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            val c = _c ?: throw fileStreamClosed()
             if (!canRead) return super.size()
             return wrapErrnoException(null) {
-                val s = fstat.invoke(null, fd)
+                val s = fstat.invoke(null, c.fd)
                 stat.st_size.getLong(s)
             }
         }
 
         override fun size(new: Long): FileStream.ReadWrite {
-            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            val c = _c ?: throw fileStreamClosed()
             if (!canRead || !canWrite) return super.size(new)
             wrapErrnoException(null) {
-                val pos = lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long
-                ftruncate.invoke(null, fd, new)
-                if (pos > new) lseek.invoke(null, fd, new, const.SEEK_SET)
+                val pos = lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long
+                ftruncate.invoke(null, c.fd, new)
+                if (pos > new) lseek.invoke(null, c.fd, new, const.SEEK_SET)
             }
             return this
         }
 
         override fun flush() {
-            val fd = synchronized(closeLock) { _fd } ?: throw fileStreamClosed()
+            val c = _c ?: throw fileStreamClosed()
             if (!canWrite) return super.flush()
-            fd.sync()
+            c.fd.sync()
         }
 
         override fun write(buf: ByteArray, offset: Int, len: Int) {
-            val fos = synchronized(closeLock) { _fd ?: throw fileStreamClosed(); _fos }
-            if (fos == null) return super.write(buf, offset, len)
-            fos.write(buf, offset, len)
+            val c = _c ?: throw fileStreamClosed()
+            if (c.fos == null) return super.write(buf, offset, len)
+            c.fos.write(buf, offset, len)
         }
 
         override fun close() {
-            val (fd, fis, fos) = synchronized(closeLock) {
-                val fd = _fd ?: return
-                val fis = _fis
-                val fos = _fos
-                _fd = null
-                _fis = null
-                _fos = null
-                Triple(fd, fis, fos)
+            val c = synchronized(closeLock) {
+                val c = _c ?: return
+                _c = null
+                c
             }
 
             var threw: IOException? = null
 
-            if (fis != null) {
+            if (c.fis != null) {
                 try {
-                    fis.close()
+                    c.fis.close()
                 } catch (e: IOException) {
                     threw = e
                 }
             }
 
-            if (fos != null) {
+            if (c.fos != null) {
                 try {
-                    fos.close()
+                    c.fos.close()
                 } catch (e: IOException) {
                     if (threw == null) {
                         threw = e
@@ -433,7 +435,7 @@ internal class FsJvmAndroid private constructor(
 
             // Android does not close the underlying FileDescriptor when using it with
             // File{Input/Output}Stream because we opened it. Ownership lies with us.
-            fd.doClose(threw)?.let { throw it }
+            c.fd.doClose(threw)?.let { throw it }
         }
 
         override fun toString(): String = "AndroidFileStream@" + hashCode().toString()

@@ -32,13 +32,13 @@ internal class RandomAccessFileStream private constructor(
     override fun isOpen(): Boolean = _raf != null
 
     override fun position(): Long {
-        val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+        val raf = _raf ?: throw fileStreamClosed()
         if (!canRead) return super.position()
         return raf.filePointer
     }
 
     override fun position(new: Long): FileStream.ReadWrite {
-        val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+        val raf = _raf ?: throw fileStreamClosed()
         if (!canRead) return super.position(new)
         require(new >= 0L) { "new[$new] < 0" }
         raf.seek(new)
@@ -46,19 +46,19 @@ internal class RandomAccessFileStream private constructor(
     }
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-        val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+        val raf = _raf ?: throw fileStreamClosed()
         if (!canRead) return super.read(buf, offset, len)
         return raf.read(buf, offset, len)
     }
 
     override fun size(): Long {
-        val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+        val raf = _raf ?: throw fileStreamClosed()
         if (!canRead) return super.size()
         return raf.length()
     }
 
     override fun size(new: Long): FileStream.ReadWrite {
-        val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+        val raf = _raf ?: throw fileStreamClosed()
         if (!canRead || !canWrite) return super.size(new)
         require(new >= 0L) { "new[$new] < 0" }
         raf.setLength(new)
@@ -66,23 +66,23 @@ internal class RandomAccessFileStream private constructor(
     }
 
     override fun flush() {
-        val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+        val raf = _raf ?: throw fileStreamClosed()
         if (!canWrite) return super.flush()
         raf.fd.sync()
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {
-        val raf = synchronized(closeLock) { _raf } ?: throw fileStreamClosed()
+        val raf = _raf ?: throw fileStreamClosed()
         if (!canWrite) return super.write(buf, offset, len)
         raf.write(buf, offset, len)
     }
 
     override fun close() {
         synchronized(closeLock) {
-            val raf = _raf
+            val raf = _raf ?: return
             _raf = null
             raf
-        }?.close()
+        }.close()
     }
 
     override fun toString(): String = "RandomAccessFileStream@" + hashCode().toString()

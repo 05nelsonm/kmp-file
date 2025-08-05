@@ -24,10 +24,9 @@ internal class FileStreamReadOnly private constructor(private val s: AbstractFil
     override fun position(new: Long): FileStream.Read { s.position(new); return this }
     override fun equals(other: Any?): Boolean = other is FileStreamReadOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
-    override fun toString(): String = s.toString()
+    override fun toString(): String = "ReadOnly$s"
     internal companion object {
         @JvmSynthetic
-        @Throws(IllegalStateException::class)
         internal fun of(s: AbstractFileStream): FileStreamReadOnly = FileStreamReadOnly(s)
     }
 }
@@ -37,10 +36,9 @@ internal class FileStreamWriteOnly private constructor(private val s: AbstractFi
     init { disappearingCheck(condition = { s.canWrite }) { "AbstractFileStream.canWrite != true" } }
     override fun equals(other: Any?): Boolean = other is FileStreamWriteOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
-    override fun toString(): String = s.toString()
+    override fun toString(): String = "WriteOnly$s"
     internal companion object {
         @JvmSynthetic
-        @Throws(IllegalStateException::class)
         internal fun of(s: AbstractFileStream): FileStreamWriteOnly = FileStreamWriteOnly(s)
     }
 }
