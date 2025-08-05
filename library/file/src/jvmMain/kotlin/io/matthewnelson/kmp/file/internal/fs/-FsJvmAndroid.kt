@@ -80,9 +80,9 @@ internal class FsJvmAndroid private constructor(
     // This is a one time check for API 26 and below to verify supplemental value
     // of 0x80000 by opening a temporary file with it and then verifying via fcntl
     // that it has the FD_CLOEXEC flag.
-    private val __O_CLOEXEC: Int? by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        if (const.O_CLOEXEC != null) return@lazy const.O_CLOEXEC
-        if (os.fcntlVoid == null) return@lazy null
+    private val __O_CLOEXEC: Int by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        if (const.O_CLOEXEC != 0) return@lazy const.O_CLOEXEC
+        if (os.fcntlVoid == null) return@lazy 0
 
         @Suppress("LocalVariableName")
         val O_CLOEXEC = 0x80000 // 524288
@@ -102,10 +102,10 @@ internal class FsJvmAndroid private constructor(
                 // We have the correct value for O_CLOEXEC
                 O_CLOEXEC
             } else {
-                null
+                0
             }
         } catch (_: Throwable) {
-            null
+            0
         }
 
         fd?.doClose(null)
@@ -114,7 +114,7 @@ internal class FsJvmAndroid private constructor(
             tmp.delete()
         } catch (_: Throwable) {}
 
-        if (result == null) {
+        if (result == 0) {
             try {
                 System.err.println("KMP-FILE: Failed to determine O_CLOEXEC value for API[${ANDROID.SDK_INT}]")
             } catch (_: Throwable) {}
@@ -166,8 +166,8 @@ internal class FsJvmAndroid private constructor(
             }
             if (isDirectory) throw FileNotFoundException("Is a directory")
         } catch (e: IOException) {
-            fd.doClose(null)?.let { tt -> e.addSuppressed(tt) }
-            throw e.wrapIOException()
+            fd.doClose(null)?.let { ee -> e.addSuppressed(ee) }
+            throw e
         }
         return AndroidFileStream(fd, canRead = true, canWrite = false)
     }
@@ -221,16 +221,14 @@ internal class FsJvmAndroid private constructor(
     @Throws(IOException::class)
     private fun File.open(flags: Int, excl: OpenExcl): FileDescriptor {
         val m = MODE_MASK.convert(excl._mode)
-        var f = flags or when (excl) {
+        var f = flags or __O_CLOEXEC or when (excl) {
             is OpenExcl.MaybeCreate -> const.O_CREAT
             is OpenExcl.MustCreate -> const.O_CREAT or const.O_EXCL
             is OpenExcl.MustExist -> 0
         }
 
-        f = f or (__O_CLOEXEC ?: 0)
-
         val doFcntl = run {
-            if (__O_CLOEXEC != null) return@run null
+            if (__O_CLOEXEC != 0) return@run null
             val fcntlVoid = os.fcntlVoid ?: return@run null
 
             var fcntl = os.fcntlInt
@@ -251,7 +249,15 @@ internal class FsJvmAndroid private constructor(
             DoFcntl(deleteFileOnFailure, fcntlVoid, isFcntlInt, fcntl)
         }
 
-        val fd = wrapErrnoException(this) { open.invoke(null, path, f, m) as FileDescriptor }
+        var fd: FileDescriptor
+        while (true) {
+            try {
+                fd = wrapErrnoException(this) { open.invoke(null, path, f, m) as FileDescriptor }
+                break
+            } catch (_: InterruptedIOException) {
+                // EINTR
+            }
+        }
 
         if (doFcntl == null) return fd
 
@@ -261,24 +267,24 @@ internal class FsJvmAndroid private constructor(
                 f = f or const.FD_CLOEXEC
                 doFcntl.fcntl.invoke(null, fd, const.F_SETFD, if (doFcntl.isFcntlInt) f else f.toLong())
             }
-        } catch (t: Throwable) {
-            fd.doClose(null)?.let { tt -> t.addSuppressed(tt) }
+        } catch (e: IOException) {
+            fd.doClose(null)?.let { ee -> e.addSuppressed(ee) }
             if (doFcntl.deleteFileOnFailure) {
                 try {
                     delete(this, ignoreReadOnly = true, mustExist = false)
-                } catch (e: IOException) {
-                    t.addSuppressed(e)
+                } catch (ee: IOException) {
+                    e.addSuppressed(ee)
                 }
             }
-            throw t.wrapIOException()
+            throw e
         }
 
         return fd
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun FileDescriptor.doClose(threw: Throwable?): Throwable? {
-        var t: Throwable? = threw
+    private inline fun FileDescriptor.doClose(threw: IOException?): IOException? {
+        var t: IOException? = threw
         val fd = this
         try {
             while (true) {
@@ -304,12 +310,12 @@ internal class FsJvmAndroid private constructor(
         block(os)
     } catch (t: Throwable) {
         val c = if (t is InvocationTargetException) t.cause ?: t else t
-        val m = c.message
+        val m = c.message?.ifBlank { null }
 
         throw when {
             c is SecurityException -> c.toAccessDeniedException(file ?: "".toFile())
             c is InterruptedIOException -> c
-            m == null -> IOException(c)
+            m == null -> c.wrapIOException()
             m.contains("EINTR") -> InterruptedIOException(m).alsoAddSuppressed(c)
             m.contains("EINVAL") -> IllegalArgumentException(m).alsoAddSuppressed(c)
             m.contains("ENOENT") -> fileNotFoundException(file, null, m).alsoAddSuppressed(c)
@@ -321,7 +327,7 @@ internal class FsJvmAndroid private constructor(
                 m.contains("EPERM") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
                 else -> FileSystemException(file, other, m).alsoAddSuppressed(c)
             }
-            else -> IOException(m)
+            else -> c.wrapIOException()
         }
     }
 
@@ -403,7 +409,7 @@ internal class FsJvmAndroid private constructor(
                 Triple(fd, fis, fos)
             }
 
-            var threw: Throwable? = null
+            var threw: IOException? = null
 
             if (fis != null) {
                 try {
@@ -432,193 +438,186 @@ internal class FsJvmAndroid private constructor(
 
         override fun toString(): String = "AndroidFileStream@" + hashCode().toString()
     }
+}
 
-    // android.system.Os
-    private class Os {
+// android.system.Os
+private class Os {
 
-        /** `chmod(path: String, mode: Int)` */
-        val chmod: Method
-        /** `close(fd: FileDescriptor)` */
-        val close: Method
+    /** `chmod(path: String, mode: Int)` */
+    val chmod: Method
+    /** `close(fd: FileDescriptor)` */
+    val close: Method
 
-        /** `fstat(fd: FileDescriptor): StructStat` */
-        val fstat: Method
-        /** `ftruncate(fd: FileDescriptor, length: Long)` */
-        val ftruncate: Method
-        /** `lseek(fd: FileDescriptor, offset: Long, whence: Int): Long` */
-        val lseek: Method
-        /** `mkdir(path: String, mode: Int)` */
-        val mkdir: Method
-        /** `open(path: String, flags: Int, mode: Int): FileDescriptor` */
-        val open: Method
-        /** `remove(path: String)` */
-        val remove: Method
+    /** `fstat(fd: FileDescriptor): StructStat` */
+    val fstat: Method
+    /** `ftruncate(fd: FileDescriptor, length: Long)` */
+    val ftruncate: Method
+    /** `lseek(fd: FileDescriptor, offset: Long, whence: Int): Long` */
+    val lseek: Method
+    /** `mkdir(path: String, mode: Int)` */
+    val mkdir: Method
+    /** `open(path: String, flags: Int, mode: Int): FileDescriptor` */
+    val open: Method
+    /** `remove(path: String)` */
+    val remove: Method
 
-        /**
-         * `fcntlInt(fd: FileDescriptor, cmd: Int, arg: Int): Int`
-         *
-         * Available for API 23+, but only resolved for API 26 and below to set
-         * [OsConstants.FD_CLOEXEC], if [FsJvmAndroid.__O_CLOEXEC] is unavailable.
-         * */
-        val fcntlInt: Method?
+    /**
+     * `fcntlInt(fd: FileDescriptor, cmd: Int, arg: Int): Int`
+     *
+     * Available for API 23+, but only resolved for API 26 and below to set
+     * [OsConstants.FD_CLOEXEC], if [FsJvmAndroid.__O_CLOEXEC] is unavailable.
+     * */
+    val fcntlInt: Method?
 
-        /**
-         * `fcntlLong(fd: FileDescriptor, cmd: Int, arg: Long): Int`
-         *
-         * Available for API 21-22, but only resolved for API 26 and below to set
-         * [OsConstants.FD_CLOEXEC], if [FsJvmAndroid.__O_CLOEXEC] is unavailable.
-         * */
-        val fcntlLong: Method?
+    /**
+     * `fcntlLong(fd: FileDescriptor, cmd: Int, arg: Long): Int`
+     *
+     * Available for API 21-22, but only resolved for API 26 and below to set
+     * [OsConstants.FD_CLOEXEC], if [FsJvmAndroid.__O_CLOEXEC] is unavailable.
+     * */
+    val fcntlLong: Method?
 
-        /**
-         * `fcntlVoid(fd: FileDescriptor, cmd: Int): Int`
-         *
-         * Only resolved for API 26 and below, as [OsConstants.O_CLOEXEC] is available.
-         * */
-        val fcntlVoid: Method?
+    /**
+     * `fcntlVoid(fd: FileDescriptor, cmd: Int): Int`
+     *
+     * Only resolved for API 26 and below, as [OsConstants.O_CLOEXEC] is available.
+     * */
+    val fcntlVoid: Method?
 
-        init {
-            val clazz = Class.forName("android.system.Os")
+    init {
+        val clazz = Class.forName("android.system.Os")
 
-            chmod = clazz.getMethod("chmod", String::class.java, Int::class.javaPrimitiveType)
-            close = clazz.getMethod("close", FileDescriptor::class.java)
-            fstat = clazz.getMethod("fstat", FileDescriptor::class.java)
-            ftruncate = clazz.getMethod("ftruncate", FileDescriptor::class.java, Long::class.javaPrimitiveType)
-            lseek = clazz.getMethod("lseek", FileDescriptor::class.java, Long::class.javaPrimitiveType, Int::class.javaPrimitiveType)
-            mkdir = clazz.getMethod("mkdir", String::class.java, Int::class.javaPrimitiveType)
-            open = clazz.getMethod("open", String::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
-            remove = clazz.getMethod("remove", String::class.java)
+        chmod = clazz.getMethod("chmod", String::class.java, Int::class.javaPrimitiveType)
+        close = clazz.getMethod("close", FileDescriptor::class.java)
+        fstat = clazz.getMethod("fstat", FileDescriptor::class.java)
+        ftruncate = clazz.getMethod("ftruncate", FileDescriptor::class.java, Long::class.javaPrimitiveType)
+        lseek = clazz.getMethod("lseek", FileDescriptor::class.java, Long::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+        mkdir = clazz.getMethod("mkdir", String::class.java, Int::class.javaPrimitiveType)
+        open = clazz.getMethod("open", String::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+        remove = clazz.getMethod("remove", String::class.java)
 
-            fcntlInt = if ((ANDROID.SDK_INT ?: 0) in 23..26) {
-                try {
-                    clazz.getMethod(
-                        "fcntlInt",
-                        FileDescriptor::class.java,
-                        Int::class.javaPrimitiveType,
-                        Int::class.javaPrimitiveType,
-                    )
-                } catch (_: Throwable) {
-                    null
-                }
-            } else {
+        fcntlInt = if ((ANDROID.SDK_INT ?: 0) in 23..26) {
+            try {
+                clazz.getMethod(
+                    "fcntlInt",
+                    FileDescriptor::class.java,
+                    Int::class.javaPrimitiveType,
+                    Int::class.javaPrimitiveType,
+                )
+            } catch (_: Throwable) {
                 null
             }
-            fcntlLong = if ((ANDROID.SDK_INT ?: 0) in 21..22) {
-                try {
-                    clazz.getMethod(
-                        "fcntlLong",
-                        FileDescriptor::class.java,
-                        Int::class.javaPrimitiveType,
-                        Long::class.javaPrimitiveType,
-                    )
-                } catch (_: Throwable) {
-                    null
-                }
-            } else {
+        } else {
+            null
+        }
+        fcntlLong = if ((ANDROID.SDK_INT ?: 0) in 21..22) {
+            try {
+                clazz.getMethod(
+                    "fcntlLong",
+                    FileDescriptor::class.java,
+                    Int::class.javaPrimitiveType,
+                    Long::class.javaPrimitiveType,
+                )
+            } catch (_: Throwable) {
                 null
             }
-            fcntlVoid = if ((ANDROID.SDK_INT ?: 0) in 21..26) {
-                try {
-                    clazz.getMethod(
-                        "fcntlVoid",
-                        FileDescriptor::class.java,
-                        Int::class.javaPrimitiveType,
-                    )
-                } catch (_: Throwable) {
-                    null
-                }
-            } else {
+        } else {
+            null
+        }
+        fcntlVoid = if ((ANDROID.SDK_INT ?: 0) in 21..26) {
+            try {
+                clazz.getMethod(
+                    "fcntlVoid",
+                    FileDescriptor::class.java,
+                    Int::class.javaPrimitiveType,
+                )
+            } catch (_: Throwable) {
                 null
             }
+        } else {
+            null
         }
     }
+}
 
-    // android.system.OsConstants
-    private class OsConstants {
+// android.system.OsConstants
+private class OsConstants {
 
-        val FD_CLOEXEC: Int
-        val F_GETFD: Int
-        val F_SETFD: Int
+    val FD_CLOEXEC: Int
+    val F_GETFD: Int
+    val F_SETFD: Int
 
-        val O_APPEND: Int
-        val O_CREAT: Int
-        val O_EXCL: Int
-        val O_RDONLY: Int
-        val O_RDWR: Int
-        val O_TRUNC: Int
-        val O_WRONLY: Int
+    val O_APPEND: Int
+    val O_CLOEXEC: Int // Must check for 0 (API 26 or below)
+    val O_CREAT: Int
+    val O_EXCL: Int
+    val O_RDONLY: Int
+    val O_RDWR: Int
+    val O_TRUNC: Int
+    val O_WRONLY: Int
 
-        val SEEK_CUR: Int
-        val SEEK_SET: Int
+    val SEEK_CUR: Int
+    val SEEK_SET: Int
 
-        val S_IRUSR: Int
-        val S_IWUSR: Int
-        val S_IXUSR: Int
-        val S_IRGRP: Int
-        val S_IWGRP: Int
-        val S_IXGRP: Int
-        val S_IROTH: Int
-        val S_IWOTH: Int
-        val S_IXOTH: Int
+    val S_IRUSR: Int
+    val S_IWUSR: Int
+    val S_IXUSR: Int
+    val S_IRGRP: Int
+    val S_IWGRP: Int
+    val S_IXGRP: Int
+    val S_IROTH: Int
+    val S_IWOTH: Int
+    val S_IXOTH: Int
 
-        val S_IFDIR: Int
-        val S_IFMT: Int
+    val S_IFDIR: Int
+    val S_IFMT: Int
 
-        // API 27+
-        val O_CLOEXEC: Int?
+    init {
+        val clazz = Class.forName("android.system.OsConstants")
 
-        init {
-            val clazz = Class.forName("android.system.OsConstants")
+        FD_CLOEXEC = clazz.getField("FD_CLOEXEC").getInt(null)
+        F_GETFD = clazz.getField("F_GETFD").getInt(null)
+        F_SETFD = clazz.getField("F_SETFD").getInt(null)
 
-            FD_CLOEXEC = clazz.getField("FD_CLOEXEC").getInt(null)
-            F_GETFD = clazz.getField("F_GETFD").getInt(null)
-            F_SETFD = clazz.getField("F_SETFD").getInt(null)
+        O_APPEND = clazz.getField("O_APPEND").getInt(null)
+        O_CLOEXEC = if ((ANDROID.SDK_INT ?: 0) >= 27) clazz.getField("O_CLOEXEC").getInt(null) else 0
+        O_CREAT = clazz.getField("O_CREAT").getInt(null)
+        O_EXCL = clazz.getField("O_EXCL").getInt(null)
+        O_RDONLY = clazz.getField("O_RDONLY").getInt(null)
+        O_RDWR = clazz.getField("O_RDWR").getInt(null)
+        O_TRUNC = clazz.getField("O_TRUNC").getInt(null)
+        O_WRONLY = clazz.getField("O_WRONLY").getInt(null)
 
-            O_APPEND = clazz.getField("O_APPEND").getInt(null)
-            O_CREAT = clazz.getField("O_CREAT").getInt(null)
-            O_EXCL = clazz.getField("O_EXCL").getInt(null)
-            O_RDONLY = clazz.getField("O_RDONLY").getInt(null)
-            O_RDWR = clazz.getField("O_RDWR").getInt(null)
-            O_TRUNC = clazz.getField("O_TRUNC").getInt(null)
-            O_WRONLY = clazz.getField("O_WRONLY").getInt(null)
+        SEEK_CUR = clazz.getField("SEEK_CUR").getInt(null)
+        SEEK_SET = clazz.getField("SEEK_SET").getInt(null)
 
-            SEEK_CUR = clazz.getField("SEEK_CUR").getInt(null)
-            SEEK_SET = clazz.getField("SEEK_SET").getInt(null)
+        S_IRUSR = clazz.getField("S_IRUSR").getInt(null)
+        S_IWUSR = clazz.getField("S_IWUSR").getInt(null)
+        S_IXUSR = clazz.getField("S_IXUSR").getInt(null)
+        S_IRGRP = clazz.getField("S_IRGRP").getInt(null)
+        S_IWGRP = clazz.getField("S_IWGRP").getInt(null)
+        S_IXGRP = clazz.getField("S_IXGRP").getInt(null)
+        S_IROTH = clazz.getField("S_IROTH").getInt(null)
+        S_IWOTH = clazz.getField("S_IWOTH").getInt(null)
+        S_IXOTH = clazz.getField("S_IXOTH").getInt(null)
 
-            S_IRUSR = clazz.getField("S_IRUSR").getInt(null)
-            S_IWUSR = clazz.getField("S_IWUSR").getInt(null)
-            S_IXUSR = clazz.getField("S_IXUSR").getInt(null)
-            S_IRGRP = clazz.getField("S_IRGRP").getInt(null)
-            S_IWGRP = clazz.getField("S_IWGRP").getInt(null)
-            S_IXGRP = clazz.getField("S_IXGRP").getInt(null)
-            S_IROTH = clazz.getField("S_IROTH").getInt(null)
-            S_IWOTH = clazz.getField("S_IWOTH").getInt(null)
-            S_IXOTH = clazz.getField("S_IXOTH").getInt(null)
-
-            S_IFDIR = clazz.getField("S_IFDIR").getInt(null)
-            S_IFMT = clazz.getField("S_IFMT").getInt(null)
-
-            O_CLOEXEC = if ((ANDROID.SDK_INT ?: 0) >= 27) {
-                clazz.getField("O_CLOEXEC").getInt(null)
-            } else {
-                null
-            }
-        }
+        S_IFDIR = clazz.getField("S_IFDIR").getInt(null)
+        S_IFMT = clazz.getField("S_IFMT").getInt(null)
     }
+}
 
-    // android.system.StructStat
-    private class StructStat {
+// android.system.StructStat
+private class StructStat {
 
-        /** `Int` */
-        val st_mode: Field
-        /** `Long` */
-        val st_size: Field
+    /** `Int` */
+    val st_mode: Field
+    /** `Long` */
+    val st_size: Field
 
-        init {
-            val clazz = Class.forName("android.system.StructStat")
+    init {
+        val clazz = Class.forName("android.system.StructStat")
 
-            st_mode = clazz.getField("st_mode")
-            st_size = clazz.getField("st_size")
-        }
+        st_mode = clazz.getField("st_mode")
+        st_size = clazz.getField("st_size")
     }
 }
