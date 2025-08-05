@@ -38,20 +38,20 @@ internal class NioFileStream private constructor(
     override fun isOpen(): Boolean = _ch != null
 
     override fun position(): Long {
-        val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+        val ch = _ch ?: throw fileStreamClosed()
         if (!canRead) return super.position()
         return ch.position()
     }
 
     override fun position(new: Long): FileStream.ReadWrite {
-        val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+        val ch = _ch ?: throw fileStreamClosed()
         if (!canRead) return super.position(new)
         ch.position(new)
         return this
     }
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-        val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+        val ch = _ch ?: throw fileStreamClosed()
         if (!canRead) return super.read(buf, offset, len)
         val bb = ByteBuffer.wrap(buf, offset, len)
         var total = 0
@@ -67,13 +67,13 @@ internal class NioFileStream private constructor(
     }
 
     override fun size(): Long {
-        val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+        val ch = _ch ?: throw fileStreamClosed()
         if (!canRead) return super.size()
         return ch.size()
     }
 
     override fun size(new: Long): FileStream.ReadWrite {
-        val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+        val ch = _ch ?: throw fileStreamClosed()
         if (!canRead || !canWrite) return super.size(new)
         val size = ch.size()
         if (new > size) {
@@ -88,13 +88,13 @@ internal class NioFileStream private constructor(
     }
 
     override fun flush() {
-        val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+        val ch = _ch ?: throw fileStreamClosed()
         if (!canWrite) return super.flush()
         ch.force(true)
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {
-        val ch = synchronized(closeLock) { _ch } ?: throw fileStreamClosed()
+        val ch = _ch ?: throw fileStreamClosed()
         if (!canWrite) return super.write(buf, offset, len)
         val bb = ByteBuffer.wrap(buf, offset, len)
         ch.write(bb)
