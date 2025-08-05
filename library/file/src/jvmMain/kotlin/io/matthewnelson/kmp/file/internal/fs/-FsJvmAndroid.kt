@@ -82,7 +82,12 @@ internal class FsJvmAndroid private constructor(
     // that it has the FD_CLOEXEC flag.
     private val __O_CLOEXEC: Int by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         if (const.O_CLOEXEC != 0) return@lazy const.O_CLOEXEC
-        if (os.fcntlVoid == null) return@lazy 0
+        if (os.fcntlVoid == null) {
+            try {
+                System.err.println("KMP-FILE: android.system.Os.fcntlVoid was null for API[${ANDROID.SDK_INT}]")
+            } catch (_: Throwable) {}
+            return@lazy 0
+        }
 
         @Suppress("LocalVariableName")
         val O_CLOEXEC = 0x80000 // 524288
