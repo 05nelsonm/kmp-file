@@ -19,6 +19,7 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
@@ -118,15 +119,19 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
             val p = file.path
             if (p.isEmpty()) return realpath(".")
 
-            val resolved = absolutePath(file).commonNormalize()
-            var existing = File(resolved, direct = null)
+            val absolute = absolutePath(file).commonNormalize()
+            var existing = File(absolute, direct = null)
             while (true) {
-                if (exists(existing)) break
-                val parent = existing.parentFile ?: break
-                existing = parent
+                try {
+                    val real = realpath(existing.path)
+                    return absolute.replaceFirst(existing.path, real)
+                } catch (_: FileNotFoundException) {
+                    val parent = existing.parentFile ?: break
+                    existing = parent
+                }
             }
 
-            return resolved.replaceFirst(existing.path, realpath(existing.path))
+            return absolute
         }
 
         @Throws(IOException::class)
