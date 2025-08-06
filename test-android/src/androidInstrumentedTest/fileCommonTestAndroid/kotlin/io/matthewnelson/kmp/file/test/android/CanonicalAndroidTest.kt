@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Matthew Nelson
+ * Copyright (c) 2025 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file
+package io.matthewnelson.kmp.file.test.android
 
-import io.matthewnelson.kmp.file.internal.IsWindows
+import io.matthewnelson.kmp.file.CanonicalSharedTest
+import kotlin.test.Ignore
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
-class CanonicalUnitTest: CanonicalSharedTest() {
+class CanonicalAndroidTest: CanonicalSharedTest() {
 
     @Test
-    fun givenFile_whenPathHasSymlink_thenReturnsActualPath() = skipTestIf(isJsBrowser || IsWindows || IS_ANDROID) {
-        // windows doesn't do symbolic links.
-        // Android emulator won't have access to project directory.
-        assertEquals(FILE_LOREM_IPSUM, FILE_SYM_LINK_2.canonicalFile2())
-    }
+    @Ignore
+    fun stub() {}
 }
