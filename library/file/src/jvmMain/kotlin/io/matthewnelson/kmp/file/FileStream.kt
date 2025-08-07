@@ -179,6 +179,29 @@ public actual sealed interface FileStream: Closeable {
         public actual override fun position(new: Long): Write
 
         /**
+         * Modifies the size of the [File] for which this [Write] stream belongs. This is
+         * akin to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
+         *
+         * If [new] is greater than the current [FileStream.size], then the [File] is extended
+         * whereby the extended portion reads as `0` bytes (undefined). If [new] is less than
+         * the current [FileStream.size], then the [File] is truncated and data beyond [new]
+         * is lost.
+         *
+         * If and only if the current [position] is greater than [new], then [position]
+         * will be set to [new]. Otherwise, [position] will remain unmodified.
+         *
+         * @param [new] The desired size.
+         *
+         * @return The [Write] stream for chaining operations.
+         *
+         * @throws [IllegalArgumentException] If [new] is less than 0.
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * @throws [IllegalStateException] If [isAppending] is `true`.
+         * */
+        @Throws(IOException::class)
+        public actual fun size(new: Long): Write
+
+        /**
          * Writes the entire contents of [buf] to the [File] for which this [ReadWrite]
          * stream belongs. The [position] is automatically incremented by the number
          * of bytes written for subsequent operations.
@@ -205,29 +228,6 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public actual fun write(buf: ByteArray, offset: Int, len: Int)
-
-        /**
-         * Modifies the size of the [File] for which this [Write] stream belongs. This
-         * is akin to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
-         *
-         * If [new] is greater than the current [FileStream.size], then the [File] is extended
-         * whereby the extended portion reads as `0` bytes. If [new] is less than the
-         * current [FileStream.size], then the [File] is truncated and data beyond [new] is
-         * lost.
-         *
-         * If and only if the current [position] is greater than [new], then [position]
-         * will be set to [new]. Otherwise, [position] will remain unmodified.
-         *
-         * @param [new] The desired size
-         *
-         * @return The [Write] stream for chaining operations.
-         *
-         * @throws [IllegalArgumentException] If [new] is less than 0.
-         * @throws [IOException] If an I/O error occurs, or the stream is closed.
-         * @throws [IllegalStateException] If [isAppending] is `true`.
-         * */
-        @Throws(IOException::class)
-        public actual fun size(new: Long): Write
     }
 
     /**
@@ -253,13 +253,13 @@ public actual sealed interface FileStream: Closeable {
         public actual abstract override fun position(new: Long): ReadWrite
 
         /**
-         * Modifies the size of the [File] for which this [ReadWrite] stream belongs. This
-         * is akin to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
+         * Modifies the size of the [File] for which this [Write] stream belongs. This is
+         * akin to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
          *
          * If [new] is greater than the current [FileStream.size], then the [File] is extended
-         * whereby the extended portion reads as `0` bytes. If [new] is less than the
-         * current [FileStream.size], then the [File] is truncated and data beyond [new] is
-         * lost.
+         * whereby the extended portion reads as `0` bytes (undefined). If [new] is less than
+         * the current [FileStream.size], then the [File] is truncated and data beyond [new]
+         * is lost.
          *
          * If and only if the current [position] is greater than [new], then [position]
          * will be set to [new]. Otherwise, [position] will remain unmodified.
