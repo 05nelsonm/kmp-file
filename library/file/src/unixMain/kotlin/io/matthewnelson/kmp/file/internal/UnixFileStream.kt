@@ -42,7 +42,8 @@ internal class UnixFileStream(
     fd: Int,
     canRead: Boolean,
     canWrite: Boolean,
-): AbstractFileStream(canRead, canWrite, INIT) {
+    isAppending: Boolean,
+): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
     init { if (fd == -1) throw errnoToIOException(errno) }
 
@@ -50,17 +51,23 @@ internal class UnixFileStream(
 
     override fun isOpen(): Boolean = _fd.value != null
 
+    override fun flush() {
+        val fd = _fd.value ?: throw fileStreamClosed()
+        checkCanFlush()
+        if (fsync(fd) == 0) return
+        throw errnoToIOException(errno)
+    }
+
     override fun position(): Long {
         val fd = _fd.value ?: throw fileStreamClosed()
-        if (!canRead) return super.position()
-        val ret = platformLSeek(fd, 0, SEEK_CUR)
+        val ret = platformLSeek(fd, 0L, SEEK_CUR)
         if (ret == -1L) throw errnoToIOException(errno)
         return ret
     }
 
     override fun position(new: Long): FileStream.ReadWrite {
         val fd = _fd.value ?: throw fileStreamClosed()
-        if (!canRead) return super.position(new)
+        checkCanPositionNew()
         val ret = platformLSeek(fd, new, SEEK_SET)
         if (ret == -1L) throw errnoToIllegalArgumentOrIOException(errno, null)
         return this
@@ -68,10 +75,8 @@ internal class UnixFileStream(
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
         val fd = _fd.value ?: throw fileStreamClosed()
-        if (!canRead) return super.read(buf, offset, len)
-
+        checkCanRead()
         buf.checkBounds(offset, len)
-        if (buf.isEmpty()) return 0
         if (len == 0) return 0
 
         @OptIn(UnsafeNumber::class)
@@ -91,8 +96,6 @@ internal class UnixFileStream(
 
     override fun size(): Long {
         val fd = _fd.value ?: throw fileStreamClosed()
-        if (!canRead) return super.size()
-
         return memScoped {
             val stat = alloc<stat>()
             if (fstat(fd, stat.ptr) != 0) {
@@ -104,7 +107,7 @@ internal class UnixFileStream(
 
     override fun size(new: Long): FileStream.ReadWrite {
         val fd = _fd.value ?: throw fileStreamClosed()
-        if (!canRead || !canWrite) return super.size(new)
+        checkCanSizeNew()
         val pos = platformLSeek(fd, 0L, SEEK_CUR)
         if (pos == -1L) {
             throw errnoToIllegalArgumentOrIOException(errno, null)
@@ -118,19 +121,10 @@ internal class UnixFileStream(
         return this
     }
 
-    override fun flush() {
-        val fd = _fd.value ?: throw fileStreamClosed()
-        if (!canWrite) return super.flush()
-        if (fsync(fd) == 0) return
-        throw errnoToIOException(errno)
-    }
-
     override fun write(buf: ByteArray, offset: Int, len: Int) {
         val fd = _fd.value ?: throw fileStreamClosed()
-        if (!canWrite) return super.write(buf, offset, len)
-
+        checkCanWrite()
         buf.checkBounds(offset, len)
-        if (buf.isEmpty()) return
         if (len == 0) return
 
         @OptIn(UnsafeNumber::class)

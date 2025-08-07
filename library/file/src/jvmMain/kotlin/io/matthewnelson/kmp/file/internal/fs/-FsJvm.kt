@@ -191,7 +191,7 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                 throw t.toAccessDeniedException(file)
             }
 
-            return NioFileStream.of(fis.channel, canRead = true, canWrite = false, parent = fis)
+            return NioFileStream.of(fis.channel, canRead = true, canWrite = false, isAppending = false, parent = fis)
         }
 
         @Throws(InterruptedIOException::class)

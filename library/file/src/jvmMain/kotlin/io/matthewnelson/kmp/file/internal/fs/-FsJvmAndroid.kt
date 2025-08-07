@@ -174,19 +174,42 @@ internal class FsJvmAndroid private constructor(
             fd.doClose(null)?.let { ee -> e.addSuppressed(ee) }
             throw e
         }
-        return AndroidFileStream(fd, canRead = true, canWrite = false)
+        return AndroidFileStream(fd, canRead = true, canWrite = false, isAppending = false)
     }
 
     @Throws(IOException::class)
     internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
         val fd = file.open(const.O_RDWR, excl)
-        return AndroidFileStream(fd, canRead = true, canWrite = true)
+        return AndroidFileStream(fd, canRead = true, canWrite = true, isAppending = false)
     }
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        val deleteFileOnSeekEndFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+            file,
+            excl,
+            needsToConfigureAfterOpen = appending, // lseek SEEK_END
+        )
+
         val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl)
-        return AndroidFileStream(fd, canRead = false, canWrite = true)
+
+        if (deleteFileOnSeekEndFailure != null) {
+            try {
+                wrapErrnoException(file) { lseek.invoke(null, fd, 0L, const.SEEK_END) }
+            } catch (e: IOException) {
+                fd.doClose(null)?.let { ee -> e.addSuppressed(ee) }
+                if (deleteFileOnSeekEndFailure) {
+                    try {
+                        delete(file, ignoreReadOnly = false, mustExist = true)
+                    } catch (ee: IOException) {
+                        e.addSuppressed(ee)
+                    }
+                }
+                throw e
+            }
+        }
+
+        return AndroidFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
     }
 
     internal companion object {
@@ -340,7 +363,8 @@ internal class FsJvmAndroid private constructor(
         fd: FileDescriptor,
         canRead: Boolean,
         canWrite: Boolean,
-    ): AbstractFileStream(canRead, canWrite, INIT) {
+        isAppending: Boolean,
+    ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
         private inner class Closeables(val fd: FileDescriptor) {
             val fis = if (canRead) FileInputStream(/* fdObj = */ fd) else null
@@ -353,28 +377,32 @@ internal class FsJvmAndroid private constructor(
 
         override fun isOpen(): Boolean = _c != null
 
+        override fun flush() {
+            val c = _c ?: throw fileStreamClosed()
+            checkCanFlush()
+            c.fd.sync()
+        }
+
         override fun position(): Long {
             val c = _c ?: throw fileStreamClosed()
-            if (!canRead) return super.position()
             return wrapErrnoException(null) { lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long }
         }
 
         override fun position(new: Long): FileStream.ReadWrite {
             val c = _c ?: throw fileStreamClosed()
-            if (!canRead) return super.position(new)
+            checkCanPositionNew()
             wrapErrnoException(null) { lseek.invoke(null, c.fd, new, const.SEEK_SET) }
             return this
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
             val c = _c ?: throw fileStreamClosed()
-            if (c.fis == null) return super.read(buf, offset, len)
+            if (c.fis == null) throw IllegalStateException("FileStream is O_WRONLY")
             return c.fis.read(buf, offset, len)
         }
 
         override fun size(): Long {
             val c = _c ?: throw fileStreamClosed()
-            if (!canRead) return super.size()
             return wrapErrnoException(null) {
                 val s = fstat.invoke(null, c.fd)
                 stat.st_size.getLong(s)
@@ -383,7 +411,7 @@ internal class FsJvmAndroid private constructor(
 
         override fun size(new: Long): FileStream.ReadWrite {
             val c = _c ?: throw fileStreamClosed()
-            if (!canRead || !canWrite) return super.size(new)
+            checkCanSizeNew()
             wrapErrnoException(null) {
                 val pos = lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long
                 ftruncate.invoke(null, c.fd, new)
@@ -392,15 +420,9 @@ internal class FsJvmAndroid private constructor(
             return this
         }
 
-        override fun flush() {
-            val c = _c ?: throw fileStreamClosed()
-            if (!canWrite) return super.flush()
-            c.fd.sync()
-        }
-
         override fun write(buf: ByteArray, offset: Int, len: Int) {
             val c = _c ?: throw fileStreamClosed()
-            if (c.fos == null) return super.write(buf, offset, len)
+            if (c.fos == null) throw IllegalStateException("FileStream is O_RDONLY")
             c.fos.write(buf, offset, len)
         }
 
@@ -560,6 +582,7 @@ private class OsConstants {
 
     val SEEK_CUR: Int
     val SEEK_SET: Int
+    val SEEK_END: Int
 
     val S_IRUSR: Int
     val S_IWUSR: Int
@@ -592,6 +615,7 @@ private class OsConstants {
 
         SEEK_CUR = clazz.getField("SEEK_CUR").getInt(null)
         SEEK_SET = clazz.getField("SEEK_SET").getInt(null)
+        SEEK_END = clazz.getField("SEEK_END").getInt(null)
 
         S_IRUSR = clazz.getField("S_IRUSR").getInt(null)
         S_IWUSR = clazz.getField("S_IWUSR").getInt(null)

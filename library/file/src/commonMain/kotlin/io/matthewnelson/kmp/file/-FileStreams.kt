@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.disappearingCheck
@@ -34,6 +36,8 @@ internal class FileStreamReadOnly private constructor(private val s: AbstractFil
 // Strictly for supporting isInstance checks
 internal class FileStreamWriteOnly private constructor(private val s: AbstractFileStream): FileStream.Write by s {
     init { disappearingCheck(condition = { s.canWrite }) { "AbstractFileStream.canWrite != true" } }
+    override fun position(new: Long): FileStream.Write { s.position(new); return this }
+    override fun size(new: Long): FileStream.Write { s.size(new); return this }
     override fun equals(other: Any?): Boolean = other is FileStreamWriteOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
     override fun toString(): String = "WriteOnly$s"
@@ -46,39 +50,37 @@ internal class FileStreamWriteOnly private constructor(private val s: AbstractFi
 internal abstract class AbstractFileStream internal constructor(
     internal val canRead: Boolean,
     internal val canWrite: Boolean,
+    final override val isAppending: Boolean,
     init: Any,
 ): FileStream.ReadWrite() {
 
-    init { disappearingCheck(condition = { canRead || canWrite }) { "!canRead && !canWrite" } }
+    init {
+        disappearingCheck(condition = { canRead || canWrite }) { "!canRead && !canWrite" }
+        disappearingCheck(condition = { if (isAppending) canWrite else true }) { "isAppending && !canWrite" }
+        disappearingCheck(condition = { if (canRead && canWrite) !isAppending else true }) { "isAppending && (canRead && canWrite)" }
+    }
 
     final override fun read(buf: ByteArray): Int = read(buf, 0, buf.size)
     final override fun write(buf: ByteArray) { write(buf, 0, buf.size) }
 
-    // Read
-    override fun position(): Long {
-        throw IllegalStateException("FileStream is O_WRONLY")
+    protected inline fun checkCanFlush() {
+        checkCanWrite()
     }
-    override fun position(new: Long): FileStream.ReadWrite {
-        throw IllegalStateException("FileStream is O_WRONLY")
+    protected inline fun checkCanPositionNew() {
+        checkIsNotAppending()
     }
-    override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-        throw IllegalStateException("FileStream is O_WRONLY")
+    protected inline fun checkCanRead() {
+        check(canRead) { "FileStream is O_WRONLY" }
     }
-    override fun size(): Long {
-        throw IllegalStateException("FileStream is O_WRONLY")
+    protected inline fun checkCanSizeNew() {
+        checkIsNotAppending()
+        checkCanWrite()
     }
-
-    // Write
-    override fun flush() {
-        throw IllegalStateException("FileStream is O_RDONLY")
+    protected inline fun checkCanWrite() {
+        check(canWrite) { "FileStream is O_RDONLY" }
     }
-    override fun write(buf: ByteArray, offset: Int, len: Int) {
-        throw IllegalStateException("FileStream is O_RDONLY")
-    }
-
-    // ReadWrite
-    override fun size(new: Long): FileStream.ReadWrite {
-        throw IllegalStateException("FileStream is not O_RDWR")
+    protected inline fun checkIsNotAppending() {
+        check(!isAppending) { "FileStream is O_APPEND" }
     }
 
     protected companion object {

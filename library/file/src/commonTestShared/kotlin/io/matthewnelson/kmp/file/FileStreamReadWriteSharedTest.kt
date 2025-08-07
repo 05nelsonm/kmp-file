@@ -97,7 +97,7 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
         val data = "Hello World!".encodeToByteArray()
         tmp.writeBytes(excl = null, data)
 
-        tmp.testOpen(null).use { s ->
+        tmp.testOpen(excl = null).use { s ->
             s.position(data.size + 2L)
             assertEquals(data.size + 2L, s.position())
 
@@ -116,10 +116,13 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
             s.size(3L)
             assertEquals(3L, s.position())
 
-            // Ensure position does not change if less than new size
+            // Ensure position does not change if equal than new size
             s.position(1L)
             assertEquals(1L, s.position())
             s.size(3L)
+            assertEquals(1L, s.position())
+            // Ensure position does not change if less than new size
+            s.size(2L)
             assertEquals(1L, s.position())
 
             // Ensure position changes to new when greater than new size
@@ -131,14 +134,15 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
             // Ensure position does not change if new size is invalid
             assertFailsWith<IllegalArgumentException> { s.size(-1L) }
             assertEquals(7L, s.position())
+
             // Even if position is greater than current size
             s.position(4L)
             assertFailsWith<IllegalArgumentException> { s.size(-1L) }
             assertEquals(4L, s.position())
 
             // Re-expand file to our data's size, ensuring position automatically increments
-            s.position(3L)
-            s.write(data, offset = 3, len = data.size - 3)
+            s.position(2L)
+            s.write(data, offset = 2, len = data.size - 2)
             assertEquals(data.size.toLong(), s.position())
 
             // For posterity, ensure data written is as expected

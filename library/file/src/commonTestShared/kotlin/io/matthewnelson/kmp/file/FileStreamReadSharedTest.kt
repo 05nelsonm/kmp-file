@@ -66,6 +66,14 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     }
 
     @Test
+    fun givenReadStream_whenSize_thenReturnsExpected() = runTest { tmp ->
+        tmp.writeBytes(excl = null, ByteArray(50))
+        tmp.testOpen().use { s ->
+            assertEquals(50L, s.size())
+        }
+    }
+
+    @Test
     fun givenReadStream_whenNewPosition_thenWorksAsExpected() = runTest { tmp ->
         val expected = ByteArray(8) { (it + 1).toByte() }
         tmp.writeBytes(excl = null, expected)

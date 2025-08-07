@@ -202,7 +202,8 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
             hTemplateFile = null,
         )
         if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
-        return MinGWFileStream(handle, canRead = true, canWrite = false)
+
+        return MinGWFileStream(handle, canRead = true, canWrite = false, isAppending = false)
     }
 
     @Throws(IOException::class)
@@ -218,6 +219,8 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
             is OpenExcl.MustExist -> OPEN_EXISTING
         }
 
+        // TODO: FILE_FLAG_RANDOM_ACCESS?
+        //  https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea
         val handle = CreateFileA(
             lpFileName = file.path,
             dwDesiredAccess = (GENERIC_READ.toInt() or GENERIC_WRITE).convert(),
@@ -229,7 +232,7 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
         )
         if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
 
-        return MinGWFileStream(handle, canRead = true, canWrite = true)
+        return MinGWFileStream(handle, canRead = true, canWrite = true, isAppending = false)
     }
 
     @Throws(IOException::class)
@@ -245,20 +248,11 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
             is OpenExcl.MustExist -> if (appending) OPEN_EXISTING else TRUNCATE_EXISTING
         }
 
-        val deleteOnSetPointerFailure = if (appending) {
-            // Only when appending do we need to run commands after opening
-            // the stream. If they fail, need to clean up the file if it is
-            // newly created.
-            when (excl) {
-                is OpenExcl.MaybeCreate -> !exists(file)
-                // Will be a new file if successful CreateFile. No need to
-                // set pointer to EOF for appending (size will be 0L).
-                is OpenExcl.MustCreate -> null
-                is OpenExcl.MustExist -> false
-            }
-        } else {
-            null
-        }
+        val deleteOnSetFilePointerFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+            file,
+            excl,
+            needsToConfigureAfterOpen = appending, // SetFilePointer
+        )
 
         val handle = CreateFileA(
             lpFileName = file.path,
@@ -271,37 +265,31 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
         )
         if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
 
-        val stream = MinGWFileStream(handle, canRead = false, canWrite = true)
+        val s = MinGWFileStream(handle, canRead = false, canWrite = true, isAppending = appending)
 
-        run {
-            if (deleteOnSetPointerFailure == null) return@run
+        if (deleteOnSetFilePointerFailure == null) return s
+        val ret = SetFilePointer(
+            hFile = handle,
+            lDistanceToMove = 0,
+            lpDistanceToMoveHigh = null,
+            dwMoveMethod = FILE_END.convert(),
+        )
+        if (ret != INVALID_SET_FILE_POINTER) return s
 
-            val ret = SetFilePointer(
-                hFile = handle,
-                lDistanceToMove = 0,
-                lpDistanceToMoveHigh = null,
-                dwMoveMethod = FILE_END.convert(),
-            )
-            if (ret != INVALID_SET_FILE_POINTER) return@run
-
-            // Failed to set pointer to EOF for appending.
-            val e = lastErrorToIOException(file)
-            try {
-                stream.close()
-            } catch (ee: IOException) {
-                e.addSuppressed(ee)
-            }
-            if (!deleteOnSetPointerFailure) throw e
-
+        val e = lastErrorToIOException(file)
+        try {
+            s.close()
+        } catch (ee: IOException) {
+            e.addSuppressed(ee)
+        }
+        if (deleteOnSetFilePointerFailure) {
             try {
                 delete(file, ignoreReadOnly = true, mustExist = true)
             } catch (ee: IOException) {
                 e.addSuppressed(ee)
             }
-            throw e
         }
-
-        return stream
+        throw e
     }
 
     @Throws(IOException::class)

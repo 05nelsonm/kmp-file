@@ -19,6 +19,7 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.fileAlreadyExistsException
 import io.matthewnelson.kmp.file.internal.toMode
@@ -42,6 +43,28 @@ internal inline fun Fs.commonMkdir(dir: File, mode: String?, mustCreate: Boolean
     val m = mode?.toMode() ?: Mode.DEFAULT_DIR
     mkdir(dir, m, mustCreate)
     return dir
+}
+
+// For Fs.openWrite appending. Should be run just prior to opening the file.
+//
+// Returns null setting file pointer to seek end is not necessary,
+// otherwise, true/false for whether to delete the file when setting
+// the file pointer to EOF fails.
+@Throws(IOException::class)
+internal inline fun Fs.commonDeleteFileOnPostOpenWriteConfigurationFailure(
+    file: File,
+    excl: OpenExcl,
+    needsToConfigureAfterOpen: Boolean
+): Boolean? {
+    if (!needsToConfigureAfterOpen) return null
+
+    return when (excl) {
+        is OpenExcl.MaybeCreate -> !exists(file)
+        // Will be a new file if successful. No need to set pointer to
+        // EOF for appending (size will be 0L).
+        is OpenExcl.MustCreate -> null
+        is OpenExcl.MustExist -> false
+    }
 }
 
 @Throws(IllegalArgumentException::class, IOException::class)
