@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.Closeable
@@ -125,8 +126,46 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        val deleteFileOnSetPositionEndFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+            file,
+            excl,
+            needsToConfigureAfterOpen = run {
+                // Android API 23 and below does not set initial channel
+                // position properly when appending. Will need to clean up
+                // if setting channel position fails.
+                if (ANDROID.SDK_INT == null) return@run false
+                if (ANDROID.SDK_INT >= 24) return@run false
+                appending
+            }
+        )
+
         val fos = file.open(excl, openCloseable = { FileOutputStream(file, /* append = */ appending) })
-        return NioFileStream.of(fos.channel, canRead = false, canWrite = true, parent = fos)
+        val ch = fos.channel
+
+        val s = NioFileStream.of(ch, canRead = false, canWrite = true, isAppending = appending, parent = fos)
+
+        if (deleteFileOnSetPositionEndFailure == null) return s
+
+        try {
+            val size = ch.size()
+            if (size > 0L) ch.position(size)
+        } catch (e: IOException) {
+            try {
+                s.close()
+            } catch (ee: IOException) {
+                e.addSuppressed(ee)
+            }
+            if (deleteFileOnSetPositionEndFailure) {
+                try {
+                    delete(file, ignoreReadOnly = false, mustExist = true)
+                } catch (ee: IOException) {
+                    e.addSuppressed(ee)
+                }
+            }
+            throw e
+        }
+
+        return s
     }
 
     @Throws(IOException::class)

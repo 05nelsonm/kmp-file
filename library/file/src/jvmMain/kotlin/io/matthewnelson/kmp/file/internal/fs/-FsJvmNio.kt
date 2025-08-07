@@ -295,6 +295,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
 
         val canRead = options.contains(StandardOpenOption.READ)
         val canWrite = options.contains(StandardOpenOption.WRITE)
+        val isAppending = options.contains(StandardOpenOption.APPEND)
 
         val ch = try {
             if (attrs == null) {
@@ -306,7 +307,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             throw t.mapNioException(this)
         }
 
-        return NioFileStream.of(ch, canRead, canWrite, parent = null)
+        return NioFileStream.of(ch, canRead, canWrite, isAppending, parent = null)
     }
 
     @Throws(IOException::class)

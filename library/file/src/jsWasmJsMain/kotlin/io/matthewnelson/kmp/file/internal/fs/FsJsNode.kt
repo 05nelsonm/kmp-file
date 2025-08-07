@@ -235,7 +235,7 @@ internal class FsJsNode private constructor(
             throw t.toIOException(file)
         }
 
-        return JsNodeFileStream(fd, canRead = true, canWrite = false)
+        return JsNodeFileStream(fd, canRead = true, canWrite = false, isAppending = false)
     }
 
     @Throws(IOException::class)
@@ -258,7 +258,7 @@ internal class FsJsNode private constructor(
         }
         if (isWindows) fd.checkIsNotADir()
 
-        JsNodeFileStream(fd, canRead = true, canWrite = true)
+        JsNodeFileStream(fd, canRead = true, canWrite = true, isAppending = false)
     } catch (t: Throwable) {
         throw t.toIOException(file)
     }
@@ -271,23 +271,33 @@ internal class FsJsNode private constructor(
                 is OpenExcl.MaybeCreate -> {}
                 is OpenExcl.MustCreate -> flags += "x"
 
-                // The resulting stream gets wrapped in a class that only implements FileStream.Write,
-                // so can force this OpenExcl.MustExist by opening O_RDWR and then setting up the stream
+                // Force OpenExcl.MustExist by opening O_RDWR and then setting up the stream
                 // manually before returning it.
                 is OpenExcl.MustExist -> flags = "r+"
             }
             val mode = if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-            val fd = jsExternTryCatch { fs.openSync(file.path, flags, mode) }.checkIsNotADir()
-            val s = JsNodeFileStream(fd, canRead = flags == "r+", canWrite = true)
+            val deleteFileOnSetupFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+                file,
+                excl,
+                needsToConfigureAfterOpen = appending || flags == "r+", // set _position or truncate
+            )
 
-            if (s.canRead) {
-                // Will only be the case when OpenExcl.MustExist.
+            val fd = jsExternTryCatch { fs.openSync(file.path, flags, mode) }.checkIsNotADir()
+
+            val s = JsNodeFileStream(
+                fd = fd,
+                canRead = false,
+                canWrite = true,
+                isAppending = appending,
+                windowsRDWR = flags == "r+",
+            )
+
+            if (deleteFileOnSetupFailure != null) {
                 try {
                     if (appending) {
-                        val size = s.size()
-                        s.position(size)
+                        s._position = s.size()
                     } else {
-                        // Truncate
+                        // Truncate (non-appending 'r+' flags)
                         s.size(0L)
                     }
                 } catch (e: IOException) {
@@ -295,6 +305,13 @@ internal class FsJsNode private constructor(
                         s.close()
                     } catch (ee: IOException) {
                         e.addSuppressed(ee)
+                    }
+                    if (deleteFileOnSetupFailure) {
+                        try {
+                            delete(file, ignoreReadOnly = true, mustExist = true)
+                        } catch (ee: IOException) {
+                            e.addSuppressed(ee)
+                        }
                     }
                     throw e
                 }
@@ -310,8 +327,36 @@ internal class FsJsNode private constructor(
                 is OpenExcl.MustExist -> 0
             }
 
+            val deleteOnSetPositionFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+                file,
+                excl,
+                needsToConfigureAfterOpen = appending, // set _position
+            )
+
             val fd = jsExternTryCatch { fs.openSync(file.path, flags, excl.mode) }
-            JsNodeFileStream(fd, canRead = false, canWrite = true)
+            val s = JsNodeFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
+
+            if (deleteOnSetPositionFailure != null) {
+                try {
+                    s._position = s.size()
+                } catch (e: IOException) {
+                    try {
+                        s.close()
+                    } catch (ee: IOException) {
+                        e.addSuppressed(ee)
+                    }
+                    if (deleteOnSetPositionFailure) {
+                        try {
+                            delete(file, ignoreReadOnly = false, mustExist = true)
+                        } catch (ee: IOException) {
+                            e.addSuppressed(ee)
+                        }
+                    }
+                    throw e
+                }
+            }
+
+            s
         }
     } catch (t: Throwable) {
         throw t.toIOException(file)
@@ -365,22 +410,37 @@ internal class FsJsNode private constructor(
         fd: Double,
         canRead: Boolean,
         canWrite: Boolean,
-    ): AbstractFileStream(canRead, canWrite, INIT) {
+        isAppending: Boolean,
+        // For openWrite on Windows when OpenExcl.MustExist is expressed,
+        // the file is opened with 'r+', instead of flags 'a' or 'w', and setup
+        // manually.
+        private val windowsRDWR: Boolean = false,
+    ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
-        private var _position: Long = 0L
+        @Suppress("PropertyName")
+        internal var _position: Long = 0L
         private var _fd: Double? = fd
 
         override fun isOpen(): Boolean = _fd != null
 
+        override fun flush() {
+            val fd = _fd ?: throw fileStreamClosed()
+            checkCanFlush()
+            try {
+                jsExternTryCatch { fs.fsyncSync(fd) }
+            } catch (t: Throwable) {
+                throw t.toIOException()
+            }
+        }
+
         override fun position(): Long {
             _fd ?: throw fileStreamClosed()
-            if (!canRead) return super.position()
             return _position
         }
 
         override fun position(new: Long): FileStream.ReadWrite {
             _fd ?: throw fileStreamClosed()
-            if (!canRead) return super.position(new)
+            checkCanPositionNew()
             require(new >= 0L) { "new[$new] < 0" }
             _position = new
             return this
@@ -388,10 +448,8 @@ internal class FsJsNode private constructor(
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
             val fd = _fd ?: throw fileStreamClosed()
-            if (!canRead) return super.read(buf, offset, len)
-
+            checkCanRead()
             buf.checkBounds(offset, len)
-            if (buf.isEmpty()) return 0
             if (len == 0) return 0
 
             var remainder = len
@@ -434,7 +492,6 @@ internal class FsJsNode private constructor(
 
         override fun size(): Long {
             val fd = _fd ?: throw fileStreamClosed()
-            if (!canRead) return super.size()
             val stat = try {
                 jsExternTryCatch { fs.fstatSync(fd) }
             } catch (t: Throwable) {
@@ -445,7 +502,7 @@ internal class FsJsNode private constructor(
 
         override fun size(new: Long): FileStream.ReadWrite {
             val fd = _fd ?: throw fileStreamClosed()
-            if (!canRead || !canWrite) return super.size(new)
+            checkCanSizeNew()
             require(new >= 0L) { "new[$new] < 0" }
             try {
                 jsExternTryCatch { fs.ftruncateSync(fd, new.toDouble()) }
@@ -456,23 +513,10 @@ internal class FsJsNode private constructor(
             return this
         }
 
-        override fun flush() {
-            val fd = _fd ?: throw fileStreamClosed()
-            if (!canWrite) return super.flush()
-            if (isWindows) return
-            try {
-                jsExternTryCatch { fs.fsyncSync(fd) }
-            } catch (t: Throwable) {
-                throw t.toIOException()
-            }
-        }
-
         override fun write(buf: ByteArray, offset: Int, len: Int) {
             val fd = _fd ?: throw fileStreamClosed()
-            if (!canWrite) return super.write(buf, offset, len)
-
+            checkCanWrite()
             buf.checkBounds(offset, len)
-            if (buf.isEmpty()) return
             if (len == 0) return
 
             var remainder = len
@@ -484,10 +528,17 @@ internal class FsJsNode private constructor(
                     BUF.writeInt8(buf[pos++], i.toDouble())
                 }
 
-                // If it's write-only, modification of position is not supported
+                // If it's appending, modification of position is not supported
                 // from the interface so use whatever the current position is
                 // for the descriptor.
-                val position = if (canRead) _position.toDouble() else null
+                val position = if (isAppending) {
+                    // On windows, OpenExcl.MustExist is forced via opening with r+
+                    // which means it's not _really_ in appending mode, so need to
+                    // always define a position.
+                    if (windowsRDWR) _position.toDouble() else null
+                } else {
+                    _position.toDouble()
+                }
 
                 val bytesWritten = try {
                     jsExternTryCatch {
@@ -510,7 +561,7 @@ internal class FsJsNode private constructor(
                 if (bytesWritten == 0) throw IOException("write == 0")
 
                 remainder -= bytesWritten
-                if (canRead) _position += bytesWritten
+                _position += bytesWritten
             }
         }
 

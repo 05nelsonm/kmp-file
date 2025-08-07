@@ -16,6 +16,7 @@
 package io.matthewnelson.kmp.file
 
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -32,14 +33,28 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenOpenWrite_whenIsInstanceOfFileStreamRead_thenIsFalse() = runTest { tmp ->
-        tmp.testOpen(null, false).use { s ->
+        tmp.testOpen(excl = null, false).use { s ->
+            // Should be wrapped in WriteOnlyFileStream
             assertIsNot<FileStream.Read>(s)
         }
     }
 
     @Test
+    fun givenOpenWrite_whenNewSizeOrPosition_thenReturnsTheWriteOnlyInstance() = runTest { tmp ->
+        tmp.testOpen(excl = null, appending = false).use { s ->
+            assertIsNot<FileStream.Read>(s)
+            val pRet = s.position(2L)
+            val sRet = s.size(2L)
+            assertEquals(s, pRet)
+            assertEquals(s, sRet)
+            assertTrue(pRet.toString().startsWith("WriteOnly"))
+            assertTrue(sRet.toString().startsWith("WriteOnly"))
+        }
+    }
+
+    @Test
     fun givenOpenWrite_whenFlush_thenIsFunctional() = runTest { tmp ->
-        tmp.testOpen(null, false).use { s ->
+        tmp.testOpen(excl = null, appending = false).use { s ->
             s.flush()
         }
     }
@@ -74,10 +89,10 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     @Test
     fun givenOpenWrite_whenExclMustExist_thenThrowsFileNotFoundException() = runTest { tmp ->
         assertFailsWith<FileNotFoundException> {
-            tmp.testOpen(excl = OpenExcl.MustExist, false).close()
+            tmp.testOpen(excl = OpenExcl.MustExist, appending = false).close()
         }
         assertFailsWith<FileNotFoundException> {
-            tmp.testOpen(excl = OpenExcl.MustExist, true).close()
+            tmp.testOpen(excl = OpenExcl.MustExist, appending = true).close()
         }
     }
 
@@ -85,10 +100,10 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     fun givenOpenWrite_whenExclMustCreate_thenThrowsFileAlreadyExistsException() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
         assertFailsWith<FileAlreadyExistsException> {
-            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, false).close()
+            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = false).close()
         }
         assertFailsWith<FileAlreadyExistsException> {
-            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, true).close()
+            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).close()
         }
     }
 
@@ -114,8 +129,28 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
+    fun givenOpenWrite_whenAppendingTrue_thenInitialPositionIsSize() = runTest { tmp ->
+        val data = "Hello World!".encodeToByteArray()
+        tmp.writeBytes(excl = null, data)
+        tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s ->
+            assertEquals(data.size.toLong(), s.position())
+            s.write(ByteArray(2) { (-5).toByte() })
+            assertEquals((data.size + 2).toLong(), s.position())
+            assertContentEquals(byteArrayOf(*data, -5, -5), tmp.readBytes())
+        }
+    }
+
+    @Test
+    fun givenOpenWrite_whenAppendingTrue_thenSetSizeOrPositionThrowsIllegalStateException() = runTest { tmp ->
+        tmp.testOpen(excl = null, appending = true).use { s ->
+            assertFailsWith<IllegalStateException> { s.position(2L) }
+            assertFailsWith<IllegalStateException> { s.size(2L) }
+        }
+    }
+
+    @Test
     fun givenOpenWrite_when0LengthWrite_thenDoesNotThrowException() = runTest { tmp ->
-        tmp.testOpen(null, false).use { s ->
+        tmp.testOpen(excl = null, appending = false).use { s ->
             s.write(ByteArray(0))
             s.write(ByteArray(1), offset = 0, len = 0)
         }
@@ -123,7 +158,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenOpenWrite_whenOffset_thenWritesAsExpected() = runTest { tmp ->
-        tmp.testOpen(null, false).use { s ->
+        tmp.testOpen(excl = null, appending = false).use { s ->
             val b = ByteArray(10) { 1.toByte() }
             b[0] = 0
             b[1] = 0
@@ -140,7 +175,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenFile_whenOpenWindows_thenReadOnlyIsSetAsExpected() = runTest<PermissionChecker.Windows> { tmp ->
-        tmp.testOpen(OpenExcl.MustCreate.of(mode = "400"), appending = false).use { s ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.of(mode = "400"), appending = false).use { s ->
             assertTrue(isReadOnly(tmp), "is read-only")
             s.write("Hello World!".encodeToByteArray())
         }
@@ -151,7 +186,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     fun givenFile_whenOpenWindows_thenFilePermissionsAreNotModifiedIfAlreadyExists() = runTest<PermissionChecker.Windows> { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
         assertFalse(isReadOnly(tmp))
-        tmp.testOpen(OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
+        tmp.testOpen(excl = OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
             assertFalse(isReadOnly(tmp), "is read-only")
         }
         assertFalse(isReadOnly(tmp))
@@ -159,7 +194,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenFile_whenOpenPosix_thenPermissionsAreAsExpected() = runTest<PermissionChecker.Posix> { tmp ->
-        tmp.testOpen(OpenExcl.MustCreate.of(mode = "400"), appending = false).use { s ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.of(mode = "400"), appending = false).use { s ->
             assertTrue(canRead(tmp), "canRead")
             assertFalse(canWrite(tmp), "canWrite")
             assertFalse(canExecute(tmp), "canExecute")
@@ -169,7 +204,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     @Test
     fun givenFile_whenOpenPosix_thenFilePermissionsAreNotModifiedIfAlreadyExists() = runTest<PermissionChecker.Posix> { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-        tmp.testOpen(OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
+        tmp.testOpen(excl = OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
             assertTrue(canRead(tmp), "canRead")
             assertTrue(canWrite(tmp), "canWrite")
             assertFalse(canExecute(tmp), "canExecute")

@@ -41,23 +41,49 @@ public expect sealed interface FileStream: Closeable {
     public fun isOpen(): Boolean
 
     /**
+     * Retrieves the current position of the file pointer for which the next
+     * operation will occur at. This is akin to [lseek](https://man7.org/linux/man-pages/man2/lseek.2.html)
+     * using arguments `offset = 0, whence = SEEK_CUR`
+     *
+     * @return The current position of the file pointer.
+     *
+     * @throws [IOException] If the stream is closed.
+     * */
+    @Throws(IOException::class)
+    public fun position(): Long
+
+    /**
+     * Sets the current position of the file pointer to [new]. This is
+     * akin to [lseek](https://man7.org/linux/man-pages/man2/lseek.2.html) using
+     * arguments `offset = new, whence = SEEK_SET`.
+     *
+     * @param [new] The new position for the file pointer.
+     *
+     * @return The [FileStream] stream for chaining operations.
+     *
+     * @throws [IllegalArgumentException] If [new] is less than 0.
+     * @throws [IOException] If an I/O error occurs, or the stream is closed.
+     * @throws [IllegalStateException] If the [FileStream] is [Write] and [Write.isAppending] is `true`.
+     * */
+    @Throws(IOException::class)
+    public fun position(new: Long): FileStream
+
+    /**
+     * The current size of the [File] for which this [FileStream] stream belongs.
+     *
+     * @return The current size of the [File].
+     *
+     * @throws [IOException] If an I/O error occurs, or the stream is closed.
+     * */
+    @Throws(IOException::class)
+    public fun size(): Long
+
+    /**
      * A stream for read operations whereby the source of data is a [File].
      *
      * @see [openRead]
      * */
     public sealed interface Read: FileStream {
-
-        /**
-         * Retrieves the current position of the file pointer for which
-         * the next operation will occur at. This is akin to [lseek](https://man7.org/linux/man-pages/man2/lseek.2.html)
-         * using arguments `offset = 0, whence = SEEK_CUR`
-         *
-         * @return The current position of the file pointer.
-         *
-         * @throws [IOException] If the stream is closed.
-         * */
-        @Throws(IOException::class)
-        public fun position(): Long
 
         /**
          * Sets the current position of the file pointer to [new]. This is
@@ -72,7 +98,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public fun position(new: Long): Read
+        public override fun position(new: Long): Read
 
         /**
          * Reads data into the provided array. The [position] is automatically
@@ -104,16 +130,6 @@ public expect sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public fun read(buf: ByteArray, offset: Int, len: Int): Int
-
-        /**
-         * The current size of the [File] for which this [Read] stream belongs.
-         *
-         * @return The size of the [File].
-         *
-         * @throws [IOException] If an I/O error occurs, or the stream is closed.
-         * */
-        @Throws(IOException::class)
-        public fun size(): Long
     }
 
     /**
@@ -125,6 +141,13 @@ public expect sealed interface FileStream: Closeable {
     public sealed interface Write: FileStream {
 
         /**
+         * If the [Write] stream was opened in appending mode.
+         *
+         * **NOTE:** If this is a [ReadWrite] stream, this will **always** be `false`
+         * */
+        public val isAppending: Boolean
+
+        /**
          * Flushes any buffered data to the device filesystem.
          *
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
@@ -133,8 +156,48 @@ public expect sealed interface FileStream: Closeable {
         public fun flush()
 
         /**
-         * Writes the entire contents of [buf] to the [File] for which this [Write]
-         * stream belongs.
+         * Sets the current position of the file pointer to [new]. This is
+         * akin to [lseek](https://man7.org/linux/man-pages/man2/lseek.2.html) using
+         * arguments `offset = new, whence = SEEK_SET`.
+         *
+         * @param [new] The new position for the file pointer.
+         *
+         * @return The [Write] stream for chaining operations.
+         *
+         * @throws [IllegalArgumentException] If [new] is less than 0.
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * @throws [IllegalStateException] If [isAppending] is `true`.
+         * */
+        @Throws(IOException::class)
+        public override fun position(new: Long): Write
+
+        /**
+         * Modifies the size of the [File] for which this [Write] stream belongs. This is
+         * akin to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
+         *
+         * If [new] is greater than the current [FileStream.size], then the [File] is extended
+         * whereby the extended portion reads as `0` bytes (undefined). If [new] is less than
+         * the current [FileStream.size], then the [File] is truncated and data beyond [new]
+         * is lost.
+         *
+         * If and only if the current [position] is greater than [new], then [position]
+         * will be set to [new]. Otherwise, [position] will remain unmodified.
+         *
+         * @param [new] The desired size.
+         *
+         * @return The [Write] stream for chaining operations.
+         *
+         * @throws [IllegalArgumentException] If [new] is less than 0.
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * @throws [IllegalStateException] If [isAppending] is `true`.
+         * */
+        @Throws(IOException::class)
+        public fun size(new: Long): Write
+
+        /**
+         * Writes the entire contents of [buf] to the [File] for which this [ReadWrite]
+         * stream belongs. The [position] is automatically incremented by the number
+         * of bytes written for subsequent operations.
          *
          * @param [buf] the array of data to write.
          *
@@ -145,7 +208,9 @@ public expect sealed interface FileStream: Closeable {
 
         /**
          * Writes [len] number of bytes from [buf], starting at index [offset], to the
-         * [File] for which this [Write] stream belongs.
+         * [File] for which this [ReadWrite] stream belongs. The [position] is
+         * automatically incremented by the number of bytes written for subsequent
+         * operations.
          *
          * @param [buf] The array of data to write.
          * @param [offset] The index in [buf] to start at when writing data.
@@ -181,18 +246,18 @@ public expect sealed interface FileStream: Closeable {
         public abstract override fun position(new: Long): ReadWrite
 
         /**
-         * Modifies the size of the [File] for which this [ReadWrite] stream belongs. This
-         * is akin to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
+         * Modifies the size of the [File] for which this [Write] stream belongs. This is
+         * akin to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
          *
-         * If [new] is greater than the current [Read.size], then the [File] is extended
-         * whereby the extended portion reads as `0` bytes. If [new] is less than the
-         * current [Read.size], then the [File] is truncated and data beyond [new] is
-         * lost.
+         * If [new] is greater than the current [FileStream.size], then the [File] is extended
+         * whereby the extended portion reads as `0` bytes (undefined). If [new] is less than
+         * the current [FileStream.size], then the [File] is truncated and data beyond [new]
+         * is lost.
          *
          * If and only if the current [position] is greater than [new], then [position]
          * will be set to [new]. Otherwise, [position] will remain unmodified.
          *
-         * @param [new] The desired size
+         * @param [new] The desired size.
          *
          * @return The [ReadWrite] stream for chaining operations.
          *
@@ -200,34 +265,6 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public abstract fun size(new: Long): ReadWrite
-
-        /**
-         * Writes the entire contents of [buf] to the [File] for which this [ReadWrite]
-         * stream belongs. The [position] is automatically incremented by the number
-         * of bytes written for subsequent operations.
-         *
-         * @param [buf] the array of data to write.
-         *
-         * @throws [IOException] If an I/O error occurs, or the stream is closed.
-         * */
-        @Throws(IOException::class)
-        public abstract override fun write(buf: ByteArray)
-
-        /**
-         * Writes [len] number of bytes from [buf], starting at index [offset], to the
-         * [File] for which this [ReadWrite] stream belongs. The [position] is
-         * automatically incremented by the number of bytes written for subsequent
-         * operations.
-         *
-         * @param [buf] The array of data to write.
-         * @param [offset] The index in [buf] to start at when writing data.
-         * @param [len] The number of bytes from [buf], starting at index [offset], to write.
-         *
-         * @throws [IOException] If an I/O error occurs, or the stream is closed.
-         * @throws [IndexOutOfBoundsException] If [offset] or [len] are inappropriate.
-         * */
-        @Throws(IOException::class)
-        public abstract override fun write(buf: ByteArray, offset: Int, len: Int)
+        public abstract override fun size(new: Long): ReadWrite
     }
 }

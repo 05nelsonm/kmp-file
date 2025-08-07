@@ -15,6 +15,7 @@
  **/
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.Closeable
 import io.matthewnelson.kmp.file.FileStream
@@ -26,8 +27,9 @@ internal class NioFileStream private constructor(
     ch: FileChannel,
     canRead: Boolean,
     canWrite: Boolean,
+    isAppending: Boolean,
     parent: Closeable?,
-): AbstractFileStream(canRead, canWrite, INIT) {
+): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
     @Volatile
     private var _ch: FileChannel? = ch
@@ -37,22 +39,27 @@ internal class NioFileStream private constructor(
 
     override fun isOpen(): Boolean = _ch != null
 
+    override fun flush() {
+        val ch = _ch ?: throw fileStreamClosed()
+        checkCanFlush()
+        ch.force(true)
+    }
+
     override fun position(): Long {
         val ch = _ch ?: throw fileStreamClosed()
-        if (!canRead) return super.position()
         return ch.position()
     }
 
     override fun position(new: Long): FileStream.ReadWrite {
         val ch = _ch ?: throw fileStreamClosed()
-        if (!canRead) return super.position(new)
+        checkCanPositionNew()
         ch.position(new)
         return this
     }
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
         val ch = _ch ?: throw fileStreamClosed()
-        if (!canRead) return super.read(buf, offset, len)
+        checkCanRead()
         val bb = ByteBuffer.wrap(buf, offset, len)
         var total = 0
         while (total < len) {
@@ -68,34 +75,34 @@ internal class NioFileStream private constructor(
 
     override fun size(): Long {
         val ch = _ch ?: throw fileStreamClosed()
-        if (!canRead) return super.size()
         return ch.size()
     }
 
     override fun size(new: Long): FileStream.ReadWrite {
         val ch = _ch ?: throw fileStreamClosed()
-        if (!canRead || !canWrite) return super.size(new)
-        val size = ch.size()
-        if (new > size) {
+        checkCanSizeNew()
+
+        if (new > ch.size()) {
             val bb = ByteBuffer.wrap(ByteArray(1))
             val pos = ch.position()
             ch.write(bb, new - 1L)
             if (pos > new) ch.position(new)
         } else {
             ch.truncate(new)
+
+            // Android API 20 and below does not set channel position
+            // properly if current position is greater than new.
+            if (ANDROID.SDK_INT == null) return this
+            if (ANDROID.SDK_INT >= 21) return this
+            val pos = ch.position()
+            if (pos > new) ch.position(new)
         }
         return this
     }
 
-    override fun flush() {
-        val ch = _ch ?: throw fileStreamClosed()
-        if (!canWrite) return super.flush()
-        ch.force(true)
-    }
-
     override fun write(buf: ByteArray, offset: Int, len: Int) {
         val ch = _ch ?: throw fileStreamClosed()
-        if (!canWrite) return super.write(buf, offset, len)
+        checkCanWrite()
         val bb = ByteBuffer.wrap(buf, offset, len)
         ch.write(bb)
     }
@@ -141,7 +148,14 @@ internal class NioFileStream private constructor(
             ch: FileChannel,
             canRead: Boolean,
             canWrite: Boolean,
+            isAppending: Boolean,
             parent: Closeable?,
-        ): NioFileStream = NioFileStream(ch, canRead, canWrite, parent)
+        ): NioFileStream = NioFileStream(
+            ch,
+            canRead,
+            canWrite,
+            isAppending,
+            parent,
+        )
     }
 }
