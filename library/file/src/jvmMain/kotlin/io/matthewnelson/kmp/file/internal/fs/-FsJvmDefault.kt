@@ -32,7 +32,6 @@ import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.NioFileStream
-import io.matthewnelson.kmp.file.internal.RandomAccessFileStream
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
@@ -119,7 +118,7 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
     @Throws(IOException::class)
     override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
         val raf = file.open(excl, openCloseable = { RandomAccessFile(file, "rw") })
-        return RandomAccessFileStream.of(raf, canRead = true, canWrite = true)
+        return NioFileStream.of(raf.channel, canRead = true, canWrite = true, isAppending = false, parent = raf)
     }
 
     @Throws(IOException::class)
