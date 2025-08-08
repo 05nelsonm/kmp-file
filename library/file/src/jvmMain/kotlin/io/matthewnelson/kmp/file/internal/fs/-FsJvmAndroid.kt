@@ -397,7 +397,7 @@ internal class FsJvmAndroid private constructor(
 
         override fun position(new: Long): FileStream.ReadWrite {
             val c = _c ?: throw fileStreamClosed()
-            checkCanPositionNew()
+            if (isAppending) return this
             wrapErrnoException(null) { lseek.invoke(null, c.fd, new, const.SEEK_SET) }
             return this
         }

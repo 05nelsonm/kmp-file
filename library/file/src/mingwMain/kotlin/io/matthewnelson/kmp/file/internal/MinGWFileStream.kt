@@ -82,7 +82,7 @@ internal class MinGWFileStream(
 
     override fun position(new: Long): FileStream.ReadWrite {
         val h = _h.value ?: throw fileStreamClosed()
-        checkCanPositionNew()
+        if (isAppending) return this
         h.setPosition(new)
         return this
     }

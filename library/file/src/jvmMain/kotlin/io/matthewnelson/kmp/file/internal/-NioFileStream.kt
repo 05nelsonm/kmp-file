@@ -52,7 +52,7 @@ internal class NioFileStream private constructor(
 
     override fun position(new: Long): FileStream.ReadWrite {
         val ch = _ch ?: throw fileStreamClosed()
-        checkCanPositionNew()
+        if (isAppending) return this
         ch.position(new)
         return this
     }

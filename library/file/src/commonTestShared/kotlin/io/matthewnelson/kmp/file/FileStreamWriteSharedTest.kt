@@ -141,12 +141,20 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenAppendingTrue_thenSetSizeOrPositionThrowsIllegalStateException() = runTest { tmp ->
-        tmp.testOpen(excl = null, appending = true).use { s ->
-            assertFailsWith<IllegalStateException> { s.position(2L) }
-            assertFailsWith<IllegalStateException> { s.size(2L) }
+    fun givenOpenWrite_whenAppendingTrue_thenChangingPositionIsIgnored() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
+            assertTrue(s.isAppending, "isAppending")
+            assertEquals(0L, s.position())
+            s.write(ByteArray(2) { 1.toByte() })
+            assertEquals(2L, s.position())
+            s.position(0L)
+            assertEquals(2L, s.position())
+            // Should not throw (like normally would)
+            s.position(-1L)
         }
     }
+
+    // TODO: Issue #157: test `size(new)` + `isAppending = true`
 
     @Test
     fun givenOpenWrite_when0LengthWrite_thenDoesNotThrowException() = runTest { tmp ->

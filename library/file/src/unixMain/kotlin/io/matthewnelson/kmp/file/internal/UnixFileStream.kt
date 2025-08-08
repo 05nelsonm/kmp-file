@@ -67,7 +67,7 @@ internal class UnixFileStream(
 
     override fun position(new: Long): FileStream.ReadWrite {
         val fd = _fd.value ?: throw fileStreamClosed()
-        checkCanPositionNew()
+        if (isAppending) return this
         val ret = platformLSeek(fd, new, SEEK_SET)
         if (ret == -1L) throw errnoToIllegalArgumentOrIOException(errno, null)
         return this
