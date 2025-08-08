@@ -248,10 +248,10 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
             is OpenExcl.MustExist -> if (appending) OPEN_EXISTING else TRUNCATE_EXISTING
         }
 
-        val deleteOnSetFilePointerFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+        val (deleteOnSetFilePointerFailure, _) = deleteFileOnPostOpenConfigurationFailure(
             file,
             excl,
-            needsToConfigureAfterOpen = appending, // SetFilePointer
+            needsConfigurationPostOpen = appending, // SetFilePointer
         )
 
         val handle = CreateFileA(
@@ -325,7 +325,7 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
     private inline fun File.isDirectoryOrNull(): Boolean? = memScoped {
         val stat = alloc<_stat64>()
         if (_stat64(path, stat.ptr) == 0) {
-            stat.st_mode.toInt() and S_IFMT == S_IFDIR
+            (stat.st_mode.toInt() and S_IFMT) == S_IFDIR
         } else {
             null
         }

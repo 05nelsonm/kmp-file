@@ -37,6 +37,7 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
+import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
@@ -230,10 +231,10 @@ internal class FsJsNode private constructor(
     @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = try {
-            jsExternTryCatch { fs.openSync(file.path, fs.constants.O_RDONLY) }.checkIsNotADir()
+            jsExternTryCatch { fs.openSync(file.path, fs.constants.O_RDONLY) }
         } catch (t: Throwable) {
             throw t.toIOException(file)
-        }
+        }.checkIsNotADir(file)
 
         return JsNodeFileStream(fd, canRead = true, canWrite = false, isAppending = false)
     }
@@ -256,7 +257,7 @@ internal class FsJsNode private constructor(
             }
             jsExternTryCatch { fs.openSync(file.path, flags, mode) }
         }
-        if (isWindows) fd.checkIsNotADir()
+        if (isWindows) fd.checkIsNotADir(file)
 
         JsNodeFileStream(fd, canRead = true, canWrite = true, isAppending = false)
     } catch (t: Throwable) {
@@ -276,13 +277,13 @@ internal class FsJsNode private constructor(
                 is OpenExcl.MustExist -> flags = "r+"
             }
             val mode = if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-            val deleteFileOnSetupFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+            val (deleteFileOnSetupFailure, _) = deleteFileOnPostOpenConfigurationFailure(
                 file,
                 excl,
-                needsToConfigureAfterOpen = appending || flags == "r+", // set _position or truncate
+                needsConfigurationPostOpen = appending || flags == "r+", // set _position or truncate
             )
 
-            val fd = jsExternTryCatch { fs.openSync(file.path, flags, mode) }.checkIsNotADir()
+            val fd = jsExternTryCatch { fs.openSync(file.path, flags, mode) }.checkIsNotADir(file)
 
             val s = JsNodeFileStream(
                 fd = fd,
@@ -295,12 +296,13 @@ internal class FsJsNode private constructor(
             if (deleteFileOnSetupFailure != null) {
                 try {
                     if (appending) {
-                        s._position = s.size()
+                        s._position = jsExternTryCatch { fs.fstatSync(fd) }.size.toLong()
                     } else {
                         // Truncate (non-appending 'r+' flags)
-                        s.size(0L)
+                        jsExternTryCatch { fs.ftruncateSync(fd, 0.toDouble()) }
                     }
-                } catch (e: IOException) {
+                } catch (t: Throwable) {
+                    val e = t.toIOException(file)
                     try {
                         s.close()
                     } catch (ee: IOException) {
@@ -327,10 +329,10 @@ internal class FsJsNode private constructor(
                 is OpenExcl.MustExist -> 0
             }
 
-            val deleteOnSetPositionFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+            val (deleteOnSetPositionFailure, _) = deleteFileOnPostOpenConfigurationFailure(
                 file,
                 excl,
-                needsToConfigureAfterOpen = appending, // set _position
+                needsConfigurationPostOpen = appending, // set _position
             )
 
             val fd = jsExternTryCatch { fs.openSync(file.path, flags, excl.mode) }
@@ -338,8 +340,9 @@ internal class FsJsNode private constructor(
 
             if (deleteOnSetPositionFailure != null) {
                 try {
-                    s._position = s.size()
-                } catch (e: IOException) {
+                    s._position = jsExternTryCatch { fs.fstatSync(fd) }.size.toLong()
+                } catch (t: Throwable) {
+                    val e = t.toIOException(file)
                     try {
                         s.close()
                     } catch (ee: IOException) {
@@ -389,10 +392,10 @@ internal class FsJsNode private constructor(
 
     @Suppress("NOTHING_TO_INLINE")
     @Throws(FileNotFoundException::class)
-    private inline fun Double.checkIsNotADir(): Double {
+    private inline fun Double.checkIsNotADir(file: File): Double {
         try {
             if (jsExternTryCatch { fs.fstatSync(this) }.isDirectory()) {
-                throw FileNotFoundException("Is a directory")
+                throw fileNotFoundException(file, null, "Is a directory")
             }
         } catch (t: Throwable) {
             val e = t.toIOException()

@@ -169,7 +169,7 @@ internal class FsJvmAndroid private constructor(
                 val s = fstat.invoke(null, fd)
                 (stat.st_mode.getInt(s) and const.S_IFMT) == const.S_IFDIR
             }
-            if (isDirectory) throw FileNotFoundException("Is a directory")
+            if (isDirectory) throw fileNotFoundException(file, null, "Is a directory")
         } catch (e: IOException) {
             fd.doClose(null)?.let { ee -> e.addSuppressed(ee) }
             throw e
@@ -185,13 +185,20 @@ internal class FsJvmAndroid private constructor(
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val deleteFileOnSeekEndFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+        val (deleteFileOnSeekEndFailure, exists) = deleteFileOnPostOpenConfigurationFailure(
             file,
             excl,
-            needsToConfigureAfterOpen = appending, // lseek SEEK_END
+            needsConfigurationPostOpen = run {
+                // Ensure __O_CLOEXEC has run so potential Fs.exists check
+                // that gets performed by this function is not stale when
+                // `appending == true` && `excl is OpenExcl.MaybeCreate`
+                // and `exists` return value is passed to `File.open`.
+                __O_CLOEXEC
+                appending // lseek SEEK_END
+            },
         )
 
-        val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl)
+        val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl, exists)
 
         if (deleteFileOnSeekEndFailure != null) {
             try {
@@ -247,7 +254,7 @@ internal class FsJvmAndroid private constructor(
     )
 
     @Throws(IOException::class)
-    private fun File.open(flags: Int, excl: OpenExcl): FileDescriptor {
+    private fun File.open(flags: Int, excl: OpenExcl, exists: Boolean? = null): FileDescriptor {
         val m = MODE_MASK.convert(excl._mode)
         var f = flags or __O_CLOEXEC or when (excl) {
             is OpenExcl.MaybeCreate -> const.O_CREAT
@@ -269,7 +276,7 @@ internal class FsJvmAndroid private constructor(
             if (fcntl == null) return@run null
 
             val deleteFileOnFailure = when (excl) {
-                is OpenExcl.MaybeCreate -> !exists(this)
+                is OpenExcl.MaybeCreate -> !(exists ?: exists(this))
                 is OpenExcl.MustCreate -> true
                 is OpenExcl.MustExist -> false
             }
