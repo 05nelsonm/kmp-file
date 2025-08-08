@@ -118,28 +118,26 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
     @Throws(IOException::class)
     override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
-        // On Android with lower APIs (I believe 19 and below), RDWR FileChannel is
-        // broken for RandomAccessFile.channel. The implementation is trash
         val raf = file.open(excl, openCloseable = { RandomAccessFile(file, "rw") })
         return RandomAccessFileStream.of(raf, canRead = true, canWrite = true)
     }
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val deleteFileOnSetPositionEndFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+        val (deleteFileOnSetPositionEndFailure, exists) = deleteFileOnPostOpenConfigurationFailure(
             file,
             excl,
-            needsToConfigureAfterOpen = run {
-                // Android API 23 and below does not set initial channel
-                // position properly when appending. Will need to clean up
-                // if setting channel position fails.
+            needsConfigurationPostOpen = run {
                 if (ANDROID.SDK_INT == null) return@run false
                 if (ANDROID.SDK_INT >= 24) return@run false
+
+                // Android API 23 and below does not set initial channel
+                // position properly when appending; it is always 0.
                 appending
-            }
+            },
         )
 
-        val fos = file.open(excl, openCloseable = { FileOutputStream(file, /* append = */ appending) })
+        val fos = file.open(excl, exists, openCloseable = { FileOutputStream(file, /* append = */ appending) })
         val ch = fos.channel
 
         val s = NioFileStream.of(ch, canRead = false, canWrite = true, isAppending = appending, parent = fos)
@@ -170,41 +168,45 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
     @Throws(IOException::class)
     @OptIn(ExperimentalContracts::class)
-    private inline fun <C: Closeable> File.open(excl: OpenExcl, openCloseable: () -> C): C {
+    private inline fun <C: Closeable> File.open(excl: OpenExcl, exists: Boolean? = null, openCloseable: () -> C): C {
         contract {
             callsInPlace(openCloseable, InvocationKind.AT_MOST_ONCE)
         }
 
-        val exists = exists(this)
+        @Suppress("LocalVariableName")
+        val _exists = exists ?: exists(this)
 
         when (excl) {
             is OpenExcl.MaybeCreate -> {}
-            is OpenExcl.MustCreate -> if (exists) throw FileAlreadyExistsException(this)
-            is OpenExcl.MustExist -> if (!exists) throw fileNotFoundException(this, null, null)
+            is OpenExcl.MustCreate -> if (_exists) throw FileAlreadyExistsException(this)
+            is OpenExcl.MustExist -> if (!_exists) throw fileNotFoundException(this, null, null)
         }
 
         val closeable = openCloseable()
 
-        run {
-            if (exists) return@run // Already existed prior to opening for the first time
-            if (excl._mode == Mode.DEFAULT_FILE) return@run // Default permissions, nothing to change
-            if (IsWindows && excl._mode.containsOwnerWriteAccess) return@run // Default permissions, nothing to change.
+        // Already existed prior to opening. Do not modify permissions.
+        if (_exists) return closeable
+        // Default permissions, nothing to change.
+        if (excl._mode == Mode.DEFAULT_FILE) return closeable
+        // Default permissions, nothing to change.
+        if (IsWindows && excl._mode.containsOwnerWriteAccess) return closeable
 
+        try {
+            chmod(this, excl._mode, mustExist = false)
+        } catch (e: IOException) {
             try {
-                chmod(this, excl._mode, mustExist = true)
-            } catch (e: IOException) {
-                try {
-                    closeable.close()
-                } catch (ee: IOException) {
-                    e.addSuppressed(ee)
-                }
-                try {
-                    delete(this, ignoreReadOnly = true, mustExist = true)
-                } catch (ee: IOException) {
-                    e.addSuppressed(ee)
-                }
-                throw e
+                closeable.close()
+            } catch (ee: IOException) {
+                e.addSuppressed(ee)
             }
+            // Would only be executing chmod if is a newly created file.
+            // Delete it to clean up before throwing.
+            try {
+                delete(this, ignoreReadOnly = true, mustExist = true)
+            } catch (ee: IOException) {
+                e.addSuppressed(ee)
+            }
+            throw e
         }
 
         return closeable

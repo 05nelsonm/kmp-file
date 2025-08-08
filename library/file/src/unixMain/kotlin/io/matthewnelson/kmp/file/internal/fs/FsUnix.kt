@@ -19,7 +19,6 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
@@ -126,7 +125,7 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
                 return@memScoped errnoToIOException(errno)
             }
             if ((stat.st_mode.toInt() and S_IFMT) == S_IFDIR) {
-                return@memScoped FileNotFoundException("Is a directory")
+                return@memScoped errnoToIOException(ENOENT, file)
             }
             null
         }
@@ -150,10 +149,10 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
         val flags = O_WRONLY or (if (appending) O_APPEND else O_TRUNC)
-        val deleteOnSeekEndFailure = commonDeleteFileOnPostOpenWriteConfigurationFailure(
+        val (deleteOnSeekEndFailure, _) = deleteFileOnPostOpenConfigurationFailure(
             file,
             excl,
-            needsToConfigureAfterOpen = appending, // lseek SEEK_END
+            needsConfigurationPostOpen = appending, // lseek SEEK_END
         )
 
         val fd = file.open(flags, excl)

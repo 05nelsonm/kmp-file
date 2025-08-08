@@ -45,28 +45,6 @@ internal inline fun Fs.commonMkdir(dir: File, mode: String?, mustCreate: Boolean
     return dir
 }
 
-// For Fs.openWrite appending. Should be run just prior to opening the file.
-//
-// Returns null setting file pointer to seek end is not necessary,
-// otherwise, true/false for whether to delete the file when setting
-// the file pointer to EOF fails.
-@Throws(IOException::class)
-internal inline fun Fs.commonDeleteFileOnPostOpenWriteConfigurationFailure(
-    file: File,
-    excl: OpenExcl,
-    needsToConfigureAfterOpen: Boolean
-): Boolean? {
-    if (!needsToConfigureAfterOpen) return null
-
-    return when (excl) {
-        is OpenExcl.MaybeCreate -> !exists(file)
-        // Will be a new file if successful. No need to set pointer to
-        // EOF for appending (size will be 0L).
-        is OpenExcl.MustCreate -> null
-        is OpenExcl.MustExist -> false
-    }
-}
-
 @Throws(IllegalArgumentException::class, IOException::class)
 internal inline fun Fs.commonMkdirs(dir: File, mode: String?, mustCreate: Boolean): File {
     val m = mode?.toMode() ?: Mode.DEFAULT_DIR
@@ -107,4 +85,58 @@ internal inline fun Fs.commonMkdirs(dir: File, mode: String?, mustCreate: Boolea
     }
 
     return dir
+}
+
+private val DELETE_FILE_POST_OPEN_NULL_NULL: Pair<Boolean?, Boolean?> = Pair(null, null)
+
+/**
+ * For figuring out if some post open file operation needs to be performed,
+ * whether failure of that post open file operation necessitates deleting
+ * the file to clean up, before throwing the exception.
+ *
+ * Returns {deleteOnActionFailure: Boolean?, fileExists: Boolean?}.
+ *
+ * @throws [IOException] If [Fs.exists] throws a security exception.
+ * */
+@Throws(IOException::class)
+internal inline fun Fs.deleteFileOnPostOpenConfigurationFailure(
+    file: File,
+    excl: OpenExcl,
+    // If OpenExcl.MustCreate, use this value. This allows for
+    // returning {null, null} if the file is going to be newly
+    // created and the post open action is not necessary (such
+    // as setting the file pointer to SEEK_END for append mode
+    // because the file is new and already at 0L).
+    whenMustCreate: Boolean? = null,
+    needsConfigurationPostOpen: Boolean,
+): Pair<Boolean?, Boolean?> = ::exists.deleteFileOnPostOpenConfigurationFailure(
+    file,
+    excl,
+    whenMustCreate,
+    needsConfigurationPostOpen,
+)
+
+@Throws(IOException::class)
+internal fun (/* Fs.exists(file) */ (File) -> Boolean).deleteFileOnPostOpenConfigurationFailure(
+    file: File,
+    excl: OpenExcl,
+    whenMustCreate: Boolean?,
+    needsConfigurationPostOpen: Boolean,
+): Pair<Boolean?, Boolean?> {
+    if (!needsConfigurationPostOpen) return DELETE_FILE_POST_OPEN_NULL_NULL
+
+    var exists: Boolean? = null
+    val deleteOnFailure = when (excl) {
+        is OpenExcl.MaybeCreate -> {
+            exists = this(file)
+            // If file does not currently exist
+            !exists
+        }
+        // Will be a new file if successful. No need to set pointer to
+        // EOF for appending (size will be 0L).
+        is OpenExcl.MustCreate -> whenMustCreate
+        is OpenExcl.MustExist -> false
+    }
+    if (exists == null && deleteOnFailure == null) return DELETE_FILE_POST_OPEN_NULL_NULL
+    return deleteOnFailure to exists
 }
