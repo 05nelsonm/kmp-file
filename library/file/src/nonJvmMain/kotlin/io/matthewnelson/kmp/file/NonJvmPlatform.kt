@@ -115,6 +115,12 @@ public actual open class InterruptedIOException: IOException {
     public actual constructor(message: String?): super(message)
 }
 
+/**
+ * Reports how many bytes had been transferred as part of the I/O operation before
+ * it was interrupted.
+ *
+ * @see [InterruptedIOException]
+ * */
 public actual inline var InterruptedIOException.bytesTransferred: Int
     get() = _bytesTransferred
     set(value) { _bytesTransferred = value }

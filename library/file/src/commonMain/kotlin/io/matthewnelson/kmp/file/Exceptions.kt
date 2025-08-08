@@ -21,7 +21,6 @@ package io.matthewnelson.kmp.file
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.jvm.JvmField
 import kotlin.jvm.JvmName
 
 /**
@@ -103,6 +102,12 @@ public expect open class InterruptedIOException: IOException {
     public constructor(message: String?)
 }
 
+/**
+ * Reports how many bytes had been transferred as part of the I/O operation before
+ * it was interrupted.
+ *
+ * @see [InterruptedIOException]
+ * */
 public expect inline var InterruptedIOException.bytesTransferred: Int
 
 /**
@@ -115,18 +120,23 @@ public expect open class InterruptedException: Exception {
 }
 
 /**
- * Ensures that the throwable is an instance of [IOException]. If
- * it is not, it will encase it in one.
+ * Ensures that the throwable is an instance of [IOException]. If it is not, it will
+ * encase it in one. If the throwable is an instance of [InterruptedException], this
+ * function returns an [InterruptedIOException] with the [InterruptedException] as
+ * a suppressed exception.
  * */
 @JvmName("wrapIO")
 public inline fun Throwable.wrapIOException(): IOException = when (this) {
     is IOException -> this
+    is InterruptedException -> InterruptedIOException().also { it.addSuppressed(this) }
     else -> IOException(this)
 }
 
 /**
- * Ensures that the throwable is an instance of [IOException]. If
- * it is not, it will encase it in one with the provided [lazyMessage].
+ * Ensures that the throwable is an instance of [IOException]. If it is not, it will
+ * encase it in one with the provided [lazyMessage]. If the throwable is an instance
+ * of [InterruptedException], this function returns an [InterruptedIOException] with
+ * the [InterruptedException] as a suppressed exception.
  * */
 @JvmName("wrapIO")
 @OptIn(ExperimentalContracts::class)
@@ -137,8 +147,10 @@ public inline fun Throwable.wrapIOException(
         callsInPlace(lazyMessage, InvocationKind.AT_MOST_ONCE)
     }
 
-    return when (this) {
-        is IOException -> this
-        else -> { val msg = lazyMessage(); IOException(msg, this) }
+    if (this is IOException) return this
+    val msg = lazyMessage()
+    if (this is InterruptedException) {
+        InterruptedIOException(msg).also { it.addSuppressed(this) }
     }
+    return IOException(msg, this)
 }
