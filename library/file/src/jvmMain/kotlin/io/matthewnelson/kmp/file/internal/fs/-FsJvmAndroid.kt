@@ -185,37 +185,7 @@ internal class FsJvmAndroid private constructor(
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val (deleteFileOnSeekEndFailure, exists) = deleteFileOnPostOpenConfigurationFailure(
-            file,
-            excl,
-            needsConfigurationPostOpen = run {
-                // Ensure __O_CLOEXEC has run so potential Fs.exists check
-                // that gets performed by this function is not stale when
-                // `appending == true` && `excl is OpenExcl.MaybeCreate`
-                // and `exists` return value is passed to `File.open`.
-                __O_CLOEXEC
-                appending // lseek SEEK_END
-            },
-        )
-
-        val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl, exists)
-
-        if (deleteFileOnSeekEndFailure != null) {
-            try {
-                wrapErrnoException(file) { lseek.invoke(null, fd, 0L, const.SEEK_END) }
-            } catch (e: IOException) {
-                fd.doClose(null)?.let { ee -> e.addSuppressed(ee) }
-                if (deleteFileOnSeekEndFailure) {
-                    try {
-                        delete(file, ignoreReadOnly = false, mustExist = true)
-                    } catch (ee: IOException) {
-                        e.addSuppressed(ee)
-                    }
-                }
-                throw e
-            }
-        }
-
+        val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl)
         return AndroidFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
     }
 
@@ -254,7 +224,7 @@ internal class FsJvmAndroid private constructor(
     )
 
     @Throws(IOException::class)
-    private fun File.open(flags: Int, excl: OpenExcl, exists: Boolean? = null): FileDescriptor {
+    private fun File.open(flags: Int, excl: OpenExcl): FileDescriptor {
         val m = MODE_MASK.convert(excl._mode)
         var f = flags or __O_CLOEXEC or when (excl) {
             is OpenExcl.MaybeCreate -> const.O_CREAT
@@ -276,7 +246,7 @@ internal class FsJvmAndroid private constructor(
             if (fcntl == null) return@run null
 
             val deleteFileOnFailure = when (excl) {
-                is OpenExcl.MaybeCreate -> !(exists ?: exists(this))
+                is OpenExcl.MaybeCreate -> !exists(this)
                 is OpenExcl.MustCreate -> true
                 is OpenExcl.MustExist -> false
             }
@@ -391,6 +361,7 @@ internal class FsJvmAndroid private constructor(
         }
 
         override fun position(): Long {
+            if (isAppending) return size()
             val c = _c ?: throw fileStreamClosed()
             return wrapErrnoException(null) { lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long }
         }
@@ -589,7 +560,6 @@ private class OsConstants {
 
     val SEEK_CUR: Int
     val SEEK_SET: Int
-    val SEEK_END: Int
 
     val S_IRUSR: Int
     val S_IWUSR: Int
@@ -622,7 +592,6 @@ private class OsConstants {
 
         SEEK_CUR = clazz.getField("SEEK_CUR").getInt(null)
         SEEK_SET = clazz.getField("SEEK_SET").getInt(null)
-        SEEK_END = clazz.getField("SEEK_END").getInt(null)
 
         S_IRUSR = clazz.getField("S_IRUSR").getInt(null)
         S_IWUSR = clazz.getField("S_IWUSR").getInt(null)
