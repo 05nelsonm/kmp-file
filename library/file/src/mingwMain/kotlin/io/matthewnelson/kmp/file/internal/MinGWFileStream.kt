@@ -144,9 +144,20 @@ internal class MinGWFileStream(
     override fun size(new: Long): FileStream.ReadWrite {
         val h = _h.value ?: throw fileStreamClosed()
         checkCanSizeNew()
-        val pos = memScoped { h.getPosition(scope = this) }
-        if (pos != new) h.setPosition(new)
+        val pos = if (isAppending) {
+            h.setPosition(new)
+            null
+        } else {
+            val pos = memScoped { h.getPosition(scope = this) }
+            if (pos != new) h.setPosition(new)
+            pos
+        }
+
         if (SetEndOfFile(h) == FALSE) throw lastErrorToIOException()
+
+        // appending
+        if (pos == null) return this
+
         // Set back to what it was previously
         if (pos < new) h.setPosition(pos)
         return this

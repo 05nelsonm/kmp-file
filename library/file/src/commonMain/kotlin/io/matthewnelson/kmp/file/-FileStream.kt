@@ -70,14 +70,10 @@ internal abstract class AbstractFileStream internal constructor(
         check(canRead) { "FileStream is O_WRONLY" }
     }
     protected inline fun checkCanSizeNew() {
-        checkIsNotAppending()
         checkCanWrite()
     }
     protected inline fun checkCanWrite() {
         check(canWrite) { "FileStream is O_RDONLY" }
-    }
-    protected inline fun checkIsNotAppending() {
-        check(!isAppending) { "FileStream is O_APPEND" }
     }
 
     protected companion object {

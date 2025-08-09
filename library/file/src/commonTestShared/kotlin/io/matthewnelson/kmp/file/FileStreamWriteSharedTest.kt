@@ -118,7 +118,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenAppendingFalse_thenIsTruncated() = runTest { tmp ->
+    fun givenOpenWrite_whenAppendingFalse_thenIsTruncatedOnOpen() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
         assertTrue(tmp.readBytes().isNotEmpty())
 
@@ -155,7 +155,9 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
                 assertEquals((data.size + 3).toLong(), s2.position())
                 assertContentEquals(byteArrayOf(*data, -5, -5, 2), tmp.readBytes())
 
-                tmp.testOpen(excl = OpenExcl.MustExist, appending = false).use { s3 ->
+                tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s3 ->
+                    s3.size(0L)
+
                     val streams = arrayOf(s1, s2, s3)
                     streams.forEach { s ->
                         assertEquals(0L, s.position())
@@ -195,26 +197,6 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenAppendingTrue_thenChangeSizeThrowsIllegalStateException() = runTest { tmp ->
-        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
-            assertEquals(0L, s.position())
-            assertEquals(0L, s.size())
-
-            assertFailsWith<IllegalStateException> { s.size(4L) }
-            assertEquals(0L, s.position())
-            assertEquals(0L, s.size())
-
-            s.write(ByteArray(5) { 1.toByte() })
-            assertEquals(5L, s.position())
-            assertEquals(5L, s.size())
-
-            assertFailsWith<IllegalStateException> { s.size(0L) }
-            assertEquals(5L, s.position())
-            assertEquals(5L, s.size())
-        }
-    }
-
-    @Test
     fun givenOpenWrite_when0LengthWrite_thenDoesNotThrowException() = runTest { tmp ->
         tmp.testOpen(excl = null, appending = false).use { s ->
             s.write(ByteArray(0))
@@ -246,6 +228,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
             s.write("Hello World!".encodeToByteArray())
         }
         assertEquals("Hello World!", tmp.readUtf8())
+        assertFailsWith<AccessDeniedException> { tmp.appendUtf8(null, "Something") }
     }
 
     @Test

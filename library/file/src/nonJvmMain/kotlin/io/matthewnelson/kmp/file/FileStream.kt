@@ -180,8 +180,9 @@ public actual sealed interface FileStream: Closeable {
          * the current [FileStream.size], then the [File] is truncated and data beyond [new]
          * is lost.
          *
-         * If and only if the current [position] is greater than [new], then [position]
-         * will be set to [new]. Otherwise, [position] will remain unmodified.
+         * [position] will be set to [new] under the following circumstances:
+         *   - [isAppending] is `true`.
+         *   - The current [position] is greater than [new].
          *
          * @param [new] The desired size.
          *
@@ -189,7 +190,6 @@ public actual sealed interface FileStream: Closeable {
          *
          * @throws [IllegalArgumentException] If [new] is less than 0.
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
-         * @throws [IllegalStateException] If [isAppending] is `true`.
          * */
         @Throws(IOException::class)
         public actual fun size(new: Long): Write
