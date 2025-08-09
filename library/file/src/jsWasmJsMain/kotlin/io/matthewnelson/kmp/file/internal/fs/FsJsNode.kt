@@ -464,8 +464,9 @@ internal class FsJsNode private constructor(
                 jsExternTryCatch { if (meta) fs.fsyncSync(fd) else fs.fdatasyncSync(fd) }
             } catch (t: Throwable) {
                 val e = t.toIOException()
-                // ERROR_ACCESS_DENIED
-                if (e is AccessDeniedException && isWindows) return this
+                if (!isWindows) throw e
+                // Windows can throw EPERM
+                if (e.message?.contains("EPERM") == true) return this
                 throw e
             }
             return this
