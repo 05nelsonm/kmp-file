@@ -46,6 +46,13 @@ internal class NioFileStream private constructor(
     }
 
     override fun position(): Long {
+        run {
+            if (!isAppending) return@run
+            if (ANDROID.SDK_INT == null) return@run
+            // Android API 23 and below does not report
+            // the correct position with O_APPEND.
+            if (ANDROID.SDK_INT < 24) return size()
+        }
         val ch = _ch ?: throw fileStreamClosed()
         return ch.position()
     }

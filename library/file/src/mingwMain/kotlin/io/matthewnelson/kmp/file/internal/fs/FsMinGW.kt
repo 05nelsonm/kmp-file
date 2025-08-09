@@ -63,19 +63,16 @@ import platform.windows.CreateFileA
 import platform.windows.FALSE
 import platform.windows.FILE_ATTRIBUTE_NORMAL
 import platform.windows.FILE_ATTRIBUTE_READONLY
-import platform.windows.FILE_END
 import platform.windows.FILE_SHARE_DELETE
 import platform.windows.FILE_SHARE_READ
 import platform.windows.FILE_SHARE_WRITE
 import platform.windows.GENERIC_READ
 import platform.windows.GENERIC_WRITE
 import platform.windows.INVALID_HANDLE_VALUE
-import platform.windows.INVALID_SET_FILE_POINTER
 import platform.windows.OPEN_ALWAYS
 import platform.windows.OPEN_EXISTING
 import platform.windows.PathIsRelativeA
 import platform.windows.SetFileAttributesA
-import platform.windows.SetFilePointer
 import platform.windows.TRUNCATE_EXISTING
 
 @OptIn(ExperimentalForeignApi::class)
@@ -248,12 +245,6 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
             is OpenExcl.MustExist -> if (appending) OPEN_EXISTING else TRUNCATE_EXISTING
         }
 
-        val (deleteOnSetFilePointerFailure, _) = deleteFileOnPostOpenConfigurationFailure(
-            file,
-            excl,
-            needsConfigurationPostOpen = appending, // SetFilePointer
-        )
-
         val handle = CreateFileA(
             lpFileName = file.path,
             dwDesiredAccess = GENERIC_WRITE.convert(),
@@ -265,31 +256,7 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
         )
         if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
 
-        val s = MinGWFileStream(handle, canRead = false, canWrite = true, isAppending = appending)
-
-        if (deleteOnSetFilePointerFailure == null) return s
-        val ret = SetFilePointer(
-            hFile = handle,
-            lDistanceToMove = 0,
-            lpDistanceToMoveHigh = null,
-            dwMoveMethod = FILE_END.convert(),
-        )
-        if (ret != INVALID_SET_FILE_POINTER) return s
-
-        val e = lastErrorToIOException(file)
-        try {
-            s.close()
-        } catch (ee: IOException) {
-            e.addSuppressed(ee)
-        }
-        if (deleteOnSetFilePointerFailure) {
-            try {
-                delete(file, ignoreReadOnly = true, mustExist = true)
-            } catch (ee: IOException) {
-                e.addSuppressed(ee)
-            }
-        }
-        throw e
+        return MinGWFileStream(handle, canRead = false, canWrite = true, isAppending = appending)
     }
 
     @Throws(IOException::class)

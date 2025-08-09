@@ -52,6 +52,7 @@ import platform.windows.SetEndOfFile
 import platform.windows.SetFilePointer
 import platform.windows.SetFilePointerEx
 import platform.windows.WriteFile
+import platform.windows._OVERLAPPED
 import kotlin.concurrent.AtomicReference
 
 @OptIn(ExperimentalForeignApi::class)
@@ -76,6 +77,7 @@ internal class MinGWFileStream(
     }
 
     override fun position(): Long {
+        if (isAppending) return size()
         val h = _h.value ?: throw fileStreamClosed()
         return memScoped { h.getPosition(scope = this) }
     }
@@ -158,6 +160,14 @@ internal class MinGWFileStream(
 
         memScoped {
             val bytesWrite = alloc<UIntVarOf<UInt>>()
+            val overlapped = if (isAppending) {
+                alloc<_OVERLAPPED> {
+                    Offset = 0xFFFFFFFF.convert()
+                    OffsetHigh = 0xFFFFFFFF.convert()
+                }
+            } else {
+                null
+            }
 
             buf.usePinned { pinned ->
                 var total = 0
@@ -169,7 +179,7 @@ internal class MinGWFileStream(
                         lpBuffer = pinned.addressOf(offset + total).getPointer(this),
                         nNumberOfBytesToWrite = (len - total).convert(),
                         lpNumberOfBytesWritten = bytesWrite.ptr,
-                        lpOverlapped = null,
+                        lpOverlapped = overlapped?.ptr,
                     )
 
                     if (ret == FALSE) {

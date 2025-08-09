@@ -59,6 +59,7 @@ internal class UnixFileStream(
     }
 
     override fun position(): Long {
+        if (isAppending) return size()
         val fd = _fd.value ?: throw fileStreamClosed()
         val ret = platformLSeek(fd, 0L, SEEK_CUR)
         if (ret == -1L) throw errnoToIOException(errno)

@@ -17,7 +17,6 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
-import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.Closeable
@@ -123,68 +122,29 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val (deleteFileOnSetPositionEndFailure, exists) = deleteFileOnPostOpenConfigurationFailure(
-            file,
-            excl,
-            needsConfigurationPostOpen = run {
-                if (ANDROID.SDK_INT == null) return@run false
-                if (ANDROID.SDK_INT >= 24) return@run false
-
-                // Android API 23 and below does not set initial channel
-                // position properly when appending; it is always 0.
-                appending
-            },
-        )
-
-        val fos = file.open(excl, exists, openCloseable = { FileOutputStream(file, /* append = */ appending) })
-        val ch = fos.channel
-
-        val s = NioFileStream.of(ch, canRead = false, canWrite = true, isAppending = appending, parent = fos)
-
-        if (deleteFileOnSetPositionEndFailure == null) return s
-
-        try {
-            val size = ch.size()
-            if (size > 0L) ch.position(size)
-        } catch (e: IOException) {
-            try {
-                s.close()
-            } catch (ee: IOException) {
-                e.addSuppressed(ee)
-            }
-            if (deleteFileOnSetPositionEndFailure) {
-                try {
-                    delete(file, ignoreReadOnly = false, mustExist = true)
-                } catch (ee: IOException) {
-                    e.addSuppressed(ee)
-                }
-            }
-            throw e
-        }
-
-        return s
+        val fos = file.open(excl, openCloseable = { FileOutputStream(file, /* append = */ appending) })
+        return NioFileStream.of(fos.channel, canRead = false, canWrite = true, isAppending = appending, parent = fos)
     }
 
     @Throws(IOException::class)
     @OptIn(ExperimentalContracts::class)
-    private inline fun <C: Closeable> File.open(excl: OpenExcl, exists: Boolean? = null, openCloseable: () -> C): C {
+    private inline fun <C: Closeable> File.open(excl: OpenExcl, openCloseable: () -> C): C {
         contract {
             callsInPlace(openCloseable, InvocationKind.AT_MOST_ONCE)
         }
 
-        @Suppress("LocalVariableName")
-        val _exists = exists ?: exists(this)
+        val exists = exists(this)
 
         when (excl) {
             is OpenExcl.MaybeCreate -> {}
-            is OpenExcl.MustCreate -> if (_exists) throw FileAlreadyExistsException(this)
-            is OpenExcl.MustExist -> if (!_exists) throw fileNotFoundException(this, null, null)
+            is OpenExcl.MustCreate -> if (exists) throw FileAlreadyExistsException(this)
+            is OpenExcl.MustExist -> if (!exists) throw fileNotFoundException(this, null, null)
         }
 
         val closeable = openCloseable()
 
         // Already existed prior to opening. Do not modify permissions.
-        if (_exists) return closeable
+        if (exists) return closeable
         // Default permissions, nothing to change.
         if (excl._mode == Mode.DEFAULT_FILE) return closeable
         // Default permissions, nothing to change.

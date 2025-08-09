@@ -29,7 +29,6 @@ import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.UnixFileStream
 import io.matthewnelson.kmp.file.internal.errnoToIllegalArgumentOrIOException
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
-import io.matthewnelson.kmp.file.internal.platformLSeek
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -49,7 +48,6 @@ import platform.posix.O_RDONLY
 import platform.posix.O_RDWR
 import platform.posix.O_TRUNC
 import platform.posix.O_WRONLY
-import platform.posix.SEEK_END
 import platform.posix.S_IFDIR
 import platform.posix.S_IFMT
 import platform.posix.S_IRGRP
@@ -149,30 +147,7 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
         val flags = O_WRONLY or (if (appending) O_APPEND else O_TRUNC)
-        val (deleteOnSeekEndFailure, _) = deleteFileOnPostOpenConfigurationFailure(
-            file,
-            excl,
-            needsConfigurationPostOpen = appending, // lseek SEEK_END
-        )
-
         val fd = file.open(flags, excl)
-
-        if (deleteOnSeekEndFailure != null && platformLSeek(fd, 0L, SEEK_END) == -1L) {
-            val e = errnoToIOException(errno, file)
-            if (ignoreEINTR { close(fd) } != 0) {
-                val ee = errnoToIOException(errno)
-                e.addSuppressed(ee)
-            }
-            if (deleteOnSeekEndFailure) {
-                try {
-                    delete(file, ignoreReadOnly = false, mustExist = true)
-                } catch (ee: IOException) {
-                    e.addSuppressed(ee)
-                }
-            }
-            throw e
-        }
-
         return UnixFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
     }
 
