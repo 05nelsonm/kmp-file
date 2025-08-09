@@ -248,8 +248,8 @@ internal class FsJsNode private constructor(
         }
 
         val fd = if (isWindows && excl is OpenExcl.MustExist) {
-            // For some reason on Windows or'ing flags will fail with illegal
-            // arguments. Specifying flags via String works though.
+            // For some reason on Windows, or'ing flags will fail with illegal
+            // arguments. Specifying flags via String to force MustExist works though.
             jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
         } else {
             val flags = fs.constants.O_RDWR or when (excl) {
@@ -268,27 +268,54 @@ internal class FsJsNode private constructor(
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream = try {
-        if (isWindows) {
-            var flags = if (appending) "a" else "w"
-            when (excl) {
-                is OpenExcl.MaybeCreate -> {}
-                is OpenExcl.MustCreate -> flags += "x"
-                is OpenExcl.MustExist -> if (!exists(file)) throw fileNotFoundException(file, null, null)
-            }
-            val mode = if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-            val fd = jsExternTryCatch { fs.openSync(file.path, flags, mode) }.checkIsNotADir(file)
-            JsNodeFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
+        val mode = if (isWindows) {
+            if (excl._mode.containsOwnerWriteAccess) "666" else "444"
+        } else {
+            excl.mode
+        }
+
+        var truncate = false
+        val fd = if (isWindows && excl is OpenExcl.MustExist) {
+            // Need to manually truncate if not appending.
+            if (!appending) truncate = true
+            // For some reason on Windows, or'ing flags will fail with illegal
+            // arguments. Specifying flags via String to force MustExist works though.
+            jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
         } else {
             var flags = fs.constants.O_WRONLY
-            flags = flags or if (appending) fs.constants.O_APPEND else fs.constants.O_TRUNC
-            flags = flags or when (excl) {
-                is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
-                is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
-                is OpenExcl.MustExist -> 0
+            flags = if (appending) {
+                // Do not want to use O_APPEND flag for Windows b/c it will strip
+                // out FILE_WRITE_DATA from GENERIC_READ for dwDesiredAccess. That
+                // causes ftruncate to fail with EPERM.
+                //
+                // Instead, writes will all use size() for their position argument.
+                if (isWindows) flags else flags or fs.constants.O_APPEND
+            } else {
+                flags or fs.constants.O_TRUNC
             }
-            val fd = jsExternTryCatch { fs.openSync(file.path, flags, excl.mode) }
-            JsNodeFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
+            flags = when (excl) {
+                is OpenExcl.MaybeCreate -> flags or fs.constants.O_CREAT
+                is OpenExcl.MustCreate -> flags or fs.constants.O_CREAT or fs.constants.O_EXCL
+                is OpenExcl.MustExist -> flags
+            }
+            jsExternTryCatch { fs.openSync(file.path, flags, mode) }
         }
+        if (isWindows) fd.checkIsNotADir(file)
+
+        val s = JsNodeFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
+        if (truncate) {
+            try {
+                s.size(0L)
+            } catch (e: IOException) {
+                try {
+                    s.close()
+                } catch (ee: IOException) {
+                    e.addSuppressed(ee)
+                }
+                throw e
+            }
+        }
+        s
     } catch (t: Throwable) {
         throw t.toIOException(file)
     }
@@ -456,10 +483,17 @@ internal class FsJsNode private constructor(
                     BUF.writeInt8(buf[pos++], i.toDouble())
                 }
 
-                // If it's appending, modification of position is ignored
-                // from the interface so use whatever the current position
-                // is for the descriptor (current size).
-                val position = if (isAppending) null else _position.toDouble()
+                val position = if (isAppending) {
+                    // If it's appending, modification of position is ignored
+                    // from the interface so use whatever the current position
+                    // is for the descriptor (current size).
+                    //
+                    // The only caveat is Windows, which will never specify
+                    // the O_APPEND flag and always requires the end position.
+                    if (isWindows) size().toDouble() else null
+                } else {
+                    _position.toDouble()
+                }
 
                 val bytesWritten = try {
                     jsExternTryCatch {
