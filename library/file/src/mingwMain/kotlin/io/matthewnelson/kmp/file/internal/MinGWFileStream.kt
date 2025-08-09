@@ -36,6 +36,7 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
 import platform.windows.CloseHandle
+import platform.windows.ERROR_ACCESS_DENIED
 import platform.windows.ERROR_HANDLE_EOF
 import platform.windows.FALSE
 import platform.windows.FILE_BEGIN
@@ -68,13 +69,6 @@ internal class MinGWFileStream(
     private val _h = AtomicReference<HANDLE?>(h)
 
     override fun isOpen(): Boolean = _h.value != null
-
-    override fun flush() {
-        val h = _h.value ?: throw fileStreamClosed()
-        checkCanFlush()
-        val ret = FlushFileBuffers(hFile = h)
-        if (ret == FALSE) throw lastErrorToIOException()
-    }
 
     override fun position(): Long {
         if (isAppending) return size()
@@ -161,6 +155,15 @@ internal class MinGWFileStream(
         // Set back to what it was previously
         if (pos < new) h.setPosition(pos)
         return this
+    }
+
+    override fun sync(meta: Boolean): FileStream.ReadWrite {
+        val h = _h.value ?: throw fileStreamClosed()
+        val ret = FlushFileBuffers(hFile = h)
+        if (ret != FALSE) return this
+        val lastError = GetLastError()
+        if (lastError.toInt() == ERROR_ACCESS_DENIED) return this
+        throw lastErrorToIOException(lastError)
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {

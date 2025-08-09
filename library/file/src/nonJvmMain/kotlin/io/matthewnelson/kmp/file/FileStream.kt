@@ -80,6 +80,33 @@ public actual sealed interface FileStream: Closeable {
     public actual fun size(): Long
 
     /**
+     * Syncs any updates to the [File] for which this stream belongs, to the
+     * device filesystem. This is akin to [fsync/fdatasync](https://man7.org/linux/man-pages/man2/fsync.2.html).
+     *
+     * If the stream's [File] resides locally on the device then upon return
+     * of this function it is guaranteed that all changes made to the [File]
+     * since this stream was created, or since this function was last called,
+     * will have been written to said device. This is useful for ensuring that
+     * critical information is not lost in the event of a system crash.
+     *
+     * If the stream's [File] does **not** reside locally on the device, then
+     * no such guarantee is made.
+     *
+     * Only changes made via this stream are guaranteed to be updated as a
+     * result of this function call.
+     *
+     * @param [meta] If `false`, only updates to the [File] content will be
+     *   written to storage. If `true`, updates to both the [File] content and
+     *   its metadata will be written to storage.
+     *
+     * @return The [FileStream] for chaining operations.
+     *
+     * @throws [IOException] If an I/O error occurs, or the stream is closed.
+     * */
+    @Throws(IOException::class)
+    public actual fun sync(meta: Boolean): FileStream
+
+    /**
      * A stream for read operations whereby the source of data is a [File].
      *
      * @see [openRead]
@@ -131,6 +158,33 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
+
+        /**
+         * Syncs any updates to the [File] for which this stream belongs, to the
+         * device filesystem. This is akin to [fsync/fdatasync](https://man7.org/linux/man-pages/man2/fsync.2.html).
+         *
+         * If the stream's [File] resides locally on the device then upon return
+         * of this function it is guaranteed that all changes made to the [File]
+         * since this stream was created, or since this function was last called,
+         * will have been written to said device. This is useful for ensuring that
+         * critical information is not lost in the event of a system crash.
+         *
+         * If the stream's [File] does **not** reside locally on the device, then
+         * no such guarantee is made.
+         *
+         * Only changes made via this stream are guaranteed to be updated as a
+         * result of this function call.
+         *
+         * @param [meta] If `false`, only updates to the [File] content will be
+         *   written to storage. If `true`, updates to both the [File] content and
+         *   its metadata will be written to storage.
+         *
+         * @return The [Read] stream for chaining operations.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * */
+        @Throws(IOException::class)
+        public actual override fun sync(meta: Boolean): Read
     }
 
     /**
@@ -145,14 +199,6 @@ public actual sealed interface FileStream: Closeable {
          * If the [Write] stream was opened in appending mode.
          * */
         public actual val isAppending: Boolean
-
-        /**
-         * Flushes any buffered data to the device filesystem.
-         *
-         * @throws [IOException] If an I/O error occurs, or the stream is closed.
-         * */
-        @Throws(IOException::class)
-        public actual fun flush()
 
         /**
          * Sets the current position of the file pointer to [new]. This is
@@ -193,6 +239,33 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public actual fun size(new: Long): Write
+
+        /**
+         * Syncs any updates to the [File] for which this stream belongs, to the
+         * device filesystem. This is akin to [fsync/fdatasync](https://man7.org/linux/man-pages/man2/fsync.2.html).
+         *
+         * If the stream's [File] resides locally on the device then upon return
+         * of this function it is guaranteed that all changes made to the [File]
+         * since this stream was created, or since this function was last called,
+         * will have been written to said device. This is useful for ensuring that
+         * critical information is not lost in the event of a system crash.
+         *
+         * If the stream's [File] does **not** reside locally on the device, then
+         * no such guarantee is made.
+         *
+         * Only changes made via this stream are guaranteed to be updated as a
+         * result of this function call.
+         *
+         * @param [meta] If `false`, only updates to the [File] content will be
+         *   written to storage. If `true`, updates to both the [File] content and
+         *   its metadata will be written to storage.
+         *
+         * @return The [Write] stream for chaining operations.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * */
+        @Throws(IOException::class)
+        public actual override fun sync(meta: Boolean): Write
 
         /**
          * Writes the entire contents of [buf] to the [File] for which this [ReadWrite]
@@ -266,5 +339,32 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public actual abstract override fun size(new: Long): ReadWrite
+
+        /**
+         * Syncs any updates to the [File] for which this stream belongs, to the
+         * device filesystem. This is akin to [fsync/fdatasync](https://man7.org/linux/man-pages/man2/fsync.2.html).
+         *
+         * If the stream's [File] resides locally on the device then upon return
+         * of this function it is guaranteed that all changes made to the [File]
+         * since this stream was created, or since this function was last called,
+         * will have been written to said device. This is useful for ensuring that
+         * critical information is not lost in the event of a system crash.
+         *
+         * If the stream's [File] does **not** reside locally on the device, then
+         * no such guarantee is made.
+         *
+         * Only changes made via this stream are guaranteed to be updated as a
+         * result of this function call.
+         *
+         * @param [meta] If `false`, only updates to the [File] content will be
+         *   written to storage. If `true`, updates to both the [File] content and
+         *   its metadata will be written to storage.
+         *
+         * @return The [ReadWrite] stream for chaining operations.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * */
+        @Throws(IOException::class)
+        public actual abstract override fun sync(meta: Boolean): ReadWrite
     }
 }

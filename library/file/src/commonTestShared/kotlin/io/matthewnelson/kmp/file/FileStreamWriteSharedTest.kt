@@ -43,19 +43,22 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     fun givenOpenWrite_whenNewSizeOrPosition_thenReturnsTheWriteOnlyInstance() = runTest { tmp ->
         tmp.testOpen(excl = null, appending = false).use { s ->
             assertIsNot<FileStream.Read>(s)
-            val pRet = s.position(2L)
-            val sRet = s.size(2L)
-            assertEquals(s, pRet)
-            assertEquals(s, sRet)
-            assertTrue(pRet.toString().startsWith("WriteOnly"))
-            assertTrue(sRet.toString().startsWith("WriteOnly"))
+            val position = s.position(2L)
+            val size = s.size(2L)
+            val sync = s.sync(meta = false)
+            assertEquals(s, position)
+            assertEquals(s, size)
+            assertEquals(s, sync)
+            assertTrue(position.toString().startsWith("WriteOnly"))
+            assertTrue(size.toString().startsWith("WriteOnly"))
+            assertTrue(sync.toString().startsWith("WriteOnly"))
         }
     }
 
     @Test
-    fun givenOpenWrite_whenFlush_thenIsFunctional() = runTest { tmp ->
+    fun givenOpenWrite_whenSync_thenWorks() = runTest { tmp ->
         tmp.testOpen(excl = null, appending = false).use { s ->
-            s.flush()
+            s.sync(meta = true).sync(meta = false)
         }
     }
 

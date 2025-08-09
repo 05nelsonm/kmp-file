@@ -26,6 +26,7 @@ internal external interface ModuleFs {
     fun accessSync(path: Path, mode: Int)
     fun chmodSync(path: Path, mode: String)
     fun closeSync(fd: Double)
+    fun fdatasyncSync(fd: Double)
     fun fstatSync(fd: Double): JsStats
     fun fsyncSync(fd: Double)
     fun ftruncateSync(fd: Double, len: Double)

@@ -23,20 +23,22 @@ sealed interface io.matthewnelson.kmp.file/FileStream : io.matthewnelson.kmp.fil
     abstract fun position(): kotlin/Long // io.matthewnelson.kmp.file/FileStream.position|position(){}[0]
     abstract fun position(kotlin/Long): io.matthewnelson.kmp.file/FileStream // io.matthewnelson.kmp.file/FileStream.position|position(kotlin.Long){}[0]
     abstract fun size(): kotlin/Long // io.matthewnelson.kmp.file/FileStream.size|size(){}[0]
+    abstract fun sync(kotlin/Boolean): io.matthewnelson.kmp.file/FileStream // io.matthewnelson.kmp.file/FileStream.sync|sync(kotlin.Boolean){}[0]
 
     sealed interface Read : io.matthewnelson.kmp.file/FileStream { // io.matthewnelson.kmp.file/FileStream.Read|null[0]
         abstract fun position(kotlin/Long): io.matthewnelson.kmp.file/FileStream.Read // io.matthewnelson.kmp.file/FileStream.Read.position|position(kotlin.Long){}[0]
         abstract fun read(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/FileStream.Read.read|read(kotlin.ByteArray){}[0]
         abstract fun read(kotlin/ByteArray, kotlin/Int, kotlin/Int): kotlin/Int // io.matthewnelson.kmp.file/FileStream.Read.read|read(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+        abstract fun sync(kotlin/Boolean): io.matthewnelson.kmp.file/FileStream.Read // io.matthewnelson.kmp.file/FileStream.Read.sync|sync(kotlin.Boolean){}[0]
     }
 
     sealed interface Write : io.matthewnelson.kmp.file/FileStream { // io.matthewnelson.kmp.file/FileStream.Write|null[0]
         abstract val isAppending // io.matthewnelson.kmp.file/FileStream.Write.isAppending|{}isAppending[0]
             abstract fun <get-isAppending>(): kotlin/Boolean // io.matthewnelson.kmp.file/FileStream.Write.isAppending.<get-isAppending>|<get-isAppending>(){}[0]
 
-        abstract fun flush() // io.matthewnelson.kmp.file/FileStream.Write.flush|flush(){}[0]
         abstract fun position(kotlin/Long): io.matthewnelson.kmp.file/FileStream.Write // io.matthewnelson.kmp.file/FileStream.Write.position|position(kotlin.Long){}[0]
         abstract fun size(kotlin/Long): io.matthewnelson.kmp.file/FileStream.Write // io.matthewnelson.kmp.file/FileStream.Write.size|size(kotlin.Long){}[0]
+        abstract fun sync(kotlin/Boolean): io.matthewnelson.kmp.file/FileStream.Write // io.matthewnelson.kmp.file/FileStream.Write.sync|sync(kotlin.Boolean){}[0]
         abstract fun write(kotlin/ByteArray) // io.matthewnelson.kmp.file/FileStream.Write.write|write(kotlin.ByteArray){}[0]
         abstract fun write(kotlin/ByteArray, kotlin/Int, kotlin/Int) // io.matthewnelson.kmp.file/FileStream.Write.write|write(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
     }
@@ -44,6 +46,7 @@ sealed interface io.matthewnelson.kmp.file/FileStream : io.matthewnelson.kmp.fil
     sealed class ReadWrite : io.matthewnelson.kmp.file/FileStream.Read, io.matthewnelson.kmp.file/FileStream.Write { // io.matthewnelson.kmp.file/FileStream.ReadWrite|null[0]
         abstract fun position(kotlin/Long): io.matthewnelson.kmp.file/FileStream.ReadWrite // io.matthewnelson.kmp.file/FileStream.ReadWrite.position|position(kotlin.Long){}[0]
         abstract fun size(kotlin/Long): io.matthewnelson.kmp.file/FileStream.ReadWrite // io.matthewnelson.kmp.file/FileStream.ReadWrite.size|size(kotlin.Long){}[0]
+        abstract fun sync(kotlin/Boolean): io.matthewnelson.kmp.file/FileStream.ReadWrite // io.matthewnelson.kmp.file/FileStream.ReadWrite.sync|sync(kotlin.Boolean){}[0]
     }
 }
 

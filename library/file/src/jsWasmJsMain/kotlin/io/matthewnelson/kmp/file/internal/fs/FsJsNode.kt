@@ -376,16 +376,6 @@ internal class FsJsNode private constructor(
 
         override fun isOpen(): Boolean = _fd != null
 
-        override fun flush() {
-            val fd = _fd ?: throw fileStreamClosed()
-            checkCanFlush()
-            try {
-                jsExternTryCatch { fs.fsyncSync(fd) }
-            } catch (t: Throwable) {
-                throw t.toIOException()
-            }
-        }
-
         override fun position(): Long {
             if (isAppending) return size()
             _fd ?: throw fileStreamClosed()
@@ -465,6 +455,19 @@ internal class FsJsNode private constructor(
             }
             if (isAppending) return this
             if (_position > new) _position = new
+            return this
+        }
+
+        override fun sync(meta: Boolean): FileStream.ReadWrite {
+            val fd = _fd ?: throw fileStreamClosed()
+            try {
+                jsExternTryCatch { if (meta) fs.fsyncSync(fd) else fs.fdatasyncSync(fd) }
+            } catch (t: Throwable) {
+                val e = t.toIOException()
+                // ERROR_ACCESS_DENIED
+                if (e is AccessDeniedException && isWindows) return this
+                throw e
+            }
             return this
         }
 

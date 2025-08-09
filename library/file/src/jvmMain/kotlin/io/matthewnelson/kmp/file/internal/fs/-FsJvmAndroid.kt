@@ -354,12 +354,6 @@ internal class FsJvmAndroid private constructor(
 
         override fun isOpen(): Boolean = _c != null
 
-        override fun flush() {
-            val c = _c ?: throw fileStreamClosed()
-            checkCanFlush()
-            c.fd.sync()
-        }
-
         override fun position(): Long {
             if (isAppending) return size()
             val c = _c ?: throw fileStreamClosed()
@@ -395,6 +389,16 @@ internal class FsJvmAndroid private constructor(
                 if (isAppending) return@wrapErrnoException
                 val pos = lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long
                 if (pos > new) lseek.invoke(null, c.fd, new, const.SEEK_SET)
+            }
+            return this
+        }
+
+        override fun sync(meta: Boolean): FileStream.ReadWrite {
+            val c = _c ?: throw fileStreamClosed()
+            if (meta) {
+                c.fd.sync()
+            } else {
+                wrapErrnoException(null) { fdatasync.invoke(null, c.fd) }
             }
             return this
         }
@@ -451,6 +455,8 @@ private class Os {
     /** `close(fd: FileDescriptor)` */
     val close: Method
 
+    /** `fdatasync(fd: FileDescriptor)` */
+    val fdatasync: Method
     /** `fstat(fd: FileDescriptor): StructStat` */
     val fstat: Method
     /** `ftruncate(fd: FileDescriptor, length: Long)` */
@@ -492,6 +498,7 @@ private class Os {
 
         chmod = clazz.getMethod("chmod", String::class.java, Int::class.javaPrimitiveType)
         close = clazz.getMethod("close", FileDescriptor::class.java)
+        fdatasync = clazz.getMethod("fdatasync", FileDescriptor::class.java)
         fstat = clazz.getMethod("fstat", FileDescriptor::class.java)
         ftruncate = clazz.getMethod("ftruncate", FileDescriptor::class.java, Long::class.javaPrimitiveType)
         lseek = clazz.getMethod("lseek", FileDescriptor::class.java, Long::class.javaPrimitiveType, Int::class.javaPrimitiveType)

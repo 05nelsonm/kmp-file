@@ -111,7 +111,7 @@ class ReadUnitTest: ReadSharedTest() {
         override fun size(new: Long): FileStream.ReadWrite {
             TODO("Not yet implemented")
         }
-        override fun flush() {
+        override fun sync(meta: Boolean): FileStream.ReadWrite {
             TODO("Not yet implemented")
         }
         override fun write(buf: ByteArray, offset: Int, len: Int) {

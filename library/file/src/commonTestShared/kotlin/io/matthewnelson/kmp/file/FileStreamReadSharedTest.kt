@@ -33,7 +33,11 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     @Test
     fun givenOpenRead_whenIsInstanceOfFileStreamWrite_thenIsFalse() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-        tmp.testOpen().use { s -> assertIsNotWrite(s) }
+        tmp.testOpen().use { s ->
+            assertIsNotWrite(s)
+            assertIsNotWrite(s.position(0L))
+            assertIsNotWrite(s.sync(meta = true))
+        }
     }
 
     @Test
@@ -46,6 +50,14 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             s.close()
             assertFalse(s.isOpen())
             assertStreamClosed { s.read(ByteArray(1)) }
+        }
+    }
+
+    @Test
+    fun givenOpenWrite_whenSync_thenWorks() = runTest { tmp ->
+        tmp.writeUtf8(excl = null, "Hello World!")
+        tmp.testOpen().use { s ->
+            s.sync(meta = true).sync(meta = false)
         }
     }
 
