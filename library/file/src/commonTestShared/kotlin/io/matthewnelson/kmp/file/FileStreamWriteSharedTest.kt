@@ -88,22 +88,32 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
 
     @Test
     fun givenOpenWrite_whenExclMustExist_thenThrowsFileNotFoundException() = runTest { tmp ->
-        assertFailsWith<FileNotFoundException> {
-            tmp.testOpen(excl = OpenExcl.MustExist, appending = false).close()
-        }
-        assertFailsWith<FileNotFoundException> {
-            tmp.testOpen(excl = OpenExcl.MustExist, appending = true).close()
+        arrayOf(true, false).forEach { appending ->
+            var s: FileStream.Write? = null
+            try {
+                s = tmp.testOpen(excl = OpenExcl.MustExist, appending = appending)
+                fail("open should have failed... >> ${OpenExcl.MustExist} >> appending[$appending]")
+            } catch (_: FileNotFoundException) {
+                // pass
+            } finally {
+                s?.close()
+            }
         }
     }
 
     @Test
     fun givenOpenWrite_whenExclMustCreate_thenThrowsFileAlreadyExistsException() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-        assertFailsWith<FileAlreadyExistsException> {
-            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = false).close()
-        }
-        assertFailsWith<FileAlreadyExistsException> {
-            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).close()
+        arrayOf(true, false).forEach { appending ->
+            var s: FileStream.Write? = null
+            try {
+                s = tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = appending)
+                fail("open should have failed... >> ${OpenExcl.MustCreate.DEFAULT} >> appending[$appending]")
+            } catch (_: FileAlreadyExistsException) {
+                // pass
+            } finally {
+                s?.close()
+            }
         }
     }
 
@@ -129,14 +139,44 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenAppendingTrue_thenInitialPositionIsSize() = runTest { tmp ->
+    fun givenOpenWrite_whenAppendingTrue_thenPositionIsAlwaysSize() = runTest { tmp ->
         val data = "Hello World!".encodeToByteArray()
         tmp.writeBytes(excl = null, data)
-        tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s ->
-            assertEquals(data.size.toLong(), s.position())
-            s.write(ByteArray(2) { (-5).toByte() })
-            assertEquals((data.size + 2).toLong(), s.position())
+        tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s1 ->
+            assertEquals(data.size.toLong(), s1.position())
+            s1.write(byteArrayOf(-5, -5))
+            assertEquals((data.size + 2).toLong(), s1.position())
             assertContentEquals(byteArrayOf(*data, -5, -5), tmp.readBytes())
+
+            tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s2 ->
+                assertEquals((data.size + 2).toLong(), s2.position())
+                s2.write(byteArrayOf(2))
+                assertEquals((data.size + 3).toLong(), s1.position())
+                assertEquals((data.size + 3).toLong(), s2.position())
+                assertContentEquals(byteArrayOf(*data, -5, -5, 2), tmp.readBytes())
+
+                tmp.testOpen(excl = OpenExcl.MustExist, appending = false).use { s3 ->
+                    val streams = arrayOf(s1, s2, s3)
+                    streams.forEach { s ->
+                        assertEquals(0L, s.position())
+                        assertEquals(0L, s.size())
+                    }
+
+                    s3.write(data)
+
+                    streams.forEach { s ->
+                        assertEquals(data.size.toLong(), s.position())
+                        assertEquals(data.size.toLong(), s.size())
+                    }
+
+                    s3.size(1L)
+
+                    streams.forEach { s ->
+                        assertEquals(1L, s.position())
+                        assertEquals(1L, s.size())
+                    }
+                }
+            }
         }
     }
 
