@@ -141,10 +141,36 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenAppendingTrue_thenSetSizeOrPositionThrowsIllegalStateException() = runTest { tmp ->
-        tmp.testOpen(excl = null, appending = true).use { s ->
-            assertFailsWith<IllegalStateException> { s.position(2L) }
-            assertFailsWith<IllegalStateException> { s.size(2L) }
+    fun givenOpenWrite_whenAppendingTrue_thenChangingPositionIsIgnored() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
+            assertTrue(s.isAppending, "isAppending")
+            assertEquals(0L, s.position())
+            s.write(ByteArray(2) { 1.toByte() })
+            assertEquals(2L, s.position())
+            s.position(0L)
+            assertEquals(2L, s.position())
+            // Should not throw (like normally would)
+            s.position(-1L)
+        }
+    }
+
+    @Test
+    fun givenOpenWrite_whenAppendingTrue_thenChangeSizeThrowsIllegalStateException() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
+            assertEquals(0L, s.position())
+            assertEquals(0L, s.size())
+
+            assertFailsWith<IllegalStateException> { s.size(4L) }
+            assertEquals(0L, s.position())
+            assertEquals(0L, s.size())
+
+            s.write(ByteArray(5) { 1.toByte() })
+            assertEquals(5L, s.position())
+            assertEquals(5L, s.size())
+
+            assertFailsWith<IllegalStateException> { s.size(0L) }
+            assertEquals(5L, s.position())
+            assertEquals(5L, s.size())
         }
     }
 

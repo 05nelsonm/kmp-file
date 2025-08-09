@@ -57,13 +57,14 @@ public expect sealed interface FileStream: Closeable {
      * akin to [lseek](https://man7.org/linux/man-pages/man2/lseek.2.html) using
      * arguments `offset = new, whence = SEEK_SET`.
      *
+     * **NOTE:** If [Write.isAppending] is `true`, this is silently ignored.
+     *
      * @param [new] The new position for the file pointer.
      *
      * @return The [FileStream] stream for chaining operations.
      *
      * @throws [IllegalArgumentException] If [new] is less than 0.
      * @throws [IOException] If an I/O error occurs, or the stream is closed.
-     * @throws [IllegalStateException] If the [FileStream] is [Write] and [Write.isAppending] is `true`.
      * */
     @Throws(IOException::class)
     public fun position(new: Long): FileStream
@@ -160,13 +161,14 @@ public expect sealed interface FileStream: Closeable {
          * akin to [lseek](https://man7.org/linux/man-pages/man2/lseek.2.html) using
          * arguments `offset = new, whence = SEEK_SET`.
          *
+         * **NOTE:** If [isAppending] is `true`, this is silently ignored.
+         *
          * @param [new] The new position for the file pointer.
          *
          * @return The [Write] stream for chaining operations.
          *
          * @throws [IllegalArgumentException] If [new] is less than 0.
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
-         * @throws [IllegalStateException] If [isAppending] is `true`.
          * */
         @Throws(IOException::class)
         public override fun position(new: Long): Write

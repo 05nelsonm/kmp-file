@@ -66,9 +66,6 @@ internal abstract class AbstractFileStream internal constructor(
     protected inline fun checkCanFlush() {
         checkCanWrite()
     }
-    protected inline fun checkCanPositionNew() {
-        checkIsNotAppending()
-    }
     protected inline fun checkCanRead() {
         check(canRead) { "FileStream is O_WRONLY" }
     }

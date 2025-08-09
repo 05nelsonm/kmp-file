@@ -443,7 +443,7 @@ internal class FsJsNode private constructor(
 
         override fun position(new: Long): FileStream.ReadWrite {
             _fd ?: throw fileStreamClosed()
-            checkCanPositionNew()
+            if (isAppending) return this
             require(new >= 0L) { "new[$new] < 0" }
             _position = new
             return this
