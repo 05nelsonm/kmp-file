@@ -18,6 +18,8 @@
 package io.matthewnelson.kmp.file.internal
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import platform.posix.F_FULLFSYNC
+import platform.posix.fcntl
 import platform.posix.ftruncate
 import platform.posix.lseek
 
@@ -27,6 +29,11 @@ internal actual inline fun platformLSeek(
     offset: Long,
     whence: Int,
 ): Long = lseek(fd, offset, whence)
+
+@ExperimentalForeignApi
+internal actual inline fun platformFDataSync(
+    fd: Int,
+): Int = fcntl(fd, F_FULLFSYNC)
 
 @ExperimentalForeignApi
 internal actual inline fun platformFTruncate(

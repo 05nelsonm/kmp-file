@@ -24,6 +24,7 @@ import kotlin.jvm.JvmSynthetic
 internal class FileStreamReadOnly private constructor(private val s: AbstractFileStream): FileStream.Read by s {
     init { disappearingCheck(condition = { s.canRead }) { "AbstractFileStream.canRead != true" } }
     override fun position(new: Long): FileStream.Read { s.position(new); return this }
+    override fun sync(meta: Boolean): FileStream.Read { s.sync(meta); return this }
     override fun equals(other: Any?): Boolean = other is FileStreamReadOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
     override fun toString(): String = "ReadOnly$s"
@@ -38,6 +39,7 @@ internal class FileStreamWriteOnly private constructor(private val s: AbstractFi
     init { disappearingCheck(condition = { s.canWrite }) { "AbstractFileStream.canWrite != true" } }
     override fun position(new: Long): FileStream.Write { s.position(new); return this }
     override fun size(new: Long): FileStream.Write { s.size(new); return this }
+    override fun sync(meta: Boolean): FileStream.Write { s.sync(meta); return this }
     override fun equals(other: Any?): Boolean = other is FileStreamWriteOnly && other.s == s
     override fun hashCode(): Int = s.hashCode()
     override fun toString(): String = "WriteOnly$s"
@@ -63,9 +65,6 @@ internal abstract class AbstractFileStream internal constructor(
     final override fun read(buf: ByteArray): Int = read(buf, 0, buf.size)
     final override fun write(buf: ByteArray) { write(buf, 0, buf.size) }
 
-    protected inline fun checkCanFlush() {
-        checkCanWrite()
-    }
     protected inline fun checkCanRead() {
         check(canRead) { "FileStream is O_WRONLY" }
     }

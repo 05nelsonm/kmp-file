@@ -51,13 +51,6 @@ internal class UnixFileStream(
 
     override fun isOpen(): Boolean = _fd.value != null
 
-    override fun flush() {
-        val fd = _fd.value ?: throw fileStreamClosed()
-        checkCanFlush()
-        if (fsync(fd) == 0) return
-        throw errnoToIOException(errno)
-    }
-
     override fun position(): Long {
         if (isAppending) return size()
         val fd = _fd.value ?: throw fileStreamClosed()
@@ -123,6 +116,13 @@ internal class UnixFileStream(
         return this
     }
 
+    override fun sync(meta: Boolean): FileStream.ReadWrite {
+        val fd = _fd.value ?: throw fileStreamClosed()
+        val ret = if (meta) fsync(fd) else platformFDataSync(fd)
+        if (ret == 0) return this
+        throw errnoToIOException(errno)
+    }
+
     override fun write(buf: ByteArray, offset: Int, len: Int) {
         val fd = _fd.value ?: throw fileStreamClosed()
         checkCanWrite()
@@ -167,6 +167,11 @@ internal expect inline fun platformLSeek(
     offset: Long,
     whence: Int,
 ): Long
+
+@ExperimentalForeignApi
+internal expect inline fun platformFDataSync(
+    fd: Int,
+): Int
 
 @ExperimentalForeignApi
 internal expect inline fun platformFTruncate(

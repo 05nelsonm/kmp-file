@@ -39,12 +39,6 @@ internal class NioFileStream private constructor(
 
     override fun isOpen(): Boolean = _ch != null
 
-    override fun flush() {
-        val ch = _ch ?: throw fileStreamClosed()
-        checkCanFlush()
-        ch.force(true)
-    }
-
     override fun position(): Long {
         run {
             if (!isAppending) return@run
@@ -106,6 +100,12 @@ internal class NioFileStream private constructor(
             val pos = ch.position()
             if (pos > new) ch.position(new)
         }
+        return this
+    }
+
+    override fun sync(meta: Boolean): FileStream.ReadWrite {
+        val ch = _ch ?: throw fileStreamClosed()
+        ch.force(meta)
         return this
     }
 
