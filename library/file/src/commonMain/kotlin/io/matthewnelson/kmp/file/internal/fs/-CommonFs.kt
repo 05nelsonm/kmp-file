@@ -19,7 +19,6 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.fileAlreadyExistsException
 import io.matthewnelson.kmp.file.internal.toMode
@@ -85,58 +84,4 @@ internal inline fun Fs.commonMkdirs(dir: File, mode: String?, mustCreate: Boolea
     }
 
     return dir
-}
-
-private val DELETE_FILE_POST_OPEN_NULL_NULL: Pair<Boolean?, Boolean?> = Pair(null, null)
-
-/**
- * For figuring out if some post open file operation needs to be performed,
- * whether failure of that post open file operation necessitates deleting
- * the file to clean up, before throwing the exception.
- *
- * Returns {deleteOnActionFailure: Boolean?, fileExists: Boolean?}.
- *
- * @throws [IOException] If [Fs.exists] throws a security exception.
- * */
-@Throws(IOException::class)
-internal inline fun Fs.deleteFileOnPostOpenConfigurationFailure(
-    file: File,
-    excl: OpenExcl,
-    // If OpenExcl.MustCreate, use this value. This allows for
-    // returning {null, null} if the file is going to be newly
-    // created and the post open action is not necessary (such
-    // as setting the file pointer to SEEK_END for append mode
-    // because the file is new and already at 0L).
-    whenMustCreate: Boolean? = null,
-    needsConfigurationPostOpen: Boolean,
-): Pair<Boolean?, Boolean?> = ::exists.deleteFileOnPostOpenConfigurationFailure(
-    file,
-    excl,
-    whenMustCreate,
-    needsConfigurationPostOpen,
-)
-
-@Throws(IOException::class)
-internal fun (/* Fs.exists(file) */ (File) -> Boolean).deleteFileOnPostOpenConfigurationFailure(
-    file: File,
-    excl: OpenExcl,
-    whenMustCreate: Boolean?,
-    needsConfigurationPostOpen: Boolean,
-): Pair<Boolean?, Boolean?> {
-    if (!needsConfigurationPostOpen) return DELETE_FILE_POST_OPEN_NULL_NULL
-
-    var exists: Boolean? = null
-    val deleteOnFailure = when (excl) {
-        is OpenExcl.MaybeCreate -> {
-            exists = this(file)
-            // If file does not currently exist
-            !exists
-        }
-        // Will be a new file if successful. No need to set pointer to
-        // EOF for appending (size will be 0L).
-        is OpenExcl.MustCreate -> whenMustCreate
-        is OpenExcl.MustExist -> false
-    }
-    if (exists == null && deleteOnFailure == null) return DELETE_FILE_POST_OPEN_NULL_NULL
-    return deleteOnFailure to exists
 }
