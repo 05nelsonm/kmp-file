@@ -436,6 +436,7 @@ internal class FsJsNode private constructor(
             } catch (t: Throwable) {
                 throw t.toIOException()
             }
+            if (isAppending) return this
             if (_position > new) _position = new
             return this
         }

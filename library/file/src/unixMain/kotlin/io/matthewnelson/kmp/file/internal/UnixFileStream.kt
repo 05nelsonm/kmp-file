@@ -109,11 +109,12 @@ internal class UnixFileStream(
     override fun size(new: Long): FileStream.ReadWrite {
         val fd = _fd.value ?: throw fileStreamClosed()
         checkCanSizeNew()
-        val pos = platformLSeek(fd, 0L, SEEK_CUR)
-        if (pos == -1L) {
+        if (platformFTruncate(fd, new) == -1) {
             throw errnoToIllegalArgumentOrIOException(errno, null)
         }
-        if (platformFTruncate(fd, new) == -1) {
+        if (isAppending) return this
+        val pos = platformLSeek(fd, 0L, SEEK_CUR)
+        if (pos == -1L) {
             throw errnoToIllegalArgumentOrIOException(errno, null)
         }
         if (pos > new && platformLSeek(fd, new, SEEK_SET) == -1L) {

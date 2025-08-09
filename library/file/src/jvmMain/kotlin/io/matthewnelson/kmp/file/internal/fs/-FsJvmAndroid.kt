@@ -391,8 +391,9 @@ internal class FsJvmAndroid private constructor(
             val c = _c ?: throw fileStreamClosed()
             checkCanSizeNew()
             wrapErrnoException(null) {
-                val pos = lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long
                 ftruncate.invoke(null, c.fd, new)
+                if (isAppending) return@wrapErrnoException
+                val pos = lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long
                 if (pos > new) lseek.invoke(null, c.fd, new, const.SEEK_SET)
             }
             return this

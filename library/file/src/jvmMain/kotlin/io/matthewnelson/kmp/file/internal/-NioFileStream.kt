@@ -91,14 +91,16 @@ internal class NioFileStream private constructor(
 
         if (new > ch.size()) {
             val bb = ByteBuffer.wrap(ByteArray(1))
-            val pos = ch.position()
             ch.write(bb, new - 1L)
+            if (isAppending) return this
+            val pos = ch.position()
             if (pos > new) ch.position(new)
         } else {
             ch.truncate(new)
 
             // Android API 20 and below does not set channel position
             // properly if current position is greater than new.
+            if (isAppending) return this
             if (ANDROID.SDK_INT == null) return this
             if (ANDROID.SDK_INT >= 21) return this
             val pos = ch.position()
