@@ -42,7 +42,6 @@ internal external interface ModuleFs {
     fun statSync(path: Path): JsStats
     fun unlinkSync(path: Path)
     fun writeSync(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double?): Double
-    fun writeFileSync(path: Path, data: JsBuffer, options: JsObject)
 
     val constants: ConstantsFs
 }

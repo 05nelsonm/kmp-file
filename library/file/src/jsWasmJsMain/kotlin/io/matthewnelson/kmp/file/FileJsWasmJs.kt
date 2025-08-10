@@ -17,11 +17,8 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.IsWindows
-import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
-import io.matthewnelson.kmp.file.internal.node.nodeOptionsWriteFile
 import io.matthewnelson.kmp.file.internal.require
 
 /**
@@ -133,28 +130,7 @@ public inline fun File.write(excl: OpenExcl?, data: Buffer) {
 public fun File.write(excl: OpenExcl?, appending: Boolean, data: Buffer) {
     val node = FsJsNode.require()
     val excl = excl ?: OpenExcl.MaybeCreate.DEFAULT
-
-    val mode = if (IsWindows) {
-        if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-    } else {
-        excl.mode
-    }
-
-    var flags = if (appending) "a" else "w"
-    when (excl) {
-        is OpenExcl.MaybeCreate -> {}
-        is OpenExcl.MustCreate -> flags += "x"
-        is OpenExcl.MustExist -> if (!node.exists(this)) throw fileNotFoundException(this, null, null)
-    }
-
-    val options = nodeOptionsWriteFile(mode = mode, flag = flags)
-
-    try {
-        @OptIn(DelicateFileApi::class)
-        jsExternTryCatch { node.fs.writeFileSync(path, data.value, options) }
-    } catch (t: Throwable) {
-        throw t.toIOException(this)
-    }
+    node.openWrite(this, excl, appending).use { s -> s.write(data) }
 }
 
 /**
