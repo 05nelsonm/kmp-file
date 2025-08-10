@@ -126,6 +126,10 @@ internal inline fun Buffer.commonWriteInt8(index: Number, byte: Byte) {
     value.writeInt8(value = byte, offset = i)
 }
 
+internal inline fun Buffer.commonToString(): String {
+    return "Buffer@" + hashCode()
+}
+
 internal inline fun Buffer.commonToUtf8(start: Number, end: Number): String {
     return value.toString(encoding = "utf8", start = start.toDouble(), end = end.toDouble())
 }
