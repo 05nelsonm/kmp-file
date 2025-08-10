@@ -413,9 +413,17 @@ internal class FsJsNode private constructor(
                         )
                     }
                 } catch (t: Throwable) {
-                    val e = t.toIOException()
-                    if (e is InterruptedIOException) {
-                        e.bytesTransferred = total
+                    var e = t.toIOException()
+                    when {
+                        e is InterruptedIOException -> {
+                            e.bytesTransferred = total
+                        }
+                        total > 0 -> {
+                            e = InterruptedIOException("Read was interrupted").apply {
+                                bytesTransferred = total
+                                addSuppressed(e)
+                            }
+                        }
                     }
                     throw e
                 }.toInt()
@@ -499,7 +507,6 @@ internal class FsJsNode private constructor(
             val fd = _fd ?: throw fileStreamClosed()
             checkCanWrite()
             buf.checkBounds(offset, len)
-            if (len == 0) return
 
             var remainder = len
             var pos = offset
@@ -523,9 +530,17 @@ internal class FsJsNode private constructor(
                         )
                     }
                 } catch (t: Throwable) {
-                    val e = t.toIOException()
-                    if (e is InterruptedIOException) {
-                        e.bytesTransferred = len - remainder
+                    var e = t.toIOException()
+                    when {
+                        e is InterruptedIOException -> {
+                            e.bytesTransferred = len - remainder
+                        }
+                        remainder != len -> {
+                            e = InterruptedIOException("Write was interrupted").apply {
+                                bytesTransferred = len - remainder
+                                addSuppressed(e)
+                            }
+                        }
                     }
                     throw e
                 }.toInt()
@@ -547,11 +562,10 @@ internal class FsJsNode private constructor(
             val fd = _fd ?: throw fileStreamClosed()
             checkCanWrite()
             buf.length.toLong().checkBounds(offset, len)
-            if (len == 0L) return
 
             var remainder = len
             var off = offset
-            while (remainder > 0) {
+            while (remainder > 0L) {
                 val position = currentPosition()
 
                 val bytesWritten = try {
