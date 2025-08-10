@@ -20,6 +20,7 @@ import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.Closeable
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.InterruptedIOException
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 
@@ -64,9 +65,35 @@ internal class NioFileStream private constructor(
         val bb = ByteBuffer.wrap(buf, offset, len)
         var total = 0
         while (total < len) {
-            val read = ch.read(bb)
+            val read = try {
+                ch.read(bb)
+            } catch (e: IOException) {
+                var e = e
+                when {
+                    e is InterruptedIOException -> {
+                        // Need to add in previous reads
+                        e.bytesTransferred += total
+                    }
+                    total > 0 -> {
+                        e = InterruptedIOException("Read was interrupted").apply {
+                            bytesTransferred = total
+                            addSuppressed(e)
+                        }
+                    }
+                }
+                throw e
+            }
             if (read == -1) {
                 if (total == 0) total = -1
+                break
+            }
+            if (read == 0) {
+                if (total > 0) {
+                    val e = InterruptedIOException("read == 0")
+                    e.bytesTransferred = total
+                    throw e
+                }
+                total = -1
                 break
             }
             total += read

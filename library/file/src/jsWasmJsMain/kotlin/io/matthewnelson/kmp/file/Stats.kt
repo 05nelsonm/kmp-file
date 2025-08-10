@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file
 
@@ -39,4 +39,8 @@ public expect value class Stats internal constructor(private val value: JsStats)
 
     /** @suppress */
     public override fun toString(): String
+}
+
+internal inline fun Stats.commonToString(): String {
+    return "Stats@" + hashCode()
 }

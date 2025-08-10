@@ -140,13 +140,25 @@ internal class UnixFileStream(
                     (len - total).convert(),
                 ).toInt()
                 if (ret < 0) {
-                    val e = errnoToIOException(errno)
-                    if (e is InterruptedIOException) {
-                        e.bytesTransferred = total
+                    var e = errnoToIOException(errno)
+                    when {
+                        e is InterruptedIOException -> {
+                            e.bytesTransferred = total
+                        }
+                        total > 0 -> {
+                            e = InterruptedIOException("Write was interrupted").apply {
+                                bytesTransferred = total
+                                addSuppressed(e)
+                            }
+                        }
                     }
                     throw e
                 }
-                if (ret == 0) throw IOException("write == 0")
+                if (ret == 0) {
+                    val e = InterruptedIOException("write == 0")
+                    e.bytesTransferred = total
+                    throw e
+                }
                 total += ret
             }
         }

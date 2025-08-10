@@ -49,7 +49,7 @@ internal class FileStreamWriteOnly private constructor(private val s: AbstractFi
     }
 }
 
-internal abstract class AbstractFileStream internal constructor(
+internal abstract class AbstractFileStream protected constructor(
     internal val canRead: Boolean,
     internal val canWrite: Boolean,
     final override val isAppending: Boolean,

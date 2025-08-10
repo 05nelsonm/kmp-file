@@ -86,7 +86,7 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
     public fun unwrap(): JsAny = value
 
     /** @suppress */
-    public actual override fun toString(): String = "Buffer@${hashCode()}"
+    public actual override fun toString(): String = commonToString()
 
     public actual companion object {
 
@@ -163,5 +163,5 @@ public actual value class Stats internal constructor(private val value: JsStats)
     public fun unwrap(): JsAny = value
 
     /** @suppress */
-    public actual override fun toString(): String = "Stats@${hashCode()}"
+    public actual override fun toString(): String = commonToString()
 }

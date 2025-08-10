@@ -197,13 +197,25 @@ internal class MinGWFileStream(
                     )
 
                     if (ret == FALSE) {
-                        val e = lastErrorToIOException()
-                        if (e is InterruptedIOException) {
-                            e.bytesTransferred = total
+                        var e = lastErrorToIOException()
+                        when {
+                            e is InterruptedIOException -> {
+                                e.bytesTransferred = total
+                            }
+                            total > 0 -> {
+                                e = InterruptedIOException("Write was interrupted").apply {
+                                    bytesTransferred = total
+                                    addSuppressed(e)
+                                }
+                            }
                         }
                         throw e
                     }
-                    if (bytesWrite.value == 0u) throw IOException("write == 0")
+                    if (bytesWrite.value == 0u) {
+                        val e = InterruptedIOException("write == 0")
+                        e.bytesTransferred = total
+                        throw e
+                    }
                     total += bytesWrite.value.toInt()
                 }
             }
