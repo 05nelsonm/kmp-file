@@ -31,14 +31,14 @@ package io.matthewnelson.kmp.file
  * @see [Write]
  * @see [ReadWrite]
  * */
-public expect sealed interface FileStream: Closeable {
+public actual sealed interface FileStream: Closeable {
 
     /**
      * Checks if this [FileStream] has been closed or not.
      *
      * @return `true` if the [FileStream] is still open, `false` otherwise.
      * */
-    public fun isOpen(): Boolean
+    public actual fun isOpen(): Boolean
 
     /**
      * Retrieves the current position of the file pointer for which the next
@@ -50,7 +50,7 @@ public expect sealed interface FileStream: Closeable {
      * @throws [IOException] If the stream is closed.
      * */
     @Throws(IOException::class)
-    public fun position(): Long
+    public actual fun position(): Long
 
     /**
      * Sets the current position of the file pointer to [new]. This is
@@ -67,7 +67,7 @@ public expect sealed interface FileStream: Closeable {
      * @throws [IOException] If an I/O error occurs, or the stream is closed.
      * */
     @Throws(IOException::class)
-    public fun position(new: Long): FileStream
+    public actual fun position(new: Long): FileStream
 
     /**
      * The current size of the [File] for which this [FileStream] stream belongs.
@@ -77,7 +77,7 @@ public expect sealed interface FileStream: Closeable {
      * @throws [IOException] If an I/O error occurs, or the stream is closed.
      * */
     @Throws(IOException::class)
-    public fun size(): Long
+    public actual fun size(): Long
 
     /**
      * Syncs any updates to the [File] for which this stream belongs, to the
@@ -104,14 +104,14 @@ public expect sealed interface FileStream: Closeable {
      * @throws [IOException] If an I/O error occurs, or the stream is closed.
      * */
     @Throws(IOException::class)
-    public fun sync(meta: Boolean): FileStream
+    public actual fun sync(meta: Boolean): FileStream
 
     /**
      * A stream for read operations whereby the source of data is a [File].
      *
      * @see [openRead]
      * */
-    public sealed interface Read: FileStream {
+    public actual sealed interface Read: FileStream {
 
         /**
          * Sets the current position of the file pointer to [new]. This is
@@ -126,7 +126,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public override fun position(new: Long): Read
+        public actual override fun position(new: Long): Read
 
         /**
          * Reads data into the provided array. The [position] is automatically
@@ -140,7 +140,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public fun read(buf: ByteArray): Int
+        public actual fun read(buf: ByteArray): Int
 
         /**
          * Reads data into the provided array. The [position] is automatically
@@ -157,7 +157,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IndexOutOfBoundsException] If [offset] or [len] are inappropriate.
          * */
         @Throws(IOException::class)
-        public fun read(buf: ByteArray, offset: Int, len: Int): Int
+        public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
 
         /**
          * Syncs any updates to the [File] for which this stream belongs, to the
@@ -184,7 +184,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public override fun sync(meta: Boolean): Read
+        public actual override fun sync(meta: Boolean): Read
     }
 
     /**
@@ -193,14 +193,12 @@ public expect sealed interface FileStream: Closeable {
      * @see [openWrite]
      * @see [openAppending]
      * */
-    public sealed interface Write: FileStream {
+    public actual sealed interface Write: FileStream {
 
         /**
          * If the [Write] stream was opened in appending mode.
-         *
-         * **NOTE:** If this is a [ReadWrite] stream, this will **always** be `false`
          * */
-        public val isAppending: Boolean
+        public actual val isAppending: Boolean
 
         /**
          * Sets the current position of the file pointer to [new]. This is
@@ -217,7 +215,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public override fun position(new: Long): Write
+        public actual override fun position(new: Long): Write
 
         /**
          * Modifies the size of the [File] for which this [Write] stream belongs. This is
@@ -240,7 +238,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public fun size(new: Long): Write
+        public actual fun size(new: Long): Write
 
         /**
          * Syncs any updates to the [File] for which this stream belongs, to the
@@ -267,7 +265,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public override fun sync(meta: Boolean): Write
+        public actual override fun sync(meta: Boolean): Write
 
         /**
          * Writes the entire contents of [buf] to the [File] for which this [Write]
@@ -279,7 +277,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public fun write(buf: ByteArray)
+        public actual fun write(buf: ByteArray)
 
         /**
          * Writes [len] number of bytes from [buf], starting at index [offset],
@@ -295,7 +293,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IndexOutOfBoundsException] If [offset] or [len] are inappropriate.
          * */
         @Throws(IOException::class)
-        public fun write(buf: ByteArray, offset: Int, len: Int)
+        public actual fun write(buf: ByteArray, offset: Int, len: Int)
     }
 
     /**
@@ -303,7 +301,7 @@ public expect sealed interface FileStream: Closeable {
      *
      * @see [openReadWrite]
      * */
-    public sealed class ReadWrite protected constructor(): Read, Write {
+    public actual sealed class ReadWrite protected actual constructor(): Read, Write {
 
         /**
          * Sets the current position of the file pointer to [new]. This is
@@ -318,7 +316,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public abstract override fun position(new: Long): ReadWrite
+        public actual abstract override fun position(new: Long): ReadWrite
 
         /**
          * Modifies the size of the [File] for which this [Write] stream belongs. This is
@@ -340,7 +338,7 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public abstract override fun size(new: Long): ReadWrite
+        public actual abstract override fun size(new: Long): ReadWrite
 
         /**
          * Syncs any updates to the [File] for which this stream belongs, to the
@@ -367,6 +365,6 @@ public expect sealed interface FileStream: Closeable {
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
-        public abstract override fun sync(meta: Boolean): ReadWrite
+        public actual abstract override fun sync(meta: Boolean): ReadWrite
     }
 }

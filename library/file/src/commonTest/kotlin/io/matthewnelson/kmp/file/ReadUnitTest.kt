@@ -62,9 +62,7 @@ class ReadUnitTest: ReadSharedTest() {
                 (expected.size - 1).toLong(),
                 (expected.size + 1).toLong(),
             ).forEach { testSize ->
-                val stream = object : TestStream(s = tmp.openRead()) {
-                    override fun size(): Long = testSize
-                }
+                val stream = TestReadStream(s = tmp.openRead()) { testSize }
                 val actual = tmp.commonReadBytes(open = { stream })
 
                 assertFalse(stream.isOpen())
@@ -84,12 +82,10 @@ class ReadUnitTest: ReadSharedTest() {
     fun givenFile_whenReadStreamSizeReturnsGreaterThanIntMax_thenThrowsFileSystemException() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
         tmp.writeUtf8(excl = null, "Hello World!")
-        var stream: TestStream? = null
+        var stream: TestReadStream? = null
 
         try {
-            stream = object : TestStream(s = tmp.openRead()) {
-                override fun size(): Long = Int.MAX_VALUE.toLong() + 1L
-            }
+            stream = TestReadStream(s = tmp.openRead()) { Int.MAX_VALUE.toLong() + 1L }
             tmp.commonReadBytes { stream }
             fail("readBytes should have thrown exception...")
         } catch (e: FileSystemException) {
@@ -98,25 +94,5 @@ class ReadUnitTest: ReadSharedTest() {
         } finally {
             tmp.delete2()
         }
-    }
-
-    private abstract class TestStream(
-        val s: FileStream.Read,
-    ): AbstractFileStream(canRead = true, canWrite = false, isAppending = false, INIT) {
-        final override fun isOpen(): Boolean = s.isOpen()
-        final override fun position(): Long = s.position()
-        final override fun position(new: Long): FileStream.ReadWrite { s.position(new); return this }
-        final override fun read(buf: ByteArray, offset: Int, len: Int): Int = s.read(buf, offset, len)
-        override fun size(): Long = s.size()
-        override fun size(new: Long): FileStream.ReadWrite {
-            TODO("Not yet implemented")
-        }
-        override fun sync(meta: Boolean): FileStream.ReadWrite {
-            TODO("Not yet implemented")
-        }
-        override fun write(buf: ByteArray, offset: Int, len: Int) {
-            TODO("Not yet implemented")
-        }
-        final override fun close() { s.close() }
     }
 }

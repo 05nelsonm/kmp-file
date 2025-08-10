@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+
 package io.matthewnelson.kmp.file
 
 import kotlin.experimental.ExperimentalNativeApi
@@ -29,4 +31,19 @@ actual val IS_SIMULATOR: Boolean by lazy {
 actual val IS_ANDROID: Boolean by lazy {
     @OptIn(ExperimentalNativeApi::class)
     Platform.osFamily == OsFamily.ANDROID
+}
+
+internal actual class TestReadStream actual constructor(
+    actual val s: FileStream.Read,
+    val fakeSize: () -> Long,
+): AbstractFileStream(true, false, false, INIT) {
+    actual override fun isOpen(): Boolean = s.isOpen()
+    actual override fun position(): Long = s.position()
+    actual override fun position(new: Long): FileStream.ReadWrite { s.position(new); return this }
+    actual override fun read(buf: ByteArray, offset: Int, len: Int): Int = s.read(buf, offset, len)
+    actual override fun size(): Long = fakeSize()
+    actual override fun size(new: Long): FileStream.ReadWrite = error("Not implemented")
+    actual override fun sync(meta: Boolean): FileStream.ReadWrite = error("Not implemented")
+    actual override fun write(buf: ByteArray, offset: Int, len: Int) { error("Not implemented") }
+    actual override fun close() { s.close() }
 }

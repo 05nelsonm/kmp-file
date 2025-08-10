@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("RedundantVisibilityModifier")
+@file:Suppress("RedundantVisibilityModifier", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
+import io.matthewnelson.kmp.file.Buffer
 import io.matthewnelson.kmp.file.DelicateFileApi
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
@@ -345,7 +346,6 @@ internal class FsJsNode private constructor(
         }
     }
 
-    @Suppress("NOTHING_TO_INLINE")
     @Throws(FileNotFoundException::class)
     private inline fun Double.checkIsNotADir(file: File): Double {
         try {
@@ -407,8 +407,8 @@ internal class FsJsNode private constructor(
                         fs.readSync(
                             fd = fd,
                             buffer = BUF,
-                            offset = 0,
-                            length = length,
+                            offset = 0.toDouble(),
+                            length = length.toDouble(),
                             position = _position.toDouble(),
                         )
                     }
@@ -418,7 +418,7 @@ internal class FsJsNode private constructor(
                         e.bytesTransferred = total
                     }
                     throw e
-                }
+                }.toInt()
 
                 if (read == 0) break
 
@@ -432,6 +432,32 @@ internal class FsJsNode private constructor(
             }
 
             return if (total == 0) -1 else total
+        }
+
+        override fun read(buf: Buffer): Long = read(buf, 0L, buf.length.toLong())
+
+        override fun read(buf: Buffer, offset: Long, len: Long): Long {
+            val fd = _fd ?: throw fileStreamClosed()
+            checkCanRead()
+            buf.length.toLong().checkBounds(offset, len)
+            if (len == 0L) return 0L
+
+            val read = try {
+                jsExternTryCatch {
+                    fs.readSync(
+                        fd = fd,
+                        buffer = buf.value,
+                        offset = offset.toDouble(),
+                        length = len.toDouble(),
+                        position = _position.toDouble(),
+                    )
+                }
+            } catch (t: Throwable) {
+                throw t.toIOException()
+            }.toLong()
+
+            _position += read
+            return if (read == 0L) -1L else read
         }
 
         override fun size(): Long {
@@ -463,11 +489,8 @@ internal class FsJsNode private constructor(
             try {
                 jsExternTryCatch { if (meta) fs.fsyncSync(fd) else fs.fdatasyncSync(fd) }
             } catch (t: Throwable) {
-                val e = t.toIOException()
-                if (!isWindows) throw e
-                // Windows can throw EPERM
-                if (e.message?.contains("EPERM") == true) return this
-                throw e
+                if (isWindows && t.errorCodeOrNull == "EPERM") return this
+                throw t.toIOException()
             }
             return this
         }
@@ -487,25 +510,15 @@ internal class FsJsNode private constructor(
                     BUF.writeInt8(buf[pos++], i.toDouble())
                 }
 
-                val position = if (isAppending) {
-                    // If it's appending, modification of position is ignored
-                    // from the interface so use whatever the current position
-                    // is for the descriptor (current size).
-                    //
-                    // The only caveat is Windows, which will never specify
-                    // the O_APPEND flag and always requires the end position.
-                    if (isWindows) size().toDouble() else null
-                } else {
-                    _position.toDouble()
-                }
+                val position = currentPosition()
 
                 val bytesWritten = try {
                     jsExternTryCatch {
                         fs.writeSync(
                             fd = fd,
                             buffer = BUF,
-                            offset = 0,
-                            length = length,
+                            offset = 0.toDouble(),
+                            length = length.toDouble(),
                             position = position,
                         )
                     }
@@ -515,11 +528,66 @@ internal class FsJsNode private constructor(
                         e.bytesTransferred = len - remainder
                     }
                     throw e
+                }.toInt()
+
+                if (bytesWritten == 0) {
+                    val e = InterruptedIOException("write == 0")
+                    e.bytesTransferred = len - remainder
+                    throw e
                 }
 
-                if (bytesWritten == 0) throw IOException("write == 0")
+                remainder -= bytesWritten
+                if (!isAppending) _position += bytesWritten
+            }
+        }
+
+        override fun write(buf: Buffer) { write(buf, 0L, buf.length.toLong()) }
+
+        override fun write(buf: Buffer, offset: Long, len: Long) {
+            val fd = _fd ?: throw fileStreamClosed()
+            checkCanWrite()
+            buf.length.toLong().checkBounds(offset, len)
+            if (len == 0L) return
+
+            var remainder = len
+            var off = offset
+            while (remainder > 0) {
+                val position = currentPosition()
+
+                val bytesWritten = try {
+                    jsExternTryCatch {
+                        fs.writeSync(
+                            fd = fd,
+                            buffer = buf.value,
+                            offset = off.toDouble(),
+                            length = remainder.toDouble(),
+                            position = position,
+                        )
+                    }
+                } catch (t: Throwable) {
+                    var e = t.toIOException()
+                    when {
+                        e is InterruptedIOException -> {
+                            e.bytesTransferred = (len - remainder).toInt()
+                        }
+                        remainder != len -> {
+                            e = InterruptedIOException("Write was interrupted").apply {
+                                bytesTransferred = (len - remainder).toInt()
+                                addSuppressed(e)
+                            }
+                        }
+                    }
+                    throw e
+                }.toLong()
+
+                if (bytesWritten == 0L) {
+                    val e = InterruptedIOException("write == 0")
+                    e.bytesTransferred = (len - remainder).toInt()
+                    throw e
+                }
 
                 remainder -= bytesWritten
+                off += bytesWritten
                 if (!isAppending) _position += bytesWritten
             }
         }
@@ -535,5 +603,18 @@ internal class FsJsNode private constructor(
         }
 
         override fun toString(): String = "JsNodeFileStream@" + hashCode().toString()
+
+        @Throws(IOException::class)
+        private inline fun currentPosition(): Double? = if (isAppending) {
+            // If it's appending, modification of position is ignored
+            // from the interface so use whatever the current position
+            // is for the descriptor (current size).
+            //
+            // The only caveat is Windows, which will never specify
+            // the O_APPEND flag and always requires the end position.
+            if (isWindows) size().toDouble() else null
+        } else {
+            _position.toDouble()
+        }
     }
 }

@@ -19,6 +19,20 @@ package io.matthewnelson.kmp.file.internal
 
 @Throws(IndexOutOfBoundsException::class)
 internal inline fun ByteArray.checkBounds(offset: Int, len: Int) {
+    size.checkBounds(offset, len)
+}
+
+@Throws(IndexOutOfBoundsException::class)
+internal inline fun Int.checkBounds(offset: Int, len: Int) {
+    val size = this
+    if (offset < 0) throw IndexOutOfBoundsException("offset[$offset] < 0")
+    if (len < 0) throw IndexOutOfBoundsException("len[$len] < 0")
+    if (offset > size - len) throw IndexOutOfBoundsException("offset[$offset] > size[$size] - len[$len]")
+}
+
+@Throws(IndexOutOfBoundsException::class)
+internal inline fun Long.checkBounds(offset: Long, len: Long) {
+    val size = this
     if (offset < 0) throw IndexOutOfBoundsException("offset[$offset] < 0")
     if (len < 0) throw IndexOutOfBoundsException("len[$len] < 0")
     if (offset > size - len) throw IndexOutOfBoundsException("offset[$offset] > size[$size] - len[$len]")

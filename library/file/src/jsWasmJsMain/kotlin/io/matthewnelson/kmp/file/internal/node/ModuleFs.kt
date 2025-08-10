@@ -35,13 +35,13 @@ internal external interface ModuleFs {
     fun openSync(path: Path, flags: Int): Double
     fun openSync(path: Path, flags: Int, mode: String): Double
     fun openSync(path: Path, flags: String, mode: String): Double // Windows
-    fun readSync(fd: Double, buffer: JsBuffer, offset: Int, length: Int, position: Double): Int
+    fun readSync(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double): Double
     fun readFileSync(path: Path): JsBuffer
     fun realpathSync(path: Path): Path
     fun rmdirSync(path: Path, options: JsObject)
     fun statSync(path: Path): JsStats
     fun unlinkSync(path: Path)
-    fun writeSync(fd: Double, buffer: JsBuffer, offset: Int, length: Int, position: Double?): Int
+    fun writeSync(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double?): Double
     fun writeFileSync(path: Path, data: JsBuffer, options: JsObject)
 
     val constants: ConstantsFs

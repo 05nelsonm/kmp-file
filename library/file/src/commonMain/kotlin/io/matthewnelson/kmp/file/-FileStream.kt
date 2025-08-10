@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
 package io.matthewnelson.kmp.file
 
@@ -49,7 +49,7 @@ internal class FileStreamWriteOnly private constructor(private val s: AbstractFi
     }
 }
 
-internal abstract class AbstractFileStream internal constructor(
+internal abstract class AbstractFileStream protected constructor(
     internal val canRead: Boolean,
     internal val canWrite: Boolean,
     final override val isAppending: Boolean,

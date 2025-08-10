@@ -132,7 +132,7 @@ public actual sealed interface FileStream: Closeable {
          * Reads data into the provided array. The [position] is automatically
          * incremented by the number of bytes read for subsequent operations.
          *
-         * @param [buf] The array to read data from the file into.
+         * @param [buf] The array to place data into.
          *
          * @return The number of bytes read into [buf], or -1 if no more data
          *   is available from the [File] for which this [Read] stream belongs.
@@ -158,6 +158,37 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
+
+        /**
+         * Reads data into the provided [Buffer]. The [position] is automatically
+         * incremented by the number of bytes read for subsequent operations.
+         *
+         * @param [buf] The [Buffer] to place data into.
+         *
+         * @return The number of bytes read into [buf], or -1 if no more data
+         *   is available from the [File] for which this [Read] stream belongs.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * */
+        @Throws(IOException::class)
+        public fun read(buf: Buffer): Long
+
+        /**
+         * Reads data into the provided array. The [position] is automatically
+         * incremented by the number of bytes read for subsequent operations.
+         *
+         * @param [buf] The [Buffer] to place data into.
+         * @param [offset] The index in [buf] to start placing data.
+         * @param [len] The number of bytes to place into [buf], starting at index [offset].
+         *
+         * @return The number of bytes read into [buf], or -1 if no more data
+         *   is available from the [File] for which this [Read] stream belongs.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * @throws [IndexOutOfBoundsException] If [offset] or [len] are inappropriate.
+         * */
+        @Throws(IOException::class)
+        public fun read(buf: Buffer, offset: Long, len: Long): Long
 
         /**
          * Syncs any updates to the [File] for which this stream belongs, to the
@@ -268,7 +299,7 @@ public actual sealed interface FileStream: Closeable {
         public actual override fun sync(meta: Boolean): Write
 
         /**
-         * Writes the entire contents of [buf] to the [File] for which this [ReadWrite]
+         * Writes the entire contents of [buf] to the [File] for which this [Write]
          * stream belongs. The [position] is automatically incremented by the number
          * of bytes written for subsequent operations.
          *
@@ -280,8 +311,8 @@ public actual sealed interface FileStream: Closeable {
         public actual fun write(buf: ByteArray)
 
         /**
-         * Writes [len] number of bytes from [buf], starting at index [offset], to the
-         * [File] for which this [ReadWrite] stream belongs. The [position] is
+         * Writes [len] number of bytes from [buf], starting at index [offset],
+         * to the [File] for which this [Write] stream belongs. The [position] is
          * automatically incremented by the number of bytes written for subsequent
          * operations.
          *
@@ -294,6 +325,34 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public actual fun write(buf: ByteArray, offset: Int, len: Int)
+
+        /**
+         * Writes the entire contents of [buf] to the [File] for which this [Write]
+         * stream belongs. The [position] is automatically incremented by the number
+         * of bytes written for subsequent operations.
+         *
+         * @param [buf] the [Buffer] of data to write.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * */
+        @Throws(IOException::class)
+        public fun write(buf: Buffer)
+
+        /**
+         * Writes [len] number of bytes from [buf], starting at index [offset],
+         * to the [File] for which this [Write] stream belongs. The [position] is
+         * automatically incremented by the number of bytes written for subsequent
+         * operations.
+         *
+         * @param [buf] The [Buffer] of data to write.
+         * @param [offset] The index in [buf] to start at when writing data.
+         * @param [len] The number of bytes from [buf], starting at index [offset], to write.
+         *
+         * @throws [IOException] If an I/O error occurs, or the stream is closed.
+         * @throws [IndexOutOfBoundsException] If [offset] or [len] are inappropriate.
+         * */
+        @Throws(IOException::class)
+        public fun write(buf: Buffer, offset: Long, len: Long)
     }
 
     /**

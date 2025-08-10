@@ -151,7 +151,7 @@ public actual sealed interface FileStream: Closeable, Flushable {
          * Reads data into the provided array. The [position] is automatically
          * incremented by the number of bytes read for subsequent operations.
          *
-         * @param [buf] The array to read data from the file into.
+         * @param [buf] The array to place data into.
          *
          * @return The number of bytes read into [buf], or -1 if no more data
          *   is available from the [File] for which this [Read] stream belongs.
@@ -290,7 +290,7 @@ public actual sealed interface FileStream: Closeable, Flushable {
         public actual override fun sync(meta: Boolean): Write
 
         /**
-         * Writes the entire contents of [buf] to the [File] for which this [ReadWrite]
+         * Writes the entire contents of [buf] to the [File] for which this [Write]
          * stream belongs. The [position] is automatically incremented by the number
          * of bytes written for subsequent operations.
          *
@@ -302,8 +302,8 @@ public actual sealed interface FileStream: Closeable, Flushable {
         public actual fun write(buf: ByteArray)
 
         /**
-         * Writes [len] number of bytes from [buf], starting at index [offset], to the
-         * [File] for which this [ReadWrite] stream belongs. The [position] is
+         * Writes [len] number of bytes from [buf], starting at index [offset],
+         * to the [File] for which this [Write] stream belongs. The [position] is
          * automatically incremented by the number of bytes written for subsequent
          * operations.
          *
