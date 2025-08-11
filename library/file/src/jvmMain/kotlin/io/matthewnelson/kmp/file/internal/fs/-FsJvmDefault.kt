@@ -141,7 +141,11 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
             is OpenExcl.MustExist -> if (!exists) throw fileNotFoundException(this, null, null)
         }
 
-        val closeable = openCloseable()
+        val closeable = try {
+            openCloseable()
+        } catch (t: SecurityException) {
+            throw t.toAccessDeniedException(this)
+        }
 
         // Already existed prior to opening. Do not modify permissions.
         if (exists) return closeable

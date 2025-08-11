@@ -21,7 +21,6 @@ import io.matthewnelson.kmp.file.Closeable
 import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.InterruptedIOException
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 
@@ -30,6 +29,10 @@ internal class NioFileStream private constructor(
     canRead: Boolean,
     canWrite: Boolean,
     isAppending: Boolean,
+    // Should be closed when FileChannel.close() is called as the
+    // FileChannel would be obtained from File{Input/Output}Stream
+    // or a RandomAccessFile, but Android API 20 and below may do
+    // some weird things. So, close them both to be on the safe side.
     parent: Closeable?,
 ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
@@ -84,15 +87,6 @@ internal class NioFileStream private constructor(
                 }
                 if (read == -1) {
                     if (total == 0) total = -1
-                    break
-                }
-                if (read == 0) {
-                    if (total > 0) {
-                        val e = InterruptedIOException("read == 0")
-                        e.bytesTransferred = total
-                        throw e
-                    }
-                    total = -1
                     break
                 }
                 total += read

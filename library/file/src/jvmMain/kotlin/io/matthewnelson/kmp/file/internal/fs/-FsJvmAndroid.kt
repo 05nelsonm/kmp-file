@@ -19,6 +19,7 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
@@ -30,6 +31,7 @@ import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysTempDir
+import io.matthewnelson.kmp.file.internal.KMP_FILE_VERSION
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
@@ -387,12 +389,11 @@ internal class FsJvmAndroid private constructor(
             if (len == 0) return 0
             interruptible.doBlocking(positionLock) { completed ->
                 val fd = _fd ?: return -1
-                var ret = tryCatchErrno(null) {
+                val read = tryCatchErrno(null) {
                     readBytes.invoke(null, fd, buf, offset, len) as Int
                 }
-                if (ret == 0) ret = -1
                 completed()
-                return ret
+                return if (read == 0) -1 else read
             }
         }
 
@@ -462,19 +463,14 @@ internal class FsJvmAndroid private constructor(
                 var total = 0
                 while (total < len) {
                     val fd = delegateOrClosed(isWrite = true, total) { _fd }
-                    val ret = try {
+                    val write = try {
                         tryCatchErrno(null) {
                             writeBytes.invoke(null, fd, buf, offset + total, len - total) as Int
                         }
                     } catch (e: IOException) {
                         throw e.toMaybeInterruptedIOException(isWrite = true, total)
                     }
-                    if (ret == 0) {
-                        val e = InterruptedIOException("write == 0")
-                        e.bytesTransferred = total
-                        throw e
-                    }
-                    total += ret
+                    total += write
                 }
                 completed()
                 return
@@ -482,6 +478,15 @@ internal class FsJvmAndroid private constructor(
         }
 
         override fun close() { interruptible.close() }
+
+        // For testing. Only available for -SNAPSHOT versions
+        @Throws(ClosedException::class, UnsupportedOperationException::class)
+        public fun getFD(): FileDescriptor {
+            if (!KMP_FILE_VERSION.endsWith("-SNAPSHOT")) {
+                throw UnsupportedOperationException("getFD is for testing only")
+            }
+            return _fd ?: throw ClosedException()
+        }
     }
 }
 
@@ -647,7 +652,7 @@ private class OsConstants {
     val F_SETFD: Int
 
     val O_APPEND: Int
-    val O_CLOEXEC: Int // Must check for 0 (API 26 or below)
+    val O_CLOEXEC: Int // Must check for 0 (API 26 and below)
     val O_CREAT: Int
     val O_EXCL: Int
     val O_RDONLY: Int
