@@ -19,6 +19,7 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
@@ -30,6 +31,7 @@ import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysTempDir
+import io.matthewnelson.kmp.file.internal.KMP_FILE_VERSION
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
@@ -476,6 +478,15 @@ internal class FsJvmAndroid private constructor(
         }
 
         override fun close() { interruptible.close() }
+
+        // For testing. Only available for -SNAPSHOT versions
+        @Throws(ClosedException::class, UnsupportedOperationException::class)
+        public fun getFD(): FileDescriptor {
+            if (!KMP_FILE_VERSION.endsWith("-SNAPSHOT")) {
+                throw UnsupportedOperationException("getFD is for testing only")
+            }
+            return _fd ?: throw ClosedException()
+        }
     }
 }
 
