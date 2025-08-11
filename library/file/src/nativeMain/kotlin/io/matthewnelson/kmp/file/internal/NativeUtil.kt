@@ -28,18 +28,29 @@ import kotlin.contracts.contract
 
 // action must be something that returns -1 and sets errno
 @OptIn(ExperimentalContracts::class)
-internal inline fun ignoreEINTR(action: () -> Int): Int {
+internal inline fun ignoreEINTR32(action: () -> Int): Int {
     contract {
         callsInPlace(action, InvocationKind.UNKNOWN)
     }
 
     var ret = -1
-    while (true) {
+    do {
         ret = action()
-        if (ret != -1) break
-        if (errno == EINTR) continue
-        break
+    } while (ret == -1 && errno == EINTR)
+    return ret
+}
+
+// action must be something that returns -1L and sets errno
+@OptIn(ExperimentalContracts::class)
+internal inline fun ignoreEINTR64(action: () -> Long): Long {
+    contract {
+        callsInPlace(action, InvocationKind.UNKNOWN)
     }
+
+    var ret = -1L
+    do {
+        ret = action()
+    } while (ret == -1L && errno == EINTR)
     return ret
 }
 
@@ -52,11 +63,8 @@ internal inline fun <T: CPointed> ignoreEINTR(action: () -> CPointer<T>?): CPoin
     }
 
     var ret: CPointer<T>? = null
-    while (true) {
+    do {
         ret = action()
-        if (ret != null) break
-        if (errno == EINTR) continue
-        break
-    }
+    } while (ret == null && errno == EINTR)
     return ret
 }

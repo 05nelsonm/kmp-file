@@ -32,12 +32,12 @@ import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.commonDriveOrNull
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
+import io.matthewnelson.kmp.file.internal.ignoreEINTR32
 import io.matthewnelson.kmp.file.internal.isReadOnly
 import io.matthewnelson.kmp.file.lastErrorToIOException
 import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
-import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.convert
@@ -130,7 +130,7 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
     @Throws(IOException::class)
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
-        if (ignoreEINTR { remove(file.path) } == 0) return
+        if (ignoreEINTR32 { remove(file.path) } == 0) return
 
         var err = errno
         if (err == EACCES) {
@@ -263,7 +263,7 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
     @Throws(IOException::class)
     override fun realpath(path: Path): Path {
-        val p = ignoreEINTR<ByteVar> { _fullpath(null, path, PATH_MAX.toULong()) }
+        val p = ignoreEINTR { _fullpath(null, path, PATH_MAX.toULong()) }
             ?: throw errnoToIOException(errno, path.toFile())
 
         return try {
@@ -293,7 +293,7 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
     private inline fun File.isDirectoryOrNull(): Boolean? = memScoped {
         val stat = alloc<_stat64>()
-        if (ignoreEINTR { _stat64(path, stat.ptr) } == 0) {
+        if (ignoreEINTR32 { _stat64(path, stat.ptr) } == 0) {
             (stat.st_mode.toInt() and S_IFMT) == S_IFDIR
         } else {
             null

@@ -16,6 +16,8 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
+import io.matthewnelson.kmp.file.internal.ignoreEINTR32
+import io.matthewnelson.kmp.file.internal.ignoreEINTR64
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.EINTR
 import platform.posix.ENOENT
@@ -34,8 +36,23 @@ class IgnoreEINTRUnitTest {
         val before = errno
         try {
             set_posix_errno(EINTR)
-            val ret = ignoreEINTR { if (++count >= 3) set_posix_errno(ENOENT); -1 }
+            val ret = ignoreEINTR32 { if (++count >= 3) set_posix_errno(ENOENT); -1 }
             assertEquals(-1, ret)
+            assertEquals(ENOENT, errno)
+            assertEquals(3, count)
+        } finally {
+            set_posix_errno(before)
+        }
+    }
+
+    @Test
+    fun givenLongAction_whenMultipleInvocations_thenReturnsAfterNonEINTRErrno() {
+        var count = 0
+        val before = errno
+        try {
+            set_posix_errno(EINTR)
+            val ret = ignoreEINTR64 { if (++count >= 3) set_posix_errno(ENOENT); -1L }
+            assertEquals(-1L, ret)
             assertEquals(ENOENT, errno)
             assertEquals(3, count)
         } finally {

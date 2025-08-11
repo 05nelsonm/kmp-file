@@ -58,8 +58,10 @@ internal class UnixFileStream(
         if (isAppending) return size()
         checkIsOpen()
         synchronized(positionLock) {
-            val fd = _fd.value ?: throw ClosedException()
-            val ret = platformLSeek(fd, 0L, SEEK_CUR)
+            val ret = ignoreEINTR64 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformLSeek(fd, 0L, SEEK_CUR)
+            }
             if (ret == -1L) throw errnoToIOException(errno)
             return ret
         }
@@ -70,8 +72,10 @@ internal class UnixFileStream(
         new.checkIsNotNegative()
         if (isAppending) return this
         synchronized(positionLock) {
-            val fd = _fd.value ?: throw ClosedException()
-            val ret = platformLSeek(fd, new, SEEK_SET)
+            val ret = ignoreEINTR64 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformLSeek(fd, new, SEEK_SET)
+            }
             if (ret == -1L) throw errnoToIOException(errno)
             return this
         }
@@ -86,7 +90,7 @@ internal class UnixFileStream(
             @OptIn(UnsafeNumber::class)
             @Suppress("RemoveRedundantCallsOfConversionMethods")
             val ret = buf.usePinned { pinned ->
-                ignoreEINTR {
+                ignoreEINTR32 {
                     val fd = _fd.value ?: throw ClosedException()
                     platform.posix.read(
                         fd,
@@ -107,10 +111,11 @@ internal class UnixFileStream(
         synchronized(positionLock) {
             memScoped {
                 val stat = alloc<stat>()
-                val fd = _fd.value ?: throw ClosedException()
-                if (fstat(fd, stat.ptr) != 0) {
-                    throw errnoToIOException(errno)
+                val ret = ignoreEINTR32 {
+                    val fd = _fd.value ?: throw ClosedException()
+                    fstat(fd, stat.ptr)
                 }
+                if (ret != 0) throw errnoToIOException(errno)
                 return stat.st_size
             }
         }
@@ -121,28 +126,29 @@ internal class UnixFileStream(
         checkCanSizeNew()
         new.checkIsNotNegative()
         synchronized(positionLock) {
-            val fd = _fd.value ?: throw ClosedException()
-            if (platformFTruncate(fd, new) == -1) {
-                throw errnoToIOException(errno, null)
-            }
+            ignoreEINTR32 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformFTruncate(fd, new)
+            }.let { if (it == -1) throw errnoToIOException(errno) }
             if (isAppending) return this
-            checkIsOpen()
-            val pos = platformLSeek(fd, 0L, SEEK_CUR)
-            if (pos == -1L) {
-                throw errnoToIOException(errno, null)
+            val pos = ignoreEINTR64 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformLSeek(fd, 0L, SEEK_CUR)
             }
+            if (pos == -1L) throw errnoToIOException(errno)
             if (pos <= new) return this
-            checkIsOpen()
-            if (platformLSeek(fd, new, SEEK_SET) == -1L) {
-                throw errnoToIOException(errno, null)
+            val ret = ignoreEINTR64 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformLSeek(fd, new, SEEK_SET)
             }
+            if (ret == -1L) throw errnoToIOException(errno)
             return this
         }
     }
 
     override fun sync(meta: Boolean): FileStream.ReadWrite {
         checkIsOpen()
-        val ret = ignoreEINTR {
+        val ret = ignoreEINTR32 {
             val fd = _fd.value ?: throw ClosedException()
             if (meta) fsync(fd) else platformFDataSync(fd)
         }
@@ -161,7 +167,7 @@ internal class UnixFileStream(
             buf.usePinned { pinned ->
                 var total = 0
                 while (total < len) {
-                    val ret = ignoreEINTR {
+                    val ret = ignoreEINTR32 {
                         val fd = delegateOrClosed(isWrite = true, total) { _fd.value }
                         platform.posix.write(
                             fd,

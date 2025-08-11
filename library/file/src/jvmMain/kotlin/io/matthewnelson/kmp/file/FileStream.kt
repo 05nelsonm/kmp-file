@@ -27,6 +27,8 @@ import kotlin.concurrent.Volatile
 /**
  * A stream for a [File].
  *
+ * **NOTE:** Implementations are thread-safe.
+ *
  * @see [use]
  * @see [openRead]
  * @see [openReadWrite]
