@@ -28,11 +28,9 @@ import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
-import io.matthewnelson.kmp.file.bytesTransferred
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
@@ -510,7 +508,7 @@ internal class FsJsNode private constructor(
 
                 val position = currentWritePosition(total)
                 val fd = delegateOrClosed(isWrite = true, total) { _fd }
-                val ret = try {
+                val write = try {
                     jsExternTryCatch {
                         fs.writeSync(
                             fd = fd,
@@ -524,14 +522,8 @@ internal class FsJsNode private constructor(
                     throw t.toIOException().toMaybeInterruptedIOException(isWrite = true, total)
                 }.toInt()
 
-                if (ret <= 0) {
-                    val e = InterruptedIOException("write == 0")
-                    e.bytesTransferred = total
-                    throw e
-                }
-
-                total += ret
-                if (!isAppending) _position += ret
+                total += write
+                if (!isAppending) _position += write
             }
         }
 
@@ -546,7 +538,7 @@ internal class FsJsNode private constructor(
             while (total < len) {
                 val position = currentWritePosition(total)
                 val fd = delegateOrClosed(isWrite = true, total) { _fd }
-                val ret = try {
+                val write = try {
                     jsExternTryCatch {
                         fs.writeSync(
                             fd = fd,
@@ -560,14 +552,8 @@ internal class FsJsNode private constructor(
                     throw t.toIOException().toMaybeInterruptedIOException(isWrite = true, total)
                 }.toLong()
 
-                if (ret <= 0L) {
-                    val e = InterruptedIOException("write == 0")
-                    e.bytesTransferred = total.toInt()
-                    throw e
-                }
-
-                total += ret
-                if (!isAppending) _position += ret
+                total += write
+                if (!isAppending) _position += write
             }
         }
 

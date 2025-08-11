@@ -18,8 +18,6 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.FileStream
-import io.matthewnelson.kmp.file.InterruptedIOException
-import io.matthewnelson.kmp.file.bytesTransferred
 import io.matthewnelson.kmp.file.errnoToIOException
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
@@ -89,7 +87,7 @@ internal class UnixFileStream(
         synchronized(positionLock) {
             @OptIn(UnsafeNumber::class)
             @Suppress("RemoveRedundantCallsOfConversionMethods")
-            val ret = buf.usePinned { pinned ->
+            val read = buf.usePinned { pinned ->
                 ignoreEINTR32 {
                     val fd = _fd.value ?: throw ClosedException()
                     platform.posix.read(
@@ -100,9 +98,8 @@ internal class UnixFileStream(
                 }
             }
 
-            if (ret < 0) throw errnoToIOException(errno)
-            if (ret == 0) return -1 // EOF
-            return ret
+            if (read < 0) throw errnoToIOException(errno)
+            return if (read == 0) -1 else read
         }
     }
 
@@ -177,11 +174,6 @@ internal class UnixFileStream(
                     }
                     if (ret < 0) {
                         throw errnoToIOException(errno).toMaybeInterruptedIOException(isWrite = true, total)
-                    }
-                    if (ret == 0) {
-                        val e = InterruptedIOException("write == 0")
-                        e.bytesTransferred = total
-                        throw e
                     }
                     total += ret
                 }

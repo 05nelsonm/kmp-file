@@ -21,8 +21,6 @@ import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.InterruptedIOException
-import io.matthewnelson.kmp.file.bytesTransferred
 import io.matthewnelson.kmp.file.lastErrorToIOException
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
@@ -117,11 +115,7 @@ internal class MinGWFileStream(
                 if (ret == FALSE) {
                     val lastError = GetLastError()
                     if (lastError.toInt() == ERROR_HANDLE_EOF) return -1
-                    val e = lastErrorToIOException(lastError)
-                    if (e is InterruptedIOException) {
-                        e.bytesTransferred = read
-                    }
-                    throw e
+                    throw lastErrorToIOException(lastError).toMaybeInterruptedIOException(isWrite = false, read)
                 }
 
                 return if (read == 0) -1 else read
@@ -212,7 +206,7 @@ internal class MinGWFileStream(
         if (len == 0) return
         synchronized(positionLock) {
             memScoped {
-                val bytesWrite = alloc<UIntVarOf<UInt>>()
+                val bytesWritten = alloc<UIntVarOf<UInt>>()
                 val overlapped = if (isAppending) {
                     alloc<_OVERLAPPED> {
                         Offset = 0xFFFFFFFF.convert()
@@ -225,27 +219,20 @@ internal class MinGWFileStream(
                 buf.usePinned { pinned ->
                     var total = 0
                     while (total < len) {
-                        bytesWrite.value = 0u
+                        bytesWritten.value = 0u
                         val h = delegateOrClosed(isWrite = true, total) { _h.value }
                         val ret = WriteFile(
                             hFile = h,
                             lpBuffer = pinned.addressOf(offset + total).getPointer(this),
                             nNumberOfBytesToWrite = (len - total).convert(),
-                            lpNumberOfBytesWritten = bytesWrite.ptr,
+                            lpNumberOfBytesWritten = bytesWritten.ptr,
                             lpOverlapped = overlapped?.ptr,
                         )
 
-                        val write = bytesWrite.value.toInt()
-
+                        total += bytesWritten.value.toInt().coerceAtLeast(0)
                         if (ret == FALSE) {
                             throw lastErrorToIOException().toMaybeInterruptedIOException(isWrite = true, total)
                         }
-                        if (write == 0) {
-                            val e = InterruptedIOException("write == 0")
-                            e.bytesTransferred = total
-                            throw e
-                        }
-                        total += write
                     }
                 }
             }

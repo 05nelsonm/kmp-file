@@ -387,12 +387,11 @@ internal class FsJvmAndroid private constructor(
             if (len == 0) return 0
             interruptible.doBlocking(positionLock) { completed ->
                 val fd = _fd ?: return -1
-                var ret = tryCatchErrno(null) {
+                val read = tryCatchErrno(null) {
                     readBytes.invoke(null, fd, buf, offset, len) as Int
                 }
-                if (ret == 0) ret = -1
                 completed()
-                return ret
+                return if (read == 0) -1 else read
             }
         }
 
@@ -462,19 +461,14 @@ internal class FsJvmAndroid private constructor(
                 var total = 0
                 while (total < len) {
                     val fd = delegateOrClosed(isWrite = true, total) { _fd }
-                    val ret = try {
+                    val write = try {
                         tryCatchErrno(null) {
                             writeBytes.invoke(null, fd, buf, offset + total, len - total) as Int
                         }
                     } catch (e: IOException) {
                         throw e.toMaybeInterruptedIOException(isWrite = true, total)
                     }
-                    if (ret == 0) {
-                        val e = InterruptedIOException("write == 0")
-                        e.bytesTransferred = total
-                        throw e
-                    }
-                    total += ret
+                    total += write
                 }
                 completed()
                 return
@@ -647,7 +641,7 @@ private class OsConstants {
     val F_SETFD: Int
 
     val O_APPEND: Int
-    val O_CLOEXEC: Int // Must check for 0 (API 26 or below)
+    val O_CLOEXEC: Int // Must check for 0 (API 26 and below)
     val O_CREAT: Int
     val O_EXCL: Int
     val O_RDONLY: Int
