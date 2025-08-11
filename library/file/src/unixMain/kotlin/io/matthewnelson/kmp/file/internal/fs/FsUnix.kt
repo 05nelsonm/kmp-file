@@ -27,7 +27,7 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.UnixFileStream
-import io.matthewnelson.kmp.file.internal.errnoToIllegalArgumentOrIOException
+import io.matthewnelson.kmp.file.internal.errnoToString
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
@@ -40,6 +40,7 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
 import platform.posix.EEXIST
+import platform.posix.EINVAL
 import platform.posix.ENOENT
 import platform.posix.O_APPEND
 import platform.posix.O_CLOEXEC
@@ -174,7 +175,14 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
         }
 
         val fd = ignoreEINTR { platform.posix.open(path, flags, mode) }
-        if (fd == -1) throw errnoToIllegalArgumentOrIOException(errno, this)
+        if (fd == -1) {
+            throw if (errno == EINVAL) {
+                val msg = errnoToString(errno)
+                IllegalArgumentException(msg)
+            } else {
+                errnoToIOException(errno, this)
+            }
+        }
 
         return fd
     }

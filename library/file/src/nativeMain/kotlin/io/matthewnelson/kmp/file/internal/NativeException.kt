@@ -183,13 +183,3 @@ internal fun errnoToString(errno: Int): String {
 
     return msg
 }
-
-@ExperimentalForeignApi
-internal inline fun errnoToIllegalArgumentOrIOException(errno: Int, file: File?, other: File? = null): Exception {
-    return if (errno == EINVAL) {
-        val message = errnoToString(errno)
-        IllegalArgumentException(message)
-    } else {
-        errnoToIOException(errno, file, other)
-    }
-}

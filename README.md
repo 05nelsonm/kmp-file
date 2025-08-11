@@ -3,6 +3,7 @@
 [![badge-latest-release]][url-latest-release]
 
 [![badge-kotlin]][url-kotlin]
+[![badge-atomicfu]][url-atomicfu]
 
 ![badge-platform-android] 
 ![badge-platform-jvm]
@@ -167,6 +168,7 @@ dependencies {
 
 <!-- TAG_DEPENDENCIES -->
 [badge-kotlin]: https://img.shields.io/badge/kotlin-2.1.21-blue.svg?logo=kotlin
+[badge-atomicfu]: https://img.shields.io/badge/kotlinx.atomicfu-0.28.0-blue.svg?logo=kotlin
 
 <!-- TAG_PLATFORMS -->
 [badge-platform-android]: http://img.shields.io/badge/-android-6EDB8D.svg?style=flat
@@ -188,4 +190,5 @@ dependencies {
 [url-latest-release]: https://github.com/05nelsonm/kmp-file/releases/latest
 [url-license]: https://www.apache.org/licenses/LICENSE-2.0
 [url-kotlin]: https://kotlinlang.org
+[url-atomicfu]: https://github.com/Kotlin/kotlinx-atomicfu
 [url-issue]: https://github.com/05nelsonm/kmp-file/issues

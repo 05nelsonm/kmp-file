@@ -14,12 +14,15 @@ gradle-kotlin               = "2.1.21"
 gradle-publish-maven        = "0.33.0"
 
 kotlincrypto-catalog        = "0.7.0" # Utilized from settings.gradle.kts
+kotlinx-atomicfu            = "0.28.0"
 
 [libraries]
 gradle-dokka                = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "gradle-dokka" }
 gradle-kmp-configuration    = { module = "io.matthewnelson:gradle-kmp-configuration-plugin", version.ref = "gradle-kmp-configuration" }
 gradle-kotlin               = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "gradle-kotlin" }
 gradle-publish-maven        = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "gradle-publish-maven" }
+
+kotlinx-atomicfu            = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "kotlinx-atomicfu" }
 
 # tests
 androidx-test-core          = { module = "androidx.test:core", version.ref = "androidx-test-core" }
