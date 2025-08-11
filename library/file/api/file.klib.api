@@ -117,6 +117,10 @@ final class io.matthewnelson.kmp.file/NotDirectoryException : io.matthewnelson.k
     constructor <init>(io.matthewnelson.kmp.file/File) // io.matthewnelson.kmp.file/NotDirectoryException.<init>|<init>(io.matthewnelson.kmp.file.File){}[0]
 }
 
+open class io.matthewnelson.kmp.file/ClosedException : io.matthewnelson.kmp.file/IOException { // io.matthewnelson.kmp.file/ClosedException|null[0]
+    constructor <init>() // io.matthewnelson.kmp.file/ClosedException.<init>|<init>(){}[0]
+}
+
 open class io.matthewnelson.kmp.file/EOFException : io.matthewnelson.kmp.file/IOException { // io.matthewnelson.kmp.file/EOFException|null[0]
     constructor <init>() // io.matthewnelson.kmp.file/EOFException.<init>|<init>(){}[0]
     constructor <init>(kotlin/String?) // io.matthewnelson.kmp.file/EOFException.<init>|<init>(kotlin.String?){}[0]

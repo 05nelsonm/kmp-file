@@ -18,6 +18,7 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.Closeable
+import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.InterruptedIOException
@@ -37,8 +38,9 @@ internal class NioFileStream private constructor(
     @Volatile
     private var _parent: Closeable? = parent
     private val closeLock = Any()
+    private val channelLock = Any()
 
-    override fun isOpen(): Boolean = _ch != null
+    override fun isOpen(): Boolean = _ch?.isOpen ?: false
 
     override fun position(): Long {
         run {
@@ -48,99 +50,104 @@ internal class NioFileStream private constructor(
             // the correct position with O_APPEND.
             if (ANDROID.SDK_INT < 24) return size()
         }
-        val ch = _ch ?: throw fileStreamClosed()
-        return ch.position()
+        checkIsOpen()
+        synchronized(channelLock) {
+            val ch = _ch ?: throw ClosedException()
+            return ch.position()
+        }
     }
 
     override fun position(new: Long): FileStream.ReadWrite {
-        val ch = _ch ?: throw fileStreamClosed()
+        checkIsOpen()
+        new.checkIsNotNegative()
         if (isAppending) return this
-        ch.position(new)
-        return this
+        synchronized(channelLock) {
+            val ch = _ch ?: throw ClosedException()
+            ch.position(new)
+            return this
+        }
     }
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-        val ch = _ch ?: throw fileStreamClosed()
+        checkIsOpen()
         checkCanRead()
         val bb = ByteBuffer.wrap(buf, offset, len)
-        var total = 0
-        while (total < len) {
-            val read = try {
-                ch.read(bb)
-            } catch (e: IOException) {
-                var e = e
-                when {
-                    e is InterruptedIOException -> {
-                        // Need to add in previous reads
-                        e.bytesTransferred += total
-                    }
-                    total > 0 -> {
-                        e = InterruptedIOException("Read was interrupted").apply {
-                            bytesTransferred = total
-                            addSuppressed(e)
-                        }
-                    }
+        if (len == 0) return 0
+        synchronized(channelLock) {
+            var total = 0
+            while (total < len) {
+                val ch = delegateOrClosed(isWrite = false, total) { _ch }
+                val read = try {
+                    ch.read(bb)
+                } catch (e: IOException) {
+                    throw e.toMaybeInterruptedIOException(isWrite = false, total)
                 }
-                throw e
-            }
-            if (read == -1) {
-                if (total == 0) total = -1
-                break
-            }
-            if (read == 0) {
-                if (total > 0) {
-                    val e = InterruptedIOException("read == 0")
-                    e.bytesTransferred = total
-                    throw e
+                if (read == -1) {
+                    if (total == 0) total = -1
+                    break
                 }
-                total = -1
-                break
+                if (read == 0) {
+                    if (total > 0) {
+                        val e = InterruptedIOException("read == 0")
+                        e.bytesTransferred = total
+                        throw e
+                    }
+                    total = -1
+                    break
+                }
+                total += read
             }
-            total += read
+            return total
         }
-        return total
     }
 
     override fun size(): Long {
-        val ch = _ch ?: throw fileStreamClosed()
-        return ch.size()
+        checkIsOpen()
+        synchronized(channelLock) {
+            val ch = _ch ?: throw ClosedException()
+            return ch.size()
+        }
     }
 
     override fun size(new: Long): FileStream.ReadWrite {
-        val ch = _ch ?: throw fileStreamClosed()
+        checkIsOpen()
         checkCanSizeNew()
+        new.checkIsNotNegative()
+        synchronized(channelLock) {
+            val ch = _ch ?: throw ClosedException()
+            if (new > ch.size()) {
+                val bb = ByteBuffer.wrap(ByteArray(1))
+                ch.write(bb, new - 1L)
+            } else {
+                ch.truncate(new)
+                // Android API 20 and below does not set channel position
+                // properly if current position is greater than new.
+                if (ANDROID.SDK_INT == null) return this
+                if (ANDROID.SDK_INT >= 21) return this
+            }
 
-        if (new > ch.size()) {
-            val bb = ByteBuffer.wrap(ByteArray(1))
-            ch.write(bb, new - 1L)
             if (isAppending) return this
             val pos = ch.position()
             if (pos > new) ch.position(new)
-        } else {
-            ch.truncate(new)
-
-            // Android API 20 and below does not set channel position
-            // properly if current position is greater than new.
-            if (isAppending) return this
-            if (ANDROID.SDK_INT == null) return this
-            if (ANDROID.SDK_INT >= 21) return this
-            val pos = ch.position()
-            if (pos > new) ch.position(new)
+            return this
         }
-        return this
     }
 
     override fun sync(meta: Boolean): FileStream.ReadWrite {
-        val ch = _ch ?: throw fileStreamClosed()
+        val ch = _ch ?: throw ClosedException()
         ch.force(meta)
         return this
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {
-        val ch = _ch ?: throw fileStreamClosed()
+        checkIsOpen()
         checkCanWrite()
         val bb = ByteBuffer.wrap(buf, offset, len)
-        ch.write(bb)
+        if (len == 0) return
+        synchronized(channelLock) {
+            val ch = _ch ?: throw ClosedException()
+            ch.write(bb)
+        }
     }
 
     override fun close() {
@@ -174,8 +181,6 @@ internal class NioFileStream private constructor(
 
         if (threw != null) throw threw
     }
-
-    override fun toString(): String = "NioFileStream@" + hashCode().toString()
 
     internal companion object {
 

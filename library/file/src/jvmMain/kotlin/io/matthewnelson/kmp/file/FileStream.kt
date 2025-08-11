@@ -17,17 +17,17 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import java.io.Flushable
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.channels.InterruptibleChannel
 import kotlin.Throws
 import kotlin.concurrent.Volatile
 
 /**
  * A stream for a [File].
  *
- * **NOTE:** Implementations are **not** thread-safe.
+ * **NOTE:** Implementations are thread-safe.
  *
  * @see [use]
  * @see [openRead]
@@ -38,14 +38,14 @@ import kotlin.concurrent.Volatile
  * @see [Write]
  * @see [ReadWrite]
  * */
-public actual sealed interface FileStream: Closeable, Flushable {
+public actual sealed interface FileStream: Closeable, Flushable, InterruptibleChannel {
 
     /**
      * Checks if this [FileStream] has been closed or not.
      *
      * @return `true` if the [FileStream] is still open, `false` otherwise.
      * */
-    public actual fun isOpen(): Boolean
+    public actual override fun isOpen(): Boolean
 
     /**
      * Redirects to calling `sync(meta = true)`.
@@ -432,7 +432,7 @@ public actual sealed interface FileStream: Closeable, Flushable {
 
 @Throws(IOException::class)
 private inline fun asInputStream(stream: FileStream.Read, closeParentOnClose: Boolean): InputStream {
-    if (!stream.isOpen()) throw fileStreamClosed()
+    if (!stream.isOpen()) throw ClosedException()
     if (stream is AbstractFileStream && !stream.canRead) throw IOException("AbstractFileStream.canRead != true")
 
     return object : InputStream() {
@@ -441,7 +441,7 @@ private inline fun asInputStream(stream: FileStream.Read, closeParentOnClose: Bo
         private var _closed = false
 
         override fun available(): Int {
-            if (_closed) throw jvmStreamClosed(isInput = true)
+            if (_closed) throw ClosedException()
             val avail = stream.size() - stream.position()
             if (avail <= 0) return 0
             if (avail > Int.MAX_VALUE) return Int.MAX_VALUE
@@ -449,18 +449,18 @@ private inline fun asInputStream(stream: FileStream.Read, closeParentOnClose: Bo
         }
 
         override fun read(): Int {
-            if (_closed) throw jvmStreamClosed(isInput = true)
+            if (_closed) throw ClosedException()
             val b = ByteArray(1)
             return if (stream.read(b, 0, 1) == -1) -1 else b[0].toInt() and 0xFF
         }
 
         override fun read(b: ByteArray, off: Int, len: Int): Int {
-            if (_closed) throw jvmStreamClosed(isInput = true)
+            if (_closed) throw ClosedException()
             return stream.read(b, off, len)
         }
 
         override fun skip(n: Long): Long = try {
-            if (_closed) throw jvmStreamClosed(isInput = true)
+            if (_closed) throw ClosedException()
             val posOld = stream.position()
             val posNew = posOld + n
             stream.position(posNew)
@@ -478,7 +478,7 @@ private inline fun asInputStream(stream: FileStream.Read, closeParentOnClose: Bo
 
 @Throws(IOException::class)
 private inline fun asOutputStream(stream: FileStream.Write, closeParentOnClose: Boolean): OutputStream {
-    if (!stream.isOpen()) throw fileStreamClosed()
+    if (!stream.isOpen()) throw ClosedException()
     if (stream is AbstractFileStream && !stream.canWrite) throw IOException("AbstractFileStream.canWrite != true")
 
     return object : OutputStream() {
@@ -487,18 +487,18 @@ private inline fun asOutputStream(stream: FileStream.Write, closeParentOnClose: 
         private var _closed = false
 
         override fun write(p0: Int) {
-            if (_closed) throw jvmStreamClosed(isInput = false)
+            if (_closed) throw ClosedException()
             val b = byteArrayOf(p0.toByte())
             stream.write(b)
         }
 
         override fun write(b: ByteArray, off: Int, len: Int) {
-            if (_closed) throw jvmStreamClosed(isInput = false)
+            if (_closed) throw ClosedException()
             stream.write(b, off, len)
         }
 
         override fun flush() {
-            if (_closed) throw jvmStreamClosed(isInput = false)
+            if (_closed) throw ClosedException()
             stream.flush()
         }
 
@@ -507,9 +507,4 @@ private inline fun asOutputStream(stream: FileStream.Write, closeParentOnClose: 
             if (closeParentOnClose) stream.close()
         }
     }
-}
-
-private inline fun jvmStreamClosed(isInput: Boolean): IOException {
-    val t = if (isInput) "Input" else "Output"
-    return IOException(t + "Stream is closed")
 }

@@ -20,7 +20,7 @@ package io.matthewnelson.kmp.file
 /**
  * A stream for a [File].
  *
- * **NOTE:** Implementations are **not** thread-safe.
+ * **NOTE:** Implementations are thread-safe.
  *
  * @see [use]
  * @see [openRead]

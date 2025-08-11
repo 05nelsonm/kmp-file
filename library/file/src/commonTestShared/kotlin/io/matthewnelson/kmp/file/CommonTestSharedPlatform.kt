@@ -22,8 +22,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.random.Random
-import kotlin.test.assertEquals
-import kotlin.test.fail
 
 private val BASE_16_LC = Base16 { encodeToLowercase = true }
 
@@ -63,15 +61,5 @@ sealed interface PermissionChecker {
         fun canRead(file: File): Boolean
         fun canWrite(file: File): Boolean
         fun canExecute(file: File): Boolean
-    }
-}
-
-inline fun assertStreamClosed(block: () -> Unit) {
-    try {
-        block()
-        fail("block did not throw exception as expected")
-    } catch (e: IOException) {
-        // Could be InputStream is closed, OutputStream is closed, or FileStream is closed
-        assertEquals(true, e.message?.endsWith("Stream is closed"))
     }
 }

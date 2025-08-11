@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE", "RedundantVisibilityModifier")
 
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.disappearingCheck
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.jvm.JvmSynthetic
 
 // Strictly for supporting isInstance checks
 internal class FileStreamReadOnly private constructor(private val s: AbstractFileStream): FileStream.Read by s {
     init { disappearingCheck(condition = { s.canRead }) { "AbstractFileStream.canRead != true" } }
-    override fun position(new: Long): FileStream.Read { s.position(new); return this }
-    override fun sync(meta: Boolean): FileStream.Read { s.sync(meta); return this }
-    override fun equals(other: Any?): Boolean = other is FileStreamReadOnly && other.s == s
-    override fun hashCode(): Int = s.hashCode()
-    override fun toString(): String = "ReadOnly$s"
+    public override fun position(new: Long): FileStream.Read { s.position(new); return this }
+    public override fun sync(meta: Boolean): FileStream.Read { s.sync(meta); return this }
+    public override fun equals(other: Any?): Boolean = other is FileStreamReadOnly && other.s == s
+    public override fun hashCode(): Int = s.hashCode()
+    public override fun toString(): String = "ReadOnly$s"
     internal companion object {
         @JvmSynthetic
         internal fun of(s: AbstractFileStream): FileStreamReadOnly = FileStreamReadOnly(s)
@@ -37,12 +40,12 @@ internal class FileStreamReadOnly private constructor(private val s: AbstractFil
 // Strictly for supporting isInstance checks
 internal class FileStreamWriteOnly private constructor(private val s: AbstractFileStream): FileStream.Write by s {
     init { disappearingCheck(condition = { s.canWrite }) { "AbstractFileStream.canWrite != true" } }
-    override fun position(new: Long): FileStream.Write { s.position(new); return this }
-    override fun size(new: Long): FileStream.Write { s.size(new); return this }
-    override fun sync(meta: Boolean): FileStream.Write { s.sync(meta); return this }
-    override fun equals(other: Any?): Boolean = other is FileStreamWriteOnly && other.s == s
-    override fun hashCode(): Int = s.hashCode()
-    override fun toString(): String = "WriteOnly$s"
+    public override fun position(new: Long): FileStream.Write { s.position(new); return this }
+    public override fun size(new: Long): FileStream.Write { s.size(new); return this }
+    public override fun sync(meta: Boolean): FileStream.Write { s.sync(meta); return this }
+    public override fun equals(other: Any?): Boolean = other is FileStreamWriteOnly && other.s == s
+    public override fun hashCode(): Int = s.hashCode()
+    public override fun toString(): String = "WriteOnly$s"
     internal companion object {
         @JvmSynthetic
         internal fun of(s: AbstractFileStream): FileStreamWriteOnly = FileStreamWriteOnly(s)
@@ -52,7 +55,7 @@ internal class FileStreamWriteOnly private constructor(private val s: AbstractFi
 internal abstract class AbstractFileStream protected constructor(
     internal val canRead: Boolean,
     internal val canWrite: Boolean,
-    final override val isAppending: Boolean,
+    public final override val isAppending: Boolean,
     init: Any,
 ): FileStream.ReadWrite() {
 
@@ -62,17 +65,74 @@ internal abstract class AbstractFileStream protected constructor(
         disappearingCheck(condition = { if (canRead && canWrite) !isAppending else true }) { "isAppending && (canRead && canWrite)" }
     }
 
-    final override fun read(buf: ByteArray): Int = read(buf, 0, buf.size)
-    final override fun write(buf: ByteArray) { write(buf, 0, buf.size) }
+    @Throws(ClosedException::class)
+    protected inline fun checkIsOpen() { if (!isOpen()) throw ClosedException() }
 
-    protected inline fun checkCanRead() {
-        check(canRead) { "FileStream is O_WRONLY" }
+    @Throws(IllegalStateException::class)
+    protected inline fun checkCanRead() { check(canRead) { "FileStream is O_WRONLY" } }
+    @Throws(IllegalStateException::class)
+    protected inline fun checkCanSizeNew() { checkCanWrite() }
+    @Throws(IllegalStateException::class)
+    protected inline fun checkCanWrite() { check(canWrite) { "FileStream is O_RDONLY" } }
+
+    // For `position(new)` and `size(new)`
+    @Throws(IllegalArgumentException::class)
+    protected inline fun Long.checkIsNotNegative() { require(this >= 0L) { "$this < 0" } }
+
+    public final override fun read(buf: ByteArray): Int = read(buf, 0, buf.size)
+    public final override fun write(buf: ByteArray) { write(buf, 0, buf.size) }
+
+    @Throws(IOException::class)
+    @OptIn(ExperimentalContracts::class)
+    protected fun <T: Any> delegateOrClosed(isWrite: Boolean, bytesTransferred: Number, block: () -> T?): T {
+        contract {
+            callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+        }
+
+        val d = try {
+            block()
+        } catch (e: IOException) {
+            throw e.toMaybeInterruptedIOException(isWrite, bytesTransferred)
+        }
+
+        if (d == null) {
+            val tInt = bytesTransferred.toInt()
+            if (tInt != 0) {
+                var msg = if (isWrite) "Write" else "Read"
+                msg += " was interrupted"
+                if (!isOpen()) msg += " by closure"
+                val e = InterruptedIOException(msg)
+                e.bytesTransferred = tInt
+                throw e
+            }
+            throw ClosedException()
+        }
+        return d
     }
-    protected inline fun checkCanSizeNew() {
-        checkCanWrite()
+
+    protected fun IOException.toMaybeInterruptedIOException(isWrite: Boolean, bytesTransferred: Number): IOException {
+        val tInt = bytesTransferred.toInt()
+        when {
+            this is InterruptedIOException -> {
+                this.bytesTransferred += tInt
+                return this
+            }
+            tInt != 0 -> {
+                var msg = if (isWrite) "Write" else "Read"
+                msg += " was interrupted"
+                if (!isOpen()) msg += " by closure"
+                val e = InterruptedIOException(msg)
+                e.bytesTransferred = tInt
+                e.addSuppressed(this)
+                return e
+            }
+            else -> return this
+        }
     }
-    protected inline fun checkCanWrite() {
-        check(canWrite) { "FileStream is O_RDONLY" }
+
+    public final override fun toString(): String {
+        val name = this::class.simpleName ?: "FileStream"
+        return name + '@' + hashCode().toString()
     }
 
     protected companion object {

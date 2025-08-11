@@ -17,7 +17,7 @@ public final class io/matthewnelson/kmp/file/Exceptions {
 	public static final fun wrapIO (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)Ljava/io/IOException;
 }
 
-public abstract interface class io/matthewnelson/kmp/file/FileStream : java/io/Closeable, java/io/Flushable {
+public abstract interface class io/matthewnelson/kmp/file/FileStream : java/io/Closeable, java/io/Flushable, java/nio/channels/InterruptibleChannel {
 	public static final field Companion Lio/matthewnelson/kmp/file/FileStream$Companion;
 	public static fun asInputStream (Lio/matthewnelson/kmp/file/FileStream$Read;Z)Ljava/io/InputStream;
 	public static fun asOutputStream (Lio/matthewnelson/kmp/file/FileStream$Write;Z)Ljava/io/OutputStream;

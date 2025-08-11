@@ -31,7 +31,7 @@ class AndroidFsTest {
             "FsJvmDefault"
         }
 
-        assertEquals(expected, SysFsInfo.name)
+        assertEquals(expected, SysFsInfo.name, "API[${Build.VERSION.SDK_INT}]")
         assertTrue(SysFsInfo.isPosix)
     }
 }

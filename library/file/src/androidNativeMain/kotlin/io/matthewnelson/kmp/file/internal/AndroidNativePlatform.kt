@@ -116,14 +116,14 @@ private fun locateCacheDirOrNull(packageName: String?): Path? {
     val dataUser = try {
         parseMntUserDirNames { uid ->
             val cache = "/data/user/$uid/$packageName/cache"
-            if (ignoreEINTR { access(cache, mode) } == 0) cache else null
+            if (ignoreEINTR32 { access(cache, mode) } == 0) cache else null
         }
     } catch (_: IOException) {
         // permission denied
         try {
             parseProcSelfMountsFile { uid ->
                 val cache = "/data/user/$uid/$packageName/cache"
-                if (ignoreEINTR { access(cache, mode) } == 0) cache else null
+                if (ignoreEINTR32 { access(cache, mode) } == 0) cache else null
             }
         } catch (_: IOException) {
             null
@@ -134,7 +134,7 @@ private fun locateCacheDirOrNull(packageName: String?): Path? {
 
     // Failed to obtain the uid. Try /data/data/
     val dataData = "/data/data/$packageName/cache"
-    return if (ignoreEINTR { access(dataData, mode) } == 0) dataData else null
+    return if (ignoreEINTR32 { access(dataData, mode) } == 0) dataData else null
 }
 
 @Throws(IOException::class)
@@ -142,13 +142,13 @@ private fun locateCacheDirOrNull(packageName: String?): Path? {
 private inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path? {
     val dir = run {
         val flags = O_RDONLY or O_CLOEXEC or O_DIRECTORY
-        val fd = ignoreEINTR { open("/mnt/user", flags, 0) }
+        val fd = ignoreEINTR32 { open("/mnt/user", flags, 0) }
         if (fd == -1) throw errnoToIOException(errno)
 
-        val dir = ignoreEINTR<cnames.structs.DIR> { fdopendir(fd) }
+        val dir = ignoreEINTR { fdopendir(fd) }
         if (dir == null) {
             val e = errnoToIOException(errno)
-            if (ignoreEINTR { close(fd) } == -1) {
+            if (close(fd) == -1) {
                 val ee = errnoToIOException(errno)
                 e.addSuppressed(ee)
             }
@@ -160,17 +160,17 @@ private inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path?
 
     var path: Path? = null
     try {
-        var entry: CPointer<dirent>? = ignoreEINTR<dirent> { readdir(dir) }
+        var entry = ignoreEINTR { readdir(dir) }
         while (entry != null) {
             val uid = entry.pointed.d_name.toKString().toIntOrNull()
             if (uid != null) {
                 path = checkAccess(uid)
                 if (path != null) break
             }
-            entry = ignoreEINTR<dirent> { readdir(dir) }
+            entry = ignoreEINTR { readdir(dir) }
         }
     } finally {
-        ignoreEINTR { closedir(dir) }
+        closedir(dir)
     }
     return path
 }

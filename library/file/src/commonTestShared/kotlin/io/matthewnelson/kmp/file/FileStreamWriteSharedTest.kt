@@ -194,8 +194,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
             assertEquals(2L, s.position())
             s.position(0L)
             assertEquals(2L, s.position())
-            // Should not throw (like normally would)
-            s.position(-1L)
+            assertFailsWith<IllegalArgumentException> { s.position(-1L) }
         }
     }
 

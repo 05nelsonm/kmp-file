@@ -16,11 +16,13 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.FileStream
-import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.bytesTransferred
 import io.matthewnelson.kmp.file.errnoToIOException
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.addressOf
@@ -48,129 +50,150 @@ internal class UnixFileStream(
     init { if (fd == -1) throw errnoToIOException(errno) }
 
     private val _fd = AtomicReference<Int?>(fd)
+    private val positionLock = SynchronizedObject()
 
     override fun isOpen(): Boolean = _fd.value != null
 
     override fun position(): Long {
         if (isAppending) return size()
-        val fd = _fd.value ?: throw fileStreamClosed()
-        val ret = platformLSeek(fd, 0L, SEEK_CUR)
-        if (ret == -1L) throw errnoToIOException(errno)
-        return ret
+        checkIsOpen()
+        synchronized(positionLock) {
+            val ret = ignoreEINTR64 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformLSeek(fd, 0L, SEEK_CUR)
+            }
+            if (ret == -1L) throw errnoToIOException(errno)
+            return ret
+        }
     }
 
     override fun position(new: Long): FileStream.ReadWrite {
-        val fd = _fd.value ?: throw fileStreamClosed()
+        checkIsOpen()
+        new.checkIsNotNegative()
         if (isAppending) return this
-        val ret = platformLSeek(fd, new, SEEK_SET)
-        if (ret == -1L) throw errnoToIllegalArgumentOrIOException(errno, null)
-        return this
+        synchronized(positionLock) {
+            val ret = ignoreEINTR64 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformLSeek(fd, new, SEEK_SET)
+            }
+            if (ret == -1L) throw errnoToIOException(errno)
+            return this
+        }
     }
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-        val fd = _fd.value ?: throw fileStreamClosed()
+        checkIsOpen()
         checkCanRead()
         buf.checkBounds(offset, len)
         if (len == 0) return 0
+        synchronized(positionLock) {
+            @OptIn(UnsafeNumber::class)
+            @Suppress("RemoveRedundantCallsOfConversionMethods")
+            val ret = buf.usePinned { pinned ->
+                ignoreEINTR32 {
+                    val fd = _fd.value ?: throw ClosedException()
+                    platform.posix.read(
+                        fd,
+                        pinned.addressOf(offset),
+                        len.convert(),
+                    ).toInt()
+                }
+            }
 
-        @OptIn(UnsafeNumber::class)
-        @Suppress("RemoveRedundantCallsOfConversionMethods")
-        val ret = buf.usePinned { pinned ->
-            platform.posix.read(
-                fd,
-                pinned.addressOf(offset),
-                len.convert(),
-            ).toInt()
+            if (ret < 0) throw errnoToIOException(errno)
+            if (ret == 0) return -1 // EOF
+            return ret
         }
-
-        if (ret < 0) throw errnoToIOException(errno)
-        if (ret == 0) return -1 // EOF
-        return ret
     }
 
     override fun size(): Long {
-        val fd = _fd.value ?: throw fileStreamClosed()
-        return memScoped {
-            val stat = alloc<stat>()
-            if (fstat(fd, stat.ptr) != 0) {
-                throw errnoToIOException(errno)
+        checkIsOpen()
+        synchronized(positionLock) {
+            memScoped {
+                val stat = alloc<stat>()
+                val ret = ignoreEINTR32 {
+                    val fd = _fd.value ?: throw ClosedException()
+                    fstat(fd, stat.ptr)
+                }
+                if (ret != 0) throw errnoToIOException(errno)
+                return stat.st_size
             }
-            stat.st_size
         }
     }
 
     override fun size(new: Long): FileStream.ReadWrite {
-        val fd = _fd.value ?: throw fileStreamClosed()
+        checkIsOpen()
         checkCanSizeNew()
-        if (platformFTruncate(fd, new) == -1) {
-            throw errnoToIllegalArgumentOrIOException(errno, null)
+        new.checkIsNotNegative()
+        synchronized(positionLock) {
+            ignoreEINTR32 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformFTruncate(fd, new)
+            }.let { if (it == -1) throw errnoToIOException(errno) }
+            if (isAppending) return this
+            val pos = ignoreEINTR64 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformLSeek(fd, 0L, SEEK_CUR)
+            }
+            if (pos == -1L) throw errnoToIOException(errno)
+            if (pos <= new) return this
+            val ret = ignoreEINTR64 {
+                val fd = _fd.value ?: throw ClosedException()
+                platformLSeek(fd, new, SEEK_SET)
+            }
+            if (ret == -1L) throw errnoToIOException(errno)
+            return this
         }
-        if (isAppending) return this
-        val pos = platformLSeek(fd, 0L, SEEK_CUR)
-        if (pos == -1L) {
-            throw errnoToIllegalArgumentOrIOException(errno, null)
-        }
-        if (pos > new && platformLSeek(fd, new, SEEK_SET) == -1L) {
-            throw errnoToIllegalArgumentOrIOException(errno, null)
-        }
-        return this
     }
 
     override fun sync(meta: Boolean): FileStream.ReadWrite {
-        val fd = _fd.value ?: throw fileStreamClosed()
-        val ret = if (meta) fsync(fd) else platformFDataSync(fd)
+        checkIsOpen()
+        val ret = ignoreEINTR32 {
+            val fd = _fd.value ?: throw ClosedException()
+            if (meta) fsync(fd) else platformFDataSync(fd)
+        }
         if (ret == 0) return this
         throw errnoToIOException(errno)
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {
-        val fd = _fd.value ?: throw fileStreamClosed()
+        checkIsOpen()
         checkCanWrite()
         buf.checkBounds(offset, len)
         if (len == 0) return
-
-        @OptIn(UnsafeNumber::class)
-        @Suppress("RemoveRedundantCallsOfConversionMethods")
-        buf.usePinned { pinned ->
-            var total = 0
-            while (total < len) {
-                val ret = platform.posix.write(
-                    fd,
-                    pinned.addressOf(offset + total),
-                    (len - total).convert(),
-                ).toInt()
-                if (ret < 0) {
-                    var e = errnoToIOException(errno)
-                    when {
-                        e is InterruptedIOException -> {
-                            e.bytesTransferred = total
-                        }
-                        total > 0 -> {
-                            e = InterruptedIOException("Write was interrupted").apply {
-                                bytesTransferred = total
-                                addSuppressed(e)
-                            }
-                        }
+        synchronized(positionLock) {
+            @OptIn(UnsafeNumber::class)
+            @Suppress("RemoveRedundantCallsOfConversionMethods")
+            buf.usePinned { pinned ->
+                var total = 0
+                while (total < len) {
+                    val ret = ignoreEINTR32 {
+                        val fd = delegateOrClosed(isWrite = true, total) { _fd.value }
+                        platform.posix.write(
+                            fd,
+                            pinned.addressOf(offset + total),
+                            (len - total).convert(),
+                        ).toInt()
                     }
-                    throw e
+                    if (ret < 0) {
+                        throw errnoToIOException(errno).toMaybeInterruptedIOException(isWrite = true, total)
+                    }
+                    if (ret == 0) {
+                        val e = InterruptedIOException("write == 0")
+                        e.bytesTransferred = total
+                        throw e
+                    }
+                    total += ret
                 }
-                if (ret == 0) {
-                    val e = InterruptedIOException("write == 0")
-                    e.bytesTransferred = total
-                    throw e
-                }
-                total += ret
             }
         }
     }
 
     override fun close() {
         val fd = _fd.getAndSet(null) ?: return
-        if (ignoreEINTR { platform.posix.close(fd) } == 0) return
+        if (platform.posix.close(fd) == 0) return
         throw errnoToIOException(errno)
     }
-
-    override fun toString(): String = "UnixFileStream@" + hashCode().toString()
 }
 
 @ExperimentalForeignApi

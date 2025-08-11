@@ -20,6 +20,7 @@ package io.matthewnelson.kmp.file.internal.fs
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.Buffer
+import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.DelicateFileApi
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
@@ -33,7 +34,6 @@ import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.bytesTransferred
 import io.matthewnelson.kmp.file.errorCodeOrNull
-import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.checkBounds
@@ -378,30 +378,28 @@ internal class FsJsNode private constructor(
 
         override fun position(): Long {
             if (isAppending) return size()
-            _fd ?: throw fileStreamClosed()
+            checkIsOpen()
             return _position
         }
 
         override fun position(new: Long): FileStream.ReadWrite {
-            _fd ?: throw fileStreamClosed()
+            checkIsOpen()
+            new.checkIsNotNegative()
             if (isAppending) return this
-            require(new >= 0L) { "new[$new] < 0" }
             _position = new
             return this
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-            val fd = _fd ?: throw fileStreamClosed()
+            checkIsOpen()
             checkCanRead()
             buf.checkBounds(offset, len)
-            if (len == 0) return 0
 
-            var remainder = len
             var pos = offset
             var total = 0
-            while (remainder > 0) {
-                val length = minOf(BUF.length.toInt(), remainder)
-
+            while (total < len) {
+                val length = minOf(BUF.length.toInt(), len - total)
+                val fd = delegateOrClosed(isWrite = false, total) { _fd }
                 val read = try {
                     jsExternTryCatch {
                         fs.readSync(
@@ -413,43 +411,34 @@ internal class FsJsNode private constructor(
                         )
                     }
                 } catch (t: Throwable) {
-                    var e = t.toIOException()
-                    when {
-                        e is InterruptedIOException -> {
-                            e.bytesTransferred = total
-                        }
-                        total > 0 -> {
-                            e = InterruptedIOException("Read was interrupted").apply {
-                                bytesTransferred = total
-                                addSuppressed(e)
-                            }
-                        }
-                    }
-                    throw e
+                    throw t.toIOException().toMaybeInterruptedIOException(isWrite = false, total)
                 }.toInt()
 
-                if (read == 0) break
+                if (read <= 0) {
+                    if (total == 0) total = -1
+                    break
+                }
 
                 for (i in 0 until read) {
                     buf[pos++] = BUF.readInt8(i.toDouble())
                 }
 
                 total += read
-                remainder -= read
                 _position += read
             }
 
-            return if (total == 0) -1 else total
+            return total
         }
 
         override fun read(buf: Buffer): Long = read(buf, 0L, buf.length.toLong())
 
         override fun read(buf: Buffer, offset: Long, len: Long): Long {
-            val fd = _fd ?: throw fileStreamClosed()
+            checkIsOpen()
             checkCanRead()
             buf.length.toLong().checkBounds(offset, len)
             if (len == 0L) return 0L
 
+            val fd = _fd ?: throw ClosedException()
             val read = try {
                 jsExternTryCatch {
                     fs.readSync(
@@ -464,12 +453,13 @@ internal class FsJsNode private constructor(
                 throw t.toIOException()
             }.toLong()
 
+            if (read <= 0L) return -1L
             _position += read
-            return if (read == 0L) -1L else read
+            return read
         }
 
         override fun size(): Long {
-            val fd = _fd ?: throw fileStreamClosed()
+            val fd = _fd ?: throw ClosedException()
             val stat = try {
                 jsExternTryCatch { fs.fstatSync(fd) }
             } catch (t: Throwable) {
@@ -479,9 +469,10 @@ internal class FsJsNode private constructor(
         }
 
         override fun size(new: Long): FileStream.ReadWrite {
-            val fd = _fd ?: throw fileStreamClosed()
+            checkIsOpen()
             checkCanSizeNew()
-            require(new >= 0L) { "new[$new] < 0" }
+            new.checkIsNotNegative()
+            val fd = _fd ?: throw ClosedException()
             try {
                 jsExternTryCatch { fs.ftruncateSync(fd, new.toDouble()) }
             } catch (t: Throwable) {
@@ -493,7 +484,7 @@ internal class FsJsNode private constructor(
         }
 
         override fun sync(meta: Boolean): FileStream.ReadWrite {
-            val fd = _fd ?: throw fileStreamClosed()
+            val fd = _fd ?: throw ClosedException()
             try {
                 jsExternTryCatch { if (meta) fs.fsyncSync(fd) else fs.fdatasyncSync(fd) }
             } catch (t: Throwable) {
@@ -504,22 +495,22 @@ internal class FsJsNode private constructor(
         }
 
         override fun write(buf: ByteArray, offset: Int, len: Int) {
-            val fd = _fd ?: throw fileStreamClosed()
+            checkIsOpen()
             checkCanWrite()
             buf.checkBounds(offset, len)
 
-            var remainder = len
             var pos = offset
-            while (remainder > 0) {
-                val length = minOf(BUF.length.toInt(), remainder)
+            var total = 0
+            while (total < len) {
+                val length = minOf(BUF.length.toInt(), len - total)
 
                 for (i in 0 until length) {
                     BUF.writeInt8(buf[pos++], i.toDouble())
                 }
 
-                val position = currentPosition()
-
-                val bytesWritten = try {
+                val position = currentWritePosition(total)
+                val fd = delegateOrClosed(isWrite = true, total) { _fd }
+                val ret = try {
                     jsExternTryCatch {
                         fs.writeSync(
                             fd = fd,
@@ -530,79 +521,53 @@ internal class FsJsNode private constructor(
                         )
                     }
                 } catch (t: Throwable) {
-                    var e = t.toIOException()
-                    when {
-                        e is InterruptedIOException -> {
-                            e.bytesTransferred = len - remainder
-                        }
-                        remainder != len -> {
-                            e = InterruptedIOException("Write was interrupted").apply {
-                                bytesTransferred = len - remainder
-                                addSuppressed(e)
-                            }
-                        }
-                    }
-                    throw e
+                    throw t.toIOException().toMaybeInterruptedIOException(isWrite = true, total)
                 }.toInt()
 
-                if (bytesWritten == 0) {
+                if (ret <= 0) {
                     val e = InterruptedIOException("write == 0")
-                    e.bytesTransferred = len - remainder
+                    e.bytesTransferred = total
                     throw e
                 }
 
-                remainder -= bytesWritten
-                if (!isAppending) _position += bytesWritten
+                total += ret
+                if (!isAppending) _position += ret
             }
         }
 
         override fun write(buf: Buffer) { write(buf, 0L, buf.length.toLong()) }
 
         override fun write(buf: Buffer, offset: Long, len: Long) {
-            val fd = _fd ?: throw fileStreamClosed()
+            checkIsOpen()
             checkCanWrite()
             buf.length.toLong().checkBounds(offset, len)
 
-            var remainder = len
-            var off = offset
-            while (remainder > 0L) {
-                val position = currentPosition()
-
-                val bytesWritten = try {
+            var total = 0L
+            while (total < len) {
+                val position = currentWritePosition(total)
+                val fd = delegateOrClosed(isWrite = true, total) { _fd }
+                val ret = try {
                     jsExternTryCatch {
                         fs.writeSync(
                             fd = fd,
                             buffer = buf.value,
-                            offset = off.toDouble(),
-                            length = remainder.toDouble(),
+                            offset = (offset + total).toDouble(),
+                            length = (len - total).toDouble(),
                             position = position,
                         )
                     }
                 } catch (t: Throwable) {
-                    var e = t.toIOException()
-                    when {
-                        e is InterruptedIOException -> {
-                            e.bytesTransferred = (len - remainder).toInt()
-                        }
-                        remainder != len -> {
-                            e = InterruptedIOException("Write was interrupted").apply {
-                                bytesTransferred = (len - remainder).toInt()
-                                addSuppressed(e)
-                            }
-                        }
-                    }
-                    throw e
+                    throw t.toIOException().toMaybeInterruptedIOException(isWrite = true, total)
                 }.toLong()
 
-                if (bytesWritten == 0L) {
+                if (ret <= 0L) {
                     val e = InterruptedIOException("write == 0")
-                    e.bytesTransferred = (len - remainder).toInt()
+                    e.bytesTransferred = total.toInt()
                     throw e
                 }
 
-                remainder -= bytesWritten
-                off += bytesWritten
-                if (!isAppending) _position += bytesWritten
+                total += ret
+                if (!isAppending) _position += ret
             }
         }
 
@@ -616,19 +581,21 @@ internal class FsJsNode private constructor(
             }
         }
 
-        override fun toString(): String = "JsNodeFileStream@" + hashCode().toString()
-
         @Throws(IOException::class)
-        private inline fun currentPosition(): Double? = if (isAppending) {
+        private fun currentWritePosition(bytesTransferred: Number): Double? {
+            if (!isAppending) return _position.toDouble()
+
             // If it's appending, modification of position is ignored
-            // from the interface so use whatever the current position
-            // is for the descriptor (current size).
-            //
+            // from the interface (size is always returned) so use
+            // whatever the current position is for the descriptor by
+            // passing null.
+            if (!isWindows) return null
+
             // The only caveat is Windows, which will never specify
-            // the O_APPEND flag and always requires the end position.
-            if (isWindows) size().toDouble() else null
-        } else {
-            _position.toDouble()
+            // the O_APPEND flag and always requires the end position
+            // because of how libuv opens the handle when O_APPEND is
+            // expressed.
+            return delegateOrClosed(isWrite = true, bytesTransferred) { size().toDouble() }
         }
     }
 }

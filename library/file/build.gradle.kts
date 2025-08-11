@@ -42,6 +42,12 @@ kmpConfiguration {
                 }
             }
         }
+
+        kotlin {
+            sourceSets.findByName("nativeMain")?.dependencies {
+                implementation(libs.kotlinx.atomicfu)
+            }
+        }
     }
 }
 

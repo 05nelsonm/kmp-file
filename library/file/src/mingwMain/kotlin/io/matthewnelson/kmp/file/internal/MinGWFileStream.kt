@@ -18,12 +18,14 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.bytesTransferred
 import io.matthewnelson.kmp.file.lastErrorToIOException
-import kotlinx.cinterop.AutofreeScope
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.IntVarOf
 import kotlinx.cinterop.UIntVarOf
@@ -67,98 +69,135 @@ internal class MinGWFileStream(
     init { if (h == INVALID_HANDLE_VALUE) throw lastErrorToIOException() }
 
     private val _h = AtomicReference<HANDLE?>(h)
+    private val positionLock = SynchronizedObject()
 
     override fun isOpen(): Boolean = _h.value != null
 
     override fun position(): Long {
         if (isAppending) return size()
-        val h = _h.value ?: throw fileStreamClosed()
-        return memScoped { h.getPosition(scope = this) }
+        checkIsOpen()
+        synchronized(positionLock) {
+            val h = _h.value ?: throw ClosedException()
+            return h.getPosition()
+        }
     }
 
     override fun position(new: Long): FileStream.ReadWrite {
-        val h = _h.value ?: throw fileStreamClosed()
+        checkIsOpen()
+        new.checkIsNotNegative()
         if (isAppending) return this
-        h.setPosition(new)
-        return this
+        synchronized(positionLock) {
+            val h = _h.value ?: throw ClosedException()
+            h.setPosition(new)
+            return this
+        }
     }
 
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-        val h = _h.value ?: throw fileStreamClosed()
+        checkIsOpen()
         checkCanRead()
         buf.checkBounds(offset, len)
         if (len == 0) return 0
-
-        return memScoped {
-            val bytesRead = alloc<UIntVarOf<UInt>>()
-            bytesRead.value = 0u
-
-            val ret = buf.usePinned { pinned ->
-                ReadFile(
-                    hFile = h,
-                    lpBuffer = pinned.addressOf(offset).getPointer(this),
-                    nNumberOfBytesToRead = len.convert(),
-                    lpNumberOfBytesRead = bytesRead.ptr,
-                    lpOverlapped = null,
-                )
-            }
-
-            if (ret == FALSE) {
-                val lastError = GetLastError()
-                if (lastError.toInt() == ERROR_HANDLE_EOF) return@memScoped -1
-                val e = lastErrorToIOException(lastError)
-                if (e is InterruptedIOException) {
-                    e.bytesTransferred = bytesRead.value.toInt()
+        synchronized(positionLock) {
+            memScoped {
+                val bytesRead = alloc<UIntVarOf<UInt>>()
+                bytesRead.value = 0u
+                val h = _h.value ?: throw ClosedException()
+                val ret = buf.usePinned { pinned ->
+                    ReadFile(
+                        hFile = h,
+                        lpBuffer = pinned.addressOf(offset).getPointer(this),
+                        nNumberOfBytesToRead = len.convert(),
+                        lpNumberOfBytesRead = bytesRead.ptr,
+                        lpOverlapped = null,
+                    )
                 }
-                throw e
-            }
 
-            val read = bytesRead.value.toInt()
-            if (read == 0) -1 else read
+                val read = bytesRead.value.toInt()
+                if (ret == FALSE) {
+                    val lastError = GetLastError()
+                    if (lastError.toInt() == ERROR_HANDLE_EOF) return -1
+                    val e = lastErrorToIOException(lastError)
+                    if (e is InterruptedIOException) {
+                        e.bytesTransferred = read
+                    }
+                    throw e
+                }
+
+                return if (read == 0) -1 else read
+            }
         }
     }
 
     override fun size(): Long {
-        val h = _h.value ?: throw fileStreamClosed()
+        checkIsOpen()
+        synchronized(positionLock) {
+            memScoped {
+                val size = alloc<LARGE_INTEGER>()
+                val h = _h.value ?: throw ClosedException()
+                val ret = GetFileSizeEx(
+                    hFile = h,
+                    lpFileSize = size.ptr,
+                )
+                if (ret == FALSE) throw lastErrorToIOException()
 
-        return memScoped {
-            val size = alloc<LARGE_INTEGER>()
-            val ret = GetFileSizeEx(
-                hFile = h,
-                lpFileSize = size.ptr,
-            )
-            if (ret == FALSE) throw lastErrorToIOException()
-
-            val hi = (size.HighPart.toLong() and 0xffffffff) shl 32
-            val lo = (size.LowPart.toLong()  and 0xffffffff)
-            hi or lo
+                val hi = (size.HighPart.toLong() and 0xffffffff) shl 32
+                val lo = (size.LowPart.toLong() and 0xffffffff)
+                return hi or lo
+            }
         }
     }
 
     override fun size(new: Long): FileStream.ReadWrite {
-        val h = _h.value ?: throw fileStreamClosed()
+        checkIsOpen()
         checkCanSizeNew()
-        val pos = if (isAppending) {
-            h.setPosition(new)
-            null
-        } else {
-            val pos = memScoped { h.getPosition(scope = this) }
-            if (pos != new) h.setPosition(new)
-            pos
+        new.checkIsNotNegative()
+        synchronized(positionLock) {
+            val h = _h.value ?: throw ClosedException()
+            val posBefore = if (isAppending) {
+                h.setPosition(new)
+                null
+            } else {
+                val pos = h.getPosition()
+                if (pos != new) {
+                    checkIsOpen()
+                    h.setPosition(new)
+                }
+                pos
+            }
+
+            var threw: IOException? = null
+            checkIsOpen()
+            if (SetEndOfFile(h) == FALSE) {
+                threw = lastErrorToIOException()
+            }
+
+            if (posBefore == null) {
+                if (threw != null) throw threw
+                return this
+            }
+
+            if (threw != null || posBefore < new) {
+                // Not appending or SetEndOfFile failed.
+                // Set back to whatever it was previously.
+                try {
+                    checkIsOpen()
+                    h.setPosition(posBefore)
+                } catch (e: IOException) {
+                    if (threw == null) {
+                        threw = e
+                    } else {
+                        threw.addSuppressed(e)
+                    }
+                }
+            }
+            if (threw != null) throw threw
+            return this
         }
-
-        if (SetEndOfFile(h) == FALSE) throw lastErrorToIOException()
-
-        // appending
-        if (pos == null) return this
-
-        // Set back to what it was previously
-        if (pos < new) h.setPosition(pos)
-        return this
     }
 
     override fun sync(meta: Boolean): FileStream.ReadWrite {
-        val h = _h.value ?: throw fileStreamClosed()
+        val h = _h.value ?: throw ClosedException()
         val ret = FlushFileBuffers(hFile = h)
         if (ret != FALSE) return this
         val lastError = GetLastError()
@@ -167,56 +206,47 @@ internal class MinGWFileStream(
     }
 
     override fun write(buf: ByteArray, offset: Int, len: Int) {
-        val h = _h.value ?: throw fileStreamClosed()
+        checkIsOpen()
         checkCanWrite()
         buf.checkBounds(offset, len)
         if (len == 0) return
-
-        memScoped {
-            val bytesWrite = alloc<UIntVarOf<UInt>>()
-            val overlapped = if (isAppending) {
-                alloc<_OVERLAPPED> {
-                    Offset = 0xFFFFFFFF.convert()
-                    OffsetHigh = 0xFFFFFFFF.convert()
+        synchronized(positionLock) {
+            memScoped {
+                val bytesWrite = alloc<UIntVarOf<UInt>>()
+                val overlapped = if (isAppending) {
+                    alloc<_OVERLAPPED> {
+                        Offset = 0xFFFFFFFF.convert()
+                        OffsetHigh = 0xFFFFFFFF.convert()
+                    }
+                } else {
+                    null
                 }
-            } else {
-                null
-            }
 
-            buf.usePinned { pinned ->
-                var total = 0
-                while (total < len) {
-                    bytesWrite.value = 0u
+                buf.usePinned { pinned ->
+                    var total = 0
+                    while (total < len) {
+                        bytesWrite.value = 0u
+                        val h = delegateOrClosed(isWrite = true, total) { _h.value }
+                        val ret = WriteFile(
+                            hFile = h,
+                            lpBuffer = pinned.addressOf(offset + total).getPointer(this),
+                            nNumberOfBytesToWrite = (len - total).convert(),
+                            lpNumberOfBytesWritten = bytesWrite.ptr,
+                            lpOverlapped = overlapped?.ptr,
+                        )
 
-                    val ret = WriteFile(
-                        hFile = h,
-                        lpBuffer = pinned.addressOf(offset + total).getPointer(this),
-                        nNumberOfBytesToWrite = (len - total).convert(),
-                        lpNumberOfBytesWritten = bytesWrite.ptr,
-                        lpOverlapped = overlapped?.ptr,
-                    )
+                        val write = bytesWrite.value.toInt()
 
-                    if (ret == FALSE) {
-                        var e = lastErrorToIOException()
-                        when {
-                            e is InterruptedIOException -> {
-                                e.bytesTransferred = total
-                            }
-                            total > 0 -> {
-                                e = InterruptedIOException("Write was interrupted").apply {
-                                    bytesTransferred = total
-                                    addSuppressed(e)
-                                }
-                            }
+                        if (ret == FALSE) {
+                            throw lastErrorToIOException().toMaybeInterruptedIOException(isWrite = true, total)
                         }
-                        throw e
+                        if (write == 0) {
+                            val e = InterruptedIOException("write == 0")
+                            e.bytesTransferred = total
+                            throw e
+                        }
+                        total += write
                     }
-                    if (bytesWrite.value == 0u) {
-                        val e = InterruptedIOException("write == 0")
-                        e.bytesTransferred = total
-                        throw e
-                    }
-                    total += bytesWrite.value.toInt()
                 }
             }
         }
@@ -227,13 +257,11 @@ internal class MinGWFileStream(
         val ret = CloseHandle(hObject = h)
         if (ret == FALSE) throw lastErrorToIOException()
     }
-
-    override fun toString(): String = "MinGWFileStream@" + hashCode().toString()
 }
 
 @Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-private inline fun HANDLE.getPosition(scope: AutofreeScope): Long = with(scope) {
+private inline fun HANDLE.getPosition(): Long = memScoped {
     val dhi = alloc<IntVarOf<Int>> { value = 0 }
     val dlo = SetFilePointer(
         hFile = this@getPosition,
@@ -248,11 +276,9 @@ private inline fun HANDLE.getPosition(scope: AutofreeScope): Long = with(scope) 
     return hi or lo
 }
 
+@Throws(IOException::class)
 @OptIn(ExperimentalForeignApi::class)
-@Throws(IllegalArgumentException::class, IOException::class)
 private inline fun HANDLE.setPosition(new: Long) {
-    require(new >= 0L) { "new[$new] < 0" }
-
     val distance = cValue<LARGE_INTEGER> {
         LowPart = new.toInt().convert()
         HighPart = (new ushr 32).toInt().convert()
