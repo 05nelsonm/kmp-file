@@ -172,11 +172,17 @@ internal class MinGWFileStream(
                 threw = lastErrorToIOException()
             }
 
-            if (posBefore != null && posBefore != new) {
-                // Not appending. Set back to whatever it was previously.
+            if (posBefore == null) {
+                if (threw != null) throw threw
+                return this
+            }
+
+            if (threw != null || posBefore < new) {
+                // Not appending or SetEndOfFile failed.
+                // Set back to whatever it was previously.
                 try {
                     checkIsOpen()
-                    h.setPosition(new)
+                    h.setPosition(posBefore)
                 } catch (e: IOException) {
                     if (threw == null) {
                         threw = e
