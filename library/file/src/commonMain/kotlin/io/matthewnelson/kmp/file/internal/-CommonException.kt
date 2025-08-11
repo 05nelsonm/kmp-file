@@ -21,7 +21,6 @@ import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileSystemException
-import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.path
 
 internal expect inline fun fileAlreadyExistsException(
@@ -56,5 +55,3 @@ internal inline fun fileNotFoundException(
     }
     return FileNotFoundException(msg)
 }
-
-internal inline fun fileStreamClosed(): IOException = IOException("FileStream is closed")

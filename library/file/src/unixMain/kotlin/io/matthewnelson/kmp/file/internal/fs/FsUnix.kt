@@ -31,6 +31,7 @@ import io.matthewnelson.kmp.file.internal.errnoToIllegalArgumentOrIOException
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
+import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.alloc
@@ -92,14 +93,14 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
         val m = MODE_MASK.convert(mode = mode)
         @Suppress("RemoveRedundantCallsOfConversionMethods")
-        if (chmod(file.path, m.convert()).toInt() == 0) return
+        if (ignoreEINTR { chmod(file.path, m.convert()).toInt() } == 0) return
         if (errno == ENOENT && !mustExist) return
         throw errnoToIOException(errno, file)
     }
 
     @Throws(IOException::class)
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
-        if (remove(file.path) == 0) return
+        if (ignoreEINTR { remove(file.path) } == 0) return
         if (!mustExist && errno == ENOENT) return
         throw errnoToIOException(errno, file)
     }
@@ -108,7 +109,7 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
         val m = MODE_MASK.convert(mode = mode)
         @Suppress("RemoveRedundantCallsOfConversionMethods")
-        if (mkdir(dir.path, m.convert()).toInt() == 0) return
+        if (ignoreEINTR { mkdir(dir.path, m.convert()).toInt() } == 0) return
         if (!mustCreate && errno == EEXIST) return
         throw errnoToIOException(errno, dir)
     }
@@ -119,7 +120,7 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
 
         val e = memScoped {
             val stat = alloc<stat>()
-            if (fstat(fd, stat.ptr) != 0) {
+            if (ignoreEINTR { fstat(fd, stat.ptr) } != 0) {
                 return@memScoped errnoToIOException(errno)
             }
             if ((stat.st_mode.toInt() and S_IFMT) == S_IFDIR) {
@@ -128,7 +129,7 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
             null
         }
         if (e != null) {
-            if (ignoreEINTR { close(fd) } != 0) {
+            if (close(fd) != 0) {
                 val ee = errnoToIOException(errno)
                 e.addSuppressed(ee)
             }
@@ -153,7 +154,7 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
 
     @Throws(IOException::class)
     override fun realpath(path: Path): Path {
-        val p = realpath(path, null)
+        val p = ignoreEINTR<ByteVar> { realpath(path, null) }
             ?: throw errnoToIOException(errno, path.toFile())
 
         return try {

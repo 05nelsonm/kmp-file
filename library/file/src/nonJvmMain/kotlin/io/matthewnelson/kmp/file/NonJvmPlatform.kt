@@ -29,6 +29,17 @@ public actual open class IOException: Exception {
 }
 
 /**
+ * Checked exception thrown when an attempt is made to invoke or complete an I/O
+ * operation upon something that is closed, or at least closed to that operation.
+ * That this exception is thrown does not necessarily imply that implementation
+ * is completely closed (for a [FileStream], it does). A socket whose write half
+ * has been shut down, for example, may still be open for reading.
+ * */
+public actual open class ClosedException: IOException {
+    public actual constructor()
+}
+
+/**
  * Signals that an end of file or end of stream has been reached unexpectedly
  * during input. This exception is mainly used by data input streams to signal
  * end of stream. Note that many other input operations return a special value

@@ -49,7 +49,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             assertEquals(1, s.read(ByteArray(1)))
             s.close()
             assertFalse(s.isOpen())
-            assertStreamClosed { s.read(ByteArray(1)) }
+            assertFailsWith<ClosedException> { s.read(ByteArray(1)) }
         }
     }
 

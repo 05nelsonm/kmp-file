@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("PropertyName", "RedundantVisibilityModifier", "PrivatePropertyName")
+@file:Suppress("PropertyName", "RedundantVisibilityModifier", "PrivatePropertyName", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal.fs
 
@@ -30,22 +30,25 @@ import io.matthewnelson.kmp.file.InterruptedIOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysTempDir
-import io.matthewnelson.kmp.file.internal.fileStreamClosed
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
+import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.toFile
 import io.matthewnelson.kmp.file.wrapIOException
 import java.io.FileDescriptor
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.nio.channels.AsynchronousCloseException
+import java.nio.channels.spi.AbstractInterruptibleChannel
 import java.util.UUID
 import kotlin.concurrent.Volatile
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 /**
  * Android API 21+
@@ -132,7 +135,7 @@ internal class FsJvmAndroid private constructor(
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
         val m = MODE_MASK.convert(mode)
         try {
-            wrapErrnoException(file) { chmod.invoke(null, file.path, m) }
+            tryCatchErrno(file) { chmod.invoke(null, file.path, m) }
         } catch (e: IOException) {
             if (e is FileNotFoundException && !mustExist) return
             throw e
@@ -143,7 +146,7 @@ internal class FsJvmAndroid private constructor(
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
         checkThread()
         try {
-            wrapErrnoException(file) { remove.invoke(null, file.path) }
+            tryCatchErrno(file) { remove.invoke(null, file.path) }
         } catch (e: IOException) {
             if (e is FileNotFoundException && !mustExist) return
             throw e
@@ -154,7 +157,7 @@ internal class FsJvmAndroid private constructor(
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
         val m = MODE_MASK.convert(mode)
         try {
-            wrapErrnoException(dir) { mkdir.invoke(null, dir.path, m) }
+            tryCatchErrno(dir) { mkdir.invoke(null, dir.path, m) }
         } catch (e: IOException) {
             if (e is FileAlreadyExistsException && !mustCreate) return
             throw e
@@ -165,7 +168,7 @@ internal class FsJvmAndroid private constructor(
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = file.open(const.O_RDONLY, OpenExcl.MustExist)
         try {
-            val isDirectory = wrapErrnoException(null) {
+            val isDirectory = tryCatchErrno(null) {
                 val s = fstat.invoke(null, fd)
                 (stat.st_mode.getInt(s) and const.S_IFMT) == const.S_IFDIR
             }
@@ -254,20 +257,13 @@ internal class FsJvmAndroid private constructor(
             DoFcntl(deleteFileOnFailure, fcntlVoid, isFcntlInt, fcntl)
         }
 
-        var fd: FileDescriptor
-        while (true) {
-            try {
-                fd = wrapErrnoException(this) { open.invoke(null, path, f, m) as FileDescriptor }
-                break
-            } catch (_: InterruptedIOException) {
-                // EINTR
-            }
+        val fd = tryCatchErrno(this) {
+            open.invoke(null, path, f, m) as FileDescriptor
         }
-
         if (doFcntl == null) return fd
 
         try {
-            wrapErrnoException(this) {
+            tryCatchErrno(this) {
                 f = doFcntl.fcntlVoid.invoke(null, fd, const.F_GETFD) as Int
                 f = f or const.FD_CLOEXEC
                 doFcntl.fcntl.invoke(null, fd, const.F_SETFD, if (doFcntl.isFcntlInt) f else f.toLong())
@@ -287,19 +283,12 @@ internal class FsJvmAndroid private constructor(
         return fd
     }
 
-    @Suppress("NOTHING_TO_INLINE")
     private inline fun FileDescriptor.doClose(threw: IOException?): IOException? {
-        var t: IOException? = threw
         val fd = this
+        var t: IOException? = threw
+
         try {
-            while (true) {
-                try {
-                    wrapErrnoException(null) { close.invoke(null, fd) }
-                    break
-                } catch (_: InterruptedIOException) {
-                    // EINTR
-                }
-            }
+            tryCatchErrno(null) { close.invoke(null, fd) }
         } catch (e: IOException) {
             if (t != null) {
                 e.addSuppressed(t)
@@ -310,29 +299,37 @@ internal class FsJvmAndroid private constructor(
     }
 
     // android.system.ErrnoException
+    @OptIn(ExperimentalContracts::class)
     @Throws(IllegalArgumentException::class, IOException::class)
-    private inline fun <T: Any?> wrapErrnoException(file: File?, other: File? = null, block: Os.() -> T): T = try {
-        block(os)
-    } catch (t: Throwable) {
-        val c = if (t is InvocationTargetException) t.cause ?: t else t
-        val m = c.message?.ifBlank { null }
+    private inline fun <T: Any?> tryCatchErrno(file: File?, other: File? = null, block: Os.() -> T): T {
+        contract {
+            callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+        }
 
-        throw when {
-            c is SecurityException -> c.toAccessDeniedException(file ?: "".toFile())
-            c is InterruptedIOException -> c
-            m == null -> c.wrapIOException()
-            m.contains("EINTR") -> InterruptedIOException(m).alsoAddSuppressed(c)
-            m.contains("EINVAL") -> IllegalArgumentException(m).alsoAddSuppressed(c)
-            m.contains("ENOENT") -> fileNotFoundException(file, null, m).alsoAddSuppressed(c)
-            file != null -> when {
-                m.contains("EACCES") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
-                m.contains("EEXIST") -> FileAlreadyExistsException(file, other, m).alsoAddSuppressed(c)
-                m.contains("ENOTDIR") -> NotDirectoryException(file).alsoAddSuppressed(c)
-                m.contains("ENOTEMPTY") -> DirectoryNotEmptyException(file).alsoAddSuppressed(c)
-                m.contains("EPERM") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
-                else -> FileSystemException(file, other, m).alsoAddSuppressed(c)
+        try {
+            return block(os)
+        } catch (t: Throwable) {
+            val c = if (t is InvocationTargetException) t.cause ?: t else t
+            val m = c.message?.ifBlank { null }
+
+            throw when {
+                c is SecurityException -> c.toAccessDeniedException(file ?: "".toFile())
+                c is IOException -> c
+                m == null -> c.wrapIOException()
+                m.contains("EINTR") -> InterruptedIOException(m).alsoAddSuppressed(c)
+                m.contains("EINVAL") -> IllegalArgumentException(m).alsoAddSuppressed(c)
+                m.contains("ENOENT") -> fileNotFoundException(file, null, m).alsoAddSuppressed(c)
+                file != null -> when {
+                    m.contains("EACCES") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
+                    m.contains("EEXIST") -> FileAlreadyExistsException(file, other, m).alsoAddSuppressed(c)
+                    m.contains("ENOTDIR") -> NotDirectoryException(file).alsoAddSuppressed(c)
+                    m.contains("ENOTEMPTY") -> DirectoryNotEmptyException(file).alsoAddSuppressed(c)
+                    m.contains("EPERM") -> AccessDeniedException(file, other, m).alsoAddSuppressed(c)
+                    else -> FileSystemException(file, other, m).alsoAddSuppressed(c)
+                }
+
+                else -> c.wrapIOException()
             }
-            else -> c.wrapIOException()
         }
     }
 
@@ -343,107 +340,148 @@ internal class FsJvmAndroid private constructor(
         isAppending: Boolean,
     ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
-        private inner class Closeables(val fd: FileDescriptor) {
-            val fis = if (canRead) FileInputStream(/* fdObj = */ fd) else null
-            val fos = if (canWrite) FileOutputStream(/* fdObj = */ fd) else null
-        }
-
         @Volatile
-        private var _c: Closeables? = Closeables(fd)
-        private val closeLock = Any()
+        private var _fd: FileDescriptor? = fd
+        private val interruptible = object : AccessibleInterruptibleChannel() {
+            protected override fun implCloseChannel() {
+                val fd = _fd ?: return
+                _fd = null
+                fd.doClose(null)?.let { throw it }
+            }
+        }
+        private val positionLock = Any()
 
-        override fun isOpen(): Boolean = _c != null
+        override fun isOpen(): Boolean = interruptible.isOpen
 
         override fun position(): Long {
             if (isAppending) return size()
-            val c = _c ?: throw fileStreamClosed()
-            return wrapErrnoException(null) { lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long }
+            checkIsOpen()
+            interruptible.doBlocking(positionLock) { completed ->
+                val fd = _fd ?: return 0L
+                val ret = tryCatchErrno(null) {
+                    lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long
+                }
+                completed()
+                return ret
+            }
         }
 
         override fun position(new: Long): FileStream.ReadWrite {
-            val c = _c ?: throw fileStreamClosed()
+            checkIsOpen()
+            new.checkIsNotNegative()
             if (isAppending) return this
-            wrapErrnoException(null) { lseek.invoke(null, c.fd, new, const.SEEK_SET) }
-            return this
+            interruptible.doBlocking(positionLock) { completed ->
+                val fd = _fd ?: return this
+                tryCatchErrno(null) {
+                    lseek.invoke(null, fd, new, const.SEEK_SET) as Long
+                }
+                completed()
+                return this
+            }
         }
 
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
-            val c = _c ?: throw fileStreamClosed()
-            if (c.fis == null) throw IllegalStateException("FileStream is O_WRONLY")
-            return c.fis.read(buf, offset, len)
+            checkIsOpen()
+            checkCanRead()
+            buf.checkBounds(offset, len)
+            if (len == 0) return 0
+            interruptible.doBlocking(positionLock) { completed ->
+                val fd = _fd ?: return -1
+                var ret = tryCatchErrno(null) {
+                    readBytes.invoke(null, fd, buf, offset, len) as Int
+                }
+                if (ret == 0) ret = -1
+                completed()
+                return ret
+            }
         }
 
         override fun size(): Long {
-            val c = _c ?: throw fileStreamClosed()
-            return wrapErrnoException(null) {
-                val s = fstat.invoke(null, c.fd)
-                stat.st_size.getLong(s)
+            checkIsOpen()
+            interruptible.doBlocking(positionLock) { completed ->
+                val fd = _fd ?: return -1L
+                val size = tryCatchErrno(null) {
+                    val obj = fstat.invoke(null, fd)
+                    stat.st_size.getLong(obj)
+                }
+                completed()
+                return size
             }
         }
 
         override fun size(new: Long): FileStream.ReadWrite {
-            val c = _c ?: throw fileStreamClosed()
+            checkIsOpen()
             checkCanSizeNew()
-            wrapErrnoException(null) {
-                ftruncate.invoke(null, c.fd, new)
-                if (isAppending) return@wrapErrnoException
-                val pos = lseek.invoke(null, c.fd, 0L, const.SEEK_CUR) as Long
-                if (pos > new) lseek.invoke(null, c.fd, new, const.SEEK_SET)
+            new.checkIsNotNegative()
+            interruptible.doBlocking(positionLock) { completed ->
+                val fd = _fd ?: return this
+                tryCatchErrno(null) {
+                    ftruncate.invoke(null, fd, new)
+                }
+                if (isAppending) {
+                    completed()
+                    return this
+                }
+                if (!isOpen()) return this
+                val pos = tryCatchErrno(null) {
+                    lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long
+                }
+                if (pos <= new) {
+                    completed()
+                    return this
+                }
+                if (!isOpen()) return this
+                tryCatchErrno(null) {
+                    lseek.invoke(null, fd, new, const.SEEK_SET)
+                }
+                completed()
+                return this
             }
-            return this
         }
 
         override fun sync(meta: Boolean): FileStream.ReadWrite {
-            val c = _c ?: throw fileStreamClosed()
-            if (meta) {
-                c.fd.sync()
-            } else {
-                wrapErrnoException(null) { fdatasync.invoke(null, c.fd) }
+            checkIsOpen()
+            interruptible.doBlocking(lock = null) { completed ->
+                val fd = _fd ?: return this
+                if (meta) {
+                    fd.sync()
+                } else {
+                    tryCatchErrno(null) { fdatasync.invoke(null, fd) }
+                }
+                completed()
+                return this
             }
-            return this
         }
 
         override fun write(buf: ByteArray, offset: Int, len: Int) {
-            val c = _c ?: throw fileStreamClosed()
-            if (c.fos == null) throw IllegalStateException("FileStream is O_RDONLY")
-            c.fos.write(buf, offset, len)
-        }
-
-        override fun close() {
-            val c = synchronized(closeLock) {
-                val c = _c ?: return
-                _c = null
-                c
-            }
-
-            var threw: IOException? = null
-
-            if (c.fis != null) {
-                try {
-                    c.fis.close()
-                } catch (e: IOException) {
-                    threw = e
-                }
-            }
-
-            if (c.fos != null) {
-                try {
-                    c.fos.close()
-                } catch (e: IOException) {
-                    if (threw == null) {
-                        threw = e
-                    } else {
-                        threw.addSuppressed(e)
+            checkIsOpen()
+            checkCanWrite()
+            buf.checkBounds(offset, len)
+            if (len == 0) return
+            interruptible.doBlocking(positionLock) { completed ->
+                var total = 0
+                while (total < len) {
+                    val fd = delegateOrClosed(isWrite = true, total) { _fd }
+                    val ret = try {
+                        tryCatchErrno(null) {
+                            writeBytes.invoke(null, fd, buf, offset + total, len - total) as Int
+                        }
+                    } catch (e: IOException) {
+                        throw e.toMaybeInterruptedIOException(isWrite = true, total)
                     }
+                    if (ret == 0) {
+                        val e = InterruptedIOException("write == 0")
+                        e.bytesTransferred = total
+                        throw e
+                    }
+                    total += ret
                 }
+                completed()
+                return
             }
-
-            // Android does not close the underlying FileDescriptor when using it with
-            // File{Input/Output}Stream because we opened it. Ownership lies with us.
-            c.fd.doClose(threw)?.let { throw it }
         }
 
-        override fun toString(): String = "AndroidFileStream@" + hashCode().toString()
+        override fun close() { interruptible.close() }
     }
 }
 
@@ -454,7 +492,6 @@ private class Os {
     val chmod: Method
     /** `close(fd: FileDescriptor)` */
     val close: Method
-
     /** `fdatasync(fd: FileDescriptor)` */
     val fdatasync: Method
     /** `fstat(fd: FileDescriptor): StructStat` */
@@ -467,8 +504,12 @@ private class Os {
     val mkdir: Method
     /** `open(path: String, flags: Int, mode: Int): FileDescriptor` */
     val open: Method
+    /** `read(fd: FileDescriptor, bytes: ByteArray, byteOffset: Int, byteCount: Int): Int */
+    val readBytes: Method
     /** `remove(path: String)` */
     val remove: Method
+    /** `write(fd: FileDescriptor, bytes: ByteArray, byteOffset: Int, byteCount: Int): Int */
+    val writeBytes: Method
 
     /**
      * `fcntlInt(fd: FileDescriptor, cmd: Int, arg: Int): Int`
@@ -496,15 +537,63 @@ private class Os {
     init {
         val clazz = Class.forName("android.system.Os")
 
-        chmod = clazz.getMethod("chmod", String::class.java, Int::class.javaPrimitiveType)
-        close = clazz.getMethod("close", FileDescriptor::class.java)
-        fdatasync = clazz.getMethod("fdatasync", FileDescriptor::class.java)
-        fstat = clazz.getMethod("fstat", FileDescriptor::class.java)
-        ftruncate = clazz.getMethod("ftruncate", FileDescriptor::class.java, Long::class.javaPrimitiveType)
-        lseek = clazz.getMethod("lseek", FileDescriptor::class.java, Long::class.javaPrimitiveType, Int::class.javaPrimitiveType)
-        mkdir = clazz.getMethod("mkdir", String::class.java, Int::class.javaPrimitiveType)
-        open = clazz.getMethod("open", String::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
-        remove = clazz.getMethod("remove", String::class.java)
+        chmod = clazz.getMethod(
+            "chmod",
+            String::class.java,
+            Int::class.javaPrimitiveType,
+        )
+        close = clazz.getMethod(
+            "close",
+            FileDescriptor::class.java,
+        )
+        fdatasync = clazz.getMethod(
+            "fdatasync",
+            FileDescriptor::class.java,
+        )
+        fstat = clazz.getMethod(
+            "fstat",
+            FileDescriptor::class.java,
+        )
+        ftruncate = clazz.getMethod(
+            "ftruncate",
+            FileDescriptor::class.java,
+            Long::class.javaPrimitiveType,
+        )
+        lseek = clazz.getMethod(
+            "lseek",
+            FileDescriptor::class.java,
+            Long::class.javaPrimitiveType,
+            Int::class.javaPrimitiveType,
+        )
+        mkdir = clazz.getMethod(
+            "mkdir",
+            String::class.java,
+            Int::class.javaPrimitiveType,
+        )
+        open = clazz.getMethod(
+            "open",
+            String::class.java,
+            Int::class.javaPrimitiveType,
+            Int::class.javaPrimitiveType,
+        )
+        readBytes = clazz.getMethod(
+            "read",
+            FileDescriptor::class.java,
+            ByteArray::class.java,
+            Int::class.javaPrimitiveType,
+            Int::class.javaPrimitiveType,
+        )
+        remove = clazz.getMethod(
+            "remove",
+            String::class.java,
+        )
+        writeBytes = clazz.getMethod(
+            "write",
+            FileDescriptor::class.java,
+            ByteArray::class.java,
+            Int::class.javaPrimitiveType,
+            Int::class.javaPrimitiveType,
+        )
 
         fcntlInt = if ((ANDROID.SDK_INT ?: 0) in 23..26) {
             try {
@@ -630,4 +719,50 @@ private class StructStat {
         st_mode = clazz.getField("st_mode")
         st_size = clazz.getField("st_size")
     }
+}
+
+private abstract class AccessibleInterruptibleChannel: AbstractInterruptibleChannel() {
+    public fun blockingBegin() { begin() }
+    @Throws(AsynchronousCloseException::class)
+    public fun blockingEnd(completed: Boolean) { end(completed) }
+}
+
+@OptIn(ExperimentalContracts::class)
+private inline fun AccessibleInterruptibleChannel.doBlocking(
+    lock: Any?,
+    block: (completed: () -> Unit) -> Unit,
+) {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+
+    synchronizedIfNotNull(lock) {
+        var completed = false
+        var threw: Throwable? = null
+        try {
+            blockingBegin()
+            block { completed = true }
+        } catch (t: Throwable) {
+            threw = t
+            throw t
+        } finally {
+            try {
+                blockingEnd(completed)
+            } catch (e: AsynchronousCloseException) {
+                if (threw != null) {
+                    threw.addSuppressed(e)
+                } else {
+                    throw e
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+private inline fun synchronizedIfNotNull(lock: Any?, block: () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    if (lock == null) block() else synchronized(lock, block)
 }

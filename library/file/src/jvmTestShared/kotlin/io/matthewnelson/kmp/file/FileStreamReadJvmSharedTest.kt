@@ -35,9 +35,9 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
                 assertEquals(1, iS.read(ByteArray(1)))
                 iS.close()
                 assertFalse(s.isOpen())
-                assertStreamClosed { iS.read(ByteArray(1)) }
-                assertStreamClosed { s.read(ByteArray(1)) }
-                assertStreamClosed { s.asInputStream(true) }
+                assertFailsWith<ClosedException> { iS.read(ByteArray(1)) }
+                assertFailsWith<ClosedException> { s.read(ByteArray(1)) }
+                assertFailsWith<ClosedException> { s.asInputStream(true) }
             }
         }
     }
@@ -52,7 +52,7 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
                 assertEquals(1, iS.read(ByteArray(1)))
                 iS.close()
                 assertTrue(s.isOpen())
-                assertStreamClosed { iS.read(ByteArray(1)) }
+                assertFailsWith<ClosedException> { iS.read(ByteArray(1)) }
                 s.read(ByteArray(1))
             }
         }

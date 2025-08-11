@@ -145,10 +145,10 @@ private inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path?
         val fd = ignoreEINTR { open("/mnt/user", flags, 0) }
         if (fd == -1) throw errnoToIOException(errno)
 
-        val dir = ignoreEINTR<cnames.structs.DIR> { fdopendir(fd) }
+        val dir = fdopendir(fd)
         if (dir == null) {
             val e = errnoToIOException(errno)
-            if (ignoreEINTR { close(fd) } == -1) {
+            if (close(fd) == -1) {
                 val ee = errnoToIOException(errno)
                 e.addSuppressed(ee)
             }
@@ -160,17 +160,17 @@ private inline fun parseMntUserDirNames(checkAccess: (uid: Int) -> Path?): Path?
 
     var path: Path? = null
     try {
-        var entry: CPointer<dirent>? = ignoreEINTR<dirent> { readdir(dir) }
+        var entry: CPointer<dirent>? = readdir(dir)
         while (entry != null) {
             val uid = entry.pointed.d_name.toKString().toIntOrNull()
             if (uid != null) {
                 path = checkAccess(uid)
                 if (path != null) break
             }
-            entry = ignoreEINTR<dirent> { readdir(dir) }
+            entry = readdir(dir)
         }
     } finally {
-        ignoreEINTR { closedir(dir) }
+        closedir(dir)
     }
     return path
 }

@@ -18,6 +18,7 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.FileStream.Companion.asOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -30,9 +31,9 @@ abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
                 assertTrue(s.isOpen())
                 oS.close()
                 assertFalse(s.isOpen())
-                assertStreamClosed { oS.write(2) }
-                assertStreamClosed { s.write(ByteArray(1)) }
-                assertStreamClosed { s.asOutputStream(true) }
+                assertFailsWith<ClosedException> { oS.write(2) }
+                assertFailsWith<ClosedException> { s.write(ByteArray(1)) }
+                assertFailsWith<ClosedException> { s.asOutputStream(true) }
             }
         }
     }
@@ -44,7 +45,7 @@ abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
                 assertTrue(s.isOpen())
                 oS.close()
                 assertTrue(s.isOpen())
-                assertStreamClosed { oS.write(2) }
+                assertFailsWith<ClosedException> { oS.write(2) }
                 s.write(ByteArray(1))
             }
         }
