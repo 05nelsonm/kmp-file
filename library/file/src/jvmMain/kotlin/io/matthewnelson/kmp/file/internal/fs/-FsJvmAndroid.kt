@@ -515,7 +515,7 @@ internal class FsJvmAndroid private constructor(
 
             if (src.isReadOnly && !src.isDirect) {
                 // Os.write will attempt to use ByteBuffer.array() and ByteBuffer.arrayOffset()
-                // if it's not a DirectByteBuffer. This is WRONG  for a read-only ByteBuffer and
+                // if it's not a DirectByteBuffer. This is WRONG for a read-only ByteBuffer and
                 // will result in a ReadOnlyBufferException, even though we should totally be
                 // able to write data with it.
                 //
@@ -529,7 +529,7 @@ internal class FsJvmAndroid private constructor(
                 } catch (e: IOException) {
                     // Restore position
                     if (e is InterruptedIOException && e.bytesTransferred > 0) {
-                        posBefore += e.bytesTransferred
+                        posBefore = (posBefore + e.bytesTransferred).coerceAtMost(src.limit())
                     }
                     src.position(posBefore)
                     throw e
@@ -538,12 +538,10 @@ internal class FsJvmAndroid private constructor(
             }
 
             interruptible.doBlocking(positionLock) { completed ->
-                val len = src.remaining()
+                val rem = src.remaining()
                 var total = 0
-                while (total < len) {
-                    // Os.read/write previously did not update ByteBuffer position after a successful invocation.
-                    // https://cs.android.com/android/_/android/platform/libcore/+/d9f7e57f5d09b587d8c8d1bd42b895f7de8fbf54
-                    val posBefore = if ((SDK_INT ?: 0) < 23) src.position() else null
+                while (total < rem) {
+                    val posBefore = src.position()
                     val fd = delegateOrClosed(isWrite = true, total) { _fd }
                     val write = try {
                         tryCatchErrno(null) {
@@ -551,16 +549,17 @@ internal class FsJvmAndroid private constructor(
                         }
                     } catch (e: IOException) {
                         if (e is InterruptedIOException && e.bytesTransferred > 0) {
-                            if (posBefore != null && src.position() == posBefore) {
-                                src.position(posBefore + e.bytesTransferred)
+                            val posAfter = src.position()
+                            if (posAfter == posBefore) {
+                                val posNew = (posAfter + e.bytesTransferred).coerceAtMost(src.limit())
+                                src.position(posNew)
                             }
                         }
                         throw e.toMaybeInterruptedIOException(isWrite = true, total)
                     }
-                    if (posBefore != null && write > 0) {
-                        // Sanity check that Os.write did in fact NOT update
-                        // the position. Unsure when that fix landed previous
-                        // to API 23, so.
+                    if (write > 0 && (SDK_INT ?: 0) < 23) {
+                        // Os.read/write previously did not update ByteBuffer position after a successful invocation.
+                        // https://cs.android.com/android/_/android/platform/libcore/+/d9f7e57f5d09b587d8c8d1bd42b895f7de8fbf54
                         if (src.position() == posBefore) {
                             src.position(posBefore + write)
                         }
