@@ -391,12 +391,24 @@ internal class FsJsNode private constructor(
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
             checkIsOpen()
             checkCanRead()
+            return realRead(buf, offset, len, -1L)
+        }
+
+        override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+            checkIsOpen()
+            checkCanRead()
+            position.checkIsNotNegative()
+            return realRead(buf, offset, len, position)
+        }
+
+        private fun realRead(buf: ByteArray, offset: Int, len: Int, p: Long): Int {
             buf.checkBounds(offset, len)
 
             var pos = offset
             var total = 0
             while (total < len) {
                 val length = minOf(BUF.length.toInt(), len - total)
+                val position = if (p == -1L) _position else (p + total.toLong())
                 val fd = delegateOrClosed(isWrite = false, total) { _fd }
                 val read = try {
                     jsExternTryCatch {
@@ -405,7 +417,7 @@ internal class FsJsNode private constructor(
                             buffer = BUF,
                             offset = 0.toDouble(),
                             length = length.toDouble(),
-                            position = _position.toDouble(),
+                            position = position.toDouble(),
                         )
                     }
                 } catch (t: Throwable) {
@@ -422,14 +434,10 @@ internal class FsJsNode private constructor(
                 }
 
                 total += read
-                _position += read
+                if (p == -1L) _position += read
             }
 
             return total
-        }
-
-        override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
-            TODO("Not yet implemented")
         }
 
         override fun read(buf: Buffer): Long = read(buf, 0L, buf.length.toLong())
@@ -437,6 +445,19 @@ internal class FsJsNode private constructor(
         override fun read(buf: Buffer, offset: Long, len: Long): Long {
             checkIsOpen()
             checkCanRead()
+            return realRead(buf, offset, len, -1L)
+        }
+
+        override fun read(buf: Buffer, position: Long): Long = read(buf, 0L, buf.length.toLong(), position)
+
+        override fun read(buf: Buffer, offset: Long, len: Long, position: Long): Long {
+            checkIsOpen()
+            checkCanRead()
+            position.checkIsNotNegative()
+            return realRead(buf, offset, len, position)
+        }
+
+        private fun realRead(buf: Buffer, offset: Long, len: Long, p: Long): Long {
             buf.length.toLong().checkBounds(offset, len)
             if (len == 0L) return 0L
 
@@ -448,7 +469,7 @@ internal class FsJsNode private constructor(
                         buffer = buf.value,
                         offset = offset.toDouble(),
                         length = len.toDouble(),
-                        position = _position.toDouble(),
+                        position = (if (p == -1L) _position else p).toDouble(),
                     )
                 }
             } catch (t: Throwable) {
@@ -456,14 +477,8 @@ internal class FsJsNode private constructor(
             }.toLong()
 
             if (read <= 0L) return -1L
-            _position += read
+            if (p == -1L) _position += read
             return read
-        }
-
-        override fun read(buf: Buffer, position: Long): Long = read(buf, 0L, buf.length.toLong(), position)
-
-        override fun read(buf: Buffer, offset: Long, len: Long, position: Long): Long {
-            TODO("Not yet implemented")
         }
 
         override fun size(): Long {
@@ -505,6 +520,17 @@ internal class FsJsNode private constructor(
         override fun write(buf: ByteArray, offset: Int, len: Int) {
             checkIsOpen()
             checkCanWrite()
+            realWrite(buf, offset, len, -1L)
+        }
+
+        override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
+            checkIsOpen()
+            checkCanWrite()
+            position.checkIsNotNegative()
+            realWrite(buf, offset, len, position)
+        }
+
+        private fun realWrite(buf: ByteArray, offset: Int, len: Int, p: Long) {
             buf.checkBounds(offset, len)
 
             var pos = offset
@@ -516,7 +542,12 @@ internal class FsJsNode private constructor(
                     BUF.writeInt8(buf[pos++], i.toDouble())
                 }
 
-                val position = currentWritePosition(total)
+                val position = if (p == -1L) {
+                    currentWritePosition(total)
+                } else {
+                    (p + total).toDouble()
+                }
+
                 val fd = delegateOrClosed(isWrite = true, total) { _fd }
                 val write = try {
                     jsExternTryCatch {
@@ -533,12 +564,8 @@ internal class FsJsNode private constructor(
                 }.toInt()
 
                 total += write
-                if (!isAppending) _position += write
+                if (!isAppending && p == -1L) _position += write
             }
-        }
-
-        override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
-            TODO("Not yet implemented")
         }
 
         override fun write(buf: Buffer) { write(buf, 0L, buf.length.toLong()) }
@@ -546,11 +573,29 @@ internal class FsJsNode private constructor(
         override fun write(buf: Buffer, offset: Long, len: Long) {
             checkIsOpen()
             checkCanWrite()
+            realWrite(buf, offset, len, -1L)
+        }
+
+        override fun write(buf: Buffer, position: Long) { write(buf, 0L, buf.length.toLong(), position) }
+
+        override fun write(buf: Buffer, offset: Long, len: Long, position: Long) {
+            checkIsOpen()
+            checkCanWrite()
+            position.checkIsNotNegative()
+            realWrite(buf, offset, len, position)
+        }
+
+        private fun realWrite(buf: Buffer, offset: Long, len: Long, p: Long) {
             buf.length.toLong().checkBounds(offset, len)
 
             var total = 0L
             while (total < len) {
-                val position = currentWritePosition(total)
+                val position = if (p == -1L) {
+                    currentWritePosition(total)
+                } else {
+                    (p + total).toDouble()
+                }
+
                 val fd = delegateOrClosed(isWrite = true, total) { _fd }
                 val write = try {
                     jsExternTryCatch {
@@ -567,14 +612,8 @@ internal class FsJsNode private constructor(
                 }.toLong()
 
                 total += write
-                if (!isAppending) _position += write
+                if (!isAppending && p == -1L) _position += write
             }
-        }
-
-        override fun write(buf: Buffer, position: Long) { write(buf, 0L, buf.length.toLong(), position) }
-
-        override fun write(buf: Buffer, offset: Long, len: Long, position: Long) {
-            TODO("Not yet implemented")
         }
 
         override fun close() {
