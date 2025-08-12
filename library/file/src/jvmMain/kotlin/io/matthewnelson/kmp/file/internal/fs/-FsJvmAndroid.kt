@@ -388,25 +388,47 @@ internal class FsJvmAndroid private constructor(
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
             checkIsOpen()
             checkCanRead()
+            return realRead(buf, offset, len, -1L)
+        }
+
+        override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+            checkIsOpen()
+            checkCanRead()
+            position.checkIsNotNegative()
+            return realRead(buf, offset, len, position)
+        }
+
+        private fun realRead(buf: ByteArray, offset: Int, len: Int, p: Long): Int {
             buf.checkBounds(offset, len)
             if (len == 0) return 0
             interruptible.doBlocking(positionLock) { completed ->
                 val fd = _fd ?: return 0
                 val read = tryCatchErrno(null) {
-                    readBytes.invoke(null, fd, buf, offset, len) as Int
+                    if (p == -1L) {
+                        readBytes.invoke(null, fd, buf, offset, len) as Int
+                    } else {
+                        readBytesP.invoke(null, fd, buf, offset, len, p) as Int
+                    }
                 }
                 completed(read > 0)
                 return if (read == 0) -1 else read
             }
         }
 
-        override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
-            TODO("Not yet implemented")
-        }
-
         override fun read(dst: ByteBuffer?): Int {
             checkIsOpen()
             if (!canRead) throw NonReadableChannelException()
+            return realRead(dst, -1L)
+        }
+
+        override fun read(dst: ByteBuffer?, position: Long): Int {
+            checkIsOpen()
+            if (!canRead) throw NonReadableChannelException()
+            position.checkIsNotNegative()
+            return realRead(dst, position)
+        }
+
+        private fun realRead(dst: ByteBuffer?, p: Long): Int {
             if (dst == null) throw NullPointerException("dst == null")
             if (dst.isReadOnly) throw IllegalArgumentException("Read-only buffer")
             if (!dst.hasRemaining()) return 0
@@ -416,7 +438,11 @@ internal class FsJvmAndroid private constructor(
                 val posBefore = if ((SDK_INT ?: 0) < 23) dst.position() else null
                 val fd = _fd ?: return 0
                 val read = tryCatchErrno(null) {
-                    readBuf.invoke(null, fd, dst) as Int
+                    if (p == -1L) {
+                        readBuf.invoke(null, fd, dst) as Int
+                    } else {
+                        readBufP.invoke(null, fd, dst, p) as Int
+                    }
                 }
                 if (posBefore != null && read > 0) {
                     // Sanity check that Os.write did in fact NOT update
@@ -429,10 +455,6 @@ internal class FsJvmAndroid private constructor(
                 completed(read > 0)
                 return if (read == 0) -1 else read
             }
-        }
-
-        override fun read(dst: ByteBuffer?, position: Long): Int {
-            TODO("Not yet implemented")
         }
 
         override fun size(): Long {
@@ -495,15 +517,32 @@ internal class FsJvmAndroid private constructor(
         override fun write(buf: ByteArray, offset: Int, len: Int) {
             checkIsOpen()
             checkCanWrite()
+            realWrite(buf, offset, len, -1L)
+        }
+
+        override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
+            checkIsOpen()
+            checkCanWrite()
+            position.checkIsNotNegative()
+            realWrite(buf, offset, len, position)
+        }
+
+        private fun realWrite(buf: ByteArray, offset: Int, len: Int, p: Long) {
             buf.checkBounds(offset, len)
             if (len == 0) return
             interruptible.doBlocking(positionLock) { completed ->
                 var total = 0
                 while (total < len) {
+                    val o = offset + total
+                    val c = len - total
                     val fd = delegateOrClosed(isWrite = true, total) { _fd }
                     val write = try {
                         tryCatchErrno(null) {
-                            writeBytes.invoke(null, fd, buf, offset + total, len - total) as Int
+                            if (p == -1L) {
+                                writeBytes.invoke(null, fd, buf, o, c) as Int
+                            } else {
+                                writeBytesP.invoke(null, fd, buf, o, c, p + total) as Int
+                            }
                         }
                     } catch (e: IOException) {
                         throw e.toMaybeInterruptedIOException(isWrite = true, total)
@@ -515,13 +554,20 @@ internal class FsJvmAndroid private constructor(
             }
         }
 
-        override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
-            TODO("Not yet implemented")
-        }
-
         override fun write(src: ByteBuffer?): Int {
             checkIsOpen()
             if (!canWrite) throw NonWritableChannelException()
+            return realWrite(src, -1L)
+        }
+
+        override fun write(src: ByteBuffer?, position: Long): Int {
+            checkIsOpen()
+            if (!canWrite) throw NonWritableChannelException()
+            position.checkIsNotNegative()
+            return realWrite(src, position)
+        }
+
+        private fun realWrite(src: ByteBuffer?, p: Long): Int {
             if (src == null) throw NullPointerException("src == null")
             if (!src.hasRemaining()) return 0
 
@@ -537,7 +583,7 @@ internal class FsJvmAndroid private constructor(
                 var posBefore = src.position()
                 src.get(tmp)
                 try {
-                    write(tmp, 0, tmp.size)
+                    realWrite(tmp, 0, tmp.size, p)
                 } catch (e: IOException) {
                     // Restore position
                     if (e is InterruptedIOException && e.bytesTransferred > 0) {
@@ -557,7 +603,11 @@ internal class FsJvmAndroid private constructor(
                     val fd = delegateOrClosed(isWrite = true, total) { _fd }
                     val write = try {
                         tryCatchErrno(null) {
-                            writeBuf.invoke(null, fd, src) as Int
+                            if (p == -1L) {
+                                writeBuf.invoke(null, fd, src) as Int
+                            } else {
+                                writeBufP.invoke(null, fd, src, p + total) as Int
+                            }
                         }
                     } catch (e: IOException) {
                         if (e is InterruptedIOException && e.bytesTransferred > 0) {
@@ -581,10 +631,6 @@ internal class FsJvmAndroid private constructor(
                 completed(total > 0)
                 return total
             }
-        }
-
-        override fun write(src: ByteBuffer?, position: Long): Int {
-            TODO("Not yet implemented")
         }
 
         override fun close() { interruptible.close() }
@@ -621,14 +667,22 @@ private class Os {
     val open: Method
     /** `read(fd: FileDescriptor, buffer: ByteBuffer): Int */
     val readBuf: Method
+    /** `pread(fd: FileDescriptor, buffer: ByteBuffer, offset: Long): Int */
+    val readBufP: Method
     /** `read(fd: FileDescriptor, bytes: ByteArray, byteOffset: Int, byteCount: Int): Int */
     val readBytes: Method
+    /** `pread(fd: FileDescriptor, bytes: ByteArray, byteOffset: Int, byteCount: Int, offset: Long): Int */
+    val readBytesP: Method
     /** `remove(path: String)` */
     val remove: Method
     /** `write(fd: FileDescriptor, buffer: ByteBuffer): Int */
     val writeBuf: Method
+    /** `pwrite(fd: FileDescriptor, buffer: ByteBuffer, offset: Long): Int */
+    val writeBufP: Method
     /** `write(fd: FileDescriptor, bytes: ByteArray, byteOffset: Int, byteCount: Int): Int */
     val writeBytes: Method
+    /** `pwrite(fd: FileDescriptor, bytes: ByteArray, byteOffset: Int, byteCount: Int, offset: Long): Int */
+    val writeBytesP: Method
 
     /**
      * `fcntlInt(fd: FileDescriptor, cmd: Int, arg: Int): Int`
@@ -700,12 +754,26 @@ private class Os {
             FileDescriptor::class.java,
             ByteBuffer::class.java,
         )
+        readBufP = clazz.getMethod(
+            "pread",
+            FileDescriptor::class.java,
+            ByteBuffer::class.java,
+            Long::class.javaPrimitiveType,
+        )
         readBytes = clazz.getMethod(
             "read",
             FileDescriptor::class.java,
             ByteArray::class.java,
             Int::class.javaPrimitiveType,
             Int::class.javaPrimitiveType,
+        )
+        readBytesP = clazz.getMethod(
+            "pread",
+            FileDescriptor::class.java,
+            ByteArray::class.java,
+            Int::class.javaPrimitiveType,
+            Int::class.javaPrimitiveType,
+            Long::class.javaPrimitiveType,
         )
         remove = clazz.getMethod(
             "remove",
@@ -716,12 +784,26 @@ private class Os {
             FileDescriptor::class.java,
             ByteBuffer::class.java,
         )
+        writeBufP = clazz.getMethod(
+            "pwrite",
+            FileDescriptor::class.java,
+            ByteBuffer::class.java,
+            Long::class.javaPrimitiveType,
+        )
         writeBytes = clazz.getMethod(
             "write",
             FileDescriptor::class.java,
             ByteArray::class.java,
             Int::class.javaPrimitiveType,
             Int::class.javaPrimitiveType,
+        )
+        writeBytesP = clazz.getMethod(
+            "pwrite",
+            FileDescriptor::class.java,
+            ByteArray::class.java,
+            Int::class.javaPrimitiveType,
+            Int::class.javaPrimitiveType,
+            Long::class.javaPrimitiveType,
         )
 
         fcntlInt = if ((SDK_INT ?: 0) in 23..26) {
