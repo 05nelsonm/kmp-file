@@ -16,7 +16,9 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.FileStream.Companion.asInputStream
+import java.nio.ByteBuffer
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -24,6 +26,35 @@ import kotlin.test.assertTrue
 
 @Suppress("KotlinConstantConditions")
 abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
+
+    @Test
+    fun givenReadStream_whenByteBuffer_thenWorksAsExpected() = runTest { tmp ->
+        val data = "Hello World!".encodeToByteArray()
+        tmp.writeBytes(excl = null, data)
+
+        tmp.testOpen().use { s ->
+            val bb = ByteBuffer.allocate(data.size)
+            assertEquals(0, bb.position(), "bb.position() - before")
+            assertEquals(data.size, bb.remaining(), "bb.remaining() - before")
+            assertEquals(data.size, s.read(bb), "read(bb)")
+            assertEquals(data.size.toLong(), s.position(), "s.position() - after")
+            assertEquals(data.size, bb.position(), "bb.position() - after")
+            assertEquals(0, bb.remaining(), "bb.remaining() - after")
+
+            bb.position(0)
+            val dst = ByteArray(data.size)
+            bb.get(dst)
+            assertContentEquals(data, dst)
+
+            bb.position(0)
+            assertEquals(data.size, bb.remaining())
+            assertEquals(-1, s.read(bb), "s.read(bb) - EOF")
+
+            val nullBB: ByteBuffer? = null
+            assertFailsWith<NullPointerException> { s.read(nullBB) }
+            assertFailsWith<IllegalArgumentException> { s.read(bb.asReadOnlyBuffer()) }
+        }
+    }
 
     @Test
     fun givenReadStreamAsInputStream_whenCloseParentOnCloseIsTrue_thenClosesFileStream() = runTest { tmp ->

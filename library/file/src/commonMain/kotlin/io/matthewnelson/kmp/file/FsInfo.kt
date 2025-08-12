@@ -39,7 +39,7 @@ public class FsInfo private constructor(
      * - Js/WasmJs:
      *     - Node: `FsJsNode`
      *     - Browser: `FsJsBrowser`
-     *         - NOTE: Implementation is non-operational outside of path resolution
+     *         - **NOTE:** Implementation is non-operational outside of path resolution
      * - Native:
      *     - Windows: `FsMinGW`
      *     - Else: `FsUnix`

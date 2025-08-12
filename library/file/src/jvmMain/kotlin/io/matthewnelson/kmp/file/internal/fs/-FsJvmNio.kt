@@ -27,6 +27,7 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.NioFileStream
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
+import io.matthewnelson.kmp.file.internal.disappearingCheck
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import java.nio.channels.FileChannel
 import java.nio.file.*
@@ -296,6 +297,10 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
         val canRead = options.contains(StandardOpenOption.READ)
         val canWrite = options.contains(StandardOpenOption.WRITE)
         val isAppending = options.contains(StandardOpenOption.APPEND)
+
+        // Sanity check disallowing O_RDONLY to be opened, as logic
+        // is designed for checking O_WRONLY or O_RDWR.
+        disappearingCheck(condition = { canWrite }) { "O_RDONLY. Use FsJvm.openRead()" }
 
         val ch = try {
             if (attrs == null) {

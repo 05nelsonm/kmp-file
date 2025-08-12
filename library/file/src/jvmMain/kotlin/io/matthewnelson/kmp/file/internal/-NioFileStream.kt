@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import java.nio.ByteBuffer
+import java.nio.channels.AsynchronousCloseException
 import java.nio.channels.FileChannel
 
 internal class NioFileStream private constructor(
@@ -95,6 +96,14 @@ internal class NioFileStream private constructor(
         }
     }
 
+    override fun read(dst: ByteBuffer?): Int {
+        checkIsOpen()
+        synchronized(channelLock) {
+            val ch = _ch ?: throw AsynchronousCloseException()
+            return ch.read(dst)
+        }
+    }
+
     override fun size(): Long {
         checkIsOpen()
         synchronized(channelLock) {
@@ -141,6 +150,14 @@ internal class NioFileStream private constructor(
         synchronized(channelLock) {
             val ch = _ch ?: throw ClosedException()
             ch.write(bb)
+        }
+    }
+
+    override fun write(src: ByteBuffer?): Int {
+        checkIsOpen()
+        synchronized(channelLock) {
+            val ch = _ch ?: throw AsynchronousCloseException()
+            return ch.write(src)
         }
     }
 

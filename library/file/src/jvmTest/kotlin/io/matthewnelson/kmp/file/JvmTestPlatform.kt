@@ -18,6 +18,7 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.IsWindows
+import java.nio.ByteBuffer
 
 actual val IS_SIMULATOR: Boolean = false
 actual val IS_ANDROID: Boolean = ANDROID.SDK_INT != null
@@ -47,4 +48,6 @@ internal actual class TestReadStream actual constructor(
     actual override fun sync(meta: Boolean): FileStream.ReadWrite = error("Not implemented")
     actual override fun write(buf: ByteArray, offset: Int, len: Int) { error("Not implemented") }
     actual override fun close() { s.close() }
+    override fun read(dst: ByteBuffer?): Int = s.read(dst)
+    override fun write(src: ByteBuffer?): Int = error("Not implemented")
 }

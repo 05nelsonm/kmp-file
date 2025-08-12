@@ -20,7 +20,11 @@ package io.matthewnelson.kmp.file
 import java.io.Flushable
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.ByteBuffer
+import java.nio.channels.ByteChannel
 import java.nio.channels.InterruptibleChannel
+import java.nio.channels.ReadableByteChannel
+import java.nio.channels.WritableByteChannel
 import kotlin.Throws
 import kotlin.concurrent.Volatile
 
@@ -130,7 +134,7 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
      * @see [openRead]
      * @see [asInputStream]
      * */
-    public actual sealed interface Read: FileStream {
+    public actual sealed interface Read: FileStream, ReadableByteChannel {
 
         /**
          * Sets the current position of the file pointer to [new]. This is
@@ -148,8 +152,10 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
         public actual override fun position(new: Long): Read
 
         /**
-         * Reads data into the provided array. The [position] is automatically
-         * incremented by the number of bytes read for subsequent operations.
+         * Reads data from the [File] for which this stream belongs, into the
+         * provided buffer. Bytes are read starting at the current [position].
+         * The [position] will automatically be incremented by the number of
+         * bytes that have been read.
          *
          * @param [buf] The array to place data into.
          *
@@ -162,8 +168,10 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
         public actual fun read(buf: ByteArray): Int
 
         /**
-         * Reads data into the provided array. The [position] is automatically
-         * incremented by the number of bytes read for subsequent operations.
+         * Reads data from the [File] for which this stream belongs, into the
+         * provided buffer. Bytes are read starting at the current [position].
+         * The [position] will automatically increment by the number of bytes
+         * that have been read.
          *
          * @param [buf] The array to place data into.
          * @param [offset] The index in [buf] to start placing data.
@@ -177,6 +185,17 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
          * */
         @Throws(IOException::class)
         public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
+
+        /**
+         * Reads data from the [File] for which this stream belongs, into the
+         * provided buffer. Bytes are read starting at the current [position].
+         * The [position] will automatically be incremented by the number of
+         * bytes that have been read.
+         *
+         * Otherwise, this function behaves as specified in [ReadableByteChannel].
+         * */
+        @Throws(IOException::class)
+        public abstract override fun read(dst: ByteBuffer?): Int
 
         /**
          * Syncs any updates to the [File] for which this stream belongs, to the
@@ -214,7 +233,7 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
      * @see [openAppending]
      * @see [asOutputStream]
      * */
-    public actual sealed interface Write: FileStream {
+    public actual sealed interface Write: FileStream, WritableByteChannel {
 
         /**
          * If the [Write] stream was opened in appending mode.
@@ -290,9 +309,10 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
         public actual override fun sync(meta: Boolean): Write
 
         /**
-         * Writes the entire contents of [buf] to the [File] for which this [Write]
-         * stream belongs. The [position] is automatically incremented by the number
-         * of bytes written for subsequent operations.
+         * Writes the entire contents of [buf] to the [File] for which this stream
+         * belongs. Bytes are written starting at the current [position]. The
+         * [position] will automatically increment by the number of bytes that were
+         * written.
          *
          * @param [buf] the array of data to write.
          *
@@ -303,9 +323,9 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
 
         /**
          * Writes [len] number of bytes from [buf], starting at index [offset],
-         * to the [File] for which this [Write] stream belongs. The [position] is
-         * automatically incremented by the number of bytes written for subsequent
-         * operations.
+         * to the [File] for which this stream belongs. Bytes are written starting
+         * at the current [position]. The [position] will automatically increment
+         * by the number of bytes that were written.
          *
          * @param [buf] The array of data to write.
          * @param [offset] The index in [buf] to start at when writing data.
@@ -316,6 +336,17 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
          * */
         @Throws(IOException::class)
         public actual fun write(buf: ByteArray, offset: Int, len: Int)
+
+        /**
+         * Writes the available contents of [src] to the [File] for which this stream
+         * belongs. Bytes are written starting at the current [position]. The
+         * [position] will automatically increment by the number of bytes that were
+         * written.
+         *
+         * Otherwise, this function behaves as specified in [WritableByteChannel].
+         * */
+        @Throws(IOException::class)
+        public abstract override fun write(src: ByteBuffer?): Int
     }
 
     /**
@@ -323,7 +354,7 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
      *
      * @see [openReadWrite]
      * */
-    public actual sealed class ReadWrite protected actual constructor(): Read, Write {
+    public actual sealed class ReadWrite protected actual constructor(): Read, Write, ByteChannel {
 
         /**
          * Sets the current position of the file pointer to [new]. This is

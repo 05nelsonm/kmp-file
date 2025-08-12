@@ -17,7 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
-import io.matthewnelson.kmp.file.ANDROID
+import io.matthewnelson.kmp.file.ANDROID.SDK_INT
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
@@ -44,7 +44,10 @@ import java.io.FileDescriptor
 import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousCloseException
+import java.nio.channels.NonReadableChannelException
+import java.nio.channels.NonWritableChannelException
 import java.nio.channels.spi.AbstractInterruptibleChannel
 import java.util.UUID
 import kotlin.concurrent.Volatile
@@ -89,7 +92,7 @@ internal class FsJvmAndroid private constructor(
         if (const.O_CLOEXEC != 0) return@lazy const.O_CLOEXEC
         if (os.fcntlVoid == null) {
             try {
-                System.err.println("KMP-FILE: android.system.Os.fcntlVoid was null for API[${ANDROID.SDK_INT}]")
+                System.err.println("KMP-FILE: android.system.Os.fcntlVoid was null for API[${SDK_INT}]")
             } catch (_: Throwable) {}
             return@lazy 0
         }
@@ -126,7 +129,7 @@ internal class FsJvmAndroid private constructor(
 
         if (result == 0) {
             try {
-                System.err.println("KMP-FILE: Failed to determine O_CLOEXEC value for API[${ANDROID.SDK_INT}]")
+                System.err.println("KMP-FILE: Failed to determine O_CLOEXEC value for API[${SDK_INT}]")
             } catch (_: Throwable) {}
         }
 
@@ -200,8 +203,8 @@ internal class FsJvmAndroid private constructor(
 
         @JvmSynthetic
         internal fun getOrNull(): FsJvmAndroid? {
-            if (ANDROID.SDK_INT == null) return null
-            if (ANDROID.SDK_INT < 21) return null
+            if (SDK_INT == null) return null
+            if (SDK_INT < 21) return null
 
             return try {
                 FsJvmAndroid(Os(), OsConstants(), StructStat())
@@ -363,7 +366,7 @@ internal class FsJvmAndroid private constructor(
                 val ret = tryCatchErrno(null) {
                     lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long
                 }
-                completed()
+                completed(true)
                 return ret
             }
         }
@@ -377,7 +380,7 @@ internal class FsJvmAndroid private constructor(
                 tryCatchErrno(null) {
                     lseek.invoke(null, fd, new, const.SEEK_SET) as Long
                 }
-                completed()
+                completed(true)
                 return this
             }
         }
@@ -388,11 +391,38 @@ internal class FsJvmAndroid private constructor(
             buf.checkBounds(offset, len)
             if (len == 0) return 0
             interruptible.doBlocking(positionLock) { completed ->
-                val fd = _fd ?: return -1
+                val fd = _fd ?: return 0
                 val read = tryCatchErrno(null) {
                     readBytes.invoke(null, fd, buf, offset, len) as Int
                 }
-                completed()
+                completed(read > 0)
+                return if (read == 0) -1 else read
+            }
+        }
+
+        override fun read(dst: ByteBuffer?): Int {
+            checkIsOpen()
+            if (!canRead) throw NonReadableChannelException()
+            if (dst == null) throw NullPointerException("dst == null")
+            if (dst.isReadOnly) throw IllegalArgumentException("Read-only buffer")
+            if (!dst.hasRemaining()) return 0
+            interruptible.doBlocking(positionLock) { completed ->
+                // Os.read/write previously did not update ByteBuffer position after a successful invocation.
+                // https://cs.android.com/android/_/android/platform/libcore/+/d9f7e57f5d09b587d8c8d1bd42b895f7de8fbf54
+                val posBefore = if ((SDK_INT ?: 0) < 23) dst.position() else null
+                val fd = _fd ?: return 0
+                val read = tryCatchErrno(null) {
+                    readBuf.invoke(null, fd, dst) as Int
+                }
+                if (posBefore != null && read > 0) {
+                    // Sanity check that Os.write did in fact NOT update
+                    // the position. Unsure when that fix landed previous
+                    // to API 23, so.
+                    if (dst.position() == posBefore) {
+                        dst.position(posBefore + read)
+                    }
+                }
+                completed(read > 0)
                 return if (read == 0) -1 else read
             }
         }
@@ -405,7 +435,7 @@ internal class FsJvmAndroid private constructor(
                     val obj = fstat.invoke(null, fd)
                     stat.st_size.getLong(obj)
                 }
-                completed()
+                completed(true)
                 return size
             }
         }
@@ -420,7 +450,7 @@ internal class FsJvmAndroid private constructor(
                     ftruncate.invoke(null, fd, new)
                 }
                 if (isAppending) {
-                    completed()
+                    completed(true)
                     return this
                 }
                 if (!isOpen()) return this
@@ -428,14 +458,14 @@ internal class FsJvmAndroid private constructor(
                     lseek.invoke(null, fd, 0L, const.SEEK_CUR) as Long
                 }
                 if (pos <= new) {
-                    completed()
+                    completed(true)
                     return this
                 }
                 if (!isOpen()) return this
                 tryCatchErrno(null) {
                     lseek.invoke(null, fd, new, const.SEEK_SET)
                 }
-                completed()
+                completed(true)
                 return this
             }
         }
@@ -449,7 +479,7 @@ internal class FsJvmAndroid private constructor(
                 } else {
                     tryCatchErrno(null) { fdatasync.invoke(null, fd) }
                 }
-                completed()
+                completed(true)
                 return this
             }
         }
@@ -472,8 +502,73 @@ internal class FsJvmAndroid private constructor(
                     }
                     total += write
                 }
-                completed()
+                completed(total > 0)
                 return
+            }
+        }
+
+        override fun write(src: ByteBuffer?): Int {
+            checkIsOpen()
+            if (!canWrite) throw NonWritableChannelException()
+            if (src == null) throw NullPointerException("src == null")
+            if (!src.hasRemaining()) return 0
+
+            if (src.isReadOnly && !src.isDirect) {
+                // Os.write will attempt to use ByteBuffer.array() and ByteBuffer.arrayOffset()
+                // if it's not a DirectByteBuffer. This is WRONG  for a read-only ByteBuffer and
+                // will result in a ReadOnlyBufferException, even though we should totally be
+                // able to write data with it.
+                //
+                // TODO: Use ThreadLocal caching of DirectByteBuffer
+                //  https://cs.android.com/android/platform/superproject/main/+/main:libcore/ojluni/src/main/java/sun/nio/ch/Util.java
+                val tmp = ByteArray(src.remaining())
+                var posBefore = src.position()
+                src.get(tmp)
+                try {
+                    write(tmp, 0, tmp.size)
+                } catch (e: IOException) {
+                    // Restore position
+                    if (e is InterruptedIOException && e.bytesTransferred > 0) {
+                        posBefore += e.bytesTransferred
+                    }
+                    src.position(posBefore)
+                    throw e
+                }
+                return tmp.size
+            }
+
+            interruptible.doBlocking(positionLock) { completed ->
+                val len = src.remaining()
+                var total = 0
+                while (total < len) {
+                    // Os.read/write previously did not update ByteBuffer position after a successful invocation.
+                    // https://cs.android.com/android/_/android/platform/libcore/+/d9f7e57f5d09b587d8c8d1bd42b895f7de8fbf54
+                    val posBefore = if ((SDK_INT ?: 0) < 23) src.position() else null
+                    val fd = delegateOrClosed(isWrite = true, total) { _fd }
+                    val write = try {
+                        tryCatchErrno(null) {
+                            writeBuf.invoke(null, fd, src) as Int
+                        }
+                    } catch (e: IOException) {
+                        if (e is InterruptedIOException && e.bytesTransferred > 0) {
+                            if (posBefore != null && src.position() == posBefore) {
+                                src.position(posBefore + e.bytesTransferred)
+                            }
+                        }
+                        throw e.toMaybeInterruptedIOException(isWrite = true, total)
+                    }
+                    if (posBefore != null && write > 0) {
+                        // Sanity check that Os.write did in fact NOT update
+                        // the position. Unsure when that fix landed previous
+                        // to API 23, so.
+                        if (src.position() == posBefore) {
+                            src.position(posBefore + write)
+                        }
+                    }
+                    total += write
+                }
+                completed(total > 0)
+                return total
             }
         }
 
@@ -509,10 +604,14 @@ private class Os {
     val mkdir: Method
     /** `open(path: String, flags: Int, mode: Int): FileDescriptor` */
     val open: Method
+    /** `read(fd: FileDescriptor, buffer: ByteBuffer): Int */
+    val readBuf: Method
     /** `read(fd: FileDescriptor, bytes: ByteArray, byteOffset: Int, byteCount: Int): Int */
     val readBytes: Method
     /** `remove(path: String)` */
     val remove: Method
+    /** `write(fd: FileDescriptor, buffer: ByteBuffer): Int */
+    val writeBuf: Method
     /** `write(fd: FileDescriptor, bytes: ByteArray, byteOffset: Int, byteCount: Int): Int */
     val writeBytes: Method
 
@@ -581,6 +680,11 @@ private class Os {
             Int::class.javaPrimitiveType,
             Int::class.javaPrimitiveType,
         )
+        readBuf = clazz.getMethod(
+            "read",
+            FileDescriptor::class.java,
+            ByteBuffer::class.java,
+        )
         readBytes = clazz.getMethod(
             "read",
             FileDescriptor::class.java,
@@ -592,6 +696,11 @@ private class Os {
             "remove",
             String::class.java,
         )
+        writeBuf = clazz.getMethod(
+            "write",
+            FileDescriptor::class.java,
+            ByteBuffer::class.java,
+        )
         writeBytes = clazz.getMethod(
             "write",
             FileDescriptor::class.java,
@@ -600,7 +709,7 @@ private class Os {
             Int::class.javaPrimitiveType,
         )
 
-        fcntlInt = if ((ANDROID.SDK_INT ?: 0) in 23..26) {
+        fcntlInt = if ((SDK_INT ?: 0) in 23..26) {
             try {
                 clazz.getMethod(
                     "fcntlInt",
@@ -614,7 +723,7 @@ private class Os {
         } else {
             null
         }
-        fcntlLong = if ((ANDROID.SDK_INT ?: 0) in 21..22) {
+        fcntlLong = if ((SDK_INT ?: 0) in 21..22) {
             try {
                 clazz.getMethod(
                     "fcntlLong",
@@ -628,7 +737,7 @@ private class Os {
         } else {
             null
         }
-        fcntlVoid = if ((ANDROID.SDK_INT ?: 0) in 21..26) {
+        fcntlVoid = if ((SDK_INT ?: 0) in 21..26) {
             try {
                 clazz.getMethod(
                     "fcntlVoid",
@@ -684,7 +793,7 @@ private class OsConstants {
         F_SETFD = clazz.getField("F_SETFD").getInt(null)
 
         O_APPEND = clazz.getField("O_APPEND").getInt(null)
-        O_CLOEXEC = if ((ANDROID.SDK_INT ?: 0) >= 27) clazz.getField("O_CLOEXEC").getInt(null) else 0
+        O_CLOEXEC = if ((SDK_INT ?: 0) >= 27) clazz.getField("O_CLOEXEC").getInt(null) else 0
         O_CREAT = clazz.getField("O_CREAT").getInt(null)
         O_EXCL = clazz.getField("O_EXCL").getInt(null)
         O_RDONLY = clazz.getField("O_RDONLY").getInt(null)
@@ -735,7 +844,7 @@ private abstract class AccessibleInterruptibleChannel: AbstractInterruptibleChan
 @OptIn(ExperimentalContracts::class)
 private inline fun AccessibleInterruptibleChannel.doBlocking(
     lock: Any?,
-    block: (completed: () -> Unit) -> Unit,
+    block: (completed: (Boolean) -> Unit) -> Unit,
 ) {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
@@ -746,7 +855,7 @@ private inline fun AccessibleInterruptibleChannel.doBlocking(
         var threw: Throwable? = null
         try {
             blockingBegin()
-            block { completed = true }
+            block { completed = it }
         } catch (t: Throwable) {
             threw = t
             throw t
