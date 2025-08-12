@@ -94,12 +94,30 @@ internal class MinGWFileStream(
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
         checkIsOpen()
         checkCanRead()
+        return realRead(buf, offset, len, -1L)
+    }
+
+    override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+        checkIsOpen()
+        checkCanRead()
+        position.checkIsNotNegative()
+        return realRead(buf, offset, len, position)
+    }
+
+    private fun realRead(buf: ByteArray, offset: Int, len: Int, p: Long): Int {
         buf.checkBounds(offset, len)
         if (len == 0) return 0
         synchronized(positionLock) {
             memScoped {
-                val bytesRead = alloc<UIntVarOf<UInt>>()
-                bytesRead.value = 0u
+                val bytesRead = alloc<UIntVarOf<UInt>> { value = 0u }
+                val overlapped = if (p != -1L) {
+                    alloc<_OVERLAPPED> {
+                        Offset = p.toUInt()
+                        OffsetHigh = (p ushr 32).toUInt()
+                    }
+                } else {
+                    null
+                }
                 val h = _h.value ?: throw ClosedException()
                 val ret = buf.usePinned { pinned ->
                     ReadFile(
@@ -107,7 +125,7 @@ internal class MinGWFileStream(
                         lpBuffer = pinned.addressOf(offset).getPointer(this),
                         nNumberOfBytesToRead = len.convert(),
                         lpNumberOfBytesRead = bytesRead.ptr,
-                        lpOverlapped = null,
+                        lpOverlapped = overlapped?.ptr,
                     )
                 }
 
@@ -121,10 +139,6 @@ internal class MinGWFileStream(
                 return if (read == 0) -1 else read
             }
         }
-    }
-
-    override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
-        TODO("Not yet implemented")
     }
 
     override fun size(): Long {
@@ -206,24 +220,41 @@ internal class MinGWFileStream(
     override fun write(buf: ByteArray, offset: Int, len: Int) {
         checkIsOpen()
         checkCanWrite()
+        realWrite(buf, offset, len, -1L)
+    }
+
+    override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
+        checkIsOpen()
+        checkCanWrite()
+        position.checkIsNotNegative()
+        realWrite(buf, offset, len, position)
+    }
+
+    private fun realWrite(buf: ByteArray, offset: Int, len: Int, p: Long) {
         buf.checkBounds(offset, len)
         if (len == 0) return
         synchronized(positionLock) {
             memScoped {
                 val bytesWritten = alloc<UIntVarOf<UInt>>()
-                val overlapped = if (isAppending) {
-                    alloc<_OVERLAPPED> {
+                val overlapped = when {
+                    p != -1L -> alloc<_OVERLAPPED> {
+                        // Will be populated in the while loop
+                    }
+                    isAppending -> alloc<_OVERLAPPED> {
                         Offset = 0xFFFFFFFF.convert()
                         OffsetHigh = 0xFFFFFFFF.convert()
                     }
-                } else {
-                    null
+                    else -> null
                 }
 
                 buf.usePinned { pinned ->
                     var total = 0
                     while (total < len) {
                         bytesWritten.value = 0u
+                        if (p != -1L && overlapped != null) {
+                            overlapped.Offset = (p + total).toUInt()
+                            overlapped.OffsetHigh = ((p + total) ushr 32).toUInt()
+                        }
                         val h = delegateOrClosed(isWrite = true, total) { _h.value }
                         val ret = WriteFile(
                             hFile = h,
@@ -241,10 +272,6 @@ internal class MinGWFileStream(
                 }
             }
         }
-    }
-
-    override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
-        TODO("Not yet implemented")
     }
 
     override fun close() {
