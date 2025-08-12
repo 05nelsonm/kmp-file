@@ -129,8 +129,10 @@ public expect sealed interface FileStream: Closeable {
         public override fun position(new: Long): Read
 
         /**
-         * Reads data into the provided array. The [position] is automatically
-         * incremented by the number of bytes read for subsequent operations.
+         * Reads data from the [File] for which this stream belongs, into the
+         * provided buffer. Bytes are read starting at the current [position].
+         * The [position] will automatically be incremented by the number of
+         * bytes that have been read.
          *
          * @param [buf] The array to place data into.
          *
@@ -143,8 +145,10 @@ public expect sealed interface FileStream: Closeable {
         public fun read(buf: ByteArray): Int
 
         /**
-         * Reads data into the provided array. The [position] is automatically
-         * incremented by the number of bytes read for subsequent operations.
+         * Reads data from the [File] for which this stream belongs, into the
+         * provided buffer. Bytes are read starting at the current [position].
+         * The [position] will automatically increment by the number of bytes
+         * that have been read.
          *
          * @param [buf] The array to place data into.
          * @param [offset] The index in [buf] to start placing data.
@@ -270,9 +274,10 @@ public expect sealed interface FileStream: Closeable {
         public override fun sync(meta: Boolean): Write
 
         /**
-         * Writes the entire contents of [buf] to the [File] for which this [Write]
-         * stream belongs. The [position] is automatically incremented by the number
-         * of bytes written for subsequent operations.
+         * Writes the entire contents of [buf] to the [File] for which this stream
+         * belongs. Bytes are written starting at the current [position]. The
+         * [position] will automatically increment by the number of bytes that were
+         * written.
          *
          * @param [buf] the array of data to write.
          *
@@ -283,9 +288,9 @@ public expect sealed interface FileStream: Closeable {
 
         /**
          * Writes [len] number of bytes from [buf], starting at index [offset],
-         * to the [File] for which this [Write] stream belongs. The [position] is
-         * automatically incremented by the number of bytes written for subsequent
-         * operations.
+         * to the [File] for which this stream belongs. Bytes are written starting
+         * at the current [position]. The [position] will automatically increment
+         * by the number of bytes that were written.
          *
          * @param [buf] The array of data to write.
          * @param [offset] The index in [buf] to start at when writing data.
