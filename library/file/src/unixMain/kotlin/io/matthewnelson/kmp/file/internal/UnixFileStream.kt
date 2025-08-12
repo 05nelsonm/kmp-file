@@ -21,6 +21,8 @@ import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.errnoToIOException
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
+import kotlinx.cinterop.ByteVarOf
+import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.addressOf
@@ -82,29 +84,45 @@ internal class UnixFileStream(
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
         checkIsOpen()
         checkCanRead()
+        return realRead(buf, offset, len, -1L)
+    }
+
+    override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+        checkIsOpen()
+        checkCanRead()
+        position.checkIsNotNegative()
+        return realRead(buf, offset, len, position)
+    }
+
+    private fun realRead(buf: ByteArray, offset: Int, len: Int, p: Long): Int {
         buf.checkBounds(offset, len)
         if (len == 0) return 0
-        synchronized(positionLock) {
+        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
             @OptIn(UnsafeNumber::class)
             @Suppress("RemoveRedundantCallsOfConversionMethods")
             val read = buf.usePinned { pinned ->
                 ignoreEINTR32 {
                     val fd = _fd.value ?: throw ClosedException()
-                    platform.posix.read(
-                        fd,
-                        pinned.addressOf(offset),
-                        len.convert(),
-                    ).toInt()
+                    if (p == -1L) {
+                        platform.posix.read(
+                            fd,
+                            pinned.addressOf(offset),
+                            len.convert(),
+                        ).toInt()
+                    } else {
+                        platformPRead(
+                            fd,
+                            pinned.addressOf(offset),
+                            len,
+                            p,
+                        )
+                    }
                 }
             }
 
             if (read < 0) throw errnoToIOException(errno)
             return if (read == 0) -1 else read
         }
-    }
-
-    override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
-        TODO("Not yet implemented")
     }
 
     override fun size(): Long {
@@ -160,9 +178,20 @@ internal class UnixFileStream(
     override fun write(buf: ByteArray, offset: Int, len: Int) {
         checkIsOpen()
         checkCanWrite()
+        realWrite(buf, offset, len, -1L)
+    }
+
+    override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
+        checkIsOpen()
+        checkCanWrite()
+        position.checkIsNotNegative()
+        realWrite(buf, offset, len, position)
+    }
+
+    private fun realWrite(buf: ByteArray, offset: Int, len: Int, p: Long) {
         buf.checkBounds(offset, len)
         if (len == 0) return
-        synchronized(positionLock) {
+        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
             @OptIn(UnsafeNumber::class)
             @Suppress("RemoveRedundantCallsOfConversionMethods")
             buf.usePinned { pinned ->
@@ -170,11 +199,20 @@ internal class UnixFileStream(
                 while (total < len) {
                     val ret = ignoreEINTR32 {
                         val fd = delegateOrClosed(isWrite = true, total) { _fd.value }
-                        platform.posix.write(
-                            fd,
-                            pinned.addressOf(offset + total),
-                            (len - total).convert(),
-                        ).toInt()
+                        if (p == -1L) {
+                            platform.posix.write(
+                                fd,
+                                pinned.addressOf(offset + total),
+                                (len - total).convert(),
+                            ).toInt()
+                        } else {
+                            platformPWrite(
+                                fd,
+                                pinned.addressOf(offset + total),
+                                len - total,
+                                p + total,
+                            )
+                        }
                     }
                     if (ret < 0) {
                         throw errnoToIOException(errno).toMaybeInterruptedIOException(isWrite = true, total)
@@ -185,23 +223,12 @@ internal class UnixFileStream(
         }
     }
 
-    override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
-        TODO("Not yet implemented")
-    }
-
     override fun close() {
         val fd = _fd.getAndSet(null) ?: return
         if (platform.posix.close(fd) == 0) return
         throw errnoToIOException(errno)
     }
 }
-
-@ExperimentalForeignApi
-internal expect inline fun platformLSeek(
-    fd: Int,
-    offset: Long,
-    whence: Int,
-): Long
 
 @ExperimentalForeignApi
 internal expect inline fun platformFDataSync(
@@ -212,4 +239,27 @@ internal expect inline fun platformFDataSync(
 internal expect inline fun platformFTruncate(
     fd: Int,
     offset: Long,
+): Int
+
+@ExperimentalForeignApi
+internal expect inline fun platformLSeek(
+    fd: Int,
+    offset: Long,
+    whence: Int,
+): Long
+
+@ExperimentalForeignApi
+internal expect inline fun platformPRead(
+    fd: Int,
+    buf: CPointer<ByteVarOf<Byte>>,
+    len: Int,
+    position: Long,
+): Int
+
+@ExperimentalForeignApi
+internal expect inline fun platformPWrite(
+    fd: Int,
+    buf: CPointer<ByteVarOf<Byte>>,
+    len: Int,
+    position: Long,
 ): Int

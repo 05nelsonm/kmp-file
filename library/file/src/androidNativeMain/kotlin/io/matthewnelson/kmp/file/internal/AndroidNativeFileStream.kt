@@ -17,17 +17,16 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import kotlinx.cinterop.ByteVarOf
+import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
+import kotlinx.cinterop.convert
 import platform.posix.fdatasync
 import platform.posix.ftruncate64
 import platform.posix.lseek64
-
-@ExperimentalForeignApi
-internal actual inline fun platformLSeek(
-    fd: Int,
-    offset: Long,
-    whence: Int,
-): Long = lseek64(fd, offset, whence)
+import platform.posix.pread64
+import platform.posix.pwrite64
 
 @ExperimentalForeignApi
 internal actual inline fun platformFDataSync(
@@ -39,3 +38,30 @@ internal actual inline fun platformFTruncate(
     fd: Int,
     offset: Long,
 ): Int = ftruncate64(fd, offset)
+
+@ExperimentalForeignApi
+internal actual inline fun platformLSeek(
+    fd: Int,
+    offset: Long,
+    whence: Int,
+): Long = lseek64(fd, offset, whence)
+
+@ExperimentalForeignApi
+@OptIn(UnsafeNumber::class)
+@Suppress("RemoveRedundantCallsOfConversionMethods")
+internal actual inline fun platformPRead(
+    fd: Int,
+    buf: CPointer<ByteVarOf<Byte>>,
+    len: Int,
+    position: Long,
+): Int = pread64(fd, buf, len.convert(), position).toInt()
+
+@ExperimentalForeignApi
+@OptIn(UnsafeNumber::class)
+@Suppress("RemoveRedundantCallsOfConversionMethods")
+internal actual inline fun platformPWrite(
+    fd: Int,
+    buf: CPointer<ByteVarOf<Byte>>,
+    len: Int,
+    position: Long,
+): Int = pwrite64(fd, buf, len.convert(), position).toInt()
