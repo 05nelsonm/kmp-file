@@ -37,6 +37,7 @@ import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
+import io.matthewnelson.kmp.file.internal.synchronizedIfNotNull
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.toFile
 import io.matthewnelson.kmp.file.wrapIOException
@@ -401,7 +402,7 @@ internal class FsJvmAndroid private constructor(
         private fun realRead(buf: ByteArray, offset: Int, len: Int, p: Long): Int {
             buf.checkBounds(offset, len)
             if (len == 0) return 0
-            interruptible.doBlocking(positionLock) { completed ->
+            interruptible.doBlocking(lock = if (p == -1L) positionLock else null) { completed ->
                 val fd = _fd ?: return 0
                 val read = tryCatchErrno(null) {
                     if (p == -1L) {
@@ -432,7 +433,7 @@ internal class FsJvmAndroid private constructor(
             if (dst == null) throw NullPointerException("dst == null")
             if (dst.isReadOnly) throw IllegalArgumentException("Read-only buffer")
             if (!dst.hasRemaining()) return 0
-            interruptible.doBlocking(positionLock) { completed ->
+            interruptible.doBlocking(lock = if (p == -1L) positionLock else null) { completed ->
                 // Os.read/write previously did not update ByteBuffer position after a successful invocation.
                 // https://cs.android.com/android/_/android/platform/libcore/+/d9f7e57f5d09b587d8c8d1bd42b895f7de8fbf54
                 val posBefore = if ((SDK_INT ?: 0) < 23) dst.position() else null
@@ -530,7 +531,7 @@ internal class FsJvmAndroid private constructor(
         private fun realWrite(buf: ByteArray, offset: Int, len: Int, p: Long) {
             buf.checkBounds(offset, len)
             if (len == 0) return
-            interruptible.doBlocking(positionLock) { completed ->
+            interruptible.doBlocking(lock = if (p == -1L) positionLock else null) { completed ->
                 var total = 0
                 while (total < len) {
                     val o = offset + total
@@ -595,7 +596,7 @@ internal class FsJvmAndroid private constructor(
                 return tmp.size
             }
 
-            interruptible.doBlocking(positionLock) { completed ->
+            interruptible.doBlocking(lock = if (p == -1L) positionLock else null) { completed ->
                 val rem = src.remaining()
                 var total = 0
                 while (total < rem) {
@@ -968,12 +969,4 @@ private inline fun AccessibleInterruptibleChannel.doBlocking(
             }
         }
     }
-}
-
-@OptIn(ExperimentalContracts::class)
-private inline fun synchronizedIfNotNull(lock: Any?, block: () -> Unit) {
-    contract {
-        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
-    }
-    if (lock == null) block() else synchronized(lock, block)
 }
