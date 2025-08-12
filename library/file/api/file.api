@@ -38,8 +38,9 @@ public final class io/matthewnelson/kmp/file/FileStream$DefaultImpls {
 	public static fun flush (Lio/matthewnelson/kmp/file/FileStream;)V
 }
 
-public abstract interface class io/matthewnelson/kmp/file/FileStream$Read : io/matthewnelson/kmp/file/FileStream {
+public abstract interface class io/matthewnelson/kmp/file/FileStream$Read : io/matthewnelson/kmp/file/FileStream, java/nio/channels/ReadableByteChannel {
 	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream$Read;
+	public abstract fun read (Ljava/nio/ByteBuffer;)I
 	public abstract fun read ([B)I
 	public abstract fun read ([BII)I
 	public abstract fun sync (Z)Lio/matthewnelson/kmp/file/FileStream$Read;
@@ -49,18 +50,19 @@ public final class io/matthewnelson/kmp/file/FileStream$Read$DefaultImpls {
 	public static fun flush (Lio/matthewnelson/kmp/file/FileStream$Read;)V
 }
 
-public abstract class io/matthewnelson/kmp/file/FileStream$ReadWrite : io/matthewnelson/kmp/file/FileStream$Read, io/matthewnelson/kmp/file/FileStream$Write {
+public abstract class io/matthewnelson/kmp/file/FileStream$ReadWrite : io/matthewnelson/kmp/file/FileStream$Read, io/matthewnelson/kmp/file/FileStream$Write, java/nio/channels/ByteChannel {
 	public fun flush ()V
 	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
 	public abstract fun size (J)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
 	public abstract fun sync (Z)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
 }
 
-public abstract interface class io/matthewnelson/kmp/file/FileStream$Write : io/matthewnelson/kmp/file/FileStream {
+public abstract interface class io/matthewnelson/kmp/file/FileStream$Write : io/matthewnelson/kmp/file/FileStream, java/nio/channels/WritableByteChannel {
 	public abstract fun isAppending ()Z
 	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public abstract fun size (J)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public abstract fun sync (Z)Lio/matthewnelson/kmp/file/FileStream$Write;
+	public abstract fun write (Ljava/nio/ByteBuffer;)I
 	public abstract fun write ([B)V
 	public abstract fun write ([BII)V
 }

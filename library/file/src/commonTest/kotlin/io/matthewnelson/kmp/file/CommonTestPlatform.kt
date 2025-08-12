@@ -52,9 +52,14 @@ internal expect class TestReadStream(
     override fun sync(meta: Boolean): FileStream.ReadWrite/* = error("Not implemented")*/
     override fun write(buf: ByteArray, offset: Int, len: Int)/* { error("Not implemented") }*/
     override fun close()/* { s.close() }*/
+
     // jsWasmJsTest
 //    override fun read(buf: Buffer): Long = s.read(buf)
 //    override fun read(buf: Buffer, offset: Long, len: Long): Long = s.read(buf, offset, len)
 //    override fun write(buf: Buffer) { error("Not implemented") }
 //    override fun write(buf: Buffer, offset: Long, len: Long) { error("Not implemented") }
+
+    // jvmTest
+//    override fun read(p0: ByteBuffer?): Int = s.read(p0)
+//    override fun write(p0: ByteBuffer?): Int = error("Not implemented")
 }
