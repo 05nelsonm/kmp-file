@@ -77,13 +77,20 @@ internal actual class TestReadStream actual constructor(
     actual override fun position(): Long = s.position()
     actual override fun position(new: Long): FileStream.ReadWrite { s.position(new); return this }
     actual override fun read(buf: ByteArray, offset: Int, len: Int): Int = s.read(buf, offset, len)
+    actual override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int = s.read(buf, offset, len, position)
     actual override fun size(): Long = fakeSize()
     actual override fun size(new: Long): FileStream.ReadWrite = error("Not implemented")
     actual override fun sync(meta: Boolean): FileStream.ReadWrite = error("Not implemented")
     actual override fun write(buf: ByteArray, offset: Int, len: Int) { error("Not implemented") }
+    actual override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) { error("Not implemented") }
     actual override fun close() { s.close() }
+
     override fun read(buf: Buffer): Long = s.read(buf)
     override fun read(buf: Buffer, offset: Long, len: Long): Long = s.read(buf, offset, len)
+    override fun read(buf: Buffer, position: Long): Long = s.read(buf, position)
+    override fun read(buf: Buffer, offset: Long, len: Long, position: Long): Long = s.read(buf, offset, len, position)
     override fun write(buf: Buffer) { error("Not implemented") }
     override fun write(buf: Buffer, offset: Long, len: Long) { error("Not implemented") }
+    override fun write(buf: Buffer, position: Long) { error("Not implemented") }
+    override fun write(buf: Buffer, offset: Long, len: Long, position: Long) { error("Not implemented") }
 }

@@ -164,6 +164,18 @@ public actual sealed interface FileStream: Closeable {
         public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
 
         /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun read(buf: ByteArray, position: Long): Int
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int
+
+        /**
          * Syncs any updates to the [File] for which this stream belongs, to the
          * device filesystem. This is akin to [fsync/fdatasync](https://man7.org/linux/man-pages/man2/fsync.2.html).
          *
@@ -299,6 +311,18 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public actual fun write(buf: ByteArray, offset: Int, len: Int)
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun write(buf: ByteArray, position: Long)
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun write(buf: ByteArray, offset: Int, len: Int, position: Long)
     }
 
     /**

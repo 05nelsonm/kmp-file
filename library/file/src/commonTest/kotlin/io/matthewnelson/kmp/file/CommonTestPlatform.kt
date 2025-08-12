@@ -47,19 +47,27 @@ internal expect class TestReadStream(
     override fun position(): Long/* = s.position()*/
     override fun position(new: Long): FileStream.ReadWrite/* { s.position(new); return this }*/
     override fun read(buf: ByteArray, offset: Int, len: Int): Int/* = s.read(buf, offset, len)*/
+    override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int/* = s.read(buf, offset, len, position)*/
     override fun size(): Long/* = fakeSize()*/
     override fun size(new: Long): FileStream.ReadWrite/* = error("Not implemented")*/
     override fun sync(meta: Boolean): FileStream.ReadWrite/* = error("Not implemented")*/
     override fun write(buf: ByteArray, offset: Int, len: Int)/* { error("Not implemented") }*/
+    override fun write(buf: ByteArray, offset: Int, len: Int, position: Long)/* { error("Not implemented") }*/
     override fun close()/* { s.close() }*/
 
     // jsWasmJsTest
 //    override fun read(buf: Buffer): Long = s.read(buf)
 //    override fun read(buf: Buffer, offset: Long, len: Long): Long = s.read(buf, offset, len)
+//    override fun read(buf: Buffer, position: Long): Long = s.read(buf, position)
+//    override fun read(buf: Buffer, offset: Long, len: Long, position: Long): Long = s.read(buf, offset, len, position)
 //    override fun write(buf: Buffer) { error("Not implemented") }
 //    override fun write(buf: Buffer, offset: Long, len: Long) { error("Not implemented") }
+//    override fun write(buf: Buffer, position: Long) { error("Not implemented") }
+//    override fun write(buf: Buffer, offset: Long, len: Long, position: Long) { error("Not implemented") }
 
     // jvmTest
-//    override fun read(p0: ByteBuffer?): Int = s.read(p0)
-//    override fun write(p0: ByteBuffer?): Int = error("Not implemented")
+//    override fun read(dst: ByteBuffer?): Int = s.read(dst)
+//    override fun read(dst: ByteBuffer?, position: Long): Int = s.read(dst, position)
+//    override fun write(src: ByteBuffer?): Int = error("Not implemented")
+//    override fun write(src: ByteBuffer?, position: Long): Int = error("Not implemented")
 }

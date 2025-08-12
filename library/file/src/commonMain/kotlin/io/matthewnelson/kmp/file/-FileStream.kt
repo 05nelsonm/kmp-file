@@ -75,12 +75,13 @@ internal abstract class AbstractFileStream protected constructor(
     @Throws(IllegalStateException::class)
     protected inline fun checkCanWrite() { check(canWrite) { "FileStream is O_RDONLY" } }
 
-    // For `position(new)` and `size(new)`
     @Throws(IllegalArgumentException::class)
     protected inline fun Long.checkIsNotNegative() { require(this >= 0L) { "$this < 0" } }
 
     public final override fun read(buf: ByteArray): Int = read(buf, 0, buf.size)
+    public final override fun read(buf: ByteArray, position: Long): Int = read(buf, 0, buf.size, position)
     public final override fun write(buf: ByteArray) { write(buf, 0, buf.size) }
+    public final override fun write(buf: ByteArray, position: Long) { write(buf, 0, buf.size, position) }
 
     @Throws(IOException::class)
     @OptIn(ExperimentalContracts::class)

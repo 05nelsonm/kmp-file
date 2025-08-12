@@ -187,6 +187,18 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
         public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
 
         /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun read(buf: ByteArray, position: Long): Int
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int
+
+        /**
          * Reads data from the [File] for which this stream belongs, into the
          * provided buffer. Bytes are read starting at the current [position].
          * The [position] will automatically be incremented by the number of
@@ -196,6 +208,12 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
          * */
         @Throws(IOException::class)
         public abstract override fun read(dst: ByteBuffer?): Int
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public fun read(dst: ByteBuffer?, position: Long): Int
 
         /**
          * Syncs any updates to the [File] for which this stream belongs, to the
@@ -338,6 +356,18 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
         public actual fun write(buf: ByteArray, offset: Int, len: Int)
 
         /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun write(buf: ByteArray, position: Long)
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun write(buf: ByteArray, offset: Int, len: Int, position: Long)
+
+        /**
          * Writes the available contents of [src] to the [File] for which this stream
          * belongs. Bytes are written starting at the current [position]. The
          * [position] will automatically increment by the number of bytes that were
@@ -347,6 +377,12 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
          * */
         @Throws(IOException::class)
         public abstract override fun write(src: ByteBuffer?): Int
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public fun write(src: ByteBuffer?, position: Long): Int
     }
 
     /**

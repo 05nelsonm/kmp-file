@@ -29,13 +29,21 @@ sealed interface io.matthewnelson.kmp.file/FileStream : io.matthewnelson.kmp.fil
         abstract fun position(kotlin/Long): io.matthewnelson.kmp.file/FileStream.Read // io.matthewnelson.kmp.file/FileStream.Read.position|position(kotlin.Long){}[0]
         abstract fun read(kotlin/ByteArray): kotlin/Int // io.matthewnelson.kmp.file/FileStream.Read.read|read(kotlin.ByteArray){}[0]
         abstract fun read(kotlin/ByteArray, kotlin/Int, kotlin/Int): kotlin/Int // io.matthewnelson.kmp.file/FileStream.Read.read|read(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+        abstract fun read(kotlin/ByteArray, kotlin/Int, kotlin/Int, kotlin/Long): kotlin/Int // io.matthewnelson.kmp.file/FileStream.Read.read|read(kotlin.ByteArray;kotlin.Int;kotlin.Int;kotlin.Long){}[0]
+        abstract fun read(kotlin/ByteArray, kotlin/Long): kotlin/Int // io.matthewnelson.kmp.file/FileStream.Read.read|read(kotlin.ByteArray;kotlin.Long){}[0]
         abstract fun sync(kotlin/Boolean): io.matthewnelson.kmp.file/FileStream.Read // io.matthewnelson.kmp.file/FileStream.Read.sync|sync(kotlin.Boolean){}[0]
 
         // Targets: [js, wasmJs]
         abstract fun read(io.matthewnelson.kmp.file/Buffer): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.read|read(io.matthewnelson.kmp.file.Buffer){}[0]
 
         // Targets: [js, wasmJs]
+        abstract fun read(io.matthewnelson.kmp.file/Buffer, kotlin/Long): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.read|read(io.matthewnelson.kmp.file.Buffer;kotlin.Long){}[0]
+
+        // Targets: [js, wasmJs]
         abstract fun read(io.matthewnelson.kmp.file/Buffer, kotlin/Long, kotlin/Long): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.read|read(io.matthewnelson.kmp.file.Buffer;kotlin.Long;kotlin.Long){}[0]
+
+        // Targets: [js, wasmJs]
+        abstract fun read(io.matthewnelson.kmp.file/Buffer, kotlin/Long, kotlin/Long, kotlin/Long): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.read|read(io.matthewnelson.kmp.file.Buffer;kotlin.Long;kotlin.Long;kotlin.Long){}[0]
     }
 
     sealed interface Write : io.matthewnelson.kmp.file/FileStream { // io.matthewnelson.kmp.file/FileStream.Write|null[0]
@@ -47,12 +55,20 @@ sealed interface io.matthewnelson.kmp.file/FileStream : io.matthewnelson.kmp.fil
         abstract fun sync(kotlin/Boolean): io.matthewnelson.kmp.file/FileStream.Write // io.matthewnelson.kmp.file/FileStream.Write.sync|sync(kotlin.Boolean){}[0]
         abstract fun write(kotlin/ByteArray) // io.matthewnelson.kmp.file/FileStream.Write.write|write(kotlin.ByteArray){}[0]
         abstract fun write(kotlin/ByteArray, kotlin/Int, kotlin/Int) // io.matthewnelson.kmp.file/FileStream.Write.write|write(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+        abstract fun write(kotlin/ByteArray, kotlin/Int, kotlin/Int, kotlin/Long) // io.matthewnelson.kmp.file/FileStream.Write.write|write(kotlin.ByteArray;kotlin.Int;kotlin.Int;kotlin.Long){}[0]
+        abstract fun write(kotlin/ByteArray, kotlin/Long) // io.matthewnelson.kmp.file/FileStream.Write.write|write(kotlin.ByteArray;kotlin.Long){}[0]
 
         // Targets: [js, wasmJs]
         abstract fun write(io.matthewnelson.kmp.file/Buffer) // io.matthewnelson.kmp.file/FileStream.Write.write|write(io.matthewnelson.kmp.file.Buffer){}[0]
 
         // Targets: [js, wasmJs]
+        abstract fun write(io.matthewnelson.kmp.file/Buffer, kotlin/Long) // io.matthewnelson.kmp.file/FileStream.Write.write|write(io.matthewnelson.kmp.file.Buffer;kotlin.Long){}[0]
+
+        // Targets: [js, wasmJs]
         abstract fun write(io.matthewnelson.kmp.file/Buffer, kotlin/Long, kotlin/Long) // io.matthewnelson.kmp.file/FileStream.Write.write|write(io.matthewnelson.kmp.file.Buffer;kotlin.Long;kotlin.Long){}[0]
+
+        // Targets: [js, wasmJs]
+        abstract fun write(io.matthewnelson.kmp.file/Buffer, kotlin/Long, kotlin/Long, kotlin/Long) // io.matthewnelson.kmp.file/FileStream.Write.write|write(io.matthewnelson.kmp.file.Buffer;kotlin.Long;kotlin.Long;kotlin.Long){}[0]
     }
 
     sealed class ReadWrite : io.matthewnelson.kmp.file/FileStream.Read, io.matthewnelson.kmp.file/FileStream.Write { // io.matthewnelson.kmp.file/FileStream.ReadWrite|null[0]

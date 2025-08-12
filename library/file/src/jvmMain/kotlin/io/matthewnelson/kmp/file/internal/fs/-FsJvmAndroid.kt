@@ -400,6 +400,10 @@ internal class FsJvmAndroid private constructor(
             }
         }
 
+        override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+            TODO("Not yet implemented")
+        }
+
         override fun read(dst: ByteBuffer?): Int {
             checkIsOpen()
             if (!canRead) throw NonReadableChannelException()
@@ -425,6 +429,10 @@ internal class FsJvmAndroid private constructor(
                 completed(read > 0)
                 return if (read == 0) -1 else read
             }
+        }
+
+        override fun read(dst: ByteBuffer?, position: Long): Int {
+            TODO("Not yet implemented")
         }
 
         override fun size(): Long {
@@ -507,6 +515,10 @@ internal class FsJvmAndroid private constructor(
             }
         }
 
+        override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
+            TODO("Not yet implemented")
+        }
+
         override fun write(src: ByteBuffer?): Int {
             checkIsOpen()
             if (!canWrite) throw NonWritableChannelException()
@@ -569,6 +581,10 @@ internal class FsJvmAndroid private constructor(
                 completed(total > 0)
                 return total
             }
+        }
+
+        override fun write(src: ByteBuffer?, position: Long): Int {
+            TODO("Not yet implemented")
         }
 
         override fun close() { interruptible.close() }

@@ -123,6 +123,10 @@ internal class MinGWFileStream(
         }
     }
 
+    override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+        TODO("Not yet implemented")
+    }
+
     override fun size(): Long {
         checkIsOpen()
         synchronized(positionLock) {
@@ -237,6 +241,10 @@ internal class MinGWFileStream(
                 }
             }
         }
+    }
+
+    override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
+        TODO("Not yet implemented")
     }
 
     override fun close() {

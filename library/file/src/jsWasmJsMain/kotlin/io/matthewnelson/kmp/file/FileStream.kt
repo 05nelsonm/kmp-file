@@ -164,6 +164,18 @@ public actual sealed interface FileStream: Closeable {
         public actual fun read(buf: ByteArray, offset: Int, len: Int): Int
 
         /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun read(buf: ByteArray, position: Long): Int
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int
+
+        /**
          * Reads data from the [File] for which this stream belongs, into the
          * provided buffer. Bytes are read starting at the current [position].
          * The [position] will automatically increment by the number of bytes
@@ -197,6 +209,18 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public fun read(buf: Buffer, offset: Long, len: Long): Long
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public fun read(buf: Buffer, position: Long): Long
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public fun read(buf: Buffer, offset: Long, len: Long, position: Long): Long
 
         /**
          * Syncs any updates to the [File] for which this stream belongs, to the
@@ -336,6 +360,18 @@ public actual sealed interface FileStream: Closeable {
         public actual fun write(buf: ByteArray, offset: Int, len: Int)
 
         /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun write(buf: ByteArray, position: Long)
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public actual fun write(buf: ByteArray, offset: Int, len: Int, position: Long)
+
+        /**
          * Writes the entire contents of [buf] to the [File] for which this stream
          * belongs. Bytes are written starting at the current [position]. The
          * [position] will automatically increment by the number of bytes that were
@@ -363,6 +399,18 @@ public actual sealed interface FileStream: Closeable {
          * */
         @Throws(IOException::class)
         public fun write(buf: Buffer, offset: Long, len: Long)
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public fun write(buf: Buffer, position: Long)
+
+        /**
+         * TODO
+         * */
+        @Throws(IOException::class)
+        public fun write(buf: Buffer, offset: Long, len: Long, position: Long)
     }
 
     /**

@@ -428,6 +428,10 @@ internal class FsJsNode private constructor(
             return total
         }
 
+        override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+            TODO("Not yet implemented")
+        }
+
         override fun read(buf: Buffer): Long = read(buf, 0L, buf.length.toLong())
 
         override fun read(buf: Buffer, offset: Long, len: Long): Long {
@@ -454,6 +458,12 @@ internal class FsJsNode private constructor(
             if (read <= 0L) return -1L
             _position += read
             return read
+        }
+
+        override fun read(buf: Buffer, position: Long): Long = read(buf, 0L, buf.length.toLong(), position)
+
+        override fun read(buf: Buffer, offset: Long, len: Long, position: Long): Long {
+            TODO("Not yet implemented")
         }
 
         override fun size(): Long {
@@ -527,6 +537,10 @@ internal class FsJsNode private constructor(
             }
         }
 
+        override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
+            TODO("Not yet implemented")
+        }
+
         override fun write(buf: Buffer) { write(buf, 0L, buf.length.toLong()) }
 
         override fun write(buf: Buffer, offset: Long, len: Long) {
@@ -555,6 +569,12 @@ internal class FsJsNode private constructor(
                 total += write
                 if (!isAppending) _position += write
             }
+        }
+
+        override fun write(buf: Buffer, position: Long) { write(buf, 0L, buf.length.toLong(), position) }
+
+        override fun write(buf: Buffer, offset: Long, len: Long, position: Long) {
+            TODO("Not yet implemented")
         }
 
         override fun close() {

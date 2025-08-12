@@ -41,8 +41,11 @@ public final class io/matthewnelson/kmp/file/FileStream$DefaultImpls {
 public abstract interface class io/matthewnelson/kmp/file/FileStream$Read : io/matthewnelson/kmp/file/FileStream, java/nio/channels/ReadableByteChannel {
 	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream$Read;
 	public abstract fun read (Ljava/nio/ByteBuffer;)I
+	public abstract fun read (Ljava/nio/ByteBuffer;J)I
 	public abstract fun read ([B)I
 	public abstract fun read ([BII)I
+	public abstract fun read ([BIIJ)I
+	public abstract fun read ([BJ)I
 	public abstract fun sync (Z)Lio/matthewnelson/kmp/file/FileStream$Read;
 }
 
@@ -63,8 +66,11 @@ public abstract interface class io/matthewnelson/kmp/file/FileStream$Write : io/
 	public abstract fun size (J)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public abstract fun sync (Z)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public abstract fun write (Ljava/nio/ByteBuffer;)I
+	public abstract fun write (Ljava/nio/ByteBuffer;J)I
 	public abstract fun write ([B)V
 	public abstract fun write ([BII)V
+	public abstract fun write ([BIIJ)V
+	public abstract fun write ([BJ)V
 }
 
 public final class io/matthewnelson/kmp/file/FileStream$Write$DefaultImpls {
