@@ -90,14 +90,14 @@ public fun errnoToIOException(errno: Int, file: File?, other: File? = null): IOE
  * @see [openRead]
  * @see [openReadWrite]
  * @see [openWrite]
- * @see [openAppending]
+ * @see [openAppend]
  * @suppress
  * */
 @DelicateFileApi
 @ExperimentalForeignApi
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
-@Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppending).use {} functionality.")
+@Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppend).use {} functionality.")
 public inline fun <T: Any?> File.fOpen(
     flags: String,
     block: (file: CPointer<FILE>) -> T,
@@ -147,12 +147,12 @@ public inline fun <T: Any?> File.fOpen(
  * @see [openRead]
  * @see [openReadWrite]
  * @see [openWrite]
- * @see [openAppending]
+ * @see [openAppend]
  * @suppress
  * */
 @DelicateFileApi
 @ExperimentalForeignApi
-@Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppending).use {} functionality.")
+@Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppend).use {} functionality.")
 public fun CPointer<FILE>.fRead(
     buf: ByteArray,
 ): Int = buf.usePinned { pinned ->
@@ -168,12 +168,12 @@ public fun CPointer<FILE>.fRead(
  * @see [openRead]
  * @see [openReadWrite]
  * @see [openWrite]
- * @see [openAppending]
+ * @see [openAppend]
  * @suppress
  * */
 @DelicateFileApi
 @ExperimentalForeignApi
-@Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppending).use {} functionality.")
+@Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppend).use {} functionality.")
 public fun CPointer<FILE>.fWrite(
     buf: ByteArray,
     offset: Int = 0,

@@ -130,7 +130,7 @@ public final class io/matthewnelson/kmp/file/KmpFile {
 	public static final fun nameOf (Ljava/io/File;)Ljava/lang/String;
 	public static final fun normalize (Ljava/io/File;)Ljava/io/File;
 	public static final fun normalizedFileOf (Ljava/io/File;)Ljava/io/File;
-	public static final fun openAppending (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;)Lio/matthewnelson/kmp/file/FileStream$Write;
+	public static final fun openAppend (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public static final fun openRead (Ljava/io/File;)Lio/matthewnelson/kmp/file/FileStream$Read;
 	public static final fun openReadWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
 	public static final fun openWrite (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;)Lio/matthewnelson/kmp/file/FileStream$Write;

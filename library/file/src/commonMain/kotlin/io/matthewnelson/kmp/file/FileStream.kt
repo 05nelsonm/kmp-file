@@ -26,7 +26,7 @@ package io.matthewnelson.kmp.file
  * @see [openRead]
  * @see [openReadWrite]
  * @see [openWrite]
- * @see [openAppending]
+ * @see [openAppend]
  * @see [Read]
  * @see [Write]
  * @see [ReadWrite]
@@ -249,7 +249,7 @@ public expect sealed interface FileStream: Closeable {
      * A [FileStream] for write-only operations whereby the destination for data is a [File].
      *
      * @see [openWrite]
-     * @see [openAppending]
+     * @see [openAppend]
      * */
     public sealed interface Write: FileStream {
 
