@@ -90,16 +90,16 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
         tmp.writeBytes(excl = OpenExcl.MustCreate.DEFAULT, data)
         tmp.testOpen().use { s ->
             val buf = ByteArray(10)
-            assertEquals(buf.size, s.read(buf, 5L))
+            assertEquals(buf.size, s.read(buf, 5L), "s.pread(buf, 5L)")
             for (i in buf.indices) {
                 val e = data[i + 5]
                 val a = buf[i]
                 assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
             }
-            assertEquals(0L, s.position())
+            assertEquals(0L, s.position(), "0 == s.position()")
             s.position(10L)
             buf.fill(0)
-            assertEquals(2, s.read(buf, 2, 2, 50L))
+            assertEquals(2, s.read(buf, 2, 2, 50L), "2 == s.read(...)")
             repeat(2) { n ->
                 val e = data[n + 50]
                 val a = buf[n + 2]

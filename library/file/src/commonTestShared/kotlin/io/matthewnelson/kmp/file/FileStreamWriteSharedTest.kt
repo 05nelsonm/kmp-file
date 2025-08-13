@@ -100,7 +100,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     @Test
     fun givenOpenWrite_whenAppendingFalse_thenFileIsTruncate() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-        assertTrue(tmp.readBytes().isNotEmpty())
+        assertEquals("Hello World!", tmp.readUtf8())
         tmp.testOpen(excl = OpenExcl.MustExist, appending = false).use { s ->
             assertTrue(tmp.readBytes().isEmpty())
         }
