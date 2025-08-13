@@ -27,10 +27,10 @@ import kotlinx.atomicfu.locks.synchronized
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UIntVar
 import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.alloc
 import kotlinx.cinterop.cValue
-import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.pointed
+import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
 import platform.windows.CloseHandle
@@ -113,8 +113,8 @@ internal class MinGWFileStream(
         // Even though OVERLAPPED is always defined, HANDLE has internals.
         synchronized(positionLock) {
             memScoped {
-                val bytesRead = cValue<UIntVar>().ptr.apply { pointed.value = 0u }
-                val overlapped = cValue<_OVERLAPPED> {
+                val bytesRead = alloc<UIntVar> { value = 0u }
+                val overlapped = alloc<_OVERLAPPED> {
                     val position = if (p == -1L) _position else p
                     Offset = position.toUInt()
                     OffsetHigh = (position ushr 32).toUInt()
@@ -124,13 +124,13 @@ internal class MinGWFileStream(
                     ReadFile(
                         hFile = h,
                         lpBuffer = pinned.addressOf(offset).getPointer(this),
-                        nNumberOfBytesToRead = len.convert(),
-                        lpNumberOfBytesRead = bytesRead,
+                        nNumberOfBytesToRead = len.toUInt(),
+                        lpNumberOfBytesRead = bytesRead.ptr,
                         lpOverlapped = overlapped.ptr,
                     )
                 }
 
-                val read = bytesRead.pointed.value.toInt()
+                val read = bytesRead.value.toInt()
                 if (!isAppending && p == -1L && read > 0) _position += read
                 if (ret == FALSE) {
                     val lastError = GetLastError()
@@ -147,19 +147,17 @@ internal class MinGWFileStream(
         // Does it really need to be synchronized???
         synchronized(positionLock) {
             memScoped {
-                val size = cValue<LARGE_INTEGER>().ptr
+                val size = alloc<LARGE_INTEGER>()
                 val h = _h.value ?: throw ClosedException()
                 val ret = GetFileSizeEx(
                     hFile = h,
-                    lpFileSize = size,
+                    lpFileSize = size.ptr,
                 )
                 if (ret == FALSE) throw lastErrorToIOException()
 
-                with(size.pointed) {
-                    val hi = (HighPart.toLong() and 0xffffffff) shl 32
-                    val lo = (LowPart.toLong() and 0xffffffff)
-                    return hi or lo
-                }
+                val hi = (size.HighPart.toLong() and 0xffffffff) shl 32
+                val lo = (size.LowPart.toLong() and 0xffffffff)
+                return hi or lo
             }
         }
     }
@@ -207,33 +205,39 @@ internal class MinGWFileStream(
         // which cannot be modified from different threads w/o a lock.
         synchronized(positionLock) {
             memScoped {
+                val bytesWritten = alloc<UIntVar>()
                 buf.usePinned { pinned ->
                     var total = 0
                     var threw: IOException? = null
-                    val bytesWritten = cValue<UIntVar>().ptr
                     while (total < len) {
-                        bytesWritten.pointed.value = 0u
-                        // Must instantiate a new struct for every iteration
-                        val overlapped = cValue<_OVERLAPPED> {
-                            if (isAppending) {
-                                Offset = 0xffffffff.toUInt()
-                                OffsetHigh = 0xffffffff.toUInt()
-                            } else {
-                                val position = (if (p == -1L) _position else p) + total
-                                Offset = position.toUInt()
-                                OffsetHigh = (position ushr 32).toUInt()
-                            }
-                        }
-                        val h = delegateOrClosed(isWrite = true, total) { _h.value }
-                        val ret = WriteFile(
-                            hFile = h,
-                            lpBuffer = pinned.addressOf(offset + total).getPointer(this),
-                            nNumberOfBytesToWrite = (len - total).convert(),
-                            lpNumberOfBytesWritten = bytesWritten,
-                            lpOverlapped = overlapped.ptr,
-                        )
+                        bytesWritten.value = 0u
 
-                        total += bytesWritten.pointed.value.toInt().coerceAtLeast(0)
+                        val ret = memScoped {
+                            val scope = this
+                            // Must instantiate a new struct for every iteration as it
+                            // has internals which WriteFile will modify and, if used
+                            // again, does a number on things.
+                            val overlapped = scope.alloc<_OVERLAPPED> {
+                                if (isAppending) {
+                                    Offset = 0xffffffff.toUInt()
+                                    OffsetHigh = 0xffffffff.toUInt()
+                                } else {
+                                    val position = (if (p == -1L) _position else p) + total
+                                    Offset = position.toUInt()
+                                    OffsetHigh = (position ushr 32).toUInt()
+                                }
+                            }
+                            val h = delegateOrClosed(isWrite = true, total) { _h.value }
+                            WriteFile(
+                                hFile = h,
+                                lpBuffer = pinned.addressOf(offset + total).getPointer(this),
+                                nNumberOfBytesToWrite = (len - total).toUInt(),
+                                lpNumberOfBytesWritten = bytesWritten.ptr,
+                                lpOverlapped = overlapped.ptr,
+                            )
+                        }
+
+                        total += bytesWritten.value.toInt().coerceAtLeast(0)
                         if (ret == FALSE) {
                             threw = lastErrorToIOException().toMaybeInterruptedIOException(isWrite = true, total)
                             break
@@ -274,15 +278,15 @@ internal class MinGWFileStream(
 @OptIn(ExperimentalForeignApi::class)
 private inline fun HANDLE.setPosition(new: Long) {
     val distance = cValue<LARGE_INTEGER> {
-        LowPart = new.toInt().convert()
-        HighPart = (new ushr 32).toInt().convert()
+        LowPart = new.toUInt()
+        HighPart = (new ushr 32).toInt()
     }
 
     val ret = SetFilePointerEx(
         hFile = this,
         liDistanceToMove = distance,
         lpNewFilePointer = null,
-        dwMoveMethod = FILE_BEGIN.convert(),
+        dwMoveMethod = FILE_BEGIN.toUInt(),
     )
     if (ret == FALSE) throw lastErrorToIOException()
 }
