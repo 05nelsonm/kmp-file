@@ -282,22 +282,22 @@ public actual sealed interface FileStream: Closeable {
 
         /**
          * Modifies the size of the [File] for which this [Write] stream belongs. This is
-         * akin to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
+         * similar to [ftruncate](https://man7.org/linux/man-pages/man2/ftruncate.2.html).
          *
          * If [new] is greater than the current [FileStream.size], then the [File] is extended
          * whereby the extended portion reads as `0` bytes (undefined). If [new] is less than
          * the current [FileStream.size], then the [File] is truncated and data beyond [new]
          * is lost.
          *
-         * [position] will be set to [new] under the following circumstances:
-         *   - [isAppending] is `true`.
-         *   - The current [position] is greater than [new].
+         * If and only if the current [position] is greater than [new], then [position]
+         * will be set to [new]. Otherwise, [position] will remain unmodified.
          *
          * @param [new] The desired size.
          *
          * @return The [Write] stream for chaining operations.
          *
          * @throws [IllegalArgumentException] If [new] is less than 0.
+         * @throws [IllegalStateException] If [isAppending] is `true`.
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)

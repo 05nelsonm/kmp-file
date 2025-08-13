@@ -225,7 +225,7 @@ internal class MinGWFileStream(
 
     override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
         checkIsOpen()
-        checkCanWrite()
+        checkCanWriteP()
         position.checkIsNotNegative()
         realWrite(buf, offset, len, position)
     }

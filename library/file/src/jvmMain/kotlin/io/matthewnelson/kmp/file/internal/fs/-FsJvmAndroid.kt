@@ -523,7 +523,7 @@ internal class FsJvmAndroid private constructor(
 
         override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
             checkIsOpen()
-            checkCanWrite()
+            checkCanWriteP()
             position.checkIsNotNegative()
             realWrite(buf, offset, len, position)
         }
@@ -563,6 +563,7 @@ internal class FsJvmAndroid private constructor(
 
         override fun write(src: ByteBuffer?, position: Long): Int {
             checkIsOpen()
+            if (isAppending) throw IllegalStateException("O_APPEND")
             if (!canWrite) throw NonWritableChannelException()
             position.checkIsNotNegative()
             return realWrite(src, position)

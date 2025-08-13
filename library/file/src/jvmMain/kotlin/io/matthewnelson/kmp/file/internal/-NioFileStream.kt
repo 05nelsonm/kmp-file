@@ -24,6 +24,8 @@ import io.matthewnelson.kmp.file.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousCloseException
 import java.nio.channels.FileChannel
+import java.nio.channels.NonReadableChannelException
+import java.nio.channels.NonWritableChannelException
 
 internal class NioFileStream private constructor(
     ch: FileChannel,
@@ -110,11 +112,13 @@ internal class NioFileStream private constructor(
 
     override fun read(dst: ByteBuffer?): Int {
         checkIsOpen()
+        if (!canRead) throw NonReadableChannelException()
         return realRead(dst, -1L)
     }
 
     override fun read(dst: ByteBuffer?, position: Long): Int {
         checkIsOpen()
+        if (!canRead) throw NonReadableChannelException()
         position.checkIsNotNegative()
         return realRead(dst, position)
     }
@@ -173,7 +177,7 @@ internal class NioFileStream private constructor(
 
     override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
         checkIsOpen()
-        checkCanWrite()
+        checkCanWriteP()
         position.checkIsNotNegative()
         realWrite(buf, offset, len, position)
     }
@@ -190,11 +194,14 @@ internal class NioFileStream private constructor(
 
     override fun write(src: ByteBuffer?): Int {
         checkIsOpen()
+        if (!canWrite) throw NonWritableChannelException()
         return realWrite(src, -1L)
     }
 
     override fun write(src: ByteBuffer?, position: Long): Int {
         checkIsOpen()
+        if (isAppending) throw IllegalStateException("O_APPEND")
+        if (!canWrite) throw NonWritableChannelException()
         position.checkIsNotNegative()
         return realWrite(src, position)
     }
