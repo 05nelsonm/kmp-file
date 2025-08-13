@@ -124,7 +124,6 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     fun givenOpenWrite_whenAppendingFalse_thenIsTruncatedOnOpen() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
         assertTrue(tmp.readBytes().isNotEmpty())
-
         tmp.testOpen(excl = OpenExcl.MustExist, appending = false).use { s ->
             assertTrue(tmp.readBytes().isEmpty())
         }
@@ -158,9 +157,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
                 assertEquals((data.size + 3).toLong(), s2.position())
                 assertContentEquals(byteArrayOf(*data, -5, -5, 2), tmp.readBytes())
 
-                tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s3 ->
-                    s3.size(0L)
-
+                tmp.testOpen(excl = OpenExcl.MustExist, appending = false).use { s3 ->
                     val streams = arrayOf(s1, s2, s3)
                     streams.forEach { s ->
                         assertEquals(0L, s.position())
@@ -195,6 +192,56 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
             s.position(0L)
             assertEquals(2L, s.position())
             assertFailsWith<IllegalArgumentException> { s.position(-1L) }
+        }
+    }
+
+    @Test
+    fun givenOpenWrite_whenAppendingTrue_thenPWriteThrowsException() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
+            assertTrue(s.isAppending, "isAppending")
+            try {
+                s.write(byteArrayOf(0), 2L)
+                fail("pwrite should have failed >> appending[${s.isAppending}]")
+            } catch (e: IllegalStateException) {
+                assertEquals("O_APPEND", e.message)
+            }
+        }
+    }
+
+    @Test
+    fun givenOpenWrite_whenAppendingTrue_thenSizeNewThrowsException() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
+            assertTrue(s.isAppending, "isAppending")
+            try {
+                s.size(new = 2L)
+                fail("size(new) should have failed >> appending[${s.isAppending}]")
+            } catch (e: IllegalStateException) {
+                assertEquals("O_APPEND", e.message)
+            }
+        }
+    }
+
+    @Test
+    fun givenOpenWrite_whenPWrite_thenFilePositionIsUnaffected() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = false).use { s ->
+            val data = ByteArray(50) { 1.toByte() }
+            s.write(data)
+            s.write(byteArrayOf(5, 5), 20L)
+            s.write(data)
+            assertEquals((data.size * 2).toLong(), s.size())
+            tmp.openRead().use { s ->
+                val expected = ByteArray(data.size * 2) { data[0] }
+                expected[20] = 5
+                expected[21] = 5
+                val actual = ByteArray(expected.size)
+                actual.fill(0)
+                assertEquals(actual.size, s.read(actual))
+                for (i in actual.indices) {
+                    val e = expected[i]
+                    val a = actual[i]
+                    assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
+                }
+            }
         }
     }
 
