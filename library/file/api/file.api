@@ -21,6 +21,7 @@ public abstract interface class io/matthewnelson/kmp/file/FileStream : java/io/C
 	public static final field Companion Lio/matthewnelson/kmp/file/FileStream$Companion;
 	public static fun asInputStream (Lio/matthewnelson/kmp/file/FileStream$Read;Z)Ljava/io/InputStream;
 	public static fun asOutputStream (Lio/matthewnelson/kmp/file/FileStream$Write;Z)Ljava/io/OutputStream;
+	public abstract fun close ()V
 	public abstract fun flush ()V
 	public abstract fun isOpen ()Z
 	public abstract fun position ()J

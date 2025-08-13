@@ -19,6 +19,7 @@ abstract fun interface io.matthewnelson.kmp.file/Closeable { // io.matthewnelson
 }
 
 sealed interface io.matthewnelson.kmp.file/FileStream : io.matthewnelson.kmp.file/Closeable { // io.matthewnelson.kmp.file/FileStream|null[0]
+    abstract fun close() // io.matthewnelson.kmp.file/FileStream.close|close(){}[0]
     abstract fun isOpen(): kotlin/Boolean // io.matthewnelson.kmp.file/FileStream.isOpen|isOpen(){}[0]
     abstract fun position(): kotlin/Long // io.matthewnelson.kmp.file/FileStream.position|position(){}[0]
     abstract fun position(kotlin/Long): io.matthewnelson.kmp.file/FileStream // io.matthewnelson.kmp.file/FileStream.position|position(kotlin.Long){}[0]
