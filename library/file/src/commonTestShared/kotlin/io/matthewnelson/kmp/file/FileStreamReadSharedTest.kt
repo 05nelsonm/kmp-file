@@ -41,6 +41,22 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     }
 
     @Test
+    fun givenOpenRead_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
+        tmp.mkdirs2(mode = null, mustCreate = true)
+        var s: FileStream.Read? = null
+        try {
+            s = tmp.testOpen()
+            fail("open should have failed because is a directory...")
+        } catch (_: IOException) {
+            // pass
+        } finally {
+            try {
+                s?.close()
+            } catch (_: Throwable) {}
+        }
+    }
+
+    @Test
     fun givenReadStream_whenClose_thenIsClosed() = runTest { tmp ->
         tmp.writeUtf8(excl = OpenExcl.MustCreate.DEFAULT, "Hello World!")
         tmp.testOpen().use { s ->
@@ -61,23 +77,7 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenRead_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
-        tmp.mkdirs2(mode = null, mustCreate = true)
-        var s: FileStream.Read? = null
-        try {
-            s = tmp.testOpen()
-            fail("open should have failed because is a directory...")
-        } catch (_: IOException) {
-            // pass
-        } finally {
-            try {
-                s?.close()
-            } catch (_: Throwable) {}
-        }
-    }
-
-    @Test
-    fun givenReadStream_whenSize_thenReturnsExpected() = runTest { tmp ->
+    fun givenReadStream_whenGetSize_thenReturnsExpected() = runTest { tmp ->
         tmp.writeBytes(excl = OpenExcl.MustCreate.DEFAULT, ByteArray(50))
         tmp.testOpen().use { s ->
             assertEquals(50L, s.size())
@@ -105,6 +105,14 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
                 val a = buf[n + 2]
                 assertEquals(e, a, "expected[$e] != actual[$a] >> index[${n + 2}]")
             }
+        }
+    }
+
+    @Test
+    fun givenReadStream_whenPReadNegativeArgument_thenThrowsIllegalArgumentException() = runTest { tmp ->
+        tmp.writeBytes(excl = OpenExcl.MustCreate.DEFAULT, byteArrayOf(0))
+        tmp.testOpen().use { s ->
+            assertFailsWith<IllegalArgumentException> { s.read(ByteArray(2), -1L) }
         }
     }
 

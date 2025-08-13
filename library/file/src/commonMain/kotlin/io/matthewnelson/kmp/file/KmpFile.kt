@@ -448,7 +448,7 @@ public fun File.openRead(): FileStream.Read {
  *
  * e.g.
  *
- *     "/path/to/my/file".toFile().openReadWrite().use { s ->
+ *     "/path/to/my/file".toFile().openReadWrite(excl = OpenExcl.MustExist).use { s ->
  *         // read
  *         // write
  *     }

@@ -31,7 +31,6 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
     fun givenReadStream_whenByteBuffer_thenWorksAsExpected() = runTest { tmp ->
         val data = "Hello World!".encodeToByteArray()
         tmp.writeBytes(excl = null, data)
-
         tmp.testOpen().use { s ->
             val bb = ByteBuffer.allocate(data.size)
             assertEquals(0, bb.position(), "bb.position() - before")
@@ -46,9 +45,21 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
             bb.get(dst)
             assertContentEquals(data, dst)
 
-            bb.position(0)
+            bb.clear()
             assertEquals(data.size, bb.remaining())
             assertEquals(-1, s.read(bb), "s.read(bb) - EOF")
+
+            bb.clear()
+            assertEquals(data.size.toLong(), s.position())
+            s.position((data.size - 5).toLong())
+            assertEquals(data.size, s.read(bb, position = 0L))
+            assertEquals((data.size - 5).toLong(), s.position())
+            dst.fill(0)
+            bb.position(0)
+            bb.get(dst)
+            assertContentEquals(data, dst)
+            bb.clear()
+            assertFailsWith<IllegalArgumentException> { s.read(bb, position = -1L) }
 
             val nullBB: ByteBuffer? = null
             assertFailsWith<NullPointerException> { s.read(nullBB) }
@@ -59,7 +70,6 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
     @Test
     fun givenReadStreamAsInputStream_whenCloseParentOnCloseIsTrue_thenClosesFileStream() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-
         tmp.testOpen().use { s ->
             s.asInputStream(closeParentOnClose = true).use { iS ->
                 assertTrue(s.isOpen())
@@ -76,7 +86,6 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
     @Test
     fun givenReadStreamAsInputStream_whenCloseParentOnCloseIsFalse_thenDoesNotCloseFileStream() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-
         tmp.testOpen().use { s ->
             s.asInputStream(closeParentOnClose = false).use { iS ->
                 assertTrue(s.isOpen())
@@ -93,7 +102,6 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
     fun givenReadStreamAsInputStream_whenAvailable_thenWorksAsExpected() = runTest { tmp ->
         val hello = "Hello World!".encodeToByteArray()
         tmp.writeBytes(excl = null, hello)
-
         tmp.testOpen().use { s ->
             s.asInputStream(true).use { iS ->
                 assertEquals(hello.size, iS.available())
@@ -111,7 +119,6 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
     fun givenReadStreamAsInputStream_whenSkipForward_thenWorksAsExpected() = runTest { tmp ->
         val expected = ByteArray(8) { (it + 1).toByte() }
         tmp.writeBytes(excl = null, expected)
-
         tmp.testOpen().use { s ->
             s.asInputStream(true).use { iS ->
                 val buf = ByteArray(expected.size + 4)
@@ -139,7 +146,6 @@ abstract class FileStreamReadJvmSharedTest: FileStreamReadSharedTest() {
     fun givenReadStreamAsInputStream_whenSkipBackward_thenWorksAsExpected() = runTest { tmp ->
         val expected = ByteArray(8) { (it + 1).toByte() }
         tmp.writeBytes(excl = null, expected)
-
         tmp.testOpen().use { s ->
             s.asInputStream(true).use { iS ->
                 val buf = ByteArray(expected.size + 10)
