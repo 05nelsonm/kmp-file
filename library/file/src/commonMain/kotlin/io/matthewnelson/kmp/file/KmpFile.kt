@@ -443,8 +443,7 @@ public fun File.openRead(): FileStream.Read {
 
 /**
  * Opens a [File] for read/write operations. The [File] is **not** truncated
- * if it already exists, and the initial [FileStream.ReadWrite.position] is
- * `0`.
+ * if it already exists, and the initial [FileStream.position] is `0`.
  *
  * e.g.
  *
@@ -535,7 +534,7 @@ public inline fun File.openWrite(excl: OpenExcl?): FileStream.Write {
  *
  * e.g.
  *
- *     "/path/to/my/file".toFile().openAppending(excl = null).use { s ->
+ *     "/path/to/my/file".toFile().openAppend(excl = null).use { s ->
  *         // write
  *     }
  *
@@ -552,7 +551,7 @@ public inline fun File.openWrite(excl: OpenExcl?): FileStream.Write {
  * @throws [UnsupportedOperationException] On Kotlin/JS-Browser.
  * */
 @Throws(IOException::class)
-public inline fun File.openAppending(excl: OpenExcl?): FileStream.Write {
+public inline fun File.openAppend(excl: OpenExcl?): FileStream.Write {
     return openWrite(excl, appending = true)
 }
 
