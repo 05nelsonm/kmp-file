@@ -65,6 +65,17 @@ abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
             assertEquals(0, dROBB.remaining(), "dROBB.remaining() - after")
 
             assertContentEquals(data + data + data, tmp.readBytes(), "data + data + data == tmp.readBytes()")
+
+            val pData = data.copyOf()
+            pData[2] = (pData[2] + 1).toByte()
+            pData[3] = (pData[3] + 1).toByte()
+            pData[4] = (pData[4] + 1).toByte()
+            s.write(ByteBuffer.wrap(pData), 0L)
+
+            assertContentEquals(pData + data + data, tmp.readBytes())
+
+            bb.clear()
+            assertFailsWith<IllegalArgumentException> { s.write(bb, -1L) }
         }
     }
 

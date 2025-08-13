@@ -41,9 +41,11 @@ internal actual class TestReadStream actual constructor(
     actual override fun position(): Long = s.position()
     actual override fun position(new: Long): FileStream.ReadWrite { s.position(new); return this }
     actual override fun read(buf: ByteArray, offset: Int, len: Int): Int = s.read(buf, offset, len)
+    actual override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int = s.read(buf, offset, len, position)
     actual override fun size(): Long = fakeSize()
     actual override fun size(new: Long): FileStream.ReadWrite = error("Not implemented")
     actual override fun sync(meta: Boolean): FileStream.ReadWrite = error("Not implemented")
     actual override fun write(buf: ByteArray, offset: Int, len: Int) { error("Not implemented") }
+    actual override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) { error("Not implemented") }
     actual override fun close() { s.close() }
 }

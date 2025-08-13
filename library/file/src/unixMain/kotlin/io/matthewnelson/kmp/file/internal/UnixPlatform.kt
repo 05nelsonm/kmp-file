@@ -17,8 +17,24 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 internal actual inline fun platformDirSeparator(): Char = '/'
 
 internal actual inline fun platformPathSeparator(): Char = ':'
 
 internal actual val IsWindows: Boolean = false
+
+@OptIn(ExperimentalContracts::class)
+internal inline fun synchronizedIfNotNull(lock: SynchronizedObject?, block: () -> Unit) {
+    @Suppress("LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    @Suppress("LEAKED_IN_PLACE_LAMBDA")
+    if (lock == null) block() else synchronized(lock, block)
+}

@@ -40,29 +40,6 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenNewSizeOrPosition_thenReturnsTheWriteOnlyInstance() = runTest { tmp ->
-        tmp.testOpen(excl = null, appending = false).use { s ->
-            assertIsNot<FileStream.Read>(s)
-            val position = s.position(2L)
-            val size = s.size(2L)
-            val sync = s.sync(meta = false)
-            assertEquals(s, position)
-            assertEquals(s, size)
-            assertEquals(s, sync)
-            assertTrue(position.toString().startsWith("WriteOnly"))
-            assertTrue(size.toString().startsWith("WriteOnly"))
-            assertTrue(sync.toString().startsWith("WriteOnly"))
-        }
-    }
-
-    @Test
-    fun givenOpenWrite_whenSync_thenWorks() = runTest { tmp ->
-        tmp.testOpen(excl = null, appending = false).use { s ->
-            s.sync(meta = true).sync(meta = false)
-        }
-    }
-
-    @Test
     fun givenOpenWrite_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
         tmp.mkdirs2(mode = null, mustCreate = true)
         arrayOf(
@@ -121,17 +98,16 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenAppendingFalse_thenIsTruncatedOnOpen() = runTest { tmp ->
+    fun givenOpenWrite_whenAppendingFalse_thenFileIsTruncate() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-        assertTrue(tmp.readBytes().isNotEmpty())
-
+        assertEquals("Hello World!", tmp.readUtf8())
         tmp.testOpen(excl = OpenExcl.MustExist, appending = false).use { s ->
             assertTrue(tmp.readBytes().isEmpty())
         }
     }
 
     @Test
-    fun givenOpenWrite_whenAppendingTrue_thenIsNotTruncated() = runTest { tmp ->
+    fun givenOpenWrite_whenAppendingTrue_thenFileIsNotTruncated() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
         tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s ->
             val buf = "Hello World2!".encodeToByteArray()
@@ -142,7 +118,69 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenAppendingTrue_thenPositionIsAlwaysSize() = runTest { tmp ->
+    fun givenOpenWrite_whenWindows_thenReadOnlyIsSetAsExpected() = runTest<PermissionChecker.Windows> { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.of(mode = "400"), appending = false).use { s ->
+            assertTrue(isReadOnly(tmp), "is read-only")
+            s.write("Hello World!".encodeToByteArray())
+        }
+        assertEquals("Hello World!", tmp.readUtf8())
+        assertFailsWith<AccessDeniedException> { tmp.appendUtf8(null, "Something") }
+    }
+
+    @Test
+    fun givenOpenWrite_whenWindows_thenFilePermissionsAreNotModifiedIfAlreadyExists() = runTest<PermissionChecker.Windows> { tmp ->
+        tmp.writeUtf8(excl = null, "Hello World!")
+        assertFalse(isReadOnly(tmp))
+        tmp.testOpen(excl = OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
+            assertFalse(isReadOnly(tmp), "is read-only")
+        }
+        assertFalse(isReadOnly(tmp))
+    }
+
+    @Test
+    fun givenOpenWrite_whenPosix_thenPermissionsAreAsExpected() = runTest<PermissionChecker.Posix> { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.of(mode = "400"), appending = false).use { s ->
+            assertTrue(canRead(tmp), "canRead")
+            assertFalse(canWrite(tmp), "canWrite")
+            assertFalse(canExecute(tmp), "canExecute")
+        }
+    }
+
+    @Test
+    fun givenOpenWrite_whenPosix_thenFilePermissionsAreNotModifiedIfAlreadyExists() = runTest<PermissionChecker.Posix> { tmp ->
+        tmp.writeUtf8(excl = null, "Hello World!")
+        tmp.testOpen(excl = OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
+            assertTrue(canRead(tmp), "canRead")
+            assertTrue(canWrite(tmp), "canWrite")
+            assertFalse(canExecute(tmp), "canExecute")
+        }
+    }
+
+    @Test
+    fun givenWriteStream_whenNewSizeOrPosition_thenReturnsTheWriteOnlyInstance() = runTest { tmp ->
+        tmp.testOpen(excl = null, appending = false).use { s ->
+            assertIsNot<FileStream.Read>(s)
+            val position = s.position(2L)
+            val size = s.size(2L)
+            val sync = s.sync(meta = false)
+            assertEquals(s, position)
+            assertEquals(s, size)
+            assertEquals(s, sync)
+            assertTrue(position.toString().startsWith("WriteOnly"))
+            assertTrue(size.toString().startsWith("WriteOnly"))
+            assertTrue(sync.toString().startsWith("WriteOnly"))
+        }
+    }
+
+    @Test
+    fun givenWriteStream_whenSync_thenWorks() = runTest { tmp ->
+        tmp.testOpen(excl = null, appending = false).use { s ->
+            s.sync(meta = true).sync(meta = false)
+        }
+    }
+
+    @Test
+    fun givenWriteStream_whenAppendingTrue_thenPositionIsAlwaysSize() = runTest { tmp ->
         val data = "Hello World!".encodeToByteArray()
         tmp.writeBytes(excl = null, data)
         tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s1 ->
@@ -158,9 +196,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
                 assertEquals((data.size + 3).toLong(), s2.position())
                 assertContentEquals(byteArrayOf(*data, -5, -5, 2), tmp.readBytes())
 
-                tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s3 ->
-                    s3.size(0L)
-
+                tmp.testOpen(excl = OpenExcl.MustExist, appending = false).use { s3 ->
                     val streams = arrayOf(s1, s2, s3)
                     streams.forEach { s ->
                         assertEquals(0L, s.position())
@@ -186,7 +222,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenAppendingTrue_thenChangingPositionIsIgnored() = runTest { tmp ->
+    fun givenWriteStream_whenAppendingTrue_thenChangingPositionIsIgnored() = runTest { tmp ->
         tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
             assertTrue(s.isAppending, "isAppending")
             assertEquals(0L, s.position())
@@ -199,15 +235,74 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_when0LengthWrite_thenDoesNotThrowException() = runTest { tmp ->
-        tmp.testOpen(excl = null, appending = false).use { s ->
-            s.write(ByteArray(0))
-            s.write(ByteArray(1), offset = 0, len = 0)
+    fun givenWriteStream_whenAppendingTrue_thenPWriteThrowsIllegalStateException() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
+            assertTrue(s.isAppending, "isAppending")
+            try {
+                s.write(byteArrayOf(0), 2L)
+                fail("pwrite should have failed >> appending[${s.isAppending}]")
+            } catch (e: IllegalStateException) {
+                assertEquals("O_APPEND", e.message)
+            }
         }
     }
 
     @Test
-    fun givenOpenWrite_whenOffset_thenWritesAsExpected() = runTest { tmp ->
+    fun givenWriteStream_whenAppendingTrue_thenSizeNewThrowsIllegalStateException() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
+            assertTrue(s.isAppending, "isAppending")
+            try {
+                s.size(new = 2L)
+                fail("size(new) should have failed >> appending[${s.isAppending}]")
+            } catch (e: IllegalStateException) {
+                assertEquals("O_APPEND", e.message)
+            }
+        }
+    }
+
+    @Test
+    fun givenWriteStream_whenPWriteNegativeArgument_thenThrowsIllegalArgumentException() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = false).use { s ->
+            assertFailsWith<IllegalArgumentException> { s.write(byteArrayOf(0), -1L) }
+        }
+    }
+
+    @Test
+    fun givenWriteStream_whenPWrite_thenFilePositionIsUnaffected() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = false).use { s ->
+            val data = ByteArray(50) { 1.toByte() }
+            s.write(data)
+            s.write(byteArrayOf(5, 5), 20L)
+            s.write(data)
+            assertEquals((data.size * 2).toLong(), s.size())
+            tmp.openRead().use { s ->
+                val expected = ByteArray(data.size * 2) { data[0] }
+                expected[20] = 5
+                expected[21] = 5
+                val actual = ByteArray(expected.size)
+                actual.fill(0)
+                assertEquals(actual.size, s.read(actual))
+                for (i in actual.indices) {
+                    val e = expected[i]
+                    val a = actual[i]
+                    assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
+                }
+            }
+        }
+    }
+
+    @Test
+    fun givenWriteStream_when0LengthWrite_thenDoesNothing() = runTest { tmp ->
+        tmp.testOpen(excl = null, appending = false).use { s ->
+            s.write(ByteArray(0))
+            assertEquals(0L, s.size())
+            s.write(ByteArray(1), offset = 0, len = 0)
+            assertEquals(0L, s.size())
+        }
+    }
+
+    @Test
+    fun givenWriteStream_whenOffset_thenWritesAsExpected() = runTest { tmp ->
         tmp.testOpen(excl = null, appending = false).use { s ->
             val b = ByteArray(10) { 1.toByte() }
             b[0] = 0
@@ -220,45 +315,6 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
                 val a = read[i]
                 assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
             }
-        }
-    }
-
-    @Test
-    fun givenFile_whenOpenWindows_thenReadOnlyIsSetAsExpected() = runTest<PermissionChecker.Windows> { tmp ->
-        tmp.testOpen(excl = OpenExcl.MustCreate.of(mode = "400"), appending = false).use { s ->
-            assertTrue(isReadOnly(tmp), "is read-only")
-            s.write("Hello World!".encodeToByteArray())
-        }
-        assertEquals("Hello World!", tmp.readUtf8())
-        assertFailsWith<AccessDeniedException> { tmp.appendUtf8(null, "Something") }
-    }
-
-    @Test
-    fun givenFile_whenOpenWindows_thenFilePermissionsAreNotModifiedIfAlreadyExists() = runTest<PermissionChecker.Windows> { tmp ->
-        tmp.writeUtf8(excl = null, "Hello World!")
-        assertFalse(isReadOnly(tmp))
-        tmp.testOpen(excl = OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
-            assertFalse(isReadOnly(tmp), "is read-only")
-        }
-        assertFalse(isReadOnly(tmp))
-    }
-
-    @Test
-    fun givenFile_whenOpenPosix_thenPermissionsAreAsExpected() = runTest<PermissionChecker.Posix> { tmp ->
-        tmp.testOpen(excl = OpenExcl.MustCreate.of(mode = "400"), appending = false).use { s ->
-            assertTrue(canRead(tmp), "canRead")
-            assertFalse(canWrite(tmp), "canWrite")
-            assertFalse(canExecute(tmp), "canExecute")
-        }
-    }
-
-    @Test
-    fun givenFile_whenOpenPosix_thenFilePermissionsAreNotModifiedIfAlreadyExists() = runTest<PermissionChecker.Posix> { tmp ->
-        tmp.writeUtf8(excl = null, "Hello World!")
-        tmp.testOpen(excl = OpenExcl.MaybeCreate.of(mode = "400"), appending = true).use { s ->
-            assertTrue(canRead(tmp), "canRead")
-            assertTrue(canWrite(tmp), "canWrite")
-            assertFalse(canExecute(tmp), "canExecute")
         }
     }
 }

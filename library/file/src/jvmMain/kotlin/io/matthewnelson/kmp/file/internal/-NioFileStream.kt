@@ -24,6 +24,8 @@ import io.matthewnelson.kmp.file.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousCloseException
 import java.nio.channels.FileChannel
+import java.nio.channels.NonReadableChannelException
+import java.nio.channels.NonWritableChannelException
 
 internal class NioFileStream private constructor(
     ch: FileChannel,
@@ -42,7 +44,7 @@ internal class NioFileStream private constructor(
     @Volatile
     private var _parent: Closeable? = parent
     private val closeLock = Any()
-    private val channelLock = Any()
+    private val positionLock = Any()
 
     override fun isOpen(): Boolean = _ch?.isOpen ?: false
 
@@ -55,7 +57,7 @@ internal class NioFileStream private constructor(
             if (ANDROID.SDK_INT < 24) return size()
         }
         checkIsOpen()
-        synchronized(channelLock) {
+        synchronized(positionLock) {
             val ch = _ch ?: throw ClosedException()
             return ch.position()
         }
@@ -65,7 +67,7 @@ internal class NioFileStream private constructor(
         checkIsOpen()
         new.checkIsNotNegative()
         if (isAppending) return this
-        synchronized(channelLock) {
+        synchronized(positionLock) {
             val ch = _ch ?: throw ClosedException()
             ch.position(new)
             return this
@@ -75,14 +77,26 @@ internal class NioFileStream private constructor(
     override fun read(buf: ByteArray, offset: Int, len: Int): Int {
         checkIsOpen()
         checkCanRead()
+        return realRead(buf, offset, len, -1L)
+    }
+
+    override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+        checkIsOpen()
+        checkCanRead()
+        position.checkIsNotNegative()
+        return realRead(buf, offset, len, position)
+    }
+
+    private fun realRead(buf: ByteArray, offset: Int, len: Int, p: Long): Int {
         val bb = ByteBuffer.wrap(buf, offset, len)
         if (len == 0) return 0
-        synchronized(channelLock) {
+        // Let FileChannelImpl decide if acquiring a lock is necessary for pread (Windows)
+        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
             var total = 0
             while (total < len) {
                 val ch = delegateOrClosed(isWrite = false, total) { _ch }
                 val read = try {
-                    ch.read(bb)
+                    if (p == -1L) ch.read(bb) else ch.read(bb, p + total)
                 } catch (e: IOException) {
                     throw e.toMaybeInterruptedIOException(isWrite = false, total)
                 }
@@ -98,15 +112,28 @@ internal class NioFileStream private constructor(
 
     override fun read(dst: ByteBuffer?): Int {
         checkIsOpen()
-        synchronized(channelLock) {
+        if (!canRead) throw NonReadableChannelException()
+        return realRead(dst, -1L)
+    }
+
+    override fun read(dst: ByteBuffer?, position: Long): Int {
+        checkIsOpen()
+        if (!canRead) throw NonReadableChannelException()
+        position.checkIsNotNegative()
+        return realRead(dst, position)
+    }
+
+    private fun realRead(dst: ByteBuffer?, p: Long): Int {
+        // Let FileChannelImpl decide if acquiring a lock is necessary for pread (Windows)
+        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
             val ch = _ch ?: throw AsynchronousCloseException()
-            return ch.read(dst)
+            return if (p == -1L) ch.read(dst) else ch.read(dst, p)
         }
     }
 
     override fun size(): Long {
         checkIsOpen()
-        synchronized(channelLock) {
+        synchronized(positionLock) {
             val ch = _ch ?: throw ClosedException()
             return ch.size()
         }
@@ -116,7 +143,7 @@ internal class NioFileStream private constructor(
         checkIsOpen()
         checkCanSizeNew()
         new.checkIsNotNegative()
-        synchronized(channelLock) {
+        synchronized(positionLock) {
             val ch = _ch ?: throw ClosedException()
             if (new > ch.size()) {
                 val bb = ByteBuffer.wrap(ByteArray(1))
@@ -145,19 +172,45 @@ internal class NioFileStream private constructor(
     override fun write(buf: ByteArray, offset: Int, len: Int) {
         checkIsOpen()
         checkCanWrite()
+        realWrite(buf, offset, len, -1L)
+    }
+
+    override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
+        checkIsOpen()
+        checkCanWriteP()
+        position.checkIsNotNegative()
+        realWrite(buf, offset, len, position)
+    }
+
+    private fun realWrite(buf: ByteArray, offset: Int, len: Int, p: Long) {
         val bb = ByteBuffer.wrap(buf, offset, len)
         if (len == 0) return
-        synchronized(channelLock) {
+        // Let FileChannelImpl decide if acquiring a lock is necessary for pwrite (Windows)
+        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
             val ch = _ch ?: throw ClosedException()
-            ch.write(bb)
+            if (p == -1L) ch.write(bb) else ch.write(bb, p)
         }
     }
 
     override fun write(src: ByteBuffer?): Int {
         checkIsOpen()
-        synchronized(channelLock) {
+        if (!canWrite) throw NonWritableChannelException()
+        return realWrite(src, -1L)
+    }
+
+    override fun write(src: ByteBuffer?, position: Long): Int {
+        checkIsOpen()
+        if (isAppending) throw IllegalStateException("O_APPEND")
+        if (!canWrite) throw NonWritableChannelException()
+        position.checkIsNotNegative()
+        return realWrite(src, position)
+    }
+
+    private fun realWrite(src: ByteBuffer?, p: Long): Int {
+        // Let FileChannelImpl decide if acquiring a lock is necessary for pwrite (Windows)
+        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
             val ch = _ch ?: throw AsynchronousCloseException()
-            return ch.write(src)
+            return if (p == -1L) ch.write(src) else ch.write(src, p)
         }
     }
 

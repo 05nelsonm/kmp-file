@@ -20,6 +20,9 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.toFile
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.io.resolve
 import kotlin.io.resolve as kResolve
 
@@ -73,3 +76,11 @@ internal actual val IsWindows: Boolean = System.getProperty("os.name")
     ?: (File.separatorChar == '\\')
 
 internal actual inline fun File.platformResolve(relative: File): File = kResolve(relative)
+
+@OptIn(ExperimentalContracts::class)
+internal inline fun synchronizedIfNotNull(lock: Any?, block: () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    if (lock == null) block() else synchronized(lock, block)
+}

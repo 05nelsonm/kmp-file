@@ -267,54 +267,27 @@ internal class FsJsNode private constructor(
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream = try {
-        val mode = if (isWindows) {
-            if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-        } else {
-            excl.mode
-        }
-
-        var truncate = false
-        val fd = if (isWindows && excl is OpenExcl.MustExist) {
-            // Need to manually truncate if not appending.
-            if (!appending) truncate = true
-            // For some reason on Windows, or'ing flags will fail with illegal
-            // arguments. Specifying flags via String to force MustExist works though.
-            jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
+        val fd = if (isWindows) {
+            var flags = if (appending) "a" else "w"
+            when (excl) {
+                is OpenExcl.MaybeCreate -> {}
+                is OpenExcl.MustCreate -> flags += "x"
+                is OpenExcl.MustExist -> if (!exists(file)) throw fileNotFoundException(file, null, null)
+            }
+            val mode = if (excl._mode.containsOwnerWriteAccess) "666" else "444"
+            jsExternTryCatch { fs.openSync(file.path, flags, mode) }.checkIsNotADir(file)
         } else {
             var flags = fs.constants.O_WRONLY
-            flags = if (appending) {
-                // Do not want to use O_APPEND flag for Windows b/c it will strip
-                // out FILE_WRITE_DATA from GENERIC_READ for dwDesiredAccess. That
-                // causes ftruncate to fail with EPERM.
-                //
-                // Instead, writes will all use size() for their position argument.
-                if (isWindows) flags else flags or fs.constants.O_APPEND
-            } else {
-                flags or fs.constants.O_TRUNC
+            flags = flags or if (appending) fs.constants.O_APPEND else fs.constants.O_TRUNC
+            flags = flags or when (excl) {
+                is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
+                is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
+                is OpenExcl.MustExist -> 0
             }
-            flags = when (excl) {
-                is OpenExcl.MaybeCreate -> flags or fs.constants.O_CREAT
-                is OpenExcl.MustCreate -> flags or fs.constants.O_CREAT or fs.constants.O_EXCL
-                is OpenExcl.MustExist -> flags
-            }
-            jsExternTryCatch { fs.openSync(file.path, flags, mode) }
+            jsExternTryCatch { fs.openSync(file.path, flags, excl.mode) }
         }
-        if (isWindows) fd.checkIsNotADir(file)
 
-        val s = JsNodeFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
-        if (truncate) {
-            try {
-                s.size(0L)
-            } catch (e: IOException) {
-                try {
-                    s.close()
-                } catch (ee: IOException) {
-                    e.addSuppressed(ee)
-                }
-                throw e
-            }
-        }
-        s
+        JsNodeFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
     } catch (t: Throwable) {
         throw t.toIOException(file)
     }
@@ -391,12 +364,24 @@ internal class FsJsNode private constructor(
         override fun read(buf: ByteArray, offset: Int, len: Int): Int {
             checkIsOpen()
             checkCanRead()
+            return realRead(buf, offset, len, -1L)
+        }
+
+        override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+            checkIsOpen()
+            checkCanRead()
+            position.checkIsNotNegative()
+            return realRead(buf, offset, len, position)
+        }
+
+        private fun realRead(buf: ByteArray, offset: Int, len: Int, p: Long): Int {
             buf.checkBounds(offset, len)
 
             var pos = offset
             var total = 0
             while (total < len) {
                 val length = minOf(BUF.length.toInt(), len - total)
+                val position = if (p == -1L) _position else (p + total.toLong())
                 val fd = delegateOrClosed(isWrite = false, total) { _fd }
                 val read = try {
                     jsExternTryCatch {
@@ -405,7 +390,7 @@ internal class FsJsNode private constructor(
                             buffer = BUF,
                             offset = 0.toDouble(),
                             length = length.toDouble(),
-                            position = _position.toDouble(),
+                            position = position.toDouble(),
                         )
                     }
                 } catch (t: Throwable) {
@@ -422,7 +407,7 @@ internal class FsJsNode private constructor(
                 }
 
                 total += read
-                _position += read
+                if (p == -1L) _position += read
             }
 
             return total
@@ -433,6 +418,19 @@ internal class FsJsNode private constructor(
         override fun read(buf: Buffer, offset: Long, len: Long): Long {
             checkIsOpen()
             checkCanRead()
+            return realRead(buf, offset, len, -1L)
+        }
+
+        override fun read(buf: Buffer, position: Long): Long = read(buf, 0L, buf.length.toLong(), position)
+
+        override fun read(buf: Buffer, offset: Long, len: Long, position: Long): Long {
+            checkIsOpen()
+            checkCanRead()
+            position.checkIsNotNegative()
+            return realRead(buf, offset, len, position)
+        }
+
+        private fun realRead(buf: Buffer, offset: Long, len: Long, p: Long): Long {
             buf.length.toLong().checkBounds(offset, len)
             if (len == 0L) return 0L
 
@@ -444,7 +442,7 @@ internal class FsJsNode private constructor(
                         buffer = buf.value,
                         offset = offset.toDouble(),
                         length = len.toDouble(),
-                        position = _position.toDouble(),
+                        position = (if (p == -1L) _position else p).toDouble(),
                     )
                 }
             } catch (t: Throwable) {
@@ -452,7 +450,7 @@ internal class FsJsNode private constructor(
             }.toLong()
 
             if (read <= 0L) return -1L
-            _position += read
+            if (p == -1L) _position += read
             return read
         }
 
@@ -495,6 +493,17 @@ internal class FsJsNode private constructor(
         override fun write(buf: ByteArray, offset: Int, len: Int) {
             checkIsOpen()
             checkCanWrite()
+            realWrite(buf, offset, len, -1L)
+        }
+
+        override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
+            checkIsOpen()
+            checkCanWriteP()
+            position.checkIsNotNegative()
+            realWrite(buf, offset, len, position)
+        }
+
+        private fun realWrite(buf: ByteArray, offset: Int, len: Int, p: Long) {
             buf.checkBounds(offset, len)
 
             var pos = offset
@@ -506,7 +515,7 @@ internal class FsJsNode private constructor(
                     BUF.writeInt8(buf[pos++], i.toDouble())
                 }
 
-                val position = currentWritePosition(total)
+                val position = if (isAppending) null else (if (p == -1L) _position else p + total)
                 val fd = delegateOrClosed(isWrite = true, total) { _fd }
                 val write = try {
                     jsExternTryCatch {
@@ -515,7 +524,7 @@ internal class FsJsNode private constructor(
                             buffer = BUF,
                             offset = 0.toDouble(),
                             length = length.toDouble(),
-                            position = position,
+                            position = position?.toDouble(),
                         )
                     }
                 } catch (t: Throwable) {
@@ -523,7 +532,7 @@ internal class FsJsNode private constructor(
                 }.toInt()
 
                 total += write
-                if (!isAppending) _position += write
+                if (!isAppending && p == -1L) _position += write
             }
         }
 
@@ -532,11 +541,24 @@ internal class FsJsNode private constructor(
         override fun write(buf: Buffer, offset: Long, len: Long) {
             checkIsOpen()
             checkCanWrite()
+            realWrite(buf, offset, len, -1L)
+        }
+
+        override fun write(buf: Buffer, position: Long) { write(buf, 0L, buf.length.toLong(), position) }
+
+        override fun write(buf: Buffer, offset: Long, len: Long, position: Long) {
+            checkIsOpen()
+            checkCanWriteP()
+            position.checkIsNotNegative()
+            realWrite(buf, offset, len, position)
+        }
+
+        private fun realWrite(buf: Buffer, offset: Long, len: Long, p: Long) {
             buf.length.toLong().checkBounds(offset, len)
 
             var total = 0L
             while (total < len) {
-                val position = currentWritePosition(total)
+                val position = if (isAppending) null else (if (p == -1L) _position else p + total)
                 val fd = delegateOrClosed(isWrite = true, total) { _fd }
                 val write = try {
                     jsExternTryCatch {
@@ -545,7 +567,7 @@ internal class FsJsNode private constructor(
                             buffer = buf.value,
                             offset = (offset + total).toDouble(),
                             length = (len - total).toDouble(),
-                            position = position,
+                            position = position?.toDouble(),
                         )
                     }
                 } catch (t: Throwable) {
@@ -553,7 +575,7 @@ internal class FsJsNode private constructor(
                 }.toLong()
 
                 total += write
-                if (!isAppending) _position += write
+                if (!isAppending && p == -1L) _position += write
             }
         }
 
@@ -565,23 +587,6 @@ internal class FsJsNode private constructor(
             } catch (t: Throwable) {
                 throw t.toIOException()
             }
-        }
-
-        @Throws(IOException::class)
-        private fun currentWritePosition(bytesTransferred: Number): Double? {
-            if (!isAppending) return _position.toDouble()
-
-            // If it's appending, modification of position is ignored
-            // from the interface (size is always returned) so use
-            // whatever the current position is for the descriptor by
-            // passing null.
-            if (!isWindows) return null
-
-            // The only caveat is Windows, which will never specify
-            // the O_APPEND flag and always requires the end position
-            // because of how libuv opens the handle when O_APPEND is
-            // expressed.
-            return delegateOrClosed(isWrite = true, bytesTransferred) { size().toDouble() }
         }
     }
 }

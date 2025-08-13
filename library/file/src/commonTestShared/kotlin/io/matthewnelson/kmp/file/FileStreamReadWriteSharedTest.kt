@@ -53,7 +53,6 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
     @Test
     fun givenOpenReadWrite_whenOpened_thenInitialPositionIs0() = runTest { tmp ->
         tmp.writeUtf8(excl = null, "Hello World!")
-
         tmp.testOpen(excl = OpenExcl.MustExist).use { s ->
             assertEquals(0L, s.position())
             assertTrue(s.size() > 0L)
@@ -64,7 +63,6 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
     fun givenOpenReadWrite_whenOpened_thenIsNotTruncated() = runTest { tmp ->
         val data = "Hello World!".encodeToByteArray()
         tmp.writeBytes(excl = null, data)
-
         tmp.testOpen(excl = OpenExcl.MustExist).use { s ->
             assertEquals(data.size.toLong(), s.size())
         }
@@ -96,7 +94,6 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
     fun givenReadWriteStream_whenFileIsResized_thenPositionIsAdjustedAsExpected() = runTest { tmp ->
         val data = "Hello World!".encodeToByteArray()
         tmp.writeBytes(excl = null, data)
-
         tmp.testOpen(excl = null).use { s ->
             s.position(data.size + 2L)
             assertEquals(data.size + 2L, s.position())

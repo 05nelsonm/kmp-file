@@ -69,18 +69,23 @@ internal abstract class AbstractFileStream protected constructor(
     protected inline fun checkIsOpen() { if (!isOpen()) throw ClosedException() }
 
     @Throws(IllegalStateException::class)
-    protected inline fun checkCanRead() { check(canRead) { "FileStream is O_WRONLY" } }
+    protected inline fun checkCanRead() { check(canRead) { "O_WRONLY" } }
     @Throws(IllegalStateException::class)
-    protected inline fun checkCanSizeNew() { checkCanWrite() }
+    protected inline fun checkCanSizeNew() { checkIsNotAppending(); checkCanWrite() }
     @Throws(IllegalStateException::class)
-    protected inline fun checkCanWrite() { check(canWrite) { "FileStream is O_RDONLY" } }
+    protected inline fun checkCanWrite() { check(canWrite) { "O_RDONLY" } }
+    @Throws(IllegalStateException::class)
+    protected inline fun checkCanWriteP() { checkIsNotAppending(); checkCanWrite() }
+    @Throws(IllegalStateException::class)
+    protected inline fun checkIsNotAppending() { check(!isAppending) { "O_APPEND" } }
 
-    // For `position(new)` and `size(new)`
     @Throws(IllegalArgumentException::class)
     protected inline fun Long.checkIsNotNegative() { require(this >= 0L) { "$this < 0" } }
 
     public final override fun read(buf: ByteArray): Int = read(buf, 0, buf.size)
+    public final override fun read(buf: ByteArray, position: Long): Int = read(buf, 0, buf.size, position)
     public final override fun write(buf: ByteArray) { write(buf, 0, buf.size) }
+    public final override fun write(buf: ByteArray, position: Long) { write(buf, 0, buf.size, position) }
 
     @Throws(IOException::class)
     @OptIn(ExperimentalContracts::class)
