@@ -84,23 +84,19 @@ abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
     @Test
     fun givenReadOnlyFilePermissions_whenOpenAppending_thenThrowsAccessDeniedException() = skipTestIf(!isUsingFsJvmDefault) {
         runTest { tmp ->
+            // Regardless, we want Android and non-Android tests to perform the same way
+            // for this test (i.e. they both throw AccessDeniedException for consistency).
+            val data = "Hello World!".encodeToByteArray()
+            tmp.writeBytes(excl = OpenExcl.MustCreate.of("444"), data)
+            var s: FileStream.Write? = null
             try {
-                // Regardless, we want Android and non-Android tests to perform the same way
-                // for this test (i.e. they both throw AccessDeniedException for consistency).
-                val data = "Hello World!".encodeToByteArray()
-                tmp.writeBytes(excl = OpenExcl.MustCreate.of("444"), data)
-                var s: FileStream.Write? = null
-                try {
-                    s = tmp.testOpen(excl = OpenExcl.MustExist, appending = true)
-                    fail("open should have failed due to missing write permissions...")
-                } catch (e: AccessDeniedException) {
-                    assertEquals(true, e.message?.contains("permission denied", ignoreCase = true))
-                    // pass
-                } finally {
-                    s?.close()
-                }
+                s = tmp.testOpen(excl = OpenExcl.MustExist, appending = true)
+                fail("open should have failed due to missing write permissions...")
+            } catch (e: AccessDeniedException) {
+                assertEquals(true, e.message?.contains("permission denied", ignoreCase = true))
+                // pass
             } finally {
-                System.clearProperty(KEY_PROP)
+                s?.close()
             }
         }
     }
