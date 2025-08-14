@@ -76,6 +76,20 @@ abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
 
             bb.clear()
             assertFailsWith<IllegalArgumentException> { s.write(bb, -1L) }
+
+            if (!isAppendingPWriteAvailable) return@use
+            val before = s.size()
+
+            tmp.testOpen(excl = null, appending = true).use { s2 ->
+                assertTrue(s2.isAppending, "s2.isAppending")
+                assertEquals(before, s2.size(), "s2.size()")
+                bb.position(bb.limit() - 1)
+                s2.write(bb, position = before + 19)
+                val expected = pData + data + data + ByteArray(19) + byteArrayOf(data.last())
+                assertContentEquals(expected, tmp.readBytes())
+                assertEquals(before, s.position(), "before == s.position()")
+                assertEquals(before + 20, s2.position(), "before + 20 == s2.position()")
+            }
         }
     }
 

@@ -241,31 +241,31 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
         }
     }
 
-//    @Test
-//    fun givenWriteStream_whenAppendingTrue_thenPWriteThrowsIllegalStateException() = runTest { tmp ->
-//        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
-//            assertTrue(s.isAppending, "isAppending")
-//            try {
-//                s.write(byteArrayOf(0), 2L)
-//                fail("pwrite should have failed >> appending[${s.isAppending}]")
-//            } catch (e: IllegalStateException) {
-//                assertEquals("O_APPEND", e.message)
-//            }
-//        }
-//    }
+    @Test
+    fun givenWriteStream_whenAppendingTrue_thenPWriteAndSizeWorksAsExpected() = skipTestIf(!isAppendingPWriteAvailable) {
+        runTest { tmp ->
+            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
+                assertTrue(s.isAppending, "isAppending")
 
-//    @Test
-//    fun givenWriteStream_whenAppendingTrue_thenSizeNewThrowsIllegalStateException() = runTest { tmp ->
-//        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
-//            assertTrue(s.isAppending, "isAppending")
-//            try {
-//                s.size(new = 2L)
-//                fail("size(new) should have failed >> appending[${s.isAppending}]")
-//            } catch (e: IllegalStateException) {
-//                assertEquals("O_APPEND", e.message)
-//            }
-//        }
-//    }
+                val data = byteArrayOf(1, 1)
+                s.write(data)
+                assertContentEquals(data, tmp.readBytes())
+
+                data[0] = 2
+                data[1] = 2
+                s.write(data, position = 0L)
+                assertContentEquals(data, tmp.readBytes())
+                assertEquals(2L, s.size())
+
+                // We can grow the file (Jvm FileChannel will use pwrite under the hood)
+                s.size(new = 20L)
+                assertEquals(20L, s.size())
+
+                s.write(data)
+                assertContentEquals(data + ByteArray(18) + data, tmp.readBytes())
+            }
+        }
+    }
 
     @Test
     fun givenWriteStream_whenPWriteNegativeArgument_thenThrowsIllegalArgumentException() = runTest { tmp ->
