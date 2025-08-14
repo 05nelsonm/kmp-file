@@ -80,7 +80,7 @@ internal class NioFileStream private constructor(
     private fun realRead(buf: ByteArray, offset: Int, len: Int, p: Long): Int {
         val bb = ByteBuffer.wrap(buf, offset, len)
         if (len == 0) return 0
-        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
+        synchronizedIfNotNull(lock = positionLockOrNull(p)) {
             var total = 0
             while (total < len) {
                 val ch = delegateOrClosed(isWrite = false, total) { _ch }
@@ -113,7 +113,7 @@ internal class NioFileStream private constructor(
     }
 
     private fun realRead(dst: ByteBuffer?, p: Long): Int {
-        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
+        synchronizedIfNotNull(lock = positionLockOrNull(p)) {
             val ch = _ch ?: throw AsynchronousCloseException()
             return if (p == -1L) ch.read(dst) else ch.read(dst, p)
         }
@@ -136,7 +136,6 @@ internal class NioFileStream private constructor(
             if (new > ch.size()) {
                 val bb = ByteBuffer.wrap(ByteArray(1))
                 ch.write(bb, new - 1L)
-                // TODO: ch.force(true)?
             } else {
                 ch.truncate(new)
                 // Android API 20 and below does not set channel position
@@ -192,14 +191,7 @@ internal class NioFileStream private constructor(
 
     private fun realWrite(src: ByteBuffer?, p: Long): Int {
         if (src == null) throw NullPointerException("src == null")
-        val needsLock = run {
-            if (p == -1L) return@run true
-            if (!isAppending) return@run false
-            // TODO
-            true
-        }
-
-        synchronizedIfNotNull(lock = if (needsLock) positionLock else null) {
+        synchronizedIfNotNull(lock = positionLockOrNull(p)) {
             val ch = _ch ?: throw AsynchronousCloseException()
             if (p == -1L) {
                 if (isAppending) {
@@ -212,6 +204,14 @@ internal class NioFileStream private constructor(
                 return ch.write(src, p)
             }
         }
+    }
+
+    private fun positionLockOrNull(p: Long): Any? {
+        if (p == -1L) return positionLock
+        // Windows always needs a lock
+        if (IsWindows) return positionLock
+        // Unix pread/pwrite (no lock needed)
+        return null
     }
 
     override fun close() {

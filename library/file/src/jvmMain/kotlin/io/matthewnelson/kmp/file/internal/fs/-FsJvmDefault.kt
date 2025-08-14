@@ -225,6 +225,8 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 // broken). android.os.ParcelFileDescriptor allows for just that by opening
 // one with only O_WRONLY expressed, passing its FileDescriptor to a
 // FileOutputStream, then creating the FileChannel from the FileOutputStream.
+//
+// See: https://developer.android.com/reference/android/os/ParcelFileDescriptor#open(java.io.File,%20int)
 @Suppress("PrivatePropertyName")
 private class ParcelFileDescriptor private constructor() {
 
