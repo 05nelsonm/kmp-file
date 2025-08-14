@@ -27,9 +27,9 @@ abstract class SysFsInfoSharedTest {
     fun givenFileSystem_whenSysFsName_thenReturnsExpected() {
         val names = mapOf(
             "FsJvmAndroid" to true,
+            "FsJvmAndroidLegacy" to !isWindows,
             "FsJvmNioNonPosix" to false,
             "FsJvmNioPosix" to true,
-            "FsJvmDefault" to !isWindows,
             "FsJsBrowser" to !isWindows,
             "FsJsNode" to !isWindows,
             "FsMinGW" to false,

@@ -15,20 +15,20 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.fs.commonChmod
-import io.matthewnelson.kmp.file.internal.fs.FsJvmDefault
+import io.matthewnelson.kmp.file.internal.fs.commonMkdir
+import io.matthewnelson.kmp.file.internal.fs.FsJvmAndroidLegacy
 import kotlin.test.Ignore
 import kotlin.test.Test
 
-class ChmodFsJvmDefaultUnitTest: ChmodSharedTest() {
+class MkdirFsJvmAndroidLegacyUnitTest: MkdirSharedTest() {
 
     private companion object {
-        val DEFAULT by lazy { FsJvmDefault.get() }
+        val FS by lazy { FsJvmAndroidLegacy.get() }
     }
 
     override val checker: PermissionChecker? = permissionChecker()
-    override fun File.testChmod(mode: String, mustExist: Boolean): File {
-        return DEFAULT.commonChmod(this, mode, mustExist)
+    override fun File.testMkdir(mode: String?, mustCreate: Boolean): File {
+        return FS.commonMkdir(this, mode, mustCreate)
     }
 
     @Test

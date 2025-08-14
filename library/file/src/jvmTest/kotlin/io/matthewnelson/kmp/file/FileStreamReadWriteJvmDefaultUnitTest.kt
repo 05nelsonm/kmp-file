@@ -15,21 +15,21 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.fs.FsJvmDefault
+import io.matthewnelson.kmp.file.internal.fs.FsJvmAndroidLegacy
 import kotlin.test.Ignore
 import kotlin.test.Test
 
 class FileStreamReadWriteJvmDefaultUnitTest: FileStreamReadWriteSharedTest() {
 
     private companion object {
-        val DEFAULT by lazy { FsJvmDefault.get() }
+        val FS by lazy { FsJvmAndroidLegacy.get() }
     }
 
     override val checker: PermissionChecker? = permissionChecker()
 
     override fun File.testOpen(
         excl: OpenExcl?,
-    ): FileStream.ReadWrite = DEFAULT.openReadWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT)
+    ): FileStream.ReadWrite = FS.openReadWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT)
 
     @Test
     @Ignore

@@ -29,15 +29,14 @@ import kotlin.test.fail
 abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
 
     private companion object {
-        const val KEY_PROP = "io.matthewnelson.kmp.file.FsJvmDefaultTest"
+        const val KEY_PROP = "io.matthewnelson.kmp.file.FsJvmAndroidLegacyTest"
         val IS_SNAPSHOT = FsInfo.VERSION.endsWith("-SNAPSHOT")
     }
 
-    @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
-    protected open val isUsingFsJvmDefault: Boolean = ANDROID.SDK_INT != null && ANDROID.SDK_INT!! < 21
+    protected open val isUsingFsJvmAndroidLegacy: Boolean = SysFsInfo.name == "FsJvmAndroidLegacy"
 
     @Test
-    fun givenWriteOnlyFilePermissions_whenOpenAppending_thenSuccessfullyRecovers() = skipTestIf(!isUsingFsJvmDefault) {
+    fun givenWriteOnlyFilePermissions_whenOpenAppending_thenSuccessfullyRecovers() = skipTestIf(!isUsingFsJvmAndroidLegacy) {
         // Will only be relevant on Posix system because Windows is either read-only, or read/write.
         runTest<PermissionChecker.Posix> { tmp ->
             try {
@@ -82,7 +81,7 @@ abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
     }
 
     @Test
-    fun givenReadOnlyFilePermissions_whenOpenAppending_thenThrowsAccessDeniedException() = skipTestIf(!isUsingFsJvmDefault) {
+    fun givenReadOnlyFilePermissions_whenOpenAppending_thenThrowsAccessDeniedException() = skipTestIf(!isUsingFsJvmAndroidLegacy) {
         runTest { tmp ->
             // Regardless, we want Android and non-Android tests to perform the same way
             // for this test (i.e. they both throw AccessDeniedException for consistency).

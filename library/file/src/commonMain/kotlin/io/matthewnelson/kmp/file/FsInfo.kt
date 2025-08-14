@@ -32,7 +32,7 @@ public class FsInfo private constructor(
      *
      * - Android:
      *     - API 21+: `FsJvmAndroid`
-     *     - API 20-: `FsJvmDefault`
+     *     - API 20-: `FsJvmAndroidLegacy`
      * - Jvm:
      *     - Windows: `FsJvmNioNonPosix`
      *     - Else: `FsJvmNioPosix`

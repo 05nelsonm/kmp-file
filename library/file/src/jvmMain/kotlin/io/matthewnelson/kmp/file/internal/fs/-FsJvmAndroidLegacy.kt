@@ -50,10 +50,8 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-// The "Default" filesystem implementation, when all else fails. In
-// production, should only ever be used when Android API is 20 or below.
-internal class FsJvmDefault private constructor(): Fs.Jvm(
-    info = FsInfo.of(name = "FsJvmDefault", isPosix = !IsWindows)
+internal class FsJvmAndroidLegacy private constructor(): Fs.Jvm(
+    info = FsInfo.of(name = "FsJvmAndroidLegacy", isPosix = !IsWindows)
 ) {
 
     @Throws(IOException::class)
@@ -146,9 +144,9 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
                     // to fall through to the RandomAccessFile logical branch,
                     // simulating total failure of reflective access on Android.
                     try {
-                        if (System.getProperty("io.matthewnelson.kmp.file.FsJvmDefaultTest") != null) {
+                        if (System.getProperty("io.matthewnelson.kmp.file.FsJvmAndroidLegacyTest") != null) {
                             // Clear it so test knows this ran.
-                            System.clearProperty("io.matthewnelson.kmp.file.FsJvmDefaultTest")
+                            System.clearProperty("io.matthewnelson.kmp.file.FsJvmAndroidLegacyTest")
                             return@run
                         }
                     } catch (_: Throwable) {}
@@ -340,10 +338,10 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
     internal companion object {
 
         @JvmSynthetic
-        internal fun get(): FsJvmDefault {
+        internal fun get(): FsJvmAndroidLegacy {
             // load it if not already loaded.
             ParcelFileDescriptor.INSTANCE
-            return FsJvmDefault()
+            return FsJvmAndroidLegacy()
         }
     }
 }
