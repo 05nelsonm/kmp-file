@@ -152,15 +152,13 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
          * the new data. The values of any bytes between the previous end-of-file and
          * the newly written data are unspecified.
          *
-         * Aside from requiring [isAppending] to be `false`, this function behaves
-         * exactly like the positional [java.nio.channels.FileChannel.write] function.
+         * Otherwise, this function behaves as specified in [java.nio.channels.FileChannel.write].
          *
          * @param [src] The buffer of data to write.
          * @param [position] The file offset (from the start of the [File]) to
          *   begin writing at.
          *
          * @throws [IllegalArgumentException] If [position] is less than 0.
-         * @throws [IllegalStateException] If [isAppending] is `true`.
          * @throws [IOException] If an I/O error occurs.
          * */
         @Throws(IOException::class)

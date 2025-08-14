@@ -276,20 +276,6 @@ public expect sealed interface FileStream: Closeable {
         @Throws(IOException::class)
         public override fun position(new: Long): Write
 
-        // NOTE: Resizing the file while isAppending == true is not supported for a
-        // few unfortunate reasons.
-        //
-        // On Jvm, growing the file beyond its current size requires a pwrite of 1
-        // byte at position (new - 1). This is because FileChannel.truncate will only
-        // shrink the file, never grow it. On Linux and FreeBSD, pwrite is broken when
-        // flag O_APPEND is present (See: https://bugzilla.kernel.org/show_bug.cgi?id=43178).
-        //
-        // On Node.js, fs.ftruncateSync while flag O_APPEND is present returns error
-        // EPERM on Windows. This is because the file attributes libuv opens the file
-        // with have the FILE_WRITE_DATA flag removed from GENERIC_WRITE. This is
-        // avoidable on Windows by never removing that attribute and instead expressing
-        // an overlap of 0xFFFFFFFF/0xFFFFFFFF for each write (if in appending mode), but
-        // such a change to libuv would still leave past versions still affected.
         /**
          * Modifies the size of the [File] for which this [Write] stream belongs.
          *
@@ -307,7 +293,6 @@ public expect sealed interface FileStream: Closeable {
          * @return The [Write] stream for chaining operations.
          *
          * @throws [IllegalArgumentException] If [new] is less than 0.
-         * @throws [IllegalStateException] If [isAppending] is `true`.
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
@@ -370,8 +355,6 @@ public expect sealed interface FileStream: Closeable {
         @Throws(IOException::class)
         public fun write(buf: ByteArray, offset: Int, len: Int)
 
-        // NOTE: Positional writes while isAppending == true are not supported for
-        // the same reasons expressed in the NOTE on Write.size(new)
         /**
          * Writes the entire contents of [buf] to the [File] for which this stream
          * belongs. Bytes are written starting at the specified [position]. The
@@ -385,14 +368,11 @@ public expect sealed interface FileStream: Closeable {
          *   begin writing at.
          *
          * @throws [IllegalArgumentException] If [position] is less than 0.
-         * @throws [IllegalStateException] If [isAppending] is `true`.
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
         public fun write(buf: ByteArray, position: Long)
 
-        // NOTE: Positional writes while isAppending == true are not supported for
-        // the same reasons expressed in the NOTE on Write.size(new).
         /**
          * Writes [len] number of bytes from [buf], starting at index [offset],
          * to the [File] for which this stream belongs. Bytes are written starting
@@ -406,7 +386,6 @@ public expect sealed interface FileStream: Closeable {
          *   begin writing at.
          *
          * @throws [IllegalArgumentException] If [position] is less than 0.
-         * @throws [IllegalStateException] If [isAppending] is `true`.
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
