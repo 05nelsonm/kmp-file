@@ -145,32 +145,33 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
                     // Magic string for testing purposes on -SNAPSHOT versions
                     // to fall through to the RandomAccessFile logical branch,
                     // simulating total failure of reflective access on Android.
-                    if (System.getProperty("io.matthewnelson.kmp.file.FsJvmDefaultTest") != null) {
-                        try {
+                    try {
+                        if (System.getProperty("io.matthewnelson.kmp.file.FsJvmDefaultTest") != null) {
+                            // Clear it so test knows this ran.
                             System.clearProperty("io.matthewnelson.kmp.file.FsJvmDefaultTest")
-                        } catch (_: Throwable) {}
-                        return@run
-                    }
+                            return@run
+                        }
+                    } catch (_: Throwable) {}
                 }
 
-                val wronly = file.open(
+                val pfd = file.open(
                     excl,
                     // ParcelFileDescriptor uses permissions 770 by default (or
                     // 774 if MODE_WORLD{READABLE/WRITABLE} are defined). Need
                     // to do chmod on it if it's been created and does not match
                     // what has been specified by caller via excl.
                     modeDefaultFile = Mode("770"),
-                    openCloseable = { ParcelFileDescriptor.INSTANCE!!.WRONLY(file, excl) },
+                    openCloseable = { ParcelFileDescriptor.INSTANCE!!.Opener(file, excl) },
                 )
 
-                val fos = FileOutputStream(wronly.getFD())
+                val fos = FileOutputStream(pfd.getFD())
 
                 return NioFileStream.of(
                     fos.channel,
                     canRead = false,
                     canWrite = true,
                     isAppending = true,
-                    /* parents = */ fos, wronly,
+                    /* parents = */ fos, pfd,
                 )
             }
 
@@ -184,26 +185,11 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
             val raf = try {
                 file.open(excl, openCloseable = { RandomAccessFile(file, "rw") })
                 // Success!
-            } catch (t: IOException) {
-                val e = when (t) {
-                    // SecurityException converted to AccessDeniedException
-                    is AccessDeniedException -> t
-                    // Documented exception thrown.
-                    is FileNotFoundException -> run {
-                        val m = t.message
-                        if (m == null) return@run t
+            } catch (e: IOException) {
+                // File.open should have converted any FileNotFound exception
+                // that was attributed to permissions or a SecurityException.
+                if (e !is AccessDeniedException) throw e
 
-                        // Check for EPERM
-                        if (!m.contains("denied", ignoreCase = true)) return@run t
-
-                        // Convert it to a more appropriate exception
-                        AccessDeniedException(file, null, "Permission denied")
-                            .alsoAddSuppressed(t)
-                    }
-                    else -> throw t
-                }
-
-                // File already existed and did not have read permissions?
                 val tryModifyingReadPerms = try {
                     if (exists(file)) {
                         // Exists. Check permissions to see why we failed and
@@ -309,8 +295,18 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
         val closeable = try {
             openCloseable()
-        } catch (t: SecurityException) {
-            throw t.toAccessDeniedException(this)
+        } catch (t: Throwable) {
+            val c = if (t is InvocationTargetException) t.cause ?: t else t
+            throw when (c) {
+                is SecurityException -> c.toAccessDeniedException(this)
+                is FileNotFoundException -> run {
+                    val m = c.message ?: return@run c
+                    if (!m.contains("denied")) return@run c
+                    AccessDeniedException(this, null, "Permission denied")
+                        .alsoAddSuppressed(c)
+                }
+                else -> c.wrapIOException()
+            }
         }
 
         // Already existed prior to opening. Do not modify permissions.
@@ -393,7 +389,7 @@ private class ParcelFileDescriptor private constructor() {
     private val getFileDescriptor: Method
     private val open: Method
 
-    inner class WRONLY @Throws(IOException::class) constructor(file: File, excl: OpenExcl): Closeable {
+    inner class Opener @Throws(Throwable::class) constructor(file: File, excl: OpenExcl): Closeable {
 
         @Volatile
         private var _pfd: Pair<Any, FileDescriptor>?
@@ -407,36 +403,18 @@ private class ParcelFileDescriptor private constructor() {
                 is OpenExcl.MustExist -> 0
             }
 
-            val obj = try {
-                open.invoke(null, file, flags)
-            } catch (t: Throwable) {
-                val c = if (t is InvocationTargetException) t.cause ?: t else t
-                if (c is SecurityException) throw c.toAccessDeniedException(file)
-                if (c is FileNotFoundException) {
-                    val m = c.message ?: throw c
-                    if (m.contains("denied")) {
-                        throw AccessDeniedException(file, null, "Permission denied")
-                            .alsoAddSuppressed(c)
-                    }
-                }
+            val obj = open.invoke(null, file, flags)
 
-                throw c.wrapIOException()
-            }
             val fd = try {
                 getFileDescriptor.invoke(obj) as FileDescriptor
             } catch (t: Throwable) {
-                val c = if (t is InvocationTargetException) t.cause ?: t else t
-                val e = when (c) {
-                    is SecurityException -> c.toAccessDeniedException(file).alsoAddSuppressed(c)
-                    else -> c.wrapIOException { "Failed to retrieve the fd from ParcelFileDescriptor" }
-                }
-
                 try {
                     close.invoke(obj)
-                } catch (t: Throwable) {
-                    e.addSuppressed(if (t is InvocationTargetException) t.cause ?: t else t)
+                } catch (tt: Throwable) {
+                    val c = if (tt is InvocationTargetException) tt.cause ?: tt else tt
+                    t.addSuppressed(c)
                 }
-                throw e
+                throw t
             }
 
             _pfd = obj to fd
