@@ -218,13 +218,21 @@ internal class MinGWFileStream(
                             // has internals which WriteFile will modify and, if used
                             // again, does a number on things.
                             val overlapped = scope.alloc<_OVERLAPPED> {
-                                if (isAppending) {
-                                    Offset = 0xffffffff.toUInt()
-                                    OffsetHigh = 0xffffffff.toUInt()
-                                } else {
-                                    val position = (if (p == -1L) _position else p) + total
-                                    Offset = position.toUInt()
-                                    OffsetHigh = (position ushr 32).toUInt()
+                                when {
+                                    p != -1L -> {
+                                        val position = p + total
+                                        Offset = position.toUInt()
+                                        OffsetHigh = (position ushr 32).toUInt()
+                                    }
+                                    isAppending -> {
+                                        Offset = 0xffffffff.toUInt()
+                                        OffsetHigh = 0xffffffff.toUInt()
+                                    }
+                                    else -> {
+                                        val position = _position + total
+                                        Offset = position.toUInt()
+                                        OffsetHigh = (position ushr 32).toUInt()
+                                    }
                                 }
                             }
                             val h = delegateOrClosed(isWrite = true, total) { _h.value }
