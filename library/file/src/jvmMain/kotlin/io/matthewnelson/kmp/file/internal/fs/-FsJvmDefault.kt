@@ -136,8 +136,18 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
         if (ParcelFileDescriptor.INSTANCE != null && appending) {
-            val wronly = file.open(excl, openCloseable = { ParcelFileDescriptor.INSTANCE!!.WRONLY(file, excl) })
+            val wronly = file.open(
+                excl,
+                // ParcelFileDescriptor uses permissions 770 by default (or
+                // 777 if MODE_WORLD{READABLE/WRITABLE} were defined). Need
+                // to do chmod on it if it's been created and does not match
+                // what has been specified by caller via excl.
+                modeDefaultFile = Mode("770"),
+                openCloseable = { ParcelFileDescriptor.INSTANCE!!.WRONLY(file, excl) },
+            )
+
             val fos = FileOutputStream(wronly.getFD())
+
             @Suppress("KotlinConstantConditions")
             return NioFileStream.of(
                 fos.channel,
@@ -160,7 +170,11 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
     @Throws(IOException::class)
     @OptIn(ExperimentalContracts::class)
-    private inline fun <C: Closeable> File.open(excl: OpenExcl, openCloseable: () -> C): C {
+    private inline fun <C: Closeable> File.open(
+        excl: OpenExcl,
+        modeDefaultFile: Mode = Mode.DEFAULT_FILE,
+        openCloseable: () -> C,
+    ): C {
         contract {
             callsInPlace(openCloseable, InvocationKind.AT_MOST_ONCE)
         }
@@ -181,9 +195,9 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
         // Already existed prior to opening. Do not modify permissions.
         if (exists) return closeable
-        // Default permissions, nothing to change.
-        if (excl._mode == Mode.DEFAULT_FILE) return closeable
-        // Default permissions, nothing to change.
+        // Desired permissions matched what the default is. Nothing to change.
+        if (excl._mode == modeDefaultFile) return closeable
+        // File is created by default r/w. Nothing to change.
         if (IsWindows && excl._mode.containsOwnerWriteAccess) return closeable
 
         try {
@@ -269,10 +283,7 @@ private class ParcelFileDescriptor private constructor() {
 
         init {
             val flags = MODE_WRITE_ONLY or when (excl) {
-                is OpenExcl.MaybeCreate, is OpenExcl.MustCreate -> {
-                    // TODO: MODE_WORLD_READABLE/MODE_WORLD_WRITEABLE?
-                    MODE_CREATE
-                }
+                is OpenExcl.MaybeCreate, is OpenExcl.MustCreate -> MODE_CREATE
                 is OpenExcl.MustExist -> 0
             }
 
