@@ -25,14 +25,17 @@ import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
+import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.IsWindows
+import io.matthewnelson.kmp.file.internal.KMP_FILE_VERSION
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.NioFileStream
+import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
@@ -135,37 +138,140 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        if (ParcelFileDescriptor.INSTANCE != null && appending) {
-            val wronly = file.open(
-                excl,
-                // ParcelFileDescriptor uses permissions 770 by default (or
-                // 777 if MODE_WORLD{READABLE/WRITABLE} were defined). Need
-                // to do chmod on it if it's been created and does not match
-                // what has been specified by caller via excl.
-                modeDefaultFile = Mode("770"),
-                openCloseable = { ParcelFileDescriptor.INSTANCE!!.WRONLY(file, excl) },
+        if (appending) {
+            run {
+                if (ParcelFileDescriptor.INSTANCE == null) return@run
+                if (KMP_FILE_VERSION.endsWith("-SNAPSHOT")) {
+                    // Magic string for testing purposes on -SNAPSHOT versions
+                    // to fall through to the RandomAccessFile logical branch,
+                    // simulating total failure of reflective access on Android.
+                    try {
+                        if (System.getProperty("io.matthewnelson.kmp.file.FsJvmDefaultTest") != null) {
+                            // Clear it so test knows this ran.
+                            System.clearProperty("io.matthewnelson.kmp.file.FsJvmDefaultTest")
+                            return@run
+                        }
+                    } catch (_: Throwable) {}
+                }
+
+                val pfd = file.open(
+                    excl,
+                    // ParcelFileDescriptor uses permissions 770 by default (or
+                    // 774 if MODE_WORLD{READABLE/WRITABLE} are defined). Need
+                    // to do chmod on it if it's been created and does not match
+                    // what has been specified by caller via excl.
+                    modeDefaultFile = Mode("770"),
+                    openCloseable = { ParcelFileDescriptor.INSTANCE!!.Opener(file, excl) },
+                )
+
+                val fos = FileOutputStream(pfd.getFD())
+
+                return NioFileStream.of(
+                    fos.channel,
+                    canRead = false,
+                    canWrite = true,
+                    isAppending = true,
+                    /* parents = */ fos, pfd,
+                )
+            }
+
+            // No ParcelFileDescriptor available... Must attempt RandomAccessFile with
+            // O_RDWR (because you cannot pass a mode of just "w" to it). If this does
+            // not succeed, no appending to this file, unfortunately.
+            //
+            // Ideally this should NEVER occur at runtime, as non-Android consumers will
+            // always utilize FsJvmNio. So, this logical branch will probably never be
+            // seen. But! it "works" and is tested on Jvm desktop.
+            val raf = try {
+                file.open(excl, openCloseable = { RandomAccessFile(file, "rw") })
+                // Success!
+            } catch (e: IOException) {
+                // File.open should have converted any FileNotFound exception
+                // that was attributed to permissions or a SecurityException.
+                if (e !is AccessDeniedException) throw e
+
+                val tryModifyingReadPerms = try {
+                    if (exists(file)) {
+                        // Exists. Check permissions to see why we failed and
+                        // if it can be recovered from.
+                        if (file.canWrite()) {
+                            if (file.canRead()) {
+                                // O_RDWR should have worked... Fall through.
+                                var msg = "Read/Write permissions found, but failed to open"
+                                msg += " the existing file with O_RDWR. Irrecoverable error."
+                                e.addSuppressed(IllegalStateException(msg))
+                                false
+                            } else {
+                                // Missing read permissions. Try recovering.
+                                true
+                            }
+                        } else {
+                            // Missing write permissions which are required for openWrite.
+                            // Fall through.
+                            false
+                        }
+                    } else {
+                        // Does not exist. Probably illegal directory? Fall through.
+                        false
+                    }
+                } catch (tt: Throwable) {
+                    e.addSuppressed(tt)
+                    false
+                }
+
+                val raf2: RandomAccessFile? = run {
+                    if (!tryModifyingReadPerms) return@run null
+                    val wasSetReadable = try {
+                        file.setReadable(/* readable = */ true, /* ownerOnly = */ true)
+                    } catch (tt: SecurityException) {
+                        e.addSuppressed(tt)
+                        false
+                    }
+                    if (!wasSetReadable) return@run null
+
+                    val raf = try {
+                        file.open(excl, openCloseable = { RandomAccessFile(file, "rw") })
+                    } catch (ee: IOException) {
+                        // Still failed. Fall through.
+                        var msg = "Failed to open file after temporarily applying missing"
+                        msg += " read permissions. Irrecoverable error."
+                        val eee = IllegalStateException(msg)
+                        eee.addSuppressed(ee)
+                        e.addSuppressed(eee)
+                        null
+                    }
+
+                    try {
+                        // Set permissions back regardless of open success/failure
+                        file.setReadable(/* readable = */ false, /* ownerOnly = */ true)
+                    } catch (_: SecurityException) {}
+
+                    raf
+                }
+
+                if (raf2 == null) throw e
+                raf2
+            }
+
+            return NioFileStream.of(
+                raf.channel,
+                canRead = false,
+                canWrite = true,
+                isAppending = true,
+                /* parents = */ raf,
             )
+        } else {
+            // Truncate
+            val fos = file.open(excl, openCloseable = { FileOutputStream(file) })
 
-            val fos = FileOutputStream(wronly.getFD())
-
-            @Suppress("KotlinConstantConditions")
             return NioFileStream.of(
                 fos.channel,
                 canRead = false,
                 canWrite = true,
-                isAppending = appending,
-                /* parents = */ fos, wronly,
+                isAppending = false,
+                /* parents = */ fos,
             )
         }
-
-        val fos = file.open(excl, openCloseable = { FileOutputStream(file, /* append = */ appending) })
-        return NioFileStream.of(
-            fos.channel,
-            canRead = false,
-            canWrite = true,
-            isAppending = appending,
-            /* parents = */ fos,
-        )
     }
 
     @Throws(IOException::class)
@@ -189,8 +295,18 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
 
         val closeable = try {
             openCloseable()
-        } catch (t: SecurityException) {
-            throw t.toAccessDeniedException(this)
+        } catch (t: Throwable) {
+            val c = if (t is InvocationTargetException) t.cause ?: t else t
+            throw when (c) {
+                is SecurityException -> c.toAccessDeniedException(this)
+                is FileNotFoundException -> run {
+                    val m = c.message ?: return@run c
+                    if (!m.contains("denied")) return@run c
+                    AccessDeniedException(this, null, "Permission denied")
+                        .alsoAddSuppressed(c)
+                }
+                else -> c.wrapIOException()
+            }
         }
 
         // Already existed prior to opening. Do not modify permissions.
@@ -273,7 +389,7 @@ private class ParcelFileDescriptor private constructor() {
     private val getFileDescriptor: Method
     private val open: Method
 
-    inner class WRONLY @Throws(IOException::class) constructor(file: File, excl: OpenExcl): Closeable {
+    inner class Opener @Throws(Throwable::class) constructor(file: File, excl: OpenExcl): Closeable {
 
         @Volatile
         private var _pfd: Pair<Any, FileDescriptor>?
@@ -287,15 +403,21 @@ private class ParcelFileDescriptor private constructor() {
                 is OpenExcl.MustExist -> 0
             }
 
-            try {
-                val obj = open.invoke(null, file, flags)
-                val fd = getFileDescriptor.invoke(obj) as FileDescriptor
-                _pfd = obj to fd
+            val obj = open.invoke(null, file, flags)
+
+            val fd = try {
+                getFileDescriptor.invoke(obj) as FileDescriptor
             } catch (t: Throwable) {
-                val c = if (t is InvocationTargetException) t.cause ?: t else t
-                if (c is SecurityException) throw c.toAccessDeniedException(file)
-                throw c.wrapIOException()
+                try {
+                    close.invoke(obj)
+                } catch (tt: Throwable) {
+                    val c = if (tt is InvocationTargetException) tt.cause ?: tt else tt
+                    t.addSuppressed(c)
+                }
+                throw t
             }
+
+            _pfd = obj to fd
         }
 
         override fun close() {
