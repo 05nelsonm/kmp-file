@@ -214,27 +214,19 @@ internal class MinGWFileStream(
 
                         val ret = memScoped {
                             val scope = this
-                            // Must instantiate a new struct for every iteration as it
-                            // has internals which WriteFile will modify and, if used
-                            // again, does a number on things.
+                            // Must create a new struct for every iteration as it has
+                            // internals which WriteFile will modify and, if used again,
+                            // does a number on things.
                             val overlapped = scope.alloc<_OVERLAPPED> {
-                                when {
-                                    p != -1L -> {
-                                        val position = p + total
-                                        Offset = position.toUInt()
-                                        OffsetHigh = (position ushr 32).toUInt()
-                                    }
-                                    isAppending -> {
-                                        Offset = 0xffffffff.toUInt()
-                                        OffsetHigh = 0xffffffff.toUInt()
-                                    }
-                                    else -> {
-                                        val position = _position + total
-                                        Offset = position.toUInt()
-                                        OffsetHigh = (position ushr 32).toUInt()
-                                    }
+                                val position = when {
+                                    p != -1L -> p + total
+                                    isAppending -> 0xffffffff
+                                    else -> _position + total
                                 }
+                                Offset = position.toUInt()
+                                OffsetHigh = (position ushr 32).toUInt()
                             }
+                            // If this throws here it's b/c !isOpen(). Updating _position does not matter
                             val h = delegateOrClosed(isWrite = true, total) { _h.value }
                             WriteFile(
                                 hFile = h,
