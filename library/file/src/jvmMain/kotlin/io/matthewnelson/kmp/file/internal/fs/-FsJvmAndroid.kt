@@ -578,7 +578,6 @@ internal class FsJvmAndroid private constructor(
 
         override fun write(src: ByteBuffer?, position: Long): Int {
             checkIsOpen()
-            if (isAppending) throw IllegalStateException("O_APPEND")
             if (!canWrite) throw NonWritableChannelException()
             position.checkIsNotNegative()
             return realWrite(src, position)
@@ -882,7 +881,7 @@ private class OsConstants {
     val F_GETFD: Int
     val F_SETFD: Int
 
-    val O_APPEND: Int
+//    val O_APPEND: Int // See Issue #175
     val O_CLOEXEC: Int // Must check for 0 (API 26 and below)
     val O_CREAT: Int
     val O_EXCL: Int
@@ -915,7 +914,7 @@ private class OsConstants {
         F_GETFD = clazz.getField("F_GETFD").getInt(null)
         F_SETFD = clazz.getField("F_SETFD").getInt(null)
 
-        O_APPEND = clazz.getField("O_APPEND").getInt(null)
+//        O_APPEND = clazz.getField("O_APPEND").getInt(null)
         O_CLOEXEC = if ((SDK_INT ?: 0) >= 27) clazz.getField("O_CLOEXEC").getInt(null) else 0
         O_CREAT = clazz.getField("O_CREAT").getInt(null)
         O_EXCL = clazz.getField("O_EXCL").getInt(null)
