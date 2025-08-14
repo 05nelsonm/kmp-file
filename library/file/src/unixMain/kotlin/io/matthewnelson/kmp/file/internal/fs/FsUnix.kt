@@ -42,7 +42,6 @@ import kotlinx.cinterop.toKString
 import platform.posix.EEXIST
 import platform.posix.EINVAL
 import platform.posix.ENOENT
-import platform.posix.O_APPEND
 import platform.posix.O_CLOEXEC
 import platform.posix.O_CREAT
 import platform.posix.O_EXCL
@@ -148,7 +147,16 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val flags = O_WRONLY or (if (appending) O_APPEND else O_TRUNC)
+        val flags = O_WRONLY or if (appending) {
+            // See Issue #175
+            // Could get more specific here and only use O_APPEND
+            // on Darwin targets (which has pwrite implemented
+            // correctly AFAIK), but...
+//            O_APPEND
+            0
+        } else {
+            O_TRUNC
+        }
         val fd = file.open(flags, excl)
         return UnixFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
     }

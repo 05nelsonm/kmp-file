@@ -71,13 +71,9 @@ internal abstract class AbstractFileStream protected constructor(
     @Throws(IllegalStateException::class)
     protected inline fun checkCanRead() { check(canRead) { "O_WRONLY" } }
     @Throws(IllegalStateException::class)
-    protected inline fun checkCanSizeNew() { checkIsNotAppending(); checkCanWrite() }
+    protected inline fun checkCanSizeNew() { checkCanWrite() }
     @Throws(IllegalStateException::class)
     protected inline fun checkCanWrite() { check(canWrite) { "O_RDONLY" } }
-    @Throws(IllegalStateException::class)
-    protected inline fun checkCanWriteP() { checkIsNotAppending(); checkCanWrite() }
-    @Throws(IllegalStateException::class)
-    protected inline fun checkIsNotAppending() { check(!isAppending) { "O_APPEND" } }
 
     @Throws(IllegalArgumentException::class)
     protected inline fun Long.checkIsNotNegative() { require(this >= 0L) { "$this < 0" } }

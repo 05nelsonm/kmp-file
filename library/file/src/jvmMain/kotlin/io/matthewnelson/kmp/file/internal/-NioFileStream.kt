@@ -32,30 +32,20 @@ internal class NioFileStream private constructor(
     canRead: Boolean,
     canWrite: Boolean,
     isAppending: Boolean,
-    // Should be closed when FileChannel.close() is called as the
-    // FileChannel would be obtained from File{Input/Output}Stream
-    // or a RandomAccessFile, but Android API 20 and below may do
-    // some weird things. So, close them both to be on the safe side.
-    parent: Closeable?,
+    parents: Array<out Closeable>,
 ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
     @Volatile
     private var _ch: FileChannel? = ch
     @Volatile
-    private var _parent: Closeable? = parent
+    private var _parents: Array<out Closeable>? = parents
     private val closeLock = Any()
     private val positionLock = Any()
 
     override fun isOpen(): Boolean = _ch?.isOpen ?: false
 
     override fun position(): Long {
-        run {
-            if (!isAppending) return@run
-            if (ANDROID.SDK_INT == null) return@run
-            // Android API 23 and below does not report
-            // the correct position with O_APPEND.
-            if (ANDROID.SDK_INT < 24) return size()
-        }
+        if (isAppending) return size()
         checkIsOpen()
         synchronized(positionLock) {
             val ch = _ch ?: throw ClosedException()
@@ -90,8 +80,7 @@ internal class NioFileStream private constructor(
     private fun realRead(buf: ByteArray, offset: Int, len: Int, p: Long): Int {
         val bb = ByteBuffer.wrap(buf, offset, len)
         if (len == 0) return 0
-        // Let FileChannelImpl decide if acquiring a lock is necessary for pread (Windows)
-        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
+        synchronizedIfNotNull(lock = positionLockOrNull(p)) {
             var total = 0
             while (total < len) {
                 val ch = delegateOrClosed(isWrite = false, total) { _ch }
@@ -124,8 +113,7 @@ internal class NioFileStream private constructor(
     }
 
     private fun realRead(dst: ByteBuffer?, p: Long): Int {
-        // Let FileChannelImpl decide if acquiring a lock is necessary for pread (Windows)
-        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
+        synchronizedIfNotNull(lock = positionLockOrNull(p)) {
             val ch = _ch ?: throw AsynchronousCloseException()
             return if (p == -1L) ch.read(dst) else ch.read(dst, p)
         }
@@ -177,7 +165,7 @@ internal class NioFileStream private constructor(
 
     override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
         checkIsOpen()
-        checkCanWriteP()
+        checkCanWrite()
         position.checkIsNotNegative()
         realWrite(buf, offset, len, position)
     }
@@ -185,11 +173,7 @@ internal class NioFileStream private constructor(
     private fun realWrite(buf: ByteArray, offset: Int, len: Int, p: Long) {
         val bb = ByteBuffer.wrap(buf, offset, len)
         if (len == 0) return
-        // Let FileChannelImpl decide if acquiring a lock is necessary for pwrite (Windows)
-        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
-            val ch = _ch ?: throw ClosedException()
-            if (p == -1L) ch.write(bb) else ch.write(bb, p)
-        }
+        realWrite(bb, p)
     }
 
     override fun write(src: ByteBuffer?): Int {
@@ -200,27 +184,43 @@ internal class NioFileStream private constructor(
 
     override fun write(src: ByteBuffer?, position: Long): Int {
         checkIsOpen()
-        if (isAppending) throw IllegalStateException("O_APPEND")
         if (!canWrite) throw NonWritableChannelException()
         position.checkIsNotNegative()
         return realWrite(src, position)
     }
 
     private fun realWrite(src: ByteBuffer?, p: Long): Int {
-        // Let FileChannelImpl decide if acquiring a lock is necessary for pwrite (Windows)
-        synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
+        if (src == null) throw NullPointerException("src == null")
+        synchronizedIfNotNull(lock = positionLockOrNull(p)) {
             val ch = _ch ?: throw AsynchronousCloseException()
-            return if (p == -1L) ch.write(src) else ch.write(src, p)
+            if (p == -1L) {
+                if (isAppending) {
+                    val end = ch.size()
+                    return ch.write(src, end)
+                } else {
+                    return ch.write(src)
+                }
+            } else {
+                return ch.write(src, p)
+            }
         }
     }
 
+    private fun positionLockOrNull(p: Long): Any? {
+        if (p == -1L) return positionLock
+        // Windows always needs a lock
+        if (IsWindows) return positionLock
+        // Unix pread/pwrite (no lock needed)
+        return null
+    }
+
     override fun close() {
-        val (ch, parent) = synchronized(closeLock) {
+        val (ch, parents) = synchronized(closeLock) {
             val ch = _ch ?: return
-            val parent = _parent
+            val parents = _parents
             _ch = null
-            _parent = null
-            ch to parent
+            _parents = null
+            ch to parents
         }
 
         var threw: IOException? = null
@@ -231,14 +231,16 @@ internal class NioFileStream private constructor(
             threw = e
         }
 
-        if (parent != null) {
-            try {
-                parent.close()
-            } catch (e: IOException) {
-                if (threw == null) {
-                    threw = e
-                } else {
-                    threw.addSuppressed(e)
+        if (!parents.isNullOrEmpty()) {
+            parents.forEach { parent ->
+                try {
+                    parent.close()
+                } catch (e: IOException) {
+                    if (threw == null) {
+                        threw = e
+                    } else {
+                        threw.addSuppressed(e)
+                    }
                 }
             }
         }
@@ -254,13 +256,17 @@ internal class NioFileStream private constructor(
             canRead: Boolean,
             canWrite: Boolean,
             isAppending: Boolean,
-            parent: Closeable?,
+            // Defining multiple parents should be done so in reverse
+            // order (i.e. last opened -> first opened) so that the final
+            // Closeable closed has no children. This is important on
+            // Android.
+            vararg parents: Closeable,
         ): NioFileStream = NioFileStream(
             ch,
             canRead,
             canWrite,
             isAppending,
-            parent,
+            parents,
         )
     }
 }

@@ -194,7 +194,14 @@ internal class FsJvmAndroid private constructor(
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
-        val fd = file.open(const.O_WRONLY or (if (appending) const.O_APPEND else const.O_TRUNC), excl)
+        var flags = const.O_WRONLY
+        if (appending) {
+            // See Issue #175
+//            flags = flags or const.O_APPEND
+        } else {
+            flags = flags or const.O_TRUNC
+        }
+        val fd = file.open(flags, excl)
         return AndroidFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
     }
 
@@ -523,7 +530,7 @@ internal class FsJvmAndroid private constructor(
 
         override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
             checkIsOpen()
-            checkCanWriteP()
+            checkCanWrite()
             position.checkIsNotNegative()
             realWrite(buf, offset, len, position)
         }
@@ -532,6 +539,14 @@ internal class FsJvmAndroid private constructor(
             buf.checkBounds(offset, len)
             if (len == 0) return
             interruptible.doBlocking(lock = if (p == -1L) positionLock else null) { completed ->
+                if (p == -1L && isAppending) {
+                    // See Issue #175
+                    val fd = _fd ?: return
+                    tryCatchErrno(null) {
+                        lseek.invoke(null, fd, 0L, const.SEEK_END)
+                    }
+                }
+
                 var total = 0
                 while (total < len) {
                     val o = offset + total
@@ -563,7 +578,6 @@ internal class FsJvmAndroid private constructor(
 
         override fun write(src: ByteBuffer?, position: Long): Int {
             checkIsOpen()
-            if (isAppending) throw IllegalStateException("O_APPEND")
             if (!canWrite) throw NonWritableChannelException()
             position.checkIsNotNegative()
             return realWrite(src, position)
@@ -598,6 +612,14 @@ internal class FsJvmAndroid private constructor(
             }
 
             interruptible.doBlocking(lock = if (p == -1L) positionLock else null) { completed ->
+                if (p == -1L && isAppending) {
+                    // See Issue #175
+                    val fd = _fd ?: return 0
+                    tryCatchErrno(null) {
+                        lseek.invoke(null, fd, 0L, const.SEEK_END)
+                    }
+                }
+
                 val rem = src.remaining()
                 var total = 0
                 while (total < rem) {
@@ -859,7 +881,7 @@ private class OsConstants {
     val F_GETFD: Int
     val F_SETFD: Int
 
-    val O_APPEND: Int
+//    val O_APPEND: Int // See Issue #175
     val O_CLOEXEC: Int // Must check for 0 (API 26 and below)
     val O_CREAT: Int
     val O_EXCL: Int
@@ -869,6 +891,7 @@ private class OsConstants {
     val O_WRONLY: Int
 
     val SEEK_CUR: Int
+    val SEEK_END: Int
     val SEEK_SET: Int
 
     val S_IRUSR: Int
@@ -891,7 +914,7 @@ private class OsConstants {
         F_GETFD = clazz.getField("F_GETFD").getInt(null)
         F_SETFD = clazz.getField("F_SETFD").getInt(null)
 
-        O_APPEND = clazz.getField("O_APPEND").getInt(null)
+//        O_APPEND = clazz.getField("O_APPEND").getInt(null)
         O_CLOEXEC = if ((SDK_INT ?: 0) >= 27) clazz.getField("O_CLOEXEC").getInt(null) else 0
         O_CREAT = clazz.getField("O_CREAT").getInt(null)
         O_EXCL = clazz.getField("O_EXCL").getInt(null)
@@ -901,6 +924,7 @@ private class OsConstants {
         O_WRONLY = clazz.getField("O_WRONLY").getInt(null)
 
         SEEK_CUR = clazz.getField("SEEK_CUR").getInt(null)
+        SEEK_END = clazz.getField("SEEK_END").getInt(null)
         SEEK_SET = clazz.getField("SEEK_SET").getInt(null)
 
         S_IRUSR = clazz.getField("S_IRUSR").getInt(null)

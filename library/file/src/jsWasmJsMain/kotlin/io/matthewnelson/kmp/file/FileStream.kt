@@ -204,7 +204,6 @@ public actual sealed interface FileStream: Closeable {
          *   begin writing at.
          *
          * @throws [IllegalArgumentException] If [position] is less than 0.
-         * @throws [IllegalStateException] If [isAppending] is `true`.
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)
@@ -223,7 +222,6 @@ public actual sealed interface FileStream: Closeable {
          *   begin writing at.
          *
          * @throws [IllegalArgumentException] If [position] is less than 0.
-         * @throws [IllegalStateException] If [isAppending] is `true`.
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
          * */
         @Throws(IOException::class)

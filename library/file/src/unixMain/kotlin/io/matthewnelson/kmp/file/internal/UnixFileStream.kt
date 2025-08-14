@@ -32,6 +32,7 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
 import platform.posix.SEEK_CUR
+import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 import platform.posix.errno
 import platform.posix.fstat
@@ -183,7 +184,7 @@ internal class UnixFileStream(
 
     override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
         checkIsOpen()
-        checkCanWriteP()
+        checkCanWrite()
         position.checkIsNotNegative()
         realWrite(buf, offset, len, position)
     }
@@ -192,6 +193,16 @@ internal class UnixFileStream(
         buf.checkBounds(offset, len)
         if (len == 0) return
         synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
+
+            if (p == -1L && isAppending) {
+                // See Issue #175
+                val ret = ignoreEINTR64 {
+                    val fd = _fd.value ?: throw ClosedException()
+                    platformLSeek(fd, 0L, SEEK_END)
+                }
+                if (ret == -1L) throw errnoToIOException(errno)
+            }
+
             @OptIn(UnsafeNumber::class)
             @Suppress("RemoveRedundantCallsOfConversionMethods")
             buf.usePinned { pinned ->
