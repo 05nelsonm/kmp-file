@@ -17,9 +17,11 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.Closeable
+import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
@@ -34,8 +36,13 @@ import io.matthewnelson.kmp.file.internal.NioFileStream
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
+import io.matthewnelson.kmp.file.wrapIOException
+import java.io.FileDescriptor
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
+import kotlin.concurrent.Volatile
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -117,13 +124,38 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
     @Throws(IOException::class)
     override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
         val raf = file.open(excl, openCloseable = { RandomAccessFile(file, "rw") })
-        return NioFileStream.of(raf.channel, canRead = true, canWrite = true, isAppending = false, parent = raf)
+        return NioFileStream.of(
+            raf.channel,
+            canRead = true,
+            canWrite = true,
+            isAppending = false,
+            /* parents = */ raf,
+        )
     }
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        if (ParcelFileDescriptor.INSTANCE != null && appending) {
+            val wronly = file.open(excl, openCloseable = { ParcelFileDescriptor.INSTANCE!!.WRONLY(file, excl) })
+            val fos = FileOutputStream(wronly.getFD())
+            @Suppress("KotlinConstantConditions")
+            return NioFileStream.of(
+                fos.channel,
+                canRead = false,
+                canWrite = true,
+                isAppending = appending,
+                /* parents = */ fos, wronly,
+            )
+        }
+
         val fos = file.open(excl, openCloseable = { FileOutputStream(file, /* append = */ appending) })
-        return NioFileStream.of(fos.channel, canRead = false, canWrite = true, isAppending = appending, parent = fos)
+        return NioFileStream.of(
+            fos.channel,
+            canRead = false,
+            canWrite = true,
+            isAppending = appending,
+            /* parents = */ fos,
+        )
     }
 
     @Throws(IOException::class)
@@ -178,6 +210,117 @@ internal class FsJvmDefault private constructor(): Fs.Jvm(
     internal companion object {
 
         @JvmSynthetic
-        internal fun get(): FsJvmDefault = FsJvmDefault()
+        internal fun get(): FsJvmDefault {
+            // load it if not already loaded.
+            ParcelFileDescriptor.INSTANCE
+            return FsJvmDefault()
+        }
+    }
+}
+
+// Issue #175
+// Basically, we need to support opening a write-only file to append data,
+// without truncating it on open via O_TRUNC, and without the O_APPEND flag
+// (because the O_APPEND flag in combination with pwrite on Linux/FreeBSD is
+// broken). android.os.ParcelFileDescriptor allows for just that by opening
+// one with only O_WRONLY expressed, passing its FileDescriptor to a
+// FileOutputStream, then creating the FileChannel from the FileOutputStream.
+@Suppress("PrivatePropertyName")
+private class ParcelFileDescriptor private constructor() {
+
+    companion object {
+        val INSTANCE: ParcelFileDescriptor? by lazy {
+            if (ANDROID.SDK_INT == null) return@lazy null
+
+            try {
+                ParcelFileDescriptor()
+            } catch (t: Throwable) {
+                // Should never happen, but just in case...
+                val b = StringBuilder("KMP-FILE: Failed to load ParcelFileDescriptor reflect!")
+                t.stackTraceToString().lines().forEach { line ->
+                    b.appendLine()
+                    b.append("KMP-FILE: ")
+                    b.append(line)
+                }
+                try {
+                    System.err.println(b.toString())
+                } catch (_: Throwable) {}
+                null
+            }
+        }
+    }
+
+    private val MODE_WRITE_ONLY: Int
+    private val MODE_CREATE: Int
+
+    private val close: Method
+    private val getFileDescriptor: Method
+    private val open: Method
+
+    inner class WRONLY @Throws(IOException::class) constructor(file: File, excl: OpenExcl): Closeable {
+
+        @Volatile
+        private var _pfd: Pair<Any, FileDescriptor>?
+
+        @Throws(ClosedException::class)
+        fun getFD(): FileDescriptor = _pfd?.second ?: throw ClosedException()
+
+        init {
+            val flags = MODE_WRITE_ONLY or when (excl) {
+                is OpenExcl.MaybeCreate, is OpenExcl.MustCreate -> {
+                    // TODO: MODE_WORLD_READABLE/MODE_WORLD_WRITEABLE?
+                    MODE_CREATE
+                }
+                is OpenExcl.MustExist -> 0
+            }
+
+            try {
+                val obj = open.invoke(null, file, flags)
+                val fd = getFileDescriptor.invoke(obj) as FileDescriptor
+                _pfd = obj to fd
+            } catch (t: Throwable) {
+                val c = if (t is InvocationTargetException) t.cause ?: t else t
+                if (c is SecurityException) throw c.toAccessDeniedException(file)
+                throw c.wrapIOException()
+            }
+        }
+
+        override fun close() {
+            // No need to hold a lock here, as ParcelFileDescriptor.close, as
+            // well as NioFileStream.close, are both protected by one.
+            val (obj, fd) = _pfd ?: return
+            _pfd = null
+
+            var threw: IOException? = null
+
+            try {
+                close.invoke(obj)
+            } catch (t: Throwable) {
+                val c = if (t is InvocationTargetException) t.cause ?: t else t
+                threw = c.wrapIOException()
+            }
+
+            if (fd.valid()) {
+                val e = IOException("FileDescriptor.valid() == true")
+                if (threw != null) {
+                    threw.addSuppressed(e)
+                } else {
+                    threw = e
+                }
+            }
+
+            if (threw != null) throw threw
+        }
+    }
+
+    init {
+        val clazz = Class.forName("android.os.ParcelFileDescriptor")
+
+        MODE_WRITE_ONLY = clazz.getField("MODE_WRITE_ONLY").getInt(null)
+        MODE_CREATE = clazz.getField("MODE_CREATE").getInt(null)
+
+        close = clazz.getMethod("close")
+        getFileDescriptor = clazz.getMethod("getFileDescriptor")
+        open = clazz.getMethod("open", File::class.java, Int::class.javaPrimitiveType)
     }
 }

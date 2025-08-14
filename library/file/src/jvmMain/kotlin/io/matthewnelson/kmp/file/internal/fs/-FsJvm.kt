@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
@@ -191,7 +192,13 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                 throw t.toAccessDeniedException(file)
             }
 
-            return NioFileStream.of(fis.channel, canRead = true, canWrite = false, isAppending = false, parent = fis)
+            return NioFileStream.of(
+                fis.channel,
+                canRead = true,
+                canWrite = false,
+                isAppending = false,
+                /* parents = */ fis,
+            )
         }
 
         @Throws(InterruptedIOException::class)
@@ -210,6 +217,10 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
             _instance ?: run {
                 var fs: Fs? = FsJvmAndroid.getOrNull()
 
+                if (fs == null && ANDROID.SDK_INT == null) {
+                    fs = FsJvmNio.get()
+                }
+
                 if (fs == null) {
                     val isAvailable = try {
                         Class.forName("java.nio.file.Files") != null
@@ -217,10 +228,14 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                         false
                     }
 
-                    if (isAvailable) fs = FsJvmNio.get()
+                    if (isAvailable) {
+                        fs = FsJvmNio.get()
+                    }
                 }
 
-                if (fs == null) fs = FsJvmDefault.get()
+                if (fs == null) {
+                    fs = FsJvmDefault.get()
+                }
 
                 _instance = fs
                 fs

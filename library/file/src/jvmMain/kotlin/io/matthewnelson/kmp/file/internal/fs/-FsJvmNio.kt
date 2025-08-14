@@ -139,7 +139,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 add(StandardOpenOption.WRITE)
             }
 
-            return file.openNonPosix(excl, options)
+            return file.openNonPosix(excl, isAppending = false, options)
         }
 
         @Throws(IOException::class)
@@ -147,16 +147,21 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
                 add(StandardOpenOption.WRITE)
                 if (appending) {
-                    add(StandardOpenOption.APPEND)
+                    // See Issue #175
+//                    add(StandardOpenOption.APPEND)
                 } else {
                     add(StandardOpenOption.TRUNCATE_EXISTING)
                 }
             }
 
-            return file.openNonPosix(excl, options)
+            return file.openNonPosix(excl, isAppending = appending, options)
         }
 
-        private inline fun File.openNonPosix(excl: OpenExcl, options: LinkedHashSet<StandardOpenOption>): NioFileStream {
+        private inline fun File.openNonPosix(
+            excl: OpenExcl,
+            isAppending: Boolean,
+            options: LinkedHashSet<StandardOpenOption>,
+        ): NioFileStream {
             val doChmod = when {
                 excl._mode == Mode.DEFAULT_FILE -> false
                 IsWindows -> if (excl._mode.containsOwnerWriteAccess) false else null
@@ -167,7 +172,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 is OpenExcl.MustExist -> false
             }
 
-            val s = openNio(excl, options, attrs = null)
+            val s = openNio(excl, isAppending = isAppending, options, attrs = null)
             if (doChmod) {
                 try {
                     chmod(this, excl._mode, mustExist = true)
@@ -241,7 +246,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 add(StandardOpenOption.READ)
                 add(StandardOpenOption.WRITE)
             }
-            return file.openPosix(excl, options)
+            return file.openPosix(excl, isAppending = false, options)
         }
 
         @Throws(IOException::class)
@@ -249,18 +254,23 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             val options = LinkedHashSet<StandardOpenOption>(2, 1.0F).apply {
                 add(StandardOpenOption.WRITE)
                 if (appending) {
-                    add(StandardOpenOption.APPEND)
+                    // See Issue #175
+//                    add(StandardOpenOption.APPEND)
                 } else {
                     add(StandardOpenOption.TRUNCATE_EXISTING)
                 }
             }
-            return file.openPosix(excl, options)
+            return file.openPosix(excl, isAppending = appending, options)
         }
 
-        private inline fun File.openPosix(excl: OpenExcl, options: LinkedHashSet<StandardOpenOption>): NioFileStream {
+        private inline fun File.openPosix(
+            excl: OpenExcl,
+            isAppending: Boolean,
+            options: LinkedHashSet<StandardOpenOption>,
+        ): NioFileStream {
             val perms = excl._mode.toPosixFilePermissions()
             val attrs = PosixFilePermissions.asFileAttribute(perms)
-            return openNio(excl, options, attrs)
+            return openNio(excl, isAppending, options, attrs)
         }
 
         private fun Mode.toPosixFilePermissions(): Set<PosixFilePermission> {
@@ -285,7 +295,12 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
     }
 
     @Throws(IOException::class)
-    protected fun File.openNio(excl: OpenExcl, options: MutableSet<StandardOpenOption>, attrs: FileAttribute<*>?): NioFileStream {
+    protected fun File.openNio(
+        excl: OpenExcl,
+        isAppending: Boolean,
+        options: MutableSet<StandardOpenOption>,
+        attrs: FileAttribute<*>?,
+    ): NioFileStream {
         val path = toNioPath()
 
         when (excl) {
@@ -296,11 +311,14 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
 
         val canRead = options.contains(StandardOpenOption.READ)
         val canWrite = options.contains(StandardOpenOption.WRITE)
-        val isAppending = options.contains(StandardOpenOption.APPEND)
+//        val isAppending = options.contains(StandardOpenOption.APPEND)
 
         // Sanity check disallowing O_RDONLY to be opened, as logic
         // is designed for checking O_WRONLY or O_RDWR.
         disappearingCheck(condition = { canWrite }) { "O_RDONLY. Use FsJvm.openRead()" }
+        // See Issue #175
+        // Sanity check disabling O_APPEND from ever being used
+        disappearingCheck(condition = { !options.contains(StandardOpenOption.APPEND) }) { "O_APPEND present" }
 
         val ch = try {
             if (attrs == null) {
@@ -312,7 +330,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             throw t.mapNioException(this)
         }
 
-        return NioFileStream.of(ch, canRead, canWrite, isAppending, parent = null)
+        return NioFileStream.of(ch, canRead, canWrite, isAppending, parents = emptyArray())
     }
 
     @Throws(IOException::class)

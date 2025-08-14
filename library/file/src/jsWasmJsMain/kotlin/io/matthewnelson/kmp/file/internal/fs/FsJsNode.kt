@@ -498,7 +498,7 @@ internal class FsJsNode private constructor(
 
         override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
             checkIsOpen()
-            checkCanWriteP()
+            checkCanWrite()
             position.checkIsNotNegative()
             realWrite(buf, offset, len, position)
         }
@@ -548,7 +548,7 @@ internal class FsJsNode private constructor(
 
         override fun write(buf: Buffer, offset: Long, len: Long, position: Long) {
             checkIsOpen()
-            checkCanWriteP()
+            checkCanWrite()
             position.checkIsNotNegative()
             realWrite(buf, offset, len, position)
         }
