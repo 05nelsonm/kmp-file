@@ -59,7 +59,7 @@ internal external interface ConstantsFs {
     val O_CREAT: Int
     val O_EXCL: Int
     val O_TRUNC: Int
-    val O_APPEND: Int
+//    val O_APPEND: Int // See Issue #175
 
 //    val S_IFCHR: Int
 //    val S_IFDIR: Int
