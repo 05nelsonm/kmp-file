@@ -25,10 +25,12 @@ import io.matthewnelson.kmp.file.SysTempDir
 import io.matthewnelson.kmp.file.delete2
 import io.matthewnelson.kmp.file.openReadWrite
 import java.io.FileDescriptor
+import java.lang.reflect.InvocationTargetException
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class AndroidFsTest {
@@ -58,8 +60,10 @@ class AndroidFsTest {
             tmp.openReadWrite(excl = OpenExcl.MustCreate.DEFAULT).use { s ->
                 fd = try {
                     s::class.java.getMethod("getFD").invoke(s) as FileDescriptor
-                } catch (_: UnsupportedOperationException) {
+                } catch (t: Throwable) {
+                    val c = if (t is InvocationTargetException) t.cause ?: t else t
                     // Should throw on non-SNAPSHOT (i.e. a release)
+                    assertIs<UnsupportedOperationException>(c)
                     assertFalse(FsInfo.VERSION.endsWith("-SNAPSHOT"))
                     return@use
                 }

@@ -31,13 +31,6 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
         appending: Boolean,
     ): FileStream.Write = openWrite(excl, appending)
 
-    // When testing FsJvmDefault on non-Android platforms, opening write-only
-    // appending is only achievable via FileOutputStream which, in order to
-    // not truncate the file on open, append must be defined as true. That
-    // fucks up positional writes, and FileStream.Write.size(new) when new
-    // is greater than the current file size (uses a pwrite under the hood).
-    protected open val isAppendingPWriteAvailable: Boolean = true
-
     @Test
     fun givenOpenWrite_whenIsInstanceOfFileStreamRead_thenIsFalse() = runTest { tmp ->
         tmp.testOpen(excl = null, false).use { s ->
@@ -242,28 +235,26 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenWriteStream_whenAppendingTrue_thenPWriteAndSizeWorksAsExpected() = skipTestIf(!isAppendingPWriteAvailable) {
-        runTest { tmp ->
-            tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
-                assertTrue(s.isAppending, "isAppending")
+    fun givenWriteStream_whenAppendingTrue_thenPWriteAndSizeWorksAsExpected() = runTest { tmp ->
+        tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = true).use { s ->
+            assertTrue(s.isAppending, "isAppending")
 
-                val data = byteArrayOf(1, 1)
-                s.write(data)
-                assertContentEquals(data, tmp.readBytes())
+            val data = byteArrayOf(1, 1)
+            s.write(data)
+            assertContentEquals(data, tmp.readBytes())
 
-                data[0] = 2
-                data[1] = 2
-                s.write(data, position = 0L)
-                assertContentEquals(data, tmp.readBytes())
-                assertEquals(2L, s.size())
+            data[0] = 2
+            data[1] = 2
+            s.write(data, position = 0L)
+            assertContentEquals(data, tmp.readBytes())
+            assertEquals(2L, s.size())
 
-                // We can grow the file (Jvm FileChannel will use pwrite under the hood)
-                s.size(new = 20L)
-                assertEquals(20L, s.size())
+            // We can grow the file (Jvm FileChannel will use pwrite under the hood)
+            s.size(new = 20L)
+            assertEquals(20L, s.size())
 
-                s.write(data)
-                assertContentEquals(data + ByteArray(18) + data, tmp.readBytes())
-            }
+            s.write(data)
+            assertContentEquals(data + ByteArray(18) + data, tmp.readBytes())
         }
     }
 

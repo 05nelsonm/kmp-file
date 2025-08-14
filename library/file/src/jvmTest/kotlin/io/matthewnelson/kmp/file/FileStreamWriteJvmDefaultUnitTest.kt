@@ -26,7 +26,7 @@ class FileStreamWriteJvmDefaultUnitTest: FileStreamWriteJvmSharedTest() {
     }
 
     override val checker: PermissionChecker? = permissionChecker()
-    override val isAppendingPWriteAvailable: Boolean = false
+    override val isUsingFsJvmDefault: Boolean = true
 
     override fun File.testOpen(excl: OpenExcl?, appending: Boolean): FileStream.Write {
         val e = excl ?: OpenExcl.MaybeCreate.DEFAULT

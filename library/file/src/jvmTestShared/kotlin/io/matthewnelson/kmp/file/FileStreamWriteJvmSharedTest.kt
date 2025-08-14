@@ -22,9 +22,88 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
+
+    private companion object {
+        const val KEY_PROP = "io.matthewnelson.kmp.file.FsJvmDefaultTest"
+        val IS_SNAPSHOT = FsInfo.VERSION.endsWith("-SNAPSHOT")
+    }
+
+    @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
+    protected open val isUsingFsJvmDefault: Boolean = ANDROID.SDK_INT != null && ANDROID.SDK_INT!! < 21
+
+    @Test
+    fun givenWriteOnlyFilePermissions_whenOpenAppending_thenSuccessfullyRecovers() = skipTestIf(!isUsingFsJvmDefault) {
+        // Will only be relevant on Posix system because Windows is either read-only, or read/write.
+        runTest<PermissionChecker.Posix> { tmp ->
+            try {
+                // Set property for Android (if needed) to skip over using ParcelFileDescriptor logic
+                if (ANDROID.SDK_INT != null) {
+                    // Only run for Android when is a snapshot, otherwise
+                    // test may show false positive b/c we're using
+                    // ParcelFileDescriptor and not needing to open O_RDWR.
+                    if (!IS_SNAPSHOT) {
+                        println("Skipping...")
+                        return@runTest
+                    }
+                    System.setProperty(KEY_PROP, "true")
+                    assertEquals("true", System.getProperty(KEY_PROP), "property was not set")
+                }
+
+                val data = "Hello World!".encodeToByteArray()
+                tmp.writeBytes(excl = OpenExcl.MustCreate.of("220"), data)
+                tmp.testOpen(excl = OpenExcl.MustExist, appending = true).use { s ->
+                    if (ANDROID.SDK_INT != null) {
+                        assertNull(
+                            System.getProperty(KEY_PROP),
+                            "Android's logical branch was not skipped when opening the file...",
+                        )
+                    }
+                    assertEquals(data.size.toLong(), s.size())
+                    // Confirm it was set back to write-only upon recovery.
+                    assertFalse(tmp.canRead())
+
+                    tmp.setReadable(true, true)
+                    assertContentEquals(data, tmp.readBytes())
+                    val d0 = (data[0] + 1).toByte()
+                    s.write(byteArrayOf(d0), position = 0L)
+                    assertEquals(data.size.toLong(), s.size())
+                    data[0] = d0
+                    assertContentEquals(data, tmp.readBytes())
+                }
+            } finally {
+                System.clearProperty(KEY_PROP)
+            }
+        }
+    }
+
+    @Test
+    fun givenReadOnlyFilePermissions_whenOpenAppending_thenThrowsAccessDeniedException() = skipTestIf(!isUsingFsJvmDefault) {
+        runTest { tmp ->
+            try {
+                // Regardless, we want Android and non-Android tests to perform the same way
+                // for this test (i.e. they both throw AccessDeniedException for consistency).
+                val data = "Hello World!".encodeToByteArray()
+                tmp.writeBytes(excl = OpenExcl.MustCreate.of("444"), data)
+                var s: FileStream.Write? = null
+                try {
+                    s = tmp.testOpen(excl = OpenExcl.MustExist, appending = true)
+                    fail("open should have failed due to missing write permissions...")
+                } catch (e: AccessDeniedException) {
+                    assertEquals(true, e.message?.contains("permission denied", ignoreCase = true))
+                    // pass
+                } finally {
+                    s?.close()
+                }
+            } finally {
+                System.clearProperty(KEY_PROP)
+            }
+        }
+    }
 
     @Test
     fun givenWriteStream_whenByteBuffer_thenWorksAsExpected() = runTest { tmp ->
@@ -77,9 +156,7 @@ abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
             bb.clear()
             assertFailsWith<IllegalArgumentException> { s.write(bb, -1L) }
 
-            if (!isAppendingPWriteAvailable) return@use
             val before = s.size()
-
             tmp.testOpen(excl = null, appending = true).use { s2 ->
                 assertTrue(s2.isAppending, "s2.isAppending")
                 assertEquals(before, s2.size(), "s2.size()")
