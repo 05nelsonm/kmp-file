@@ -234,7 +234,7 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                 }
 
                 if (fs == null) {
-                    fs = FsJvmDefault.get()
+                    fs = FsJvmAndroidLegacy.get()
                 }
 
                 _instance = fs

@@ -40,7 +40,7 @@ class AndroidFsTest {
         val expected = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             "FsJvmAndroid"
         } else {
-            "FsJvmDefault"
+            "FsJvmAndroidLegacy"
         }
 
         assertEquals(expected, SysFsInfo.name, "API[${Build.VERSION.SDK_INT}]")

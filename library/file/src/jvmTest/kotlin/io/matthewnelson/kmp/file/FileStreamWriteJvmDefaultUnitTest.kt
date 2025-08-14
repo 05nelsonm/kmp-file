@@ -15,22 +15,22 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.fs.FsJvmDefault
+import io.matthewnelson.kmp.file.internal.fs.FsJvmAndroidLegacy
 import kotlin.test.Ignore
 import kotlin.test.Test
 
 class FileStreamWriteJvmDefaultUnitTest: FileStreamWriteJvmSharedTest() {
 
     private companion object {
-        val DEFAULT by lazy { FsJvmDefault.get() }
+        val FS by lazy { FsJvmAndroidLegacy.get() }
     }
 
     override val checker: PermissionChecker? = permissionChecker()
-    override val isUsingFsJvmDefault: Boolean = true
+    override val isUsingFsJvmAndroidLegacy: Boolean = true
 
     override fun File.testOpen(excl: OpenExcl?, appending: Boolean): FileStream.Write {
         val e = excl ?: OpenExcl.MaybeCreate.DEFAULT
-        val s = DEFAULT.openWrite(this, e, appending)
+        val s = FS.openWrite(this, e, appending)
         return FileStreamWriteOnly.of(s)
     }
 

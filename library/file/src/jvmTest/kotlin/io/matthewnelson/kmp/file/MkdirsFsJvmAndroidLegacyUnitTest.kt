@@ -15,20 +15,20 @@
  **/
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.fs.commonDelete
-import io.matthewnelson.kmp.file.internal.fs.FsJvmDefault
+import io.matthewnelson.kmp.file.internal.fs.commonMkdirs
+import io.matthewnelson.kmp.file.internal.fs.FsJvmAndroidLegacy
 import kotlin.test.Ignore
 import kotlin.test.Test
 
-class DeleteFsJvmDefaultUnitTest: DeleteSharedTest() {
+class MkdirsFsJvmAndroidLegacyUnitTest: MkdirsSharedTest() {
 
     private companion object {
-        val DEFAULT by lazy { FsJvmDefault.get() }
+        val FS by lazy { FsJvmAndroidLegacy.get() }
     }
 
     override val checker: PermissionChecker? = permissionChecker()
-    override fun File.testDelete(ignoreReadOnly: Boolean, mustExist: Boolean): File {
-        return DEFAULT.commonDelete(this, ignoreReadOnly, mustExist)
+    override fun File.testMkdirs(mode: String?, mustCreate: Boolean): File {
+        return FS.commonMkdirs(this, mode, mustCreate)
     }
 
     @Test
