@@ -607,6 +607,8 @@ internal class FsJvmAndroid private constructor(
                     }
                     src.position(posBefore)
                     throw e
+                } finally {
+                    tmp.fill(0)
                 }
                 return tmp.size
             }
