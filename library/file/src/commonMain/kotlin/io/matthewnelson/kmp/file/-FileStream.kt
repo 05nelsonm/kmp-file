@@ -85,7 +85,7 @@ internal abstract class AbstractFileStream protected constructor(
 
     @Throws(IOException::class)
     @OptIn(ExperimentalContracts::class)
-    protected fun <T: Any> delegateOrClosed(isWrite: Boolean, bytesTransferred: Number, block: () -> T?): T {
+    protected inline fun <T: Any> delegateOrClosed(isWrite: Boolean, bytesTransferred: Number, block: () -> T?): T {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
