@@ -51,14 +51,14 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
         public companion object {
 
             /**
-             * The default [MaybeCreate] value with permissions `664`.
+             * The default [MaybeCreate] value with permissions `666`.
              * */
             @JvmField
             public val DEFAULT: MaybeCreate = MaybeCreate(mode = Mode.DEFAULT_FILE)
 
             /**
              * Creates a new instance of [MaybeCreate] with provided [mode], or
-             * returns [DEFAULT] when [mode] == `664` or `null`.
+             * returns [DEFAULT] when [mode] == `666` or `null`.
              *
              * @param [mode] The permissions to use if the file is created.
              *
@@ -87,14 +87,14 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
         public companion object {
 
             /**
-             * The default [MustCreate] value with permissions `664`.
+             * The default [MustCreate] value with permissions `666`.
              * */
             @JvmField
             public val DEFAULT: MustCreate = MustCreate(mode = Mode.DEFAULT_FILE)
 
             /**
              * Creates a new instance of [MustCreate] with provided [mode], or
-             * returns [DEFAULT] when [mode] == `664` or `null`.
+             * returns [DEFAULT] when [mode] == `666` or `null`.
              *
              * @param [mode] The permissions to use when the file is created.
              *
