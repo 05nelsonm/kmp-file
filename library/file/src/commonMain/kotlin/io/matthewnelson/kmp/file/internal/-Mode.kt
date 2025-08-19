@@ -33,8 +33,8 @@ internal constructor(internal val value: String) {
     }
 
     internal companion object {
-        internal val DEFAULT_DIR = Mode("775")
-        internal val DEFAULT_FILE = Mode("664")
+        internal val DEFAULT_DIR = Mode("777")
+        internal val DEFAULT_FILE = Mode("666")
     }
 
     override fun toString(): String = value

@@ -272,7 +272,7 @@ public fun File.resolve(relative: String): File {
  * e.g.
  *
  *     // The default POSIX file permissions for a new file
- *     myFile.chmod2("664")
+ *     myFile.chmod2("666")
  *
  * **POSIX permissions:**
  * - 7: READ | WRITE | EXECUTE
@@ -360,7 +360,7 @@ public fun File.exists2(): Boolean {
  *
  * @param [mode] The permissions to set for the newly created directory.
  *   Must be 3 digits, each being between `0` and `7` (inclusive). If
- *   `null`, default directory permissions `775` will be used.
+ *   `null`, default directory permissions `777` will be used.
  * @param [mustCreate] If `false`, failure to create the directory
  *   due to it already existing on the filesystem will return safely,
  *   instead of throwing [FileAlreadyExistsException]. If `true`, then
@@ -395,7 +395,7 @@ public fun File.mkdir2(mode: String?, mustCreate: Boolean = false): File {
  * @param [mode] The permissions to set for the newly created directory
  *   and any necessary, but nonexistent parent directories that were
  *   created. Must be 3 digits, each being between `0` and `7` (inclusive).
- *   If `null`, default directory permissions `775` will be used.
+ *   If `null`, default directory permissions `777` will be used.
  * @param [mustCreate] If `false`, failure to create the directory
  *   due to it already existing on the filesystem will return safely,
  *   instead of throwing [FileAlreadyExistsException]. If `true`, then
