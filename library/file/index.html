@@ -41,15 +41,18 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">0.3.0
+        <div class="library-version" id="library-version">0.4.0
         </div>
         <div class="navigation-controls">
         <div class="filter-section filter-section_loading" id="filter-section">
                 <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/commonMain">common</button>
                 <button class="platform-tag platform-selector js-like" data-active="" data-filter=":library:file/jsMain">js</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/jsWasmJsMain">jsWasmJs</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:file/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector native-like" data-active="" data-filter=":library:file/mingwMain">mingw</button>
                 <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/nativeMain">native</button>
                 <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/nonJvmMain">nonJvm</button>
+                <button class="platform-tag platform-selector wasm-like" data-active="" data-filter=":library:file/wasmJsMain">wasmJs</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
@@ -72,11 +75,25 @@
                                 js
                             </label>
                         </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/jsWasmJsMain" data-filter=":library:file/jsWasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                jsWasmJs
+                            </label>
+                        </li>
                         <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":library:file/jvmMain" data-filter=":library:file/jvmMain">
                                 <span class="checkbox--icon"></span>
                                 jvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/mingwMain" data-filter=":library:file/mingwMain">
+                                <span class="checkbox--icon"></span>
+                                mingw
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
@@ -91,6 +108,13 @@
                                 <input type="checkbox" class="checkbox--input" id=":library:file/nonJvmMain" data-filter=":library:file/nonJvmMain">
                                 <span class="checkbox--icon"></span>
                                 nonJvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option wasm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/wasmJsMain" data-filter=":library:file/wasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                wasmJs
                             </label>
                         </li>
                 </ul>
@@ -122,31 +146,34 @@
                 </div>
             </div>
             <div id="main">
-<div class="main-content" id="content" pageids="file::////PointingToDeclaration//-242802">
+<div class="main-content" id="content" pageids="file::////PointingToDeclaration//351496085">
   <div class="breadcrumbs"></div>
   <div class="cover ">
     <h1 class="cover"><span><span>file</span></span></h1>
     <div class="platform-hinted UnderCoverText with-platform-tabs" data-platform-hinted="data-platform-hinted">
-      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain" data-toggle=":library:file/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain" data-toggle=":library:file/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jvmMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nativeMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div>    </div>
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain" data-toggle=":library:file/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file/mingwMain" data-filterable-set=":library:file/mingwMain" data-toggle=":library:file/mingwMain">mingw</button><button class="platform-bookmark" data-filterable-current=":library:file/nativeMain" data-filterable-set=":library:file/nativeMain" data-toggle=":library:file/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jsWasmJsMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jvmMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/mingwMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nativeMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><p class="paragraph">A very simple <code class="lang-kotlin">File</code> API for Kotlin Multiplatform. It gets the job done.</p></div>    </div>
   </div>
   <h2 class="">Packages</h2>
-  <div class="table"><a data-name="1685700785%2FPackages%2F-242802" anchor-label="io.matthewnelson.kmp.file" id="1685700785%2FPackages%2F-242802" data-filterable-set=":library:file/commonMain,:library:file/jsMain,:library:file/jvmMain,:library:file/nativeMain,:library:file/nonJvmMain"></a>
-    <div class="table-row" data-filterable-current=":library:file/commonMain,:library:file/jsMain,:library:file/jvmMain,:library:file/nativeMain,:library:file/nonJvmMain" data-filterable-set=":library:file/commonMain,:library:file/jsMain,:library:file/jvmMain,:library:file/nativeMain,:library:file/nonJvmMain">
+  <div class="table"><a data-name="1685700785%2FPackages%2F351496085" anchor-label="io.matthewnelson.kmp.file" id="1685700785%2FPackages%2F351496085" data-filterable-set=":library:file/commonMain,:library:file/jsMain,:library:file/jsWasmJsMain,:library:file/jvmMain,:library:file/mingwMain,:library:file/nativeMain,:library:file/nonJvmMain,:library:file/wasmJsMain"></a>
+    <div class="table-row" data-filterable-current=":library:file/commonMain,:library:file/jsMain,:library:file/jsWasmJsMain,:library:file/jvmMain,:library:file/mingwMain,:library:file/nativeMain,:library:file/nonJvmMain,:library:file/wasmJsMain" data-filterable-set=":library:file/commonMain,:library:file/jsMain,:library:file/jsWasmJsMain,:library:file/jvmMain,:library:file/mingwMain,:library:file/nativeMain,:library:file/nonJvmMain,:library:file/wasmJsMain">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1685700785%2FPackages%2F-242802"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1685700785%2FPackages%2F351496085"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
           <div class="pull-right">
             <div class="platform-tags no-gutters">
               <div class="platform-tag common-like">common</div>
               <div class="platform-tag js-like">js</div>
+              <div class="platform-tag common-like">jsWasmJs</div>
               <div class="platform-tag jvm-like">jvm</div>
+              <div class="platform-tag native-like">mingw</div>
               <div class="platform-tag common-like">native</div>
               <div class="platform-tag common-like">nonJvm</div>
+              <div class="platform-tag wasm-like">wasmJs</div>
             </div>
           </div>
         </div>

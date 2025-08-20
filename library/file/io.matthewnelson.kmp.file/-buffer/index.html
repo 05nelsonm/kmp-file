@@ -41,11 +41,13 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">0.3.0
+        <div class="library-version" id="library-version">0.4.0
         </div>
         <div class="navigation-controls">
         <div class="filter-section filter-section_loading" id="filter-section">
                 <button class="platform-tag platform-selector js-like" data-active="" data-filter=":library:file/jsMain">js</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/jsWasmJsMain">jsWasmJs</button>
+                <button class="platform-tag platform-selector wasm-like" data-active="" data-filter=":library:file/wasmJsMain">wasmJs</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
@@ -59,6 +61,20 @@
                                 <input type="checkbox" class="checkbox--input" id=":library:file/jsMain" data-filter=":library:file/jsMain">
                                 <span class="checkbox--icon"></span>
                                 js
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/jsWasmJsMain" data-filter=":library:file/jsWasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                jsWasmJs
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option wasm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/wasmJsMain" data-filter=":library:file/wasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                wasmJs
                             </label>
                         </li>
                 </ul>
@@ -90,32 +106,32 @@
                 </div>
             </div>
             <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="file::io.matthewnelson.kmp.file/Buffer///PointingToDeclaration//1272649928">
+<div class="main-content" data-page-type="classlike" id="content" pageids="file::io.matthewnelson.kmp.file/Buffer///PointingToDeclaration//-455587965">
   <div class="breadcrumbs"><a href="../../index.html">file</a><span class="delimiter">/</span><a href="../index.html">io.matthewnelson.kmp.file</a><span class="delimiter">/</span><span class="current">Buffer</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Buffer</span></span></h1>
     <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">value </span><span class="token keyword">class </span><a href="index.html">Buffer</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/jsMain/kotlin/io/matthewnelson/kmp/file/Wrappers.kt#L32">source</a>)</span></span></div><p class="paragraph">If printing to console, use <a href="unwrap.html">unwrap</a> beforehand, otherwise will not print the contents of <span data-unresolved-link="io.matthewnelson.kmp.file.internal/buffer_Buffer///PointingToDeclaration/">buffer_Buffer</span>.</p><p class="paragraph">e.g.</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">println(buffer.unwrap())</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div>    </div>
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">value </span><span class="token keyword">class </span><a href="index.html">Buffer</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/jsMain/kotlin/io/matthewnelson/kmp/file/Wrappers.kt#L32">source</a>)</span></span></div><p class="paragraph">A wrapper value class for a Node.js <a href="https://nodejs.org/api/buffer.html#class-buffer">Buffer</a> object.</p><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-companion/alloc.html"><span>Buffer.</span><wbr><span>Companion.</span><wbr><span>alloc</span></a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-companion/wrap.html"><span>Buffer.</span><wbr><span>Companion.</span><wbr><span>wrap</span></a></div></span></div><div></div></div></div></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">value </span><span class="token keyword">class </span><a href="index.html">Buffer</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/jsWasmJsMain/kotlin/io/matthewnelson/kmp/file/Buffer.kt#L29">source</a>)</span></span></div><p class="paragraph">A wrapper value class for a Node.js <a href="https://nodejs.org/api/buffer.html#class-buffer">Buffer</a> object.</p><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-companion/alloc.html"><span>Buffer.</span><wbr><span>Companion.</span><wbr><span>alloc</span></a></div></span></div><div></div></div></div></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">value </span><span class="token keyword">class </span><a href="index.html">Buffer</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/wasmJsMain/kotlin/io/matthewnelson/kmp/file/WrappersWasmJs.kt#L33">source</a>)</span></span></div><p class="paragraph">A wrapper value class for a Node.js <a href="https://nodejs.org/api/buffer.html#class-buffer">Buffer</a> object.</p><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-companion/alloc.html"><span>Buffer.</span><wbr><span>Companion.</span><wbr><span>alloc</span></a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-companion/wrap.html"><span>Buffer.</span><wbr><span>Companion.</span><wbr><span>wrap</span></a></div></span></div><div></div></div></div></div></div>    </div>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
         <h2 class="">Types</h2>
-        <div class="table"><a data-name="539932563%2FClasslikes%2F1272649928" anchor-label="Companion" id="539932563%2FClasslikes%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
-          <div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
+        <div class="table"><a data-name="539932563%2FClasslikes%2F-455587965" anchor-label="Companion" id="539932563%2FClasslikes%2F-455587965" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="539932563%2FClasslikes%2F1272649928"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="539932563%2FClasslikes%2F-455587965"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -124,19 +140,19 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="">Properties</h2>
-        <div class="table"><a data-name="-824985752%2FProperties%2F1272649928" anchor-label="length" id="-824985752%2FProperties%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
-          <div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
+        <div class="table"><a data-name="-824985752%2FProperties%2F-455587965" anchor-label="length" id="-824985752%2FProperties%2F-455587965" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="length.html"><span><span>length</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-824985752%2FProperties%2F1272649928"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-824985752%2FProperties%2F-455587965"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="length.html">length</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="length.html">length</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></div><div class="brief "><p class="paragraph">The length of the underlying Node.js Buffer.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="length.html">length</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></div><div class="brief "><p class="paragraph">The length of the underlying Node.js Buffer.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="length.html">length</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></div><div class="brief "><p class="paragraph">The length of the underlying Node.js Buffer.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -145,70 +161,121 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-1962477653%2FFunctions%2F1272649928" anchor-label="fill" id="-1962477653%2FFunctions%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
-          <div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
+        <div class="table"><a data-name="-1962477653%2FFunctions%2F-455587965" anchor-label="fill" id="-1962477653%2FFunctions%2F-455587965" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="fill.html"><span><span>fill</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1962477653%2FFunctions%2F1272649928"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1962477653%2FFunctions%2F-455587965"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="fill.html"><span class="token function">fill</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="fill.html"><span class="token function">fill</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Fills the buffer with 0-byte data.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="fill.html"><span class="token function">fill</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Fills the buffer with 0-byte data.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="fill.html"><span class="token function">fill</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Fills the buffer with 0-byte data.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-2049487907%2FFunctions%2F1272649928" anchor-label="readInt8" id="-2049487907%2FFunctions%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
-          <div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
+<a data-name="-650752009%2FFunctions%2F2022412038" anchor-label="get" id="-650752009%2FFunctions%2F2022412038" data-filterable-set=":library:file/jsWasmJsMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../get.html"><span><span>get</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-650752009%2FFunctions%2F2022412038"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-active="" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">inline operator </span><span class="token keyword">fun </span><a href="index.html">Buffer</a><span class="token punctuation">.</span><a href="../get.html"><span class="token function">get</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">index<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Byte///PointingToDeclaration/">Byte</span></div><div class="brief "><p class="paragraph">Helper for <a href="read-int8.html">Buffer.readInt8</a></p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2049487907%2FFunctions%2F-455587965" anchor-label="readInt8" id="-2049487907%2FFunctions%2F-455587965" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="read-int8.html"><span>read</span><wbr><span><span>Int8</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2049487907%2FFunctions%2F1272649928"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2049487907%2FFunctions%2F-455587965"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="read-int8.html"><span class="token function">readInt8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">index<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Byte///PointingToDeclaration/">Byte</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="read-int8.html"><span class="token function">readInt8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">index<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Byte///PointingToDeclaration/">Byte</span></div><div class="brief "><p class="paragraph">Reads a byte at the given <a href="read-int8.html">index</a> from the underlying Node.js Buffer.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="read-int8.html"><span class="token function">readInt8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">index<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Byte///PointingToDeclaration/">Byte</span></div><div class="brief "><p class="paragraph">Reads a byte at the given <a href="read-int8.html">index</a> from the underlying Node.js Buffer.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="read-int8.html"><span class="token function">readInt8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">index<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Byte///PointingToDeclaration/">Byte</span></div><div class="brief "><p class="paragraph">Reads a byte at the given <a href="read-int8.html">index</a> from the underlying Node.js Buffer.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-413373769%2FFunctions%2F1272649928" anchor-label="toUtf8" id="-413373769%2FFunctions%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
-          <div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
+<a data-name="789753553%2FFunctions%2F2022412038" anchor-label="set" id="789753553%2FFunctions%2F2022412038" data-filterable-set=":library:file/jsWasmJsMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../set.html"><span><span>set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="789753553%2FFunctions%2F2022412038"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-active="" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">inline operator </span><span class="token keyword">fun </span><a href="index.html">Buffer</a><span class="token punctuation">.</span><a href="../set.html"><span class="token function">set</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">index<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><span data-unresolved-link="kotlin/Byte///PointingToDeclaration/">Byte</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Helper for <a href="write-int8.html">Buffer.writeInt8</a></p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-413373769%2FFunctions%2F-455587965" anchor-label="toUtf8" id="-413373769%2FFunctions%2F-455587965" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="to-utf8.html"><span>to</span><wbr><span><span>Utf8</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-413373769%2FFunctions%2F1272649928"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-413373769%2FFunctions%2F-455587965"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="to-utf8.html"><span class="token function">toUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">start<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">end<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token operator"> = </span>this.length</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="to-utf8.html"><span class="token function">toUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">start<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token punctuation">, </span></span><span class="parameter ">end<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">Converts data from <a href="to-utf8.html">start</a> to <a href="to-utf8.html">end</a> from bytes, to UTF-8 text.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="to-utf8.html"><span class="token function">toUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">start<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">end<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token operator"> = </span>this.length</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">Converts data from <a href="to-utf8.html">start</a> to <a href="to-utf8.html">end</a> from bytes, to UTF-8 text.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="to-utf8.html"><span class="token function">toUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">start<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token punctuation">, </span></span><span class="parameter ">end<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">Converts data from <a href="to-utf8.html">start</a> to <a href="to-utf8.html">end</a> from bytes, to UTF-8 text.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="732266123%2FFunctions%2F1272649928" anchor-label="unwrap" id="732266123%2FFunctions%2F1272649928" data-filterable-set=":library:file/jsMain"></a>
-          <div class="table-row" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain">
+<a data-name="732266123%2FFunctions%2F-780396663" anchor-label="unwrap" id="732266123%2FFunctions%2F-780396663" data-filterable-set=":library:file/jsMain,:library:file/wasmJsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsMain,:library:file/wasmJsMain" data-filterable-set=":library:file/jsMain,:library:file/wasmJsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="unwrap.html"><span><span>unwrap</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="732266123%2FFunctions%2F1272649928"></span>
+                  <div><a href="../../../../library/file/io.matthewnelson.kmp.file/-buffer/[wasm-js]unwrap.html"><span><span>unwrap</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="732266123%2FFunctions%2F-780396663"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="unwrap.html"><span class="token function">unwrap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span>dynamic</div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="[js]unwrap.html"><span class="token function">unwrap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span>dynamic</div><div class="brief "><p class="paragraph">Unwraps the <a href="index.html">Buffer</a> value class, returning the underlying Node.js Buffer as a dynamic object.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="[wasm-js]unwrap.html"><span class="token function">unwrap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin.js/JsAny///PointingToDeclaration/">JsAny</span></div><div class="brief "><p class="paragraph">Unwraps the <a href="index.html">Buffer</a> value class, returning the underlying Node.js Buffer as a <span data-unresolved-link="kotlin.js/JsAny///PointingToDeclaration/">JsAny</span> object.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-647048202%2FFunctions%2F-455587965" anchor-label="writeInt8" id="-647048202%2FFunctions%2F-455587965" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="write-int8.html"><span>write</span><wbr><span><span>Int8</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-647048202%2FFunctions%2F-455587965"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="write-int8.html"><span class="token function">writeInt8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">index<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><span data-unresolved-link="kotlin/Byte///PointingToDeclaration/">Byte</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes a byte at the given <a href="write-int8.html">index</a> to the underlying Node.js Buffer.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="write-int8.html"><span class="token function">writeInt8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">index<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><span data-unresolved-link="kotlin/Byte///PointingToDeclaration/">Byte</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes a byte at the given <a href="write-int8.html">index</a> to the underlying Node.js Buffer.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="write-int8.html"><span class="token function">writeInt8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">index<span class="token operator">: </span><span data-unresolved-link="kotlin/Number///PointingToDeclaration/">Number</span><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><span data-unresolved-link="kotlin/Byte///PointingToDeclaration/">Byte</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes a byte at the given <a href="write-int8.html">index</a> to the underlying Node.js Buffer.</p></div></div>                  </div>
                 </div>
               </div>
             </div>

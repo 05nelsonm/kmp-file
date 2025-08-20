@@ -1,5 +1,6 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
-
+$dokka.location:io.matthewnelson.kmp.file/Buffer/unwrap/#/PointingToDeclaration/file/io.matthewnelson.kmp.file/-buffer/[wasm-js]unwrap.html
+$dokka.location:io.matthewnelson.kmp.file/Stats/unwrap/#/PointingToDeclaration/file/io.matthewnelson.kmp.file/-stats/[wasm-js]unwrap.html
 module:library/file
 io.matthewnelson.kmp.file

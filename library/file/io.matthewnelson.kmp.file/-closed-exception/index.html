@@ -1,0 +1,273 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ClosedException</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+    <nav class="navigation theme-dark" id="navigation-wrapper">
+<a class="library-name--link" href="../../../../index.html">
+                    kmp-file
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">0.4.0
+        </div>
+        <div class="navigation-controls">
+        <div class="filter-section filter-section_loading" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/commonMain">common</button>
+                <button class="platform-tag platform-selector js-like" data-active="" data-filter=":library:file/jsMain">js</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/jsWasmJsMain">jsWasmJs</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:file/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/nonJvmMain">nonJvm</button>
+                <button class="platform-tag platform-selector wasm-like" data-active="" data-filter=":library:file/wasmJsMain">wasmJs</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
+                    <div class="dropdown--header"><span>Platform filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close platform filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/commonMain" data-filter=":library:file/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option js-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/jsMain" data-filter=":library:file/jsMain">
+                                <span class="checkbox--icon"></span>
+                                js
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/jsWasmJsMain" data-filter=":library:file/jsWasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                jsWasmJs
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/jvmMain" data-filter=":library:file/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/nonJvmMain" data-filter=":library:file/nonJvmMain">
+                                <span class="checkbox--icon"></span>
+                                nonJvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option wasm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/wasmJsMain" data-filter=":library:file/wasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                wasmJs
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </div>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                    <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox">
+                        <div class="dropdown--header">
+                            <span>
+                                    kmp-file
+                            </span>
+                            <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                                <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                            </button>
+                        </div>
+                        <div class="sidebar--inner" id="sideMenu"></div>
+                    </ul>
+                    <div class="dropdown--overlay"></div>
+                </div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="file::io.matthewnelson.kmp.file/ClosedException///PointingToDeclaration//1005533232">
+  <div class="breadcrumbs"><a href="../../index.html">file</a><span class="delimiter">/</span><a href="../index.html">io.matthewnelson.kmp.file</a><span class="delimiter">/</span><span class="current">ClosedException</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Closed</span><wbr><span><span>Exception</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/jvmMain" data-filterable-set=":library:file/jvmMain" data-toggle=":library:file/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">ClosedException</a> : <a href="../-i-o-exception/index.html">IOException</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/commonMain/kotlin/io/matthewnelson/kmp/file/Exceptions.kt#L44">source</a>)</span></span></div><p class="paragraph">Checked exception thrown when an attempt is made to invoke or complete an I/O operation upon something that is closed, or at least closed to that operation. That this exception is thrown does not necessarily imply that implementation is completely closed (for a <a href="../-file-stream/index.html">FileStream</a>, it does). A socket whose write half has been shut down, for example, may still be open for reading.</p></div><div class="content sourceset-dependent-content" data-togglable=":library:file/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="index.html">ClosedException</a><span class="token operator"> = </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/channels/ClosedChannelException.html">ClosedChannelException</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/jvmMain/kotlin/io/matthewnelson/kmp/file/JvmPlatform.kt#L24">source</a>)</span></span></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">ClosedException</a> : <a href="../-i-o-exception/index.html">IOException</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/nonJvmMain/kotlin/io/matthewnelson/kmp/file/NonJvmPlatform.kt#L38">source</a>)</span></span></div><p class="paragraph">Checked exception thrown when an attempt is made to invoke or complete an I/O operation upon something that is closed, or at least closed to that operation. That this exception is thrown does not necessarily imply that implementation is completely closed (for a <a href="../-file-stream/index.html">FileStream</a>, it does). A socket whose write half has been shut down, for example, may still be open for reading.</p></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1397239526%2FConstructors%2F316926496" anchor-label="ClosedException" id="1397239526%2FConstructors%2F316926496" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":library:file/commonMain,:library:file/nonJvmMain" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-closed-exception.html"><span>Closed</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1397239526%2FConstructors%2F316926496"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-654012527%2FProperties%2F316926496" anchor-label="cause" id="-654012527%2FProperties%2F316926496" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain,:library:file/nonJvmMain" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><span data-unresolved-link="kotlin/Throwable/cause/#/PointingToDeclaration/"><span><span>cause</span></span></span></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-654012527%2FProperties%2F316926496"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="../-interrupted-exception/index.html#-654012527%2FProperties%2F-1497642970">cause</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token operator">?</span></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="../-interrupted-exception/index.html#-654012527%2FProperties%2F1798813062">cause</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token operator">?</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-975344832%2FProperties%2F-455587965" anchor-label="errorCodeOrNull" id="-975344832%2FProperties%2F-455587965" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain" data-filterable-set=":library:file/jsWasmJsMain,:library:file/jsMain,:library:file/wasmJsMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../error-code-or-null.html"><span>error</span><wbr><span>Code</span><wbr><span>Or</span><wbr><span><span>Null</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-975344832%2FProperties%2F-455587965"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="../error-code-or-null.html">errorCodeOrNull</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Attempts to retrieve the <code class="lang-kotlin">code</code> from an exception thrown from JavaScript. If unable to retrieve it, <code class="lang-kotlin">null</code> is returned.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="../error-code-or-null.html">errorCodeOrNull</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Attempts to retrieve the <code class="lang-kotlin">code</code> from an exception thrown from JavaScript. If unable to retrieve it, <code class="lang-kotlin">null</code> is returned.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="../error-code-or-null.html">errorCodeOrNull</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Attempts to retrieve the <code class="lang-kotlin">code</code> from an exception thrown from JavaScript. If unable to retrieve it, <code class="lang-kotlin">null</code> is returned.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1824300659%2FProperties%2F316926496" anchor-label="message" id="1824300659%2FProperties%2F316926496" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain,:library:file/nonJvmMain" data-filterable-set=":library:file/commonMain,:library:file/nonJvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><span data-unresolved-link="kotlin/Throwable/message/#/PointingToDeclaration/"><span><span>message</span></span></span></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1824300659%2FProperties%2F316926496"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain" data-active="" data-toggle=":library:file/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:file/nonJvmMain" data-filterable-set=":library:file/nonJvmMain" data-toggle=":library:file/nonJvmMain">nonJvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="../-interrupted-exception/index.html#1824300659%2FProperties%2F-1497642970">message</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/nonJvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="../-interrupted-exception/index.html#1824300659%2FProperties%2F1798813062">message</a><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1175044559%2FFunctions%2F2022412038" anchor-label="toIOException" id="-1175044559%2FFunctions%2F2022412038" data-filterable-set=":library:file/jsWasmJsMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../to-i-o-exception.html"><span>to</span><wbr><span><span>IOException</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1175044559%2FFunctions%2F2022412038"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-active="" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="../to-i-o-exception.html"><span class="token function">toIOException</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-i-o-exception/index.html">IOException</a></div><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="../to-i-o-exception.html"><span class="token function">toIOException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../-file/index.html">File</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">other<span class="token operator">: </span><a href="../-file/index.html">File</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-i-o-exception/index.html">IOException</a></div><div class="brief "><p class="paragraph">Converts the throwable to an <a href="../-i-o-exception/index.html">IOException</a> if it is not already one. When <a href="../error-code-or-null.html">errorCodeOrNull</a> is <code class="lang-kotlin">ENOENT</code>, then this function will return <a href="../-file-not-found-exception/index.html">FileNotFoundException</a>. When the <a href="../error-code-or-null.html">errorCodeOrNull</a> is <code class="lang-kotlin">EINTR</code>, then this function will return <a href="../-interrupted-i-o-exception/index.html">InterruptedIOException</a>. When the <a href="../error-code-or-null.html">errorCodeOrNull</a> starts with <code class="lang-kotlin">ERR_FS_</code>, then this function will return <a href="../-file-system-exception/index.html">FileSystemException</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-465098681%2FFunctions%2F-1497642970" anchor-label="wrapIOException" id="-465098681%2FFunctions%2F-1497642970" data-filterable-set=":library:file/commonMain"></a>
+          <div class="table-row" data-filterable-current=":library:file/commonMain" data-filterable-set=":library:file/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../wrap-i-o-exception.html"><span>wrap</span><wbr><span><span>IOException</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-465098681%2FFunctions%2F-1497642970"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"wrapIO"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">inline </span><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="../wrap-i-o-exception.html"><span class="token function">wrapIOException</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-i-o-exception/index.html">IOException</a></div><div class="brief "><p class="paragraph">Ensures that the throwable is an instance of <a href="../-i-o-exception/index.html">IOException</a>. If it is not, it will encase it in one. If the throwable is an instance of <a href="../-interrupted-exception/index.html">InterruptedException</a>, this function returns an <a href="../-interrupted-i-o-exception/index.html">InterruptedIOException</a> with the <a href="../-interrupted-exception/index.html">InterruptedException</a> as a suppressed exception.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmName///PointingToDeclaration/"><span class="token annotation builtin">JvmName</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"wrapIO"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">inline </span><span class="token keyword">fun </span><span data-unresolved-link="kotlin/Throwable///PointingToDeclaration/">Throwable</span><span class="token punctuation">.</span><a href="../wrap-i-o-exception.html"><span class="token function">wrapIOException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lazyMessage<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-i-o-exception/index.html">IOException</a></div><div class="brief "><p class="paragraph">Ensures that the throwable is an instance of <a href="../-i-o-exception/index.html">IOException</a>. If it is not, it will encase it in one with the provided <a href="../wrap-i-o-exception.html">lazyMessage</a>. If the throwable is an instance of <a href="../-interrupted-exception/index.html">InterruptedException</a>, this function returns an <a href="../-interrupted-i-o-exception/index.html">InterruptedIOException</a> with the <a href="../-interrupted-exception/index.html">InterruptedException</a> as a suppressed exception.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+        <span>© 2023-2025 Copyright Matthew Nelson</span>
+        <span class="pull-right">
+            <span>Generated by </span>
+            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                <span>dokka</span>
+            </a>
+        </span>
+    </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

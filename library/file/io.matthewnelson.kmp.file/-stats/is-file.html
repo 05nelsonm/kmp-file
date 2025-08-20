@@ -41,11 +41,13 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">0.3.0
+        <div class="library-version" id="library-version">0.4.0
         </div>
         <div class="navigation-controls">
         <div class="filter-section filter-section_loading" id="filter-section">
                 <button class="platform-tag platform-selector js-like" data-active="" data-filter=":library:file/jsMain">js</button>
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":library:file/jsWasmJsMain">jsWasmJs</button>
+                <button class="platform-tag platform-selector wasm-like" data-active="" data-filter=":library:file/wasmJsMain">wasmJs</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
@@ -59,6 +61,20 @@
                                 <input type="checkbox" class="checkbox--input" id=":library:file/jsMain" data-filter=":library:file/jsMain">
                                 <span class="checkbox--icon"></span>
                                 js
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/jsWasmJsMain" data-filter=":library:file/jsWasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                jsWasmJs
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option wasm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:file/wasmJsMain" data-filter=":library:file/wasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                wasmJs
                             </label>
                         </li>
                 </ul>
@@ -90,14 +106,14 @@
                 </div>
             </div>
             <div id="main">
-<div class="main-content" data-page-type="member" id="content" pageids="file::io.matthewnelson.kmp.file/Stats/isFile/#/PointingToDeclaration//1272649928">
+<div class="main-content" data-page-type="member" id="content" pageids="file::io.matthewnelson.kmp.file/Stats/isFile/#/PointingToDeclaration//-455587965">
   <div class="breadcrumbs"><a href="../../index.html">file</a><span class="delimiter">/</span><a href="../index.html">io.matthewnelson.kmp.file</a><span class="delimiter">/</span><a href="index.html">Stats</a><span class="delimiter">/</span><span class="current">isFile</span></div>
   <div class="cover ">
     <h1 class="cover"><span>is</span><wbr><span><span>File</span></span></h1>
   </div>
   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="is-file.html">isFile</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/jsMain/kotlin/io/matthewnelson/kmp/file/Wrappers.kt#L79">source</a>)</span></span></div></div>  </div>
+    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:file/jsMain" data-filterable-set=":library:file/jsMain" data-active="" data-toggle=":library:file/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":library:file/jsWasmJsMain" data-filterable-set=":library:file/jsWasmJsMain" data-toggle=":library:file/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:file/wasmJsMain" data-filterable-set=":library:file/wasmJsMain" data-toggle=":library:file/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:file/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="is-file.html">isFile</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/jsMain/kotlin/io/matthewnelson/kmp/file/Wrappers.kt#L154">source</a>)</span></span></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:file/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="is-file.html">isFile</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/jsWasmJsMain/kotlin/io/matthewnelson/kmp/file/Stats.kt#L34">source</a>)</span></span></div></div><div class="content sourceset-dependent-content" data-togglable=":library:file/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="is-file.html">isFile</a><span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="clearfix"><span class="floating-right">(<a href="https://github.com/05nelsonm/kmp-file/tree/master/library/file/src/wasmJsMain/kotlin/io/matthewnelson/kmp/file/WrappersWasmJs.kt#L155">source</a>)</span></span></div></div>  </div>
 </div>
     <div class="footer">
         <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
