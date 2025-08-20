@@ -8,6 +8,7 @@
 ![badge-platform-android] 
 ![badge-platform-jvm]
 ![badge-platform-js-node] 
+![badge-platform-wasm] 
 ![badge-platform-linux] 
 ![badge-platform-macos] 
 ![badge-platform-ios] 
@@ -19,137 +20,40 @@
 ![badge-support-js-ir] 
 ![badge-support-linux-arm] 
 
-A very simple `File` API for Kotlin Multiplatform. It gets the job done.
-
-For `Jvm`, `File` is `typealias` to `java.io.File`, and `commonMain` extensions 
-point to `kotlin.io` extensions so that the footprint is very small for 
-Java/Android only consumers.
-
-The `File` implementation for `nonJvm` is operationally equivalent to 
-`Jvm` for consistency across platforms. Please submit an [issue][url-issue] 
-if you discover any inconsistencies (e.g. path resolution).
+A no-nonsense `File` API for Kotlin Multiplatform. It gets the job done.
 
 ```kotlin
-import io.matthewnelson.kmp.file.*
+fun main() {
+    val file = "/path/to/thing.txt".toFile()
+    assertFalse(file.exists2())
+    file.parentFile?.mkdirs2(mode = "775", mustCreate = true)
 
-fun commonMain(f: File) {
-    // System directory separator character (`/` or `\`)
-    SysDirSep
-    // System temporary directory
-    SysTempDir
+    val data = "Hello World!".encodeToByteArray()
 
-    f.isAbsolute()
-    f.exists()
-    f.delete()
-    f.mkdir()
-    f.mkdirs()
+    // See also openRead, openWrite, openAppend
+    file.openReadWrite(excl = OpenExcl.MustCreate.of("644")).use { stream ->
+        assertEquals(0L, stream.size())
+        assertEquals(0L, stream.postion())
 
-    // ↓↓ Extension functions ↓↓
-    f.name
-    f.parentPath
-    f.parentFile
-    f.path
-    f.absolutePath
-    f.absoluteFile
-    f.canonicalPath()
-    f.canonicalFile()
+        stream.write(data)
+        assertEquals(data.size.toLong(), stream.size())
+        assertEquals(data.size.toLong(), stream.position())
 
-    // equivalent to File("/some/path")
-    val file = "/some/path".toFile()
+        val buf = ByteArray(data.size)
+        stream.position(new = 2L)
+        stream.read(buf, position = 0L)
+        assertEquals(2L, stream.position())
+        assertContentEquals(data, buf)
 
-    // resolve child paths
-    val child = file.resolve("child")
-    println(child.path) // >> `/some/path/child`
-    println(child.resolve(file).path) // >> `/some/path` (file is rooted)
-
-    // normalized File (e.g. removal of . and ..)
-    f.normalize()
-
-    // basic write functionality
-    f.writeBytes(ByteArray(25) { it.toByte() })
-    f.writeUtf8("Hello World!")
-
-    // basic read functionality
-    f.readBytes()
-    val utf8: String = f.readUtf8()
-    println(utf8) // prints >> Hello World!
-}
-```
-
-```kotlin
-import io.matthewnelson.kmp.file.*
-
-fun nonJvmMain(f: File) {
-    // File permissions (no-op for Windows) for Node.js/Native
-    f.chmod("700")
-}
-```
-
-```kotlin
-import io.matthewnelson.kmp.file.*
-
-fun jsMain(f1: File, f2: File) {
-    // Node.js specific extension functions
-
-    // Buffers for reading/writing
-    val buffer = f1.read()
-    val b = ByteArray(25) { i -> buffer.readInt8(i) }
-    println(b.toList())
-
-    // If APIs aren't available, simply unwrap
-    val bufferDynamic = buffer.unwrap()
-    val gzipBufferDynamic = try {
-        // zlib might not work if you haven't declared
-        // it, but for this example lets assume it's
-        // available.
-        js("require('zlib')").gzipSync(bufferDynamic)
-    } catch (t: Throwable) {
-        // helper for converting exceptions to IOException
-        throw t.toIOException()
+        stream.size(new = 0L).sync(meta = true).write(buf)
     }
 
-    // Can re-wrap the dynamic buffer for a "safer" API
-    val gzipBuffer = Buffer.wrap(gzipBufferDynamic)
+    file.appendBytes(excl = OpenExcl.MustExist, data)
+    file.chmod2("400")
+    assertContentEquals(data + data, file.readBytes())
+    assertEquals("Hello World!Hello World!", file.readUtf8())
 
-    f2.write(gzipBuffer)
-
-    // File stats
-    val lstats = f1.lstat()
-    val stats = f1.stat()
-    
-    // If APIs aren't available, simply unwrap to use.
-    val statsDynamic = stats.unwrap()
-    statsDynamic.nlink as Int
-}
-```
-
-```kotlin
-import io.matthewnelson.kmp.file.*
-
-@OptIn(DelicateFileApi::class, ExperimentalForeignApi::class)
-fun nativeMain(f1: File, f2: File) {
-    // Native specific extension functions
-
-    // Use a CPointer<FILE> with auto-closure on completion
-    f1.fOpen(flags = "rb") { file1 ->
-        f2.fOpen(flags = "wb") { file2 ->
-            val buf = ByteArray(4096)
-
-            while (true) {
-                // posix.fread helper extension for CPointer<FILE>
-                val read = file1.fRead(buf)
-                if (read < 0) throw errnoToIOException(errno)
-                if (read == 0) break
-
-                // posix.fwrite helper extension for CPointer<FILE>
-                if (file2.fWrite(buf, len = read) < 0) {
-
-                    // helper for converting an error to an IOException
-                    throw errnoToIOException(errno)
-                }
-            }
-        }
-    }
+    file.delete2(ignoreReadOnly = true)
 }
 ```
 
@@ -158,12 +62,12 @@ fun nativeMain(f1: File, f2: File) {
 <!-- TAG_VERSION -->
 ```kotlin
 dependencies {
-    implementation("io.matthewnelson.kmp-file:file:0.3.0")
+    implementation("io.matthewnelson.kmp-file:file:0.4.0")
 }
 ```
 
 <!-- TAG_VERSION -->
-[badge-latest-release]: https://img.shields.io/badge/latest--release-0.3.0-blue.svg?style=flat
+[badge-latest-release]: https://img.shields.io/badge/latest--release-0.4.0-blue.svg?style=flat
 [badge-license]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
 
 <!-- TAG_DEPENDENCIES -->

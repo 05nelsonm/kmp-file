@@ -1,5 +1,74 @@
 # CHANGELOG
 
+## Version 0.4.0 (2025-08-20)
+ - Adds `SysPathSep` [[#105]][105]
+ - Adds support for `wasmJs` [[#118]][118]
+ - Migrates API to use an underlying filesystem abstraction [[#108]][108]:
+     - Deprecates the following APIs:
+         - `File.getAbsolutePath()`
+         - `File.getAbsoluteFile()`
+         - `File.getCanonicalPath()`
+         - `File.getCanonicalFile()`
+         - `File.delete()`
+         - `File.exists()`
+         - `File.mkdir()`
+         - `File.mkdirs()`
+         - `File.absolutePath`
+         - `File.absoluteFile`
+         - `File.canonicalPath()`
+         - `File.canonicalFile()`
+         - `File.chmod()`
+     - Adds the following APIs:
+         - `SysFsInfo`
+         - `File.absolutePath2()`
+         - `File.absoluteFile2()`
+         - `File.canonicalPath2()`
+         - `File.canonicalFile2()`
+         - `File.chmod2()`
+             - Now available from `commonMain`
+             - Now takes argument `mustExist` in addition to `mode`
+         - `File.delete2()`
+             - Now takes argument `ignoreReadOnly` (Windows) and `mustExist`
+         - `File.exists2()`
+         - `File.mkdir2()`
+             - Now takes argument `mode` and `mustCreate`
+         - `File.mkdirs2()`
+             - Now takes argument `mode` and `mustCreate`
+         - `errnoToIOException()` (from `nativeMain`)
+             - Now takes argument `file` and `other` in addition to `errno` which,
+               if non-null, will return an appropriate `FileSystemException`
+         - `lastErrorToIOException()` (from `mingwMain`)
+         - `Throwable.toIOException()` (from `jsWasmJsMain`)
+             - Now takes argument `file` and `other` which,
+               if non-null, will return an appropriate `FileSystemException`
+ - Adds the following IO exceptions [[#108]][108] [[#141]][141] [[#169]][169]:
+     - `FileSystemException`
+     - `FileAlreadyExistsException`
+     - `AccessDeniedException`
+     - `NotDirectoryException`
+     - `DirectoryNotEmptyException`
+     - `InterruptedIOException`
+     - `ClosedException`
+ - Adds `FileStream.{Read/Write/ReadWrite}` APIs [[#115]][115] [[#117]][117] [[#119]][119] [[#126]][126] 
+   [[#129]][129] [[#130]][130] [[#131]][131] [[#133]][133] [[#138]][139] [[#143]][143] [[#149]][149] [[#155]][155] 
+   [[#160]][160] [[#161]][161] [[#164]][164] [[#167]][167] [[#169]][169] [[#172]][172] [[#173]][173] [[#174]][174] 
+   [[#176]][176] [[#177]][177]
+     - Adds the `Closeable` interface and `Closeable.use` function
+     - Adds the following APIs:
+         - `File.openRead()`
+         - `File.openReadWrite()`
+         - `File.openWrite()`
+         - `File.openAppend()`
+         - `File.appendBytes()`
+         - `File.appendUtf8()`
+         - `OpenExcl.{MaybeCreate/MustCreate/MustExist}`
+         - `FileStream.Read.asInputStream()` (from `jvmMain`)
+         - `FileStream.Write.asOutputStream()` (from `jvmMain`)
+     - Deprecates the following `nativeMain` APIs:
+         - `File.fOpen()`
+         - `CPointer<FILE>.fRead()`
+         - `CPointer<FILE>.fWrite()`
+
 ## Version 0.3.0 (2025-06-11)
  - Updates `kotlin` to `2.1.21` [[#89]][89]
  - Adds support for the following targets [[#85]][85]:
@@ -104,3 +173,29 @@
 [88]: https://github.com/05nelsonm/kmp-file/pull/88
 [89]: https://github.com/05nelsonm/kmp-file/pull/89
 [94]: https://github.com/05nelsonm/kmp-file/pull/94
+[105]: https://github.com/05nelsonm/kmp-file/pull/105
+[108]: https://github.com/05nelsonm/kmp-file/pull/108
+[115]: https://github.com/05nelsonm/kmp-file/pull/115
+[117]: https://github.com/05nelsonm/kmp-file/pull/117
+[118]: https://github.com/05nelsonm/kmp-file/pull/118
+[119]: https://github.com/05nelsonm/kmp-file/pull/119
+[126]: https://github.com/05nelsonm/kmp-file/pull/126
+[129]: https://github.com/05nelsonm/kmp-file/pull/129
+[130]: https://github.com/05nelsonm/kmp-file/pull/130
+[131]: https://github.com/05nelsonm/kmp-file/pull/131
+[133]: https://github.com/05nelsonm/kmp-file/pull/133
+[139]: https://github.com/05nelsonm/kmp-file/pull/139
+[141]: https://github.com/05nelsonm/kmp-file/pull/141
+[143]: https://github.com/05nelsonm/kmp-file/pull/143
+[149]: https://github.com/05nelsonm/kmp-file/pull/149
+[155]: https://github.com/05nelsonm/kmp-file/pull/155
+[160]: https://github.com/05nelsonm/kmp-file/pull/160
+[161]: https://github.com/05nelsonm/kmp-file/pull/161
+[164]: https://github.com/05nelsonm/kmp-file/pull/164
+[167]: https://github.com/05nelsonm/kmp-file/pull/167
+[169]: https://github.com/05nelsonm/kmp-file/pull/169
+[172]: https://github.com/05nelsonm/kmp-file/pull/172
+[173]: https://github.com/05nelsonm/kmp-file/pull/173
+[174]: https://github.com/05nelsonm/kmp-file/pull/174
+[176]: https://github.com/05nelsonm/kmp-file/pull/176
+[177]: https://github.com/05nelsonm/kmp-file/pull/177
