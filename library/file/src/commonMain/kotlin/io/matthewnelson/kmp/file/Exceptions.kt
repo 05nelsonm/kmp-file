@@ -161,7 +161,7 @@ public inline fun Throwable.wrapIOException(
     if (this is IOException) return this
     val msg = lazyMessage()
     if (this is InterruptedException) {
-        InterruptedIOException(msg).also { it.addSuppressed(this) }
+        return InterruptedIOException(msg).also { it.addSuppressed(this) }
     }
     return IOException(msg, this)
 }
