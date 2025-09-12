@@ -14,7 +14,7 @@ gradle-kotlin               = "2.2.20"
 gradle-publish-maven        = "0.34.0"
 
 kotlincrypto-catalog        = "0.7.0" # Utilized from settings.gradle.kts
-kotlinx-atomicfu            = "0.28.0"
+kotlinx-atomicfu            = "0.29.0"
 
 [libraries]
 gradle-dokka                = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "gradle-dokka" }
