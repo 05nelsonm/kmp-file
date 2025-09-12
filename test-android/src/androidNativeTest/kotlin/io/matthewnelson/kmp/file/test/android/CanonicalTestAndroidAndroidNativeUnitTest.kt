@@ -15,8 +15,18 @@
  **/
 package io.matthewnelson.kmp.file.test.android
 
-internal const val ENV_KEY_EXPECTED_TEMP_PATH = "kmp.file.test.EXPECTED_TEMP_PATH"
-internal const val ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY = "kmp.file.test.EXPECTED_ABSOLUTE_PATH_EMPTY"
-internal const val ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT = "kmp.file.test.EXPECTED_ABSOLUTE_PATH_DOT"
-internal const val ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY = "kmp.file.test.EXPECTED_CANONICAL_PATH_EMPTY"
-internal const val ENV_KEY_EXPECTED_CANONICAL_PATH_DOT = "kmp.file.test.EXPECTED_CANONICAL_PATH_DOT"
+import platform.posix.getppid
+import kotlin.test.Test
+
+internal class CanonicalTestAndroidAndroidNativeUnitTest: CanonicalTestAndroidBaseTest() {
+
+    // AndroidNative test executable will be executed from a child process
+    // within an emulator, so using parent pid b/c otherwise descriptors would
+    // point to the Process pipes configured for {0/1/2}.
+    override val pid: String = "${getppid()}"
+
+    @Test
+    override fun givenStdioDescriptor_whenCanonicalizedOnAndroid_thenReturnsDevNull() {
+        super.givenStdioDescriptor_whenCanonicalizedOnAndroid_thenReturnsDevNull()
+    }
+}

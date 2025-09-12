@@ -1,8 +1,0 @@
-public final class io/matthewnelson/kmp/file/test/android/TEST_ENV_KEYSKt {
-	public static final field ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT Ljava/lang/String;
-	public static final field ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY Ljava/lang/String;
-	public static final field ENV_KEY_EXPECTED_CANONICAL_PATH_DOT Ljava/lang/String;
-	public static final field ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY Ljava/lang/String;
-	public static final field ENV_KEY_EXPECTED_TEMP_PATH Ljava/lang/String;
-}
-
