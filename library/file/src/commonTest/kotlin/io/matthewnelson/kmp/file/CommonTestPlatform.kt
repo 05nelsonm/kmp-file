@@ -28,8 +28,9 @@ val FILE_LOREM_IPSUM by lazy {
         .resolve("lorem_ipsum")
 }
 
-val FILE_SYM_LINK_2 by lazy {
+val FILE_LOREM_IPSUM_SYMLINK by lazy {
     DIR_TEST_SUPPORT
+        .resolve("sym_dir2")
         .resolve("sym_link2")
 }
 
