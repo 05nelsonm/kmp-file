@@ -646,10 +646,10 @@ internal class FsJsNode private constructor(
     }
 }
 
-internal fun nodeModuleBuffer(): ModuleBuffer = js("eval('require')('buffer')")
-internal fun nodeModuleFs(): ModuleFs = js("eval('require')('fs')")
-internal fun nodeModuleOs(): ModuleOs = js("eval('require')('os')")
-internal fun nodeModulePath(): ModulePath = js("eval('require')('path')")
+private fun nodeModuleBuffer(): ModuleBuffer = js("eval('require')('buffer')")
+private fun nodeModuleFs(): ModuleFs = js("eval('require')('fs')")
+private fun nodeModuleOs(): ModuleOs = js("eval('require')('os')")
+private fun nodeModulePath(): ModulePath = js("eval('require')('path')")
 
 @Suppress("UNUSED")
 private fun nodeOptionsMkDir(

@@ -44,7 +44,7 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
      * @throws [IOException] If an I/O error occurs, or the stream is closed.
      * */
     @Throws(IOException::class)
-    public open override fun flush() { sync(meta = true) }
+    public override fun flush() { sync(meta = true) }
 
     @Throws(IOException::class)
     public actual fun position(): Long

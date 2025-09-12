@@ -124,4 +124,4 @@ internal class FsJsBrowser private constructor(
 private fun jsNavigator(): JsNavigator = js("window ? window.navigator : self.navigator")
 
 @JsName("Navigator")
-internal external interface JsNavigator { val platform: String }
+private external interface JsNavigator { val platform: String }
