@@ -13,11 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file.internal.node
+@file:OptIn(ExperimentalWasmJsInterop::class)
 
-import io.matthewnelson.kmp.file.internal.js.JsObject
+package io.matthewnelson.kmp.file
 
-internal expect fun nodeOptionsMkDir(recursive: Boolean): JsObject
-internal expect fun nodeOptionsMkDir(recursive: Boolean, mode: String): JsObject
-internal expect fun nodeOptionsRmDir(force: Boolean, recursive: Boolean): JsObject
-internal expect fun nodeOptionsWriteFile(mode: String, flag: String): JsObject
+import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.internal.fs.FsJsNode
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.js
+
+@Suppress("UNUSED")
+class SysSepWasmJsUnitTest: SysSepSharedTest() {
+    override fun getenvPATH(): String? {
+        if (FsJs.INSTANCE !is FsJsNode) return null
+        return pathEnv()
+    }
+}
+
+@Suppress("RedundantNullableReturnType")
+private fun pathEnv(): String? = js("require('process').env['PATH']")

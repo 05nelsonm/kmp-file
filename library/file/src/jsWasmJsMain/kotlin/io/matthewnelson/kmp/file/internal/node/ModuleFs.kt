@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("PropertyName", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:OptIn(ExperimentalWasmJsInterop::class)
+@file:Suppress("PropertyName")
 
 package io.matthewnelson.kmp.file.internal.node
 
 import io.matthewnelson.kmp.file.internal.js.JsObject
 import io.matthewnelson.kmp.file.internal.Path
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.JsAny
+import kotlin.js.JsExport
 import kotlin.js.JsName
 
 /** [docs](https://nodejs.org/api/fs.html) */
@@ -81,10 +85,10 @@ internal external interface ConstantsFs {
 
 /** [docs](https://nodejs.org/api/fs.html#class-fsstats) */
 @JsName("Stats")
-internal expect class JsStats {
-    internal val mode: Int
-    internal val size: Double
-    internal fun isFile(): Boolean
-    internal fun isDirectory(): Boolean
-    internal fun isSymbolicLink(): Boolean
+internal external interface JsStats: JsAny {
+    val mode: Int
+    val size: Double
+    fun isFile(): Boolean
+    fun isDirectory(): Boolean
+    fun isSymbolicLink(): Boolean
 }

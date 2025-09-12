@@ -130,8 +130,7 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
         // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public fun wrap(buffer: dynamic): Buffer {
             FsJsNode.require()
-            @OptIn(DelicateFileApi::class)
-            if (!JsBuffer.isBuffer(buffer)) {
+            if (!isJsBuffer(buffer)) {
                 throw IllegalArgumentException("Object is not a Buffer")
             }
             return Buffer(buffer.unsafeCast<JsBuffer>())
@@ -164,3 +163,6 @@ public actual value class Stats internal constructor(private val value: JsStats)
     /** @suppress */
     public actual override fun toString(): String = commonToString()
 }
+
+@Suppress("UNUSED")
+private fun isJsBuffer(any: dynamic): Boolean = js("Buffer.isBuffer(any)")

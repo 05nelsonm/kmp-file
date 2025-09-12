@@ -17,9 +17,5 @@ package io.matthewnelson.kmp.file.internal.js
 
 import kotlin.js.JsName
 
-/**
- * See [io.matthewnelson.kmp.file.internal.node.nodeOptionsMkDir]
- * See [io.matthewnelson.kmp.file.internal.node.nodeOptionsRmDir]
- * */
 @JsName("Object")
 internal abstract external class JsObject

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:OptIn(ExperimentalWasmJsInterop::class)
 @file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
 package io.matthewnelson.kmp.file
@@ -131,8 +132,7 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
         // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public fun wrap(buffer: JsAny): Buffer {
             FsJsNode.require()
-            @OptIn(DelicateFileApi::class)
-            if (!JsBuffer.isBuffer(buffer)) {
+            if (!isJsBuffer(buffer)) {
                 throw IllegalArgumentException("Object is not a Buffer")
             }
             return Buffer(buffer.unsafeCast())
@@ -165,3 +165,6 @@ public actual value class Stats internal constructor(private val value: JsStats)
     /** @suppress */
     public actual override fun toString(): String = commonToString()
 }
+
+@Suppress("UNUSED")
+private fun isJsBuffer(any: JsAny): Boolean = js("Buffer.isBuffer(any)")

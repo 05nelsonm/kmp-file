@@ -16,6 +16,8 @@
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
+import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnPlugin
+import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootExtension
 
 plugins {
     alias(libs.plugins.android.library) apply(false)
@@ -29,22 +31,36 @@ allprojects {
     findProperty("VERSION_NAME")?.let { version = it }
     findProperty("POM_DESCRIPTION")?.let { description = it.toString() }
 
-    repositories { mavenCentral() }
+    repositories {
+        mavenCentral()
+
+        if (version.toString().endsWith("-SNAPSHOT")) {
+            // Only allow snapshot dependencies for non-release versions.
+            // This would cause a build failure if attempting to make a release
+            // while depending on a -SNAPSHOT version (such as core).
+            maven("https://central.sonatype.com/repository/maven-snapshots/")
+        }
+    }
 }
 
 @Suppress("PropertyName")
 val CHECK_PUBLICATION = findProperty("CHECK_PUBLICATION")
 
 plugins.withType<YarnPlugin> {
-    the<YarnRootExtension>().lockFileDirectory = rootDir.resolve(".kotlin-js-store")
-    if (CHECK_PUBLICATION != null) {
-        the<YarnRootExtension>().yarnLockMismatchReport = YarnLockMismatchReport.NONE
+    the<YarnRootExtension>().apply {
+        lockFileDirectory = rootDir.resolve(".kotlin-js-store").resolve("js")
+        if (CHECK_PUBLICATION != null) yarnLockMismatchReport = YarnLockMismatchReport.NONE
+    }
+}
+
+plugins.withType<WasmYarnPlugin> {
+    the<WasmYarnRootExtension>().apply {
+        lockFileDirectory = rootDir.resolve(".kotlin-js-store").resolve("wasm")
+        if (CHECK_PUBLICATION != null) yarnLockMismatchReport = YarnLockMismatchReport.NONE
     }
 }
 
 apiValidation {
-    // Only enable when selectively enabled targets are not being passed via cli.
-    // See https://github.com/Kotlin/binary-compatibility-validator/issues/269
     @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
     klib.enabled = findProperty("KMP_TARGETS") == null
 

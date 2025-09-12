@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("UNUSED", "PropertyName", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:OptIn(ExperimentalWasmJsInterop::class)
+@file:Suppress("UNUSED", "PropertyName")
 
 package io.matthewnelson.kmp.file.internal.node
 
 import io.matthewnelson.kmp.file.DelicateFileApi
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.JsAny
 import kotlin.js.JsName
 
 /** [docs](https://nodejs.org/api/buffer.html) */
@@ -33,7 +36,7 @@ internal external interface ConstantsBuffer {
 
 /** [docs](https://nodejs.org/api/buffer.html#class-buffer) */
 @JsName("Buffer")
-internal expect class JsBuffer {
+internal external class JsBuffer: JsAny {
 
     internal val length: Double
 

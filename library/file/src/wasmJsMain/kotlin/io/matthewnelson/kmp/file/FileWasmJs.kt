@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:OptIn(ExperimentalWasmJsInterop::class)
 @file:Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
 
 package io.matthewnelson.kmp.file
@@ -95,7 +96,7 @@ internal fun internalWasmJsExternTryCatch(block: () -> Unit) {
 
 private class WasmJsException(message: String?, val code: String?): Throwable(message)
 
-@Suppress("UNUSED")
+@Suppress("UNUSED", "RedundantNullableReturnType")
 private fun wasmJsTryCatch(block: () -> Unit): JsError? = js(code =
 """{
     try {
