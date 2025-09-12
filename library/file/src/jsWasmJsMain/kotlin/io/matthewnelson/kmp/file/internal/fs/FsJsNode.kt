@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:OptIn(ExperimentalWasmJsInterop::class)
 @file:Suppress("RedundantVisibilityModifier", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal.fs
@@ -38,22 +39,20 @@ import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
+import io.matthewnelson.kmp.file.internal.js.JsObject
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
+import io.matthewnelson.kmp.file.internal.node.ModuleOs
 import io.matthewnelson.kmp.file.internal.node.ModulePath
-import io.matthewnelson.kmp.file.internal.node.nodeModuleBuffer
-import io.matthewnelson.kmp.file.internal.node.nodeModuleFs
-import io.matthewnelson.kmp.file.internal.node.nodeOptionsMkDir
-import io.matthewnelson.kmp.file.internal.node.nodeOptionsRmDir
-import io.matthewnelson.kmp.file.internal.node.nodeModuleOs
-import io.matthewnelson.kmp.file.internal.node.nodeModulePath
 import io.matthewnelson.kmp.file.jsExternTryCatch
 import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.stat
 import io.matthewnelson.kmp.file.toFile
 import io.matthewnelson.kmp.file.toIOException
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.js
 
 @OptIn(DelicateFileApi::class)
 internal class FsJsNode private constructor(
@@ -352,10 +351,12 @@ internal class FsJsNode private constructor(
     internal companion object {
 
         internal val INSTANCE: FsJsNode? by lazy {
-            val os = nodeModuleOs() ?: return@lazy null
-            val buffer = nodeModuleBuffer() ?: return@lazy null
-            val fs = nodeModuleFs() ?: return@lazy null
-            val path = nodeModulePath() ?: return@lazy null
+            if (!isNodeJs()) return@lazy null
+
+            val os = nodeModuleOs()
+            val buffer = nodeModuleBuffer()
+            val fs = nodeModuleFs()
+            val path = nodeModulePath()
 
             FsJsNode(
                 buffer = buffer,
@@ -644,3 +645,37 @@ internal class FsJsNode private constructor(
         }
     }
 }
+
+internal fun nodeModuleBuffer(): ModuleBuffer = js("eval('require')('buffer')")
+internal fun nodeModuleFs(): ModuleFs = js("eval('require')('fs')")
+internal fun nodeModuleOs(): ModuleOs = js("eval('require')('os')")
+internal fun nodeModulePath(): ModulePath = js("eval('require')('path')")
+
+@Suppress("UNUSED")
+private fun nodeOptionsMkDir(
+    recursive: Boolean,
+): JsObject = js("({ recursive: recursive })")
+
+@Suppress("UNUSED")
+private fun nodeOptionsMkDir(
+    recursive: Boolean,
+    mode: String,
+): JsObject = js("({ recursive: recursive, mode: mode })")
+
+@Suppress("UNUSED")
+private fun nodeOptionsRmDir(
+    force: Boolean,
+    recursive: Boolean,
+): JsObject = js("({ force: force, recursive: recursive })")
+
+private fun isNodeJs(): Boolean = js(code =
+"""
+(typeof process !== 'undefined' 
+    && process.versions != null 
+    && process.versions.node != null) ||
+(typeof window !== 'undefined' 
+    && typeof window.process !== 'undefined' 
+    && window.process.versions != null 
+    && window.process.versions.node != null)
+"""
+)

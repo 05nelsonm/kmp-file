@@ -27,8 +27,10 @@ import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.commonDriveRootOrNull
-import io.matthewnelson.kmp.file.internal.js.jsNavigator
 import io.matthewnelson.kmp.file.path
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.JsName
+import kotlin.js.js
 
 internal class FsJsBrowser private constructor(
     internal override val isWindows: Boolean,
@@ -117,3 +119,9 @@ internal class FsJsBrowser private constructor(
         }
     }
 }
+
+@OptIn(ExperimentalWasmJsInterop::class)
+private fun jsNavigator(): JsNavigator = js("window ? window.navigator : self.navigator")
+
+@JsName("Navigator")
+internal external interface JsNavigator { val platform: String }

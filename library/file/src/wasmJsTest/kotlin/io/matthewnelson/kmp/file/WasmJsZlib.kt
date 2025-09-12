@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:OptIn(ExperimentalWasmJsInterop::class)
+
 package io.matthewnelson.kmp.file
 
 internal external interface ModuleZlib {
