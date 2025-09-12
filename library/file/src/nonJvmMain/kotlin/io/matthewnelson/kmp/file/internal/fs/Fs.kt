@@ -18,16 +18,21 @@
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.commonDriveOrNull
 import io.matthewnelson.kmp.file.internal.commonNormalize
+import io.matthewnelson.kmp.file.internal.parentOrNull
+import io.matthewnelson.kmp.file.internal.realPathScope
 import io.matthewnelson.kmp.file.internal.resolveSlashes
 import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
@@ -80,31 +85,13 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
     internal abstract class NonJvm(info: FsInfo): Fs(info) {
 
         @Throws(IOException::class)
-        protected abstract fun realpath(path: Path): Path
+        protected abstract fun RealPathScope.realPath(path: Path): Path
 
         @Throws(IOException::class)
         internal final override fun absolutePath(file: File): Path {
             val p = file.path
             if (isAbsolute(file)) return p
-
-            p.commonDriveOrNull()?.let { drive ->
-                // Windows
-                //
-                // Path starts with C: (or some other letter)
-                // and is not rooted (because isAbsolute was false)
-                val resolvedDrive = realpath(drive) + SysDirSep
-                return p.replaceFirst(drive, resolvedDrive).resolveSlashes()
-            }
-
-            // Unix or no drive specified
-            val cwd = realpath(".")
-            return if (p.isEmpty() || p.startsWith(SysDirSep)) {
-                // Could be on windows where `\path`
-                // is a thing (and would not be absolute)
-                cwd + p
-            } else {
-                cwd + SysDirSep + p
-            }.resolveSlashes()
+            return realPathScope { resolveAbsolutePath(p) }
         }
 
         @Throws(IOException::class)
@@ -115,19 +102,26 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
         }
 
         @Throws(IOException::class)
-        internal final override fun canonicalPath(file: File): Path {
+        internal override fun canonicalPath(file: File): Path = realPathScope {
             val p = file.path
-            if (p.isEmpty()) return realpath(".")
+            if (p.isEmpty()) return realPath(".")
 
-            val absolute = absolutePath(file).commonNormalize()
-            var existing = File(absolute, direct = null)
+            val absolute = (if (isAbsolute(file)) p else resolveAbsolutePath(p)).commonNormalize()
+            var existing = absolute
             while (true) {
                 try {
-                    val real = realpath(existing.path)
-                    return absolute.replaceFirst(existing.path, real)
-                } catch (_: FileNotFoundException) {
-                    val parent = existing.parentFile ?: break
-                    existing = parent
+                    val real = realPath(existing)
+                    return absolute.replaceFirst(existing, real)
+                } catch (e: IOException) {
+                    when (e) {
+                        is FileNotFoundException,
+                        is NotDirectoryException,
+                        is AccessDeniedException -> {
+                            // Take the parent path to try next
+                            existing = existing.parentOrNull() ?: break
+                        }
+                        else -> throw e
+                    }
                 }
             }
 
@@ -139,6 +133,28 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
             val p = canonicalPath(file)
             if (p == file.path) return file
             return File(p, direct = null)
+        }
+
+        // NOTE: Must check 'isAbsolute' before calling
+        private fun RealPathScope.resolveAbsolutePath(path: Path): Path {
+            path.commonDriveOrNull()?.let { drive ->
+                // Windows
+                //
+                // Path starts with C: (or some other letter)
+                // and is not rooted (because isAbsolute was false)
+                val resolvedDrive = realPath(drive) + SysDirSep
+                return path.replaceFirst(drive, resolvedDrive).resolveSlashes()
+            }
+
+            // Unix or no drive specified
+            val cwd = realPath(".")
+            return if (path.isEmpty() || path.startsWith(SysDirSep)) {
+                // Could be on windows where `\path`
+                // is a thing (and would not be absolute)
+                cwd + path
+            } else {
+                cwd + SysDirSep + path
+            }.resolveSlashes()
         }
     }
 

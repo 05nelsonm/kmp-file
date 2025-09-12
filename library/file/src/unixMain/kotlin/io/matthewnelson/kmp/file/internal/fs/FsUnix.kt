@@ -26,6 +26,7 @@ import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.UnixFileStream
 import io.matthewnelson.kmp.file.internal.errnoToString
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
@@ -63,7 +64,6 @@ import platform.posix.S_IXUSR
 import platform.posix.chmod
 import platform.posix.close
 import platform.posix.errno
-import platform.posix.free
 import platform.posix.fstat
 import platform.posix.mkdir
 import platform.posix.realpath
@@ -162,15 +162,10 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     }
 
     @Throws(IOException::class)
-    override fun realpath(path: Path): Path {
-        val p = ignoreEINTR { realpath(path, null) }
+    override fun RealPathScope.realPath(path: Path): Path {
+        return ignoreEINTR { realpath(path, buf) }
+            ?.toKString()
             ?: throw errnoToIOException(errno, path.toFile())
-
-        return try {
-            p.toKString()
-        } finally {
-            free(p)
-        }
     }
 
     @Throws(IllegalArgumentException::class, IOException::class)

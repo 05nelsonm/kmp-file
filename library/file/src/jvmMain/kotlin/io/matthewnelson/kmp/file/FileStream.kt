@@ -82,6 +82,8 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
          * increment by the number of bytes that have been read.
          *
          * Otherwise, this function behaves as specified in [ReadableByteChannel].
+         *
+         * @see [ReadableByteChannel.read]
          * */
         @Throws(IOException::class)
         public abstract override fun read(dst: ByteBuffer?): Int
@@ -98,8 +100,13 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
          * @param [position] The file offset (from the start of the [File]) to
          *   begin reading at.
          *
+         * @return The number of bytes read, possibly `0`, or `-1` if end-of-file
+         *   has been reached.
+         *
          * @throws [IllegalArgumentException] If [position] is less than 0.
          * @throws [IOException] If an I/O error occurs.
+         *
+         * @see [java.nio.channels.FileChannel.read]
          * */
         @Throws(IOException::class)
         public fun read(dst: ByteBuffer?, position: Long): Int
@@ -140,6 +147,8 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
          * bytes that were written.
          *
          * Otherwise, this function behaves as specified in [WritableByteChannel].
+         *
+         * @see [WritableByteChannel.write]
          * */
         @Throws(IOException::class)
         public abstract override fun write(src: ByteBuffer?): Int
@@ -152,14 +161,19 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
          * the new data. The values of any bytes between the previous end-of-file and
          * the newly written data are unspecified.
          *
-         * Otherwise, this function behaves as specified in [java.nio.channels.FileChannel.write].
+         * Otherwise, this function behaves exactly like the positional
+         * [java.nio.channels.FileChannel.write] function.
          *
          * @param [src] The buffer of data to write.
          * @param [position] The file offset (from the start of the [File]) to
          *   begin writing at.
          *
+         * @return The number of bytes written, possibly `0`.
+         *
          * @throws [IllegalArgumentException] If [position] is less than 0.
          * @throws [IOException] If an I/O error occurs.
+         *
+         * @see [java.nio.channels.FileChannel.write]
          * */
         @Throws(IOException::class)
         public fun write(src: ByteBuffer?, position: Long): Int
