@@ -15,8 +15,14 @@
  **/
 package io.matthewnelson.kmp.file.test.android
 
-internal const val ENV_KEY_EXPECTED_TEMP_PATH = "kmp.file.test.EXPECTED_TEMP_PATH"
-internal const val ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY = "kmp.file.test.EXPECTED_ABSOLUTE_PATH_EMPTY"
-internal const val ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT = "kmp.file.test.EXPECTED_ABSOLUTE_PATH_DOT"
-internal const val ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY = "kmp.file.test.EXPECTED_CANONICAL_PATH_EMPTY"
-internal const val ENV_KEY_EXPECTED_CANONICAL_PATH_DOT = "kmp.file.test.EXPECTED_CANONICAL_PATH_DOT"
+import kotlin.test.Test
+
+internal class CanonicalTestAndroidAndroidTest: CanonicalTestAndroidBaseTest() {
+
+    override val pid: String = "self"
+
+    @Test
+    override fun givenStdioDescriptor_whenCanonicalizedOnAndroid_thenReturnsDevNull() {
+        super.givenStdioDescriptor_whenCanonicalizedOnAndroid_thenReturnsDevNull()
+    }
+}

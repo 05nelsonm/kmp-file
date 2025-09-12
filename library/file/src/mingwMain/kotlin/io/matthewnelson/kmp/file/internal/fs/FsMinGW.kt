@@ -29,6 +29,7 @@ import io.matthewnelson.kmp.file.internal.FileAttributes
 import io.matthewnelson.kmp.file.internal.MinGWFileStream
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.commonDriveOrNull
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
@@ -49,13 +50,14 @@ import platform.posix.EEXIST
 import platform.posix.ENOENT
 import platform.posix.ENOTDIR
 import platform.posix.ENOTEMPTY
+import platform.posix.F_OK
 import platform.posix.PATH_MAX
 import platform.posix.S_IFDIR
 import platform.posix.S_IFMT
 import platform.posix._fullpath
 import platform.posix._stat64
+import platform.posix.access
 import platform.posix.errno
-import platform.posix.free
 import platform.posix.mkdir
 import platform.posix.remove
 import platform.posix.rmdir
@@ -262,17 +264,12 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
     }
 
     @Throws(IOException::class)
-    override fun realpath(path: Path): Path {
-        val p = ignoreEINTR { _fullpath(null, path, PATH_MAX.toULong()) }
+    override fun RealPathScope.realPath(path: Path): Path {
+        val p = ignoreEINTR { _fullpath(buf, path, PATH_MAX.toULong()) }
+            ?.toKString()
             ?: throw errnoToIOException(errno, path.toFile())
-
-        return try {
-            val f = p.toKString().toFile()
-            if (!exists(f)) throw errnoToIOException(ENOENT, f)
-            f.path
-        } finally {
-            free(p)
-        }
+        if (access(p, F_OK) == 0) return p
+        throw errnoToIOException(errno, p.toFile())
     }
 
     /**

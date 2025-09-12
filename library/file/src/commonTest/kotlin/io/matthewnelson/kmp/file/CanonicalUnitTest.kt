@@ -18,13 +18,31 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.internal.IsWindows
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class CanonicalUnitTest: CanonicalSharedTest() {
 
+    // JsBrowser: not implemented
+    // AndroidNative: Does not have access to project library/file/test_support from emulator
+    // Windows: does not do symbolic links
+    private val skipTest = isJsBrowser || IsWindows || IS_ANDROID
+
     @Test
-    fun givenFile_whenPathHasSymlink_thenReturnsActualPath() = skipTestIf(isJsBrowser || IsWindows || IS_ANDROID) {
-        // windows doesn't do symbolic links.
-        // Android emulator won't have access to project directory.
-        assertEquals(FILE_LOREM_IPSUM, FILE_SYM_LINK_2.canonicalFile2())
+    fun givenPathWithSymlinks_whenFullPathExists_thenReturnsResolvedPath() = skipTestIf(skipTest) {
+        assertEquals(FILE_LOREM_IPSUM, FILE_LOREM_IPSUM_SYMLINK.canonicalFile2())
+    }
+
+    @Test
+    fun givenSubpathWithSymlink_whenFullPathDoesNotExist_thenReturnsResolvedSubpath() = skipTestIf(skipTest) {
+        val symDir1 = DIR_TEST_SUPPORT.resolve("sym_dir1")
+        val expected = symDir1.resolve("does_not_exist")
+        val actual = DIR_TEST_SUPPORT.resolve("sym_dir2").resolve("does_not_exist").canonicalFile2()
+
+        assertEquals(expected, actual)
+        assertTrue(actual.path.startsWith(symDir1.path), "startsWith")
+        assertTrue(actual.path.endsWith("does_not_exist"), "endsWith")
+        assertFalse(actual.exists2(), "exists")
     }
 }

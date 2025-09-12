@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file.test.android
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
-internal const val ENV_KEY_EXPECTED_TEMP_PATH = "kmp.file.test.EXPECTED_TEMP_PATH"
-internal const val ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY = "kmp.file.test.EXPECTED_ABSOLUTE_PATH_EMPTY"
-internal const val ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT = "kmp.file.test.EXPECTED_ABSOLUTE_PATH_DOT"
-internal const val ENV_KEY_EXPECTED_CANONICAL_PATH_EMPTY = "kmp.file.test.EXPECTED_CANONICAL_PATH_EMPTY"
-internal const val ENV_KEY_EXPECTED_CANONICAL_PATH_DOT = "kmp.file.test.EXPECTED_CANONICAL_PATH_DOT"
+package io.matthewnelson.kmp.file.internal
+
+internal actual value class RealPathScope private actual constructor(private actual val _buf: Any) {
+    internal companion object {
+        internal val INSTANCE = RealPathScope(Companion)
+    }
+}
+
+internal actual inline fun <T> realPathScope(block: RealPathScope.() -> T): T = block(RealPathScope.INSTANCE)

@@ -25,6 +25,7 @@ import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.commonDriveRootOrNull
 import io.matthewnelson.kmp.file.internal.js.jsNavigator
 import io.matthewnelson.kmp.file.path
@@ -91,7 +92,7 @@ internal class FsJsBrowser private constructor(
     }
 
     @Throws(IOException::class)
-    override fun realpath(path: Path): Path {
+    override fun RealPathScope.realPath(path: Path): Path {
         throw UnsupportedOperationException("realpath is not supported on $this.")
     }
 

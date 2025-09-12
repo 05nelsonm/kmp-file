@@ -55,3 +55,47 @@ internal inline fun Path.resolveSlashes(): Path {
 
     return rootSlashes + result
 }
+
+internal inline fun Path.parentOrNull(): Path? {
+    if (length == 1) {
+        val p0 = this[0]
+        if (p0 == '.' || p0 == SysDirSep) return null
+    }
+    if (length == 2) {
+        if (this[0] == '.' && this[1] == '.') return null
+    }
+
+    val iLast = indexOfLast { c -> c == SysDirSep }
+    if (iLast == -1) {
+        val drive = commonDriveOrNull()
+        return if (drive != null) {
+            if (length == 2) null else drive
+        } else {
+            null
+        }
+    }
+
+    if (iLast == 2) {
+        val drive = commonDriveOrNull()
+        if (drive != null) {
+            return if (length == 3) null else "${drive}${SysDirSep}"
+        }
+    }
+
+    if (iLast == 1 && IsWindows) {
+        if (this[0] == SysDirSep) {
+            // UNC path
+            return if (length == 2) null else "${SysDirSep}${SysDirSep}"
+        }
+    }
+
+    if (iLast == 0) {
+        // Something like /abc
+        return "$SysDirSep"
+    }
+
+    val ret = take(iLast)
+    if (ret.isEmpty()) return null
+    if (ret == this) return null
+    return ret
+}

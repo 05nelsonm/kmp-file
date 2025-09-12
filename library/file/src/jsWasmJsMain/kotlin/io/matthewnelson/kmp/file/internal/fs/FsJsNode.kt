@@ -34,6 +34,7 @@ import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
@@ -342,7 +343,7 @@ internal class FsJsNode private constructor(
     }
 
     @Throws(IOException::class)
-    override fun realpath(path: Path): Path = try {
+    override fun RealPathScope.realPath(path: Path): Path = try {
         jsExternTryCatch { fs.realpathSync(path) }
     } catch (t: Throwable) {
         throw t.toIOException(path.toFile())
