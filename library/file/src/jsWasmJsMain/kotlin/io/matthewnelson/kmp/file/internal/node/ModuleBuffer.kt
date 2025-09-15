@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.DelicateFileApi
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 import kotlin.js.JsName
+import kotlin.js.js
 
 /** [docs](https://nodejs.org/api/buffer.html) */
 internal external interface ModuleBuffer {
@@ -31,26 +32,18 @@ internal external interface ModuleBuffer {
 /** [docs](https://nodejs.org/api/buffer.html#buffer-constants) */
 internal external interface ConstantsBuffer {
     val MAX_LENGTH: Double
-//    val MAX_STRING_LENGTH: Double
 }
 
 /** [docs](https://nodejs.org/api/buffer.html#class-buffer) */
 @JsName("Buffer")
-internal external class JsBuffer: JsAny {
-
-    internal val length: Double
-
-    internal fun fill()
-    internal fun readInt8(offset: Double): Byte
-    internal fun writeInt8(value: Byte, offset: Double)
-    internal fun toString(encoding: String, start: Double, end: Double): String
-
-    internal companion object {
-        // Always need to check for FsJsNode first
-        @DelicateFileApi
-        internal fun alloc(size: Double): JsBuffer
-//        // Always need to check for FsJsNode first
-//        @DelicateFileApi
-//        internal fun isBuffer(obj: dynamic/JsAny): Boolean
-    }
+internal external interface JsBuffer: JsAny {
+    val length: Double
+    fun fill()
+    fun readInt8(offset: Double): Byte
+    fun writeInt8(value: Byte, offset: Double)
+    fun toString(encoding: String, start: Double, end: Double): String
 }
+
+// Always need to check for FsJsNode first
+@DelicateFileApi
+internal fun jsBufferAlloc(size: Double): JsBuffer = js("Buffer.alloc(size)")

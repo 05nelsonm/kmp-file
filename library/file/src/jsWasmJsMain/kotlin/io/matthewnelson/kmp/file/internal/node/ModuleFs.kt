@@ -22,7 +22,6 @@ import io.matthewnelson.kmp.file.internal.js.JsObject
 import io.matthewnelson.kmp.file.internal.Path
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
-import kotlin.js.JsExport
 import kotlin.js.JsName
 
 /** [docs](https://nodejs.org/api/fs.html) */

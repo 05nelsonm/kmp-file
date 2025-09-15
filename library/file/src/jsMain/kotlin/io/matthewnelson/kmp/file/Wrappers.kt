@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:OptIn(DelicateFileApi::class)
 @file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
 package io.matthewnelson.kmp.file
@@ -20,6 +21,7 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.JsStats
+import io.matthewnelson.kmp.file.internal.node.jsBufferAlloc
 import io.matthewnelson.kmp.file.internal.require
 
 /**
@@ -106,8 +108,7 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
         // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public actual fun alloc(size: Number): Buffer = try {
             FsJsNode.require()
-            @OptIn(DelicateFileApi::class)
-            val b = JsBuffer.alloc(size.toDouble())
+            val b = jsBufferAlloc(size.toDouble())
             Buffer(b)
         } catch (t: Throwable) {
             if (t is IllegalArgumentException) throw t
@@ -130,7 +131,7 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
         // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public fun wrap(buffer: dynamic): Buffer {
             FsJsNode.require()
-            if (!isJsBuffer(buffer)) {
+            if (!jsBufferIsInstance(buffer)) {
                 throw IllegalArgumentException("Object is not a Buffer")
             }
             return Buffer(buffer.unsafeCast<JsBuffer>())
@@ -164,5 +165,7 @@ public actual value class Stats internal constructor(private val value: JsStats)
     public actual override fun toString(): String = commonToString()
 }
 
+// Always need to check for FsJsNode first
+@DelicateFileApi
 @Suppress("UNUSED")
-private fun isJsBuffer(any: dynamic): Boolean = js("Buffer.isBuffer(any)")
+private fun jsBufferIsInstance(any: dynamic): Boolean = js("Buffer.isBuffer(any)")
