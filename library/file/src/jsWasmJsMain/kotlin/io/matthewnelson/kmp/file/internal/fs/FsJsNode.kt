@@ -45,6 +45,7 @@ import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
 import io.matthewnelson.kmp.file.internal.node.ModuleOs
 import io.matthewnelson.kmp.file.internal.node.ModulePath
+import io.matthewnelson.kmp.file.internal.node.jsBufferAlloc
 import io.matthewnelson.kmp.file.jsExternTryCatch
 import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
@@ -70,7 +71,7 @@ internal class FsJsNode private constructor(
     // we are left copying bytes to/from a buffer.
     @Suppress("PrivatePropertyName")
     @OptIn(DelicateFileApi::class)
-    private val BUF: JsBuffer = JsBuffer.alloc((1024 * 16).toDouble())
+    private val BUF: JsBuffer = jsBufferAlloc((1024 * 16).toDouble())
 
     internal override val dirSeparator: String get() = path.sep
     internal override val pathSeparator: String get() = path.delimiter
