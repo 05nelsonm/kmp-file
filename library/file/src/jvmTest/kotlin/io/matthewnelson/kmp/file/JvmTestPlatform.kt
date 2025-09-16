@@ -23,6 +23,9 @@ import java.nio.ByteBuffer
 actual val IS_SIMULATOR: Boolean = false
 actual val IS_ANDROID: Boolean = ANDROID.SDK_INT != null
 
+actual typealias AbstractFileStreamReadSharedTest = FileStreamReadJvmSharedTest
+actual typealias AbstractFileStreamWriteSharedTest = FileStreamWriteJvmSharedTest
+
 actual fun permissionChecker(): PermissionChecker? = if (IsWindows) {
     object : PermissionChecker.Windows {
         override fun isReadOnly(file: File): Boolean = !file.canWrite()

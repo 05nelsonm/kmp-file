@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:OptIn(DelicateFileApi::class, ExperimentalWasmJsInterop::class)
+@file:OptIn(DelicateFileApi::class)
 @file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
 package io.matthewnelson.kmp.file
@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.JsStats
 import io.matthewnelson.kmp.file.internal.node.jsBufferAlloc
+import io.matthewnelson.kmp.file.internal.node.jsBufferIsInstance
 import io.matthewnelson.kmp.file.internal.require
 import kotlin.js.unsafeCast
 
@@ -165,8 +166,3 @@ public actual value class Stats internal constructor(private val value: JsStats)
     /** @suppress */
     public actual override fun toString(): String = commonToString()
 }
-
-// Always need to check for FsJsNode first
-@DelicateFileApi
-@Suppress("UNUSED")
-private fun jsBufferIsInstance(any: JsAny): Boolean = js("Buffer.isBuffer(any)")

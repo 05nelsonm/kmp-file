@@ -110,18 +110,16 @@ public inline fun <T: Any?> File.fOpen(
     @Suppress("DEPRECATION_ERROR")
     val mode = flags.appendFlagCLOEXEC()
 
-    var ptr: CPointer<FILE>? = null
-    while (true) {
+    var ptr: CPointer<FILE>?
+    do {
         ptr = fopen(path, mode)
-        if (ptr != null) break
-        val errno = errno
-        if (errno == EINTR) continue
-        throw errnoToIOException(errno, this)
-    }
+    } while (ptr == null && errno == EINTR)
+    if (ptr == null) throw errnoToIOException(errno, this)
 
     val closeable = object : Closeable {
         private var _ptr = ptr
         override fun close() {
+            @Suppress("NAME_SHADOWING")
             val ptr = _ptr ?: return
             _ptr = null
             if (fclose(ptr) == 0) return

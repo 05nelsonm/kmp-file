@@ -13,18 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+package io.matthewnelson.kmp.file.internal.js
 
-package io.matthewnelson.kmp.file
-
-import org.junit.Test
-import kotlin.test.Ignore
-
-actual class FileStreamReadUnitTest: FileStreamReadJvmSharedTest() {
-
-    actual override val checker: PermissionChecker? = permissionChecker()
-
-    @Test
-    @Ignore
-    actual fun stub() {}
-}
+internal actual fun jsNavigator(): JsNavigator = js(CODE_JS_NAVIGATOR)

@@ -170,14 +170,14 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
 
     @Throws(IllegalArgumentException::class, IOException::class)
     private fun File.open(flags: Int, excl: OpenExcl): Int {
-        val mode = MODE_MASK.convert(excl._mode)
-        val flags = flags or O_CLOEXEC or when (excl) {
+        val m = MODE_MASK.convert(excl._mode)
+        val f = flags or O_CLOEXEC or when (excl) {
             is OpenExcl.MaybeCreate -> O_CREAT
             is OpenExcl.MustCreate -> O_CREAT or O_EXCL
             is OpenExcl.MustExist -> 0
         }
 
-        val fd = ignoreEINTR32 { platform.posix.open(path, flags, mode) }
+        val fd = ignoreEINTR32 { platform.posix.open(path, f, m) }
         if (fd == -1) {
             throw if (errno == EINVAL) {
                 val msg = errnoToString(errno)

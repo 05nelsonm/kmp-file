@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+package io.matthewnelson.kmp.file.internal.node
 
-package io.matthewnelson.kmp.file
+internal actual fun isNodeJs(): Boolean = js(CODE_IS_NODE_JS)
 
-import kotlin.test.Test
-
-actual class FileStreamWriteUnitTest: FileStreamWriteSharedTest() {
-
-    actual override val checker: PermissionChecker? = permissionChecker()
-
-    @Test
-    actual fun stub() {}
-}
+internal actual fun nodeModuleBuffer(): ModuleBuffer = js(CODE_MODULE_BUFFER)
+internal actual fun nodeModuleFs(): ModuleFs = js(CODE_MODULE_FS)
+internal actual fun nodeModuleOs(): ModuleOs = js(CODE_MODULE_OS)
+internal actual fun nodeModulePath(): ModulePath = js(CODE_MODULE_PATH)

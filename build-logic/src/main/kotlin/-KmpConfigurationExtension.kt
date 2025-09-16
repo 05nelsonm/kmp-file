@@ -17,6 +17,7 @@ import io.matthewnelson.kmp.configuration.extension.KmpConfigurationExtension
 import io.matthewnelson.kmp.configuration.extension.container.target.KmpConfigurationContainerDsl
 import org.gradle.api.Action
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.konan.target.HostManager
 
 fun KmpConfigurationExtension.configureShared(
@@ -83,17 +84,33 @@ fun KmpConfigurationExtension.configureShared(
             with(sourceSets) {
                 val sets = arrayOf("js", "wasmJs").mapNotNull { name ->
                     val main = findByName(name + "Main") ?: return@mapNotNull null
-                    val test = getByName(name + "Test")
-                    main to test
+                    main to getByName(name + "Test")
                 }
                 if (sets.isEmpty()) return@kotlin
 
-                val main = maybeCreate("jsWasmJsMain")
-                val test = maybeCreate("jsWasmJsTest")
-                main.dependsOn(getByName("nonJvmMain"))
-                test.dependsOn(getByName("nonJvmTest"))
-
+                val main = maybeCreate("jsWasmJsMain").apply { dependsOn(getByName("nonJvmMain")) }
+                val test = maybeCreate("jsWasmJsTest").apply { dependsOn(getByName("nonJvmTest")) }
                 sets.forEach { (m, t) -> m.dependsOn(main); t.dependsOn(test) }
+            }
+        }
+
+        if (publish) kotlin {
+            @Suppress("DEPRECATION")
+            compilerOptions {
+                freeCompilerArgs.add("-Xsuppress-version-warnings")
+                apiVersion.set(KotlinVersion.KOTLIN_1_9)
+                languageVersion.set(KotlinVersion.KOTLIN_1_9)
+            }
+            sourceSets.configureEach {
+                if (name.startsWith("js") || name.startsWith("wasm")) {
+                    // expect/actual value classes Buffer/Stats use `val` getters which,
+                    // because are expressed in the expect definition, require Kotlin 2.0+
+                    // as the compiler cries about backing fields.
+                    languageSettings {
+                        apiVersion = KotlinVersion.KOTLIN_2_0.version
+                        languageVersion = KotlinVersion.KOTLIN_2_0.version
+                    }
+                }
             }
         }
 

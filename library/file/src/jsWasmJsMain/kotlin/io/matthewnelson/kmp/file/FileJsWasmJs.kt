@@ -129,6 +129,7 @@ public inline fun File.write(excl: OpenExcl?, data: Buffer) {
 @Throws(IOException::class)
 public fun File.write(excl: OpenExcl?, appending: Boolean, data: Buffer) {
     val node = FsJsNode.require()
+    @Suppress("NAME_SHADOWING")
     val excl = excl ?: OpenExcl.MaybeCreate.DEFAULT
     node.openWrite(this, excl, appending).use { s -> s.write(data) }
 }

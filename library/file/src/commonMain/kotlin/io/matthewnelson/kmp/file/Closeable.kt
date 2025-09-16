@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "WRONG_INVOCATION_KIND")
 
 package io.matthewnelson.kmp.file
 
@@ -54,7 +54,6 @@ public expect fun interface Closeable {
  * */
 @OptIn(ExperimentalContracts::class)
 public inline fun <T: Closeable?, R: Any?> T.use(block: (T) -> R): R {
-    @Suppress("WRONG_INVOCATION_KIND")
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }

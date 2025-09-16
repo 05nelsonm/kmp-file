@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+package io.matthewnelson.kmp.file.internal.js
 
-package io.matthewnelson.kmp.file
+import kotlin.js.JsName
 
-import kotlin.test.Test
+@JsName("Navigator")
+internal external interface JsNavigator { val platform: String }
 
-actual class FileStreamReadUnitTest: FileStreamReadSharedTest() {
+internal const val CODE_JS_NAVIGATOR: String = "window ? window.navigator : self.navigator"
 
-    actual override val checker: PermissionChecker? = permissionChecker()
-
-    @Test
-    actual fun stub() {}
-}
+internal expect fun jsNavigator(): JsNavigator

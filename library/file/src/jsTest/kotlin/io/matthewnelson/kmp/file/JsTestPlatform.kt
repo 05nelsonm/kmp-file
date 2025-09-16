@@ -13,16 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-
 package io.matthewnelson.kmp.file
 
-import kotlin.test.Test
-
-actual class FileStreamWriteUnitTest: FileStreamWriteJsSharedTest() {
-
-    actual override val checker: PermissionChecker? = permissionChecker()
-
-    @Test
-    actual fun stub() {}
-}
+internal actual fun jsEnvPath(): String? = js("require('process').env['PATH']")

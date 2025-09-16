@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file
 
@@ -47,14 +47,9 @@ public actual class DirectoryNotEmptyException(
 
 public actual typealias InterruptedIOException = java.io.InterruptedIOException
 
-/**
- * Reports how many bytes had been transferred as part of the I/O operation before
- * it was interrupted.
- *
- * @see [InterruptedIOException]
- * */
-public actual inline var InterruptedIOException.bytesTransferred: Int
-    get() = this.bytesTransferred
-    set(value) { this.bytesTransferred = value }
-
 public actual typealias InterruptedException = java.lang.InterruptedException
+
+@PublishedApi
+internal actual inline fun InterruptedIOException.getBytesTransferred(): Int = bytesTransferred
+@PublishedApi
+internal actual inline fun InterruptedIOException.setBytesTransferred(value: Int) { bytesTransferred = value }

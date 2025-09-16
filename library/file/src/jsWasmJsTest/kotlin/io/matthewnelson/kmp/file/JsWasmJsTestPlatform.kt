@@ -24,6 +24,9 @@ import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 actual val IS_SIMULATOR: Boolean = false
 actual val IS_ANDROID: Boolean = false
 
+actual typealias AbstractFileStreamReadSharedTest = FileStreamReadJsSharedTest
+actual typealias AbstractFileStreamWriteSharedTest = FileStreamWriteJsSharedTest
+
 actual fun permissionChecker(): PermissionChecker? {
     val node = FsJs.INSTANCE
     if (node !is FsJsNode) return null

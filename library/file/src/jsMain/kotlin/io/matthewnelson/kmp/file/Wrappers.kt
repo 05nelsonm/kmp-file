@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.JsStats
 import io.matthewnelson.kmp.file.internal.node.jsBufferAlloc
+import io.matthewnelson.kmp.file.internal.node.jsBufferIsInstance
 import io.matthewnelson.kmp.file.internal.require
 
 /**
@@ -164,8 +165,3 @@ public actual value class Stats internal constructor(private val value: JsStats)
     /** @suppress */
     public actual override fun toString(): String = commonToString()
 }
-
-// Always need to check for FsJsNode first
-@DelicateFileApi
-@Suppress("UNUSED")
-private fun jsBufferIsInstance(any: dynamic): Boolean = js("Buffer.isBuffer(any)")
