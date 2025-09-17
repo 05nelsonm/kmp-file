@@ -119,7 +119,10 @@ public expect open class InterruptedIOException: IOException {
  *
  * @see [InterruptedIOException]
  * */
-public expect inline var InterruptedIOException.bytesTransferred: Int
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+public inline var InterruptedIOException.bytesTransferred: Int
+    get() = getBytesTransferred()
+    set(value) { setBytesTransferred(value) }
 
 /**
  * Thrown when a thread is waiting, sleeping, or otherwise occupied, and the thread
@@ -165,3 +168,8 @@ public inline fun Throwable.wrapIOException(
     }
     return IOException(msg, this)
 }
+
+@PublishedApi
+internal expect inline fun InterruptedIOException.getBytesTransferred(): Int
+@PublishedApi
+internal expect inline fun InterruptedIOException.setBytesTransferred(value: Int)

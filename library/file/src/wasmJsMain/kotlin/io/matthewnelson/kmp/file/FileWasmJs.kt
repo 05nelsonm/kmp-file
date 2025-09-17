@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:OptIn(ExperimentalWasmJsInterop::class)
-@file:Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
+@file:Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT", "LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
 
 package io.matthewnelson.kmp.file
 
@@ -57,7 +56,6 @@ import kotlin.contracts.contract
 // @Throws(Throwable::class)
 @OptIn(ExperimentalContracts::class)
 public actual inline fun <T: Any?> jsExternTryCatch(crossinline block: () -> T): T {
-    @Suppress("LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }

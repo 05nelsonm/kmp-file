@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE", "LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -31,7 +31,6 @@ internal actual val IsWindows: Boolean = false
 
 @OptIn(ExperimentalContracts::class)
 internal inline fun synchronizedIfNotNull(lock: SynchronizedObject?, block: () -> Unit) {
-    @Suppress("LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }

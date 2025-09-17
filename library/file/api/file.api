@@ -13,6 +13,8 @@ public final class io/matthewnelson/kmp/file/DirectoryNotEmptyException : kotlin
 }
 
 public final class io/matthewnelson/kmp/file/Exceptions {
+	public static final fun getBytesTransferred (Ljava/io/InterruptedIOException;)I
+	public static final fun setBytesTransferred (Ljava/io/InterruptedIOException;I)V
 	public static final fun wrapIO (Ljava/lang/Throwable;)Ljava/io/IOException;
 	public static final fun wrapIO (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)Ljava/io/IOException;
 }
@@ -22,7 +24,7 @@ public abstract interface class io/matthewnelson/kmp/file/FileStream : java/io/C
 	public static fun asInputStream (Lio/matthewnelson/kmp/file/FileStream$Read;Z)Ljava/io/InputStream;
 	public static fun asOutputStream (Lio/matthewnelson/kmp/file/FileStream$Write;Z)Ljava/io/OutputStream;
 	public abstract fun close ()V
-	public fun flush ()V
+	public abstract fun flush ()V
 	public abstract fun isOpen ()Z
 	public abstract fun position ()J
 	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream;

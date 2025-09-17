@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file
 
@@ -127,16 +127,6 @@ public actual open class InterruptedIOException: IOException {
 }
 
 /**
- * Reports how many bytes had been transferred as part of the I/O operation before
- * it was interrupted.
- *
- * @see [InterruptedIOException]
- * */
-public actual inline var InterruptedIOException.bytesTransferred: Int
-    get() = _bytesTransferred
-    set(value) { _bytesTransferred = value }
-
-/**
  * Thrown when a thread is waiting, sleeping, or otherwise occupied, and the thread
  * is interrupted, either before or during the activity.
  * */
@@ -144,3 +134,8 @@ public actual open class InterruptedException: Exception {
     public actual constructor(): super()
     public actual constructor(message: String?): super(message)
 }
+
+@PublishedApi
+internal actual inline fun InterruptedIOException.getBytesTransferred(): Int = _bytesTransferred
+@PublishedApi
+internal actual inline fun InterruptedIOException.setBytesTransferred(value: Int) { _bytesTransferred = value }

@@ -357,6 +357,7 @@ internal class FsJvmAndroid private constructor(
         private var _fd: FileDescriptor? = fd
         private val interruptible = object : AccessibleInterruptibleChannel() {
             protected override fun implCloseChannel() {
+                @Suppress("NAME_SHADOWING")
                 val fd = _fd ?: return
                 _fd = null
                 fd.doClose(null)?.let { throw it }
@@ -989,7 +990,8 @@ private inline fun AccessibleInterruptibleChannel.doBlocking(
                 blockingEnd(completed)
             } catch (e: AsynchronousCloseException) {
                 if (threw != null) {
-                    threw.addSuppressed(e)
+                    @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
+                    threw!!.addSuppressed(e)
                 } else {
                     throw e
                 }

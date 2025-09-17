@@ -33,6 +33,9 @@ actual val IS_ANDROID: Boolean by lazy {
     Platform.osFamily == OsFamily.ANDROID
 }
 
+actual typealias AbstractFileStreamReadSharedTest = FileStreamReadSharedTest
+actual typealias AbstractFileStreamWriteSharedTest = FileStreamWriteSharedTest
+
 internal actual class TestReadStream actual constructor(
     actual val s: FileStream.Read,
     val fakeSize: () -> Long,

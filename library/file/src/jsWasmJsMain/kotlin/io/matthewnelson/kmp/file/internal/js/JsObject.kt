@@ -13,9 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.matthewnelson.kmp.file.internal.js
 
 import kotlin.js.JsName
 
 @JsName("Object")
 internal abstract external class JsObject
+
+internal expect fun jsObject(): JsObject
+
+internal inline operator fun JsObject.set(key: String, value: Boolean) { jsObjectSet(this, key, value) }
+internal expect fun jsObjectSet(obj: JsObject, key: String, value: Boolean)
+
+internal inline operator fun JsObject.set(key: String, value: String) { jsObjectSet(this, key, value) }
+internal expect fun jsObjectSet(obj: JsObject, key: String, value: String)

@@ -34,7 +34,6 @@ import io.matthewnelson.kmp.file.internal.commonNormalize
 import io.matthewnelson.kmp.file.internal.parentOrNull
 import io.matthewnelson.kmp.file.internal.realPathScope
 import io.matthewnelson.kmp.file.internal.resolveSlashes
-import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
 
 internal actual sealed class Fs private constructor(internal actual val info: FsInfo) {
@@ -102,7 +101,7 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
         }
 
         @Throws(IOException::class)
-        internal override fun canonicalPath(file: File): Path = realPathScope {
+        internal final override fun canonicalPath(file: File): Path = realPathScope {
             val p = file.path
             if (p.isEmpty()) return realPath(".")
 
@@ -136,6 +135,7 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
         }
 
         // NOTE: Must check 'isAbsolute' before calling
+        @Throws(IOException::class)
         private fun RealPathScope.resolveAbsolutePath(path: Path): Path {
             path.commonDriveOrNull()?.let { drive ->
                 // Windows

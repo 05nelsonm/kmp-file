@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("VariableInitializerIsRedundant")
-
 package io.matthewnelson.kmp.file.internal
 
 import kotlinx.cinterop.CPointed
@@ -33,7 +31,7 @@ internal inline fun ignoreEINTR32(action: () -> Int): Int {
         callsInPlace(action, InvocationKind.UNKNOWN)
     }
 
-    var ret = -1
+    var ret: Int
     do {
         ret = action()
     } while (ret == -1 && errno == EINTR)
@@ -47,7 +45,7 @@ internal inline fun ignoreEINTR64(action: () -> Long): Long {
         callsInPlace(action, InvocationKind.UNKNOWN)
     }
 
-    var ret = -1L
+    var ret: Long
     do {
         ret = action()
     } while (ret == -1L && errno == EINTR)
@@ -62,7 +60,7 @@ internal inline fun <T: CPointed> ignoreEINTR(action: () -> CPointer<T>?): CPoin
         callsInPlace(action, InvocationKind.UNKNOWN)
     }
 
-    var ret: CPointer<T>? = null
+    var ret: CPointer<T>?
     do {
         ret = action()
     } while (ret == null && errno == EINTR)

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:OptIn(ExperimentalWasmJsInterop::class)
 @file:Suppress("RedundantVisibilityModifier", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal.fs
@@ -39,21 +38,24 @@ import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
-import io.matthewnelson.kmp.file.internal.js.JsObject
+import io.matthewnelson.kmp.file.internal.js.jsObject
+import io.matthewnelson.kmp.file.internal.js.set
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
-import io.matthewnelson.kmp.file.internal.node.ModuleOs
 import io.matthewnelson.kmp.file.internal.node.ModulePath
+import io.matthewnelson.kmp.file.internal.node.isNodeJs
 import io.matthewnelson.kmp.file.internal.node.jsBufferAlloc
+import io.matthewnelson.kmp.file.internal.node.nodeModuleBuffer
+import io.matthewnelson.kmp.file.internal.node.nodeModuleFs
+import io.matthewnelson.kmp.file.internal.node.nodeModuleOs
+import io.matthewnelson.kmp.file.internal.node.nodeModulePath
 import io.matthewnelson.kmp.file.jsExternTryCatch
 import io.matthewnelson.kmp.file.parentFile
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.stat
 import io.matthewnelson.kmp.file.toFile
 import io.matthewnelson.kmp.file.toIOException
-import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.js
 
 @OptIn(DelicateFileApi::class)
 internal class FsJsNode private constructor(
@@ -137,7 +139,9 @@ internal class FsJsNode private constructor(
             }
         }
 
-        val options = nodeOptionsRmDir(force = false, recursive = false)
+        val options = jsObject()
+        options["force"] = false
+        options["recursive"] = false
 
         // Could be a directory
         try {
@@ -198,11 +202,9 @@ internal class FsJsNode private constructor(
 
     @Throws(IOException::class)
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
-        val options = if (isWindows) {
-            nodeOptionsMkDir(recursive = false)
-        } else {
-            nodeOptionsMkDir(recursive = false, mode = mode.value)
-        }
+        val options = jsObject()
+        options["recursive"] = false
+        if (!isWindows) options["mode"] = mode.value
 
         try {
             jsExternTryCatch { fs.mkdirSync(dir.path, options) }
@@ -646,37 +648,3 @@ internal class FsJsNode private constructor(
         }
     }
 }
-
-private fun nodeModuleBuffer(): ModuleBuffer = js("eval('require')('buffer')")
-private fun nodeModuleFs(): ModuleFs = js("eval('require')('fs')")
-private fun nodeModuleOs(): ModuleOs = js("eval('require')('os')")
-private fun nodeModulePath(): ModulePath = js("eval('require')('path')")
-
-@Suppress("UNUSED")
-private fun nodeOptionsMkDir(
-    recursive: Boolean,
-): JsObject = js("({ recursive: recursive })")
-
-@Suppress("UNUSED")
-private fun nodeOptionsMkDir(
-    recursive: Boolean,
-    mode: String,
-): JsObject = js("({ recursive: recursive, mode: mode })")
-
-@Suppress("UNUSED")
-private fun nodeOptionsRmDir(
-    force: Boolean,
-    recursive: Boolean,
-): JsObject = js("({ force: force, recursive: recursive })")
-
-private fun isNodeJs(): Boolean = js(code =
-"""
-(typeof process !== 'undefined' 
-    && process.versions != null 
-    && process.versions.node != null) ||
-(typeof window !== 'undefined' 
-    && typeof window.process !== 'undefined' 
-    && window.process.versions != null 
-    && window.process.versions.node != null)
-"""
-)

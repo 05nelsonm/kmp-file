@@ -20,7 +20,7 @@ plugins {
 private val configInject = ConfigInject()
 
 kmpConfiguration {
-    configureShared(java9ModuleName = "io.matthewnelson.kmp.file", publish = true) {
+    configureShared(java9ModuleName = ConfigInject.PKG_NAME, publish = true) {
         jvm {
             sourceSetTest {
                 kotlin.srcDir("src/jvmTestShared/kotlin")
@@ -124,7 +124,7 @@ private class ConfigInject {
         kotlinSrcDir
     }
 
-    private companion object {
-        private const val PKG_NAME = "io.matthewnelson.kmp.file"
+    companion object {
+        const val PKG_NAME = "io.matthewnelson.kmp.file"
     }
 }

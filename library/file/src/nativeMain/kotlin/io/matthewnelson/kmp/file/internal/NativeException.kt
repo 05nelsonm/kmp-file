@@ -17,8 +17,6 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.errnoToIOException
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.toKString
 import platform.posix.E2BIG
@@ -98,6 +96,7 @@ import platform.posix.EXDEV
 import platform.posix.strerror
 
 @ExperimentalForeignApi
+@Suppress("DUPLICATE_LABEL_IN_WHEN")
 internal fun errnoToString(errno: Int): String {
     var msg = when (errno) {
         E2BIG -> "E2BIG"
@@ -113,7 +112,6 @@ internal fun errnoToString(errno: Int): String {
         ECANCELED -> "ECANCELED"
         ECHILD -> "ECHILD"
         ECONNABORTED -> "ECONNABORTED"
-        ECONNREFUSED -> "ECONNREFUSED"
         ECONNREFUSED -> "ECONNREFUSED"
         EDEADLK -> "EDEADLK"
         EDESTADDRREQ -> "EDESTADDRREQ"
@@ -148,7 +146,6 @@ internal fun errnoToString(errno: Int): String {
         ENOLINK -> "ENOLINK"
         ENOMEM -> "ENOMEM"
         ENOMSG -> "ENOMSG"
-        ENOENT -> "ENOENT"
         ENOPROTOOPT -> "ENOPROTOOPT"
         ENOSPC -> "ENOSPC"
         ENOSR -> "ENOSR"

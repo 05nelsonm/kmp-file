@@ -19,9 +19,13 @@ package io.matthewnelson.kmp.file
 
 import kotlin.test.Test
 
-expect class FileStreamWriteUnitTest: FileStreamWriteSharedTest {
-    override val checker: PermissionChecker?
+expect abstract class AbstractFileStreamWriteSharedTest() {
+    protected abstract val checker: PermissionChecker?
+}
+
+class FileStreamWriteUnitTest: AbstractFileStreamWriteSharedTest() {
+    override val checker: PermissionChecker? = permissionChecker()
 
     @Test
-    fun stub()
+    fun stub() {}
 }

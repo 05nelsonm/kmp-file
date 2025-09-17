@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
-package io.matthewnelson.kmp.file
+package io.matthewnelson.kmp.file.internal.node
 
-import io.matthewnelson.kmp.file.internal.fs.FsJs
-import io.matthewnelson.kmp.file.internal.fs.FsJsNode
-
-internal expect fun jsEnvPath(): String?
-
-@Suppress("UNUSED")
-class SysSepJsWasmJsUnitTest: SysSepSharedTest() {
-    override fun getenvPATH(): String? {
-        if (FsJs.INSTANCE !is FsJsNode) return null
-        return jsEnvPath()
-    }
+/** [docs](https://nodejs.org/api/fs.html#class-fsstats) */
+@JsName("Stats")
+internal actual external interface JsStats: JsAny {
+    actual val mode: Int
+    actual val size: Double
+    actual fun isFile(): Boolean
+    actual fun isDirectory(): Boolean
+    actual fun isSymbolicLink(): Boolean
 }

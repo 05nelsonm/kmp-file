@@ -13,18 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.fs.FsJs
-import io.matthewnelson.kmp.file.internal.fs.FsJsNode
-
-internal expect fun jsEnvPath(): String?
-
-@Suppress("UNUSED")
-class SysSepJsWasmJsUnitTest: SysSepSharedTest() {
-    override fun getenvPATH(): String? {
-        if (FsJs.INSTANCE !is FsJsNode) return null
-        return jsEnvPath()
-    }
-}
+internal actual fun jsEnvPath(): String? = js("require('process').env['PATH']")

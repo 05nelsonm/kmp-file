@@ -17,10 +17,15 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.internal.Mode
+import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.path
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.ENOENT
@@ -29,6 +34,26 @@ import platform.posix.access
 import platform.posix.errno
 
 internal actual sealed class FsNonJvm(info: FsInfo): Fs.NonJvm(info) {
+
+    internal actual abstract override fun isAbsolute(file: File): Boolean
+
+    @Throws(IOException::class)
+    protected actual abstract override fun RealPathScope.realPath(path: Path): Path
+
+    @Throws(IOException::class)
+    internal actual abstract override fun chmod(file: File, mode: Mode, mustExist: Boolean)
+    @Throws(IOException::class)
+    internal actual abstract override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean)
+    @Throws(IOException::class)
+    internal actual abstract override fun exists(file: File): Boolean
+    @Throws(IOException::class)
+    internal actual abstract override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean)
+    @Throws(IOException::class)
+    internal actual abstract override fun openRead(file: File): AbstractFileStream
+    @Throws(IOException::class)
+    internal actual abstract override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream
+    @Throws(IOException::class)
+    internal actual abstract override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
 
     @OptIn(ExperimentalForeignApi::class)
     internal abstract class Native(info: FsInfo): FsNonJvm(info) {
