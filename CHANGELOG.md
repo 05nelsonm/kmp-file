@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## Version 0.5.0 (2025-09-19)
+ - Updates `kotlin` to `2.2.20` [[#188]][188]
+ - Updates `kotlinx.atomicfu` to `0.29.0` [[#188]][188]
+ - Ensure `wrapIOException` returns `InterruptedIOException` when throwable 
+   is instance of `InterruptedException` [[#186]][186]
+ - Improve Kotlin/Native use of `realpath`/`_fullpath` by providing pre-allocated 
+   path buffer for re-use in successive invocations [[#187]][187]
+ - Define `JsBuffer` as an `interface` instead of a `class` [[#189]][189]
+ - Lower supported `KotlinVersion` to `1.9` [[#190]][190]
+     - Source sets `js`, `wasmJs`, & `jsWasmJs` require a minimum `KotlinVersion` of `2.0`
+
 ## Version 0.4.0 (2025-08-20)
  - Adds `SysPathSep` [[#105]][105]
  - Adds support for `wasmJs` [[#118]][118]
@@ -199,3 +210,8 @@
 [174]: https://github.com/05nelsonm/kmp-file/pull/174
 [176]: https://github.com/05nelsonm/kmp-file/pull/176
 [177]: https://github.com/05nelsonm/kmp-file/pull/177
+[186]: https://github.com/05nelsonm/kmp-file/pull/186
+[187]: https://github.com/05nelsonm/kmp-file/pull/187
+[188]: https://github.com/05nelsonm/kmp-file/pull/188
+[189]: https://github.com/05nelsonm/kmp-file/pull/189
+[190]: https://github.com/05nelsonm/kmp-file/pull/190
