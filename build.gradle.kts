@@ -66,5 +66,7 @@ apiValidation {
 
     if (CHECK_PUBLICATION != null) {
         ignoredProjects.add("check-publication")
+    } else {
+        nonPublicMarkers.add("io.matthewnelson.kmp.file.InternalKmpFileApi")
     }
 }

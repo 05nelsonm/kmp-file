@@ -94,6 +94,9 @@ public final class io/matthewnelson/kmp/file/FsInfo {
 public final class io/matthewnelson/kmp/file/FsInfo$Companion {
 }
 
+public abstract interface annotation class io/matthewnelson/kmp/file/InternalKmpFileApi : java/lang/annotation/Annotation {
+}
+
 public final class io/matthewnelson/kmp/file/JvmPlatformKt {
 	public static final fun getBytesTransferred (Ljava/io/InterruptedIOException;)I
 	public static final fun setBytesTransferred (Ljava/io/InterruptedIOException;I)V
