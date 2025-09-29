@@ -17,14 +17,18 @@
 
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.async.AsyncFileStream
 import io.matthewnelson.kmp.file.internal.disappearingCheck
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.coroutines.CoroutineContext
 import kotlin.jvm.JvmSynthetic
 
 // Strictly for supporting isInstance checks
-internal class FileStreamReadOnly private constructor(private val s: AbstractFileStream): FileStream.Read by s {
+internal class FileStreamReadOnly private constructor(
+    private val s: AbstractFileStream,
+): FileStream.Read by s, AsyncFileStream.Read by s {
     init { disappearingCheck(condition = { s.canRead }) { "AbstractFileStream.canRead != true" } }
     public override fun position(new: Long): FileStream.Read { s.position(new); return this }
     public override fun sync(meta: Boolean): FileStream.Read { s.sync(meta); return this }
@@ -38,7 +42,9 @@ internal class FileStreamReadOnly private constructor(private val s: AbstractFil
 }
 
 // Strictly for supporting isInstance checks
-internal class FileStreamWriteOnly private constructor(private val s: AbstractFileStream): FileStream.Write by s {
+internal class FileStreamWriteOnly private constructor(
+    private val s: AbstractFileStream,
+): FileStream.Write by s, AsyncFileStream.Write by s {
     init { disappearingCheck(condition = { s.canWrite }) { "AbstractFileStream.canWrite != true" } }
     public override fun position(new: Long): FileStream.Write { s.position(new); return this }
     public override fun size(new: Long): FileStream.Write { s.size(new); return this }
@@ -57,7 +63,9 @@ internal abstract class AbstractFileStream protected constructor(
     internal val canWrite: Boolean,
     public final override val isAppending: Boolean,
     init: Any,
-): FileStream.ReadWrite() {
+): FileStream.ReadWrite(), AsyncFileStream.Read, AsyncFileStream.Write {
+
+    public final override var ctx: CoroutineContext = AsyncFileStream.CTX_DEFAULT
 
     init {
         disappearingCheck(condition = { canRead || canWrite }) { "!canRead && !canWrite" }
