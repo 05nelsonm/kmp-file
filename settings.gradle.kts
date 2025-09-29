@@ -64,7 +64,8 @@ private val CHECK_PUBLICATION: String? by settings
 if (CHECK_PUBLICATION != null) {
     include(":tools:check-publication")
 } else {
-    listOf(
+    arrayOf(
+        "async",
         "file",
     ).forEach { name ->
         include(":library:$name")
