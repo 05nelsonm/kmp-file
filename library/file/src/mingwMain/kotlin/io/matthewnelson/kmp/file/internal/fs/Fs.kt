@@ -25,55 +25,54 @@ import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 
-internal expect sealed class Fs {
+internal actual sealed class Fs protected constructor(internal actual val info: FsInfo) {
 
-    internal val info: FsInfo
-
-    internal abstract fun isAbsolute(file: File): Boolean
+    internal actual abstract fun isAbsolute(file: File): Boolean
 
     /** See [io.matthewnelson.kmp.file.absolutePath2] */
     @Throws(IOException::class)
-    internal abstract fun absolutePath(file: File): Path
+    internal actual abstract fun absolutePath(file: File): Path
     /** See [io.matthewnelson.kmp.file.absoluteFile2] */
     @Throws(IOException::class)
-    internal abstract fun absoluteFile(file: File): File
+    internal actual abstract fun absoluteFile(file: File): File
     /** See [io.matthewnelson.kmp.file.canonicalPath2] */
     @Throws(IOException::class)
-    internal abstract fun canonicalPath(file: File): Path
+    internal actual abstract fun canonicalPath(file: File): Path
     /** See [io.matthewnelson.kmp.file.canonicalFile2] */
     @Throws(IOException::class)
-    internal abstract fun canonicalFile(file: File): File
+    internal actual abstract fun canonicalFile(file: File): File
 
     /** See [io.matthewnelson.kmp.file.chmod2] */
     @Throws(IOException::class)
-    internal abstract fun chmod(file: File, mode: Mode, mustExist: Boolean)
+    internal actual abstract fun chmod(file: File, mode: Mode, mustExist: Boolean)
 
     /** See [io.matthewnelson.kmp.file.delete2] */
     @Throws(IOException::class)
-    internal abstract fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean)
+    internal actual abstract fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean)
+
     /** See [io.matthewnelson.kmp.file.exists2] */
     @Throws(IOException::class)
-    internal abstract fun exists(file: File): Boolean
+    internal actual abstract fun exists(file: File): Boolean
 
     /** See [io.matthewnelson.kmp.file.mkdir2] */
     @Throws(IOException::class)
-    internal abstract fun mkdir(dir: File, mode: Mode, mustCreate: Boolean)
+    internal actual abstract fun mkdir(dir: File, mode: Mode, mustCreate: Boolean)
 
     /** See [io.matthewnelson.kmp.file.openRead] */
     @Throws(IOException::class)
-    internal abstract fun openRead(file: File): AbstractFileStream
+    internal actual abstract fun openRead(file: File): AbstractFileStream
 
     /** See [io.matthewnelson.kmp.file.openReadWrite] */
     @Throws(IOException::class)
-    internal abstract fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream
+    internal actual abstract fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream
 
     /** See [io.matthewnelson.kmp.file.openWrite] */
     @Throws(IOException::class)
-    internal abstract fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
+    internal actual abstract fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
 
-    internal companion object {
-        internal val INSTANCE: Fs
+    internal actual companion object {
+        internal actual val INSTANCE: Fs = FsMinGW
     }
 
-    public final override fun toString(): String // = info.name
+    public actual final override fun toString(): String = info.name
 }

@@ -18,7 +18,7 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.IsWindows
-import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 
 actual val IS_SIMULATOR: Boolean = false
@@ -28,7 +28,7 @@ actual typealias AbstractFileStreamReadSharedTest = FileStreamReadJsSharedTest
 actual typealias AbstractFileStreamWriteSharedTest = FileStreamWriteJsSharedTest
 
 actual fun permissionChecker(): PermissionChecker? {
-    val node = FsJs.INSTANCE
+    val node = Fs.INSTANCE
     if (node !is FsJsNode) return null
 
     return if (IsWindows) {

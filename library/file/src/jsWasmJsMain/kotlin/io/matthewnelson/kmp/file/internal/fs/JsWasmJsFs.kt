@@ -15,24 +15,12 @@
  **/
 @file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
-package io.matthewnelson.kmp.file.internal
+package io.matthewnelson.kmp.file.internal.fs
 
-import kotlinx.cinterop.ByteVar
-import kotlinx.cinterop.CArrayPointer
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.MemScope
-import kotlinx.cinterop.allocArray
-import kotlinx.cinterop.memScoped
-import platform.posix.PATH_MAX
-
-@OptIn(ExperimentalForeignApi::class)
 internal actual value class RealPathScope private actual constructor(private actual val _buf: Any) {
-    internal constructor(scope: MemScope): this(_buf = scope.allocArray<ByteVar>(length = PATH_MAX))
-    @Suppress("UNCHECKED_CAST")
-    val buf: CArrayPointer<ByteVar> get() = _buf as CArrayPointer<ByteVar>
+    internal companion object {
+        internal val INSTANCE = RealPathScope(Companion)
+    }
 }
 
-@OptIn(ExperimentalForeignApi::class)
-internal actual inline fun <T: Any?> realPathScope(block: RealPathScope.() -> T): T = memScoped {
-    block(RealPathScope(this))
-}
+internal actual inline fun <T> realPathScope(block: RealPathScope.() -> T): T = block(RealPathScope.INSTANCE)

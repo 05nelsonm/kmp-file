@@ -29,7 +29,6 @@ import io.matthewnelson.kmp.file.internal.FileAttributes
 import io.matthewnelson.kmp.file.internal.MinGWFileStream
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
-import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.commonDriveOrNull
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
@@ -80,7 +79,7 @@ import platform.windows.SetFileAttributesA
 import platform.windows.TRUNCATE_EXISTING
 
 @OptIn(ExperimentalForeignApi::class)
-internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosix = false)) {
+internal data object FsMinGW: Fs(info = FsInfo.of(name = "FsMinGW", isPosix = false)) {
 
     internal override fun isAbsolute(file: File): Boolean {
         val p = file.path
@@ -100,6 +99,26 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
             // https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-pathisrelativea?redirectedfrom=MSDN
             PathIsRelativeA(p) == FALSE
         }
+    }
+
+    @Throws(IOException::class)
+    internal override fun absolutePath(file: File): Path {
+        return absolutePath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun absoluteFile(file: File): File {
+        return absoluteFile(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalPath(file: File): Path {
+        return canonicalPath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalFile(file: File): File {
+        return canonicalFile(file, ::realPath)
     }
 
     @Throws(IOException::class)
@@ -162,6 +181,11 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
 
         if (!mustExist && err == ENOENT) return
         throw errnoToIOException(err, file)
+    }
+
+    @Throws(IOException::class)
+    internal override fun exists(file: File): Boolean {
+        return file.posixExists()
     }
 
     @Throws(IOException::class)
@@ -264,8 +288,8 @@ internal data object FsMinGW: FsNative(info = FsInfo.of(name = "FsMinGW", isPosi
     }
 
     @Throws(IOException::class)
-    override fun RealPathScope.realPath(path: Path): Path {
-        val p = ignoreEINTR { _fullpath(buf, path, PATH_MAX.toULong()) }
+    private fun realPath(scope: RealPathScope, path: Path): Path {
+        val p = ignoreEINTR { _fullpath(scope.buf, path, PATH_MAX.toULong()) }
             ?.toKString()
             ?: throw errnoToIOException(errno, path.toFile())
         if (access(p, F_OK) == 0) return p

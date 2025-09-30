@@ -25,14 +25,13 @@ import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
-import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.commonDriveRootOrNull
 import io.matthewnelson.kmp.file.internal.js.jsNavigator
 import io.matthewnelson.kmp.file.path
 
 internal class FsJsBrowser private constructor(
     internal override val isWindows: Boolean,
-): FsJs(info = FsInfo.of(name = "FsJsBrowser", isPosix = !isWindows)) {
+): Fs(info = FsInfo.of(name = "FsJsBrowser", isPosix = !isWindows)) {
 
     internal override val dirSeparator: String get() = if (isWindows) "\\" else "/"
     internal override val pathSeparator: String get() = if (isWindows) ";" else ":"
@@ -54,6 +53,26 @@ internal class FsJsBrowser private constructor(
         } else {
             p[0] == SysDirSep
         }
+    }
+
+    @Throws(IOException::class)
+    internal override fun absolutePath(file: File): Path {
+        return absolutePath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun absoluteFile(file: File): File {
+        return absoluteFile(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalPath(file: File): Path {
+        return canonicalPath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalFile(file: File): File {
+        return canonicalFile(file, ::realPath)
     }
 
     @Throws(IOException::class)
@@ -92,7 +111,7 @@ internal class FsJsBrowser private constructor(
     }
 
     @Throws(IOException::class)
-    override fun RealPathScope.realPath(path: Path): Path {
+    private fun realPath(scope: RealPathScope, path: Path): Path {
         throw UnsupportedOperationException("realpath is not supported on $this.")
     }
 

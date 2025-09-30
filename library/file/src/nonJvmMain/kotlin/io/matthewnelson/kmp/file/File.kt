@@ -54,7 +54,7 @@ public actual class File: Comparable<File> {
      * On Windows, a pathname is absolute if its prefix is a drive
      * specifier followed by "\\", or if its prefix is "\\\\" (a UNC path).
      * */
-    public actual fun isAbsolute(): Boolean = Fs.get().isAbsolute(this)
+    public actual fun isAbsolute(): Boolean = Fs.INSTANCE.isAbsolute(this)
 
     // use .name
     @PublishedApi
@@ -94,22 +94,22 @@ public actual class File: Comparable<File> {
     // use .absolutePath2
     @PublishedApi
     // @Throws(IOException::class)
-    internal actual fun getAbsolutePath(): String = Fs.get().absolutePath(this)
+    internal actual fun getAbsolutePath(): String = Fs.INSTANCE.absolutePath(this)
 
     // use .absoluteFile2
     @PublishedApi
     // @Throws(IOException::class)
-    internal actual fun getAbsoluteFile(): File = Fs.get().absoluteFile(this)
+    internal actual fun getAbsoluteFile(): File = Fs.INSTANCE.absoluteFile(this)
 
     // use .canonicalPath2
     @PublishedApi
     // @Throws(IOException::class)
-    internal actual fun getCanonicalPath(): String = Fs.get().canonicalPath(this)
+    internal actual fun getCanonicalPath(): String = Fs.INSTANCE.canonicalPath(this)
 
     // use .canonicalFile2
     @PublishedApi
     // @Throws(IOException::class)
-    internal actual fun getCanonicalFile(): File = Fs.get().canonicalFile(this)
+    internal actual fun getCanonicalFile(): File = Fs.INSTANCE.canonicalFile(this)
 
     /**
      * DEPRECATED
@@ -127,7 +127,7 @@ public actual class File: Comparable<File> {
     @Throws(IOException::class)
     public fun chmod(mode: String) {
         try {
-            Fs.get().chmod(this, mode = mode.toMode(), mustExist = true)
+            Fs.INSTANCE.chmod(this, mode = mode.toMode(), mustExist = true)
         } catch (t: IllegalArgumentException) {
             throw t.wrapIOException()
         }
@@ -147,7 +147,7 @@ public actual class File: Comparable<File> {
         )
     )
     public actual fun delete(): Boolean = try {
-        Fs.get().delete(this, ignoreReadOnly = true, mustExist = true)
+        Fs.INSTANCE.delete(this, ignoreReadOnly = true, mustExist = true)
         true
     } catch (_: IOException) {
         false
@@ -167,7 +167,7 @@ public actual class File: Comparable<File> {
         )
     )
     public actual fun exists(): Boolean = try {
-        Fs.get().exists(this)
+        Fs.INSTANCE.exists(this)
     } catch (e: IOException) {
         false
     }
@@ -186,7 +186,7 @@ public actual class File: Comparable<File> {
         )
     )
     public actual fun mkdir(): Boolean = try {
-        Fs.get().mkdir(this, Mode.DEFAULT_DIR, mustCreate = true)
+        Fs.INSTANCE.mkdir(this, Mode.DEFAULT_DIR, mustCreate = true)
         true
     } catch (_: IOException) {
         false
@@ -206,7 +206,7 @@ public actual class File: Comparable<File> {
         )
     )
     public actual fun mkdirs(): Boolean = try {
-        Fs.get().commonMkdirs(this, mode = null, mustCreate = true)
+        Fs.INSTANCE.commonMkdirs(this, mode = null, mustCreate = true)
         true
     } catch (_: IOException) {
         false

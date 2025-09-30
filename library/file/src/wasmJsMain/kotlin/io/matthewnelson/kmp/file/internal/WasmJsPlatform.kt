@@ -17,8 +17,8 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.internal.fs.Fs
 
-internal actual inline fun platformDirSeparator(): Char = FsJs.INSTANCE.dirSeparator.firstOrNull() ?: if (IsWindows) '\\' else '/'
+internal actual inline fun platformDirSeparator(): Char = Fs.INSTANCE.dirSeparator.firstOrNull() ?: if (IsWindows) '\\' else '/'
 
-internal actual inline fun platformPathSeparator(): Char = FsJs.INSTANCE.pathSeparator.firstOrNull() ?: if (IsWindows) ';' else ':'
+internal actual inline fun platformPathSeparator(): Char = Fs.INSTANCE.pathSeparator.firstOrNull() ?: if (IsWindows) ';' else ':'

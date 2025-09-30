@@ -34,7 +34,6 @@ import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
-import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
@@ -64,7 +63,7 @@ internal class FsJsNode private constructor(
     private val path: ModulePath,
     internal override val isWindows: Boolean,
     internal override val tempDirectory: Path,
-): FsJs(info = FsInfo.of(name = "FsJsNode", isPosix = !isWindows)) {
+): Fs(info = FsInfo.of(name = "FsJsNode", isPosix = !isWindows)) {
 
     // Node is single threaded and the API is synchronous such that
     // a single buffer can be used for all read/write operations.
@@ -90,6 +89,26 @@ internal class FsJsNode private constructor(
         }
 
         return path.isAbsolute(p)
+    }
+
+    @Throws(IOException::class)
+    internal override fun absolutePath(file: File): Path {
+        return absolutePath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun absoluteFile(file: File): File {
+        return absoluteFile(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalPath(file: File): Path {
+        return canonicalPath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalFile(file: File): File {
+        return canonicalFile(file, ::realPath)
     }
 
     @Throws(IOException::class)
@@ -345,7 +364,7 @@ internal class FsJsNode private constructor(
     }
 
     @Throws(IOException::class)
-    override fun RealPathScope.realPath(path: Path): Path = try {
+    private fun realPath(scope: RealPathScope, path: Path): Path = try {
         jsExternTryCatch { fs.realpathSync(path) }
     } catch (t: Throwable) {
         throw t.toIOException(path.toFile())

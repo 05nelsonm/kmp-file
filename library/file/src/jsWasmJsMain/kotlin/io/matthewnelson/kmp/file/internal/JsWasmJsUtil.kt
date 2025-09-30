@@ -17,7 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -32,7 +32,7 @@ internal inline fun FsJsNode.Companion.require(
         callsInPlace(exception, InvocationKind.AT_MOST_ONCE)
     }
 
-    val fs = FsJs.INSTANCE
+    val fs = Fs.INSTANCE
     if (fs !is FsJsNode) throw exception("Unsupported FileSystem[$fs]")
     return fs
 }

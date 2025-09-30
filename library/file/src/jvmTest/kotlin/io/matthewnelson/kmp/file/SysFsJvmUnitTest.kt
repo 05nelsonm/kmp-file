@@ -48,6 +48,6 @@ class SysFsJvmUnitTest {
 
     @Test
     fun givenSysFs_whenGet_thenIsSameInstance() {
-        assertEquals(Fs.get(), Fs.get())
+        assertEquals(Fs.INSTANCE, Fs.INSTANCE)
     }
 }

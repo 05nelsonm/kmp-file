@@ -43,6 +43,7 @@ kmpConfiguration {
         common {
             sourceSetMain {
                 dependencies {
+                    implementation("$group:async:$version")
                     implementation("$group:file:$version")
                 }
             }
