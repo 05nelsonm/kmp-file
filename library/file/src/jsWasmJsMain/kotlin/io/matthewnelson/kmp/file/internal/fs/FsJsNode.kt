@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("RedundantVisibilityModifier", "NOTHING_TO_INLINE")
+@file:Suppress("RedundantVisibilityModifier", "NOTHING_TO_INLINE", "WRONG_INVOCATION_KIND", "LocalVariableName")
 
 package io.matthewnelson.kmp.file.internal.fs
 
@@ -34,12 +34,17 @@ import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.async.SuspendCancellable
+import io.matthewnelson.kmp.file.internal.async.complete
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
+import io.matthewnelson.kmp.file.internal.js.JsObject
 import io.matthewnelson.kmp.file.internal.js.jsObject
 import io.matthewnelson.kmp.file.internal.js.set
+import io.matthewnelson.kmp.file.internal.js.toThrowable
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
+import io.matthewnelson.kmp.file.internal.node.JsStats
 import io.matthewnelson.kmp.file.internal.node.ModuleBuffer
 import io.matthewnelson.kmp.file.internal.node.ModuleFs
 import io.matthewnelson.kmp.file.internal.node.ModulePath
@@ -50,11 +55,16 @@ import io.matthewnelson.kmp.file.internal.node.nodeModuleFs
 import io.matthewnelson.kmp.file.internal.node.nodeModuleOs
 import io.matthewnelson.kmp.file.internal.node.nodeModulePath
 import io.matthewnelson.kmp.file.jsExternTryCatch
-import io.matthewnelson.kmp.file.parentFile
+import io.matthewnelson.kmp.file.parentPath
 import io.matthewnelson.kmp.file.path
-import io.matthewnelson.kmp.file.stat
 import io.matthewnelson.kmp.file.toFile
 import io.matthewnelson.kmp.file.toIOException
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @OptIn(DelicateFileApi::class)
 internal class FsJsNode private constructor(
@@ -113,10 +123,59 @@ internal class FsJsNode private constructor(
 
     @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
+        chmod(
+            file,
+            mode,
+            mustExist,
+            _stat = { path ->
+                jsExternTryCatch { fs.statSync(path) }
+            },
+            _chmod = { path, mode ->
+                jsExternTryCatch { fs.chmodSync(path, mode) }
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun chmod(file: File, mode: Mode, mustExist: Boolean, suspendCancellable: SuspendCancellable<Any?>) {
+        chmod(
+            file,
+            mode,
+            mustExist,
+            _stat = { path ->
+                suspendCancellable { cont ->
+                    fs.stat(path) { err, stats ->
+                        cont.complete(err) { stats }
+                    }
+                } as JsStats
+            },
+            _chmod = { path, mode ->
+                suspendCancellable { cont ->
+                    fs.chmod(path, mode) { err ->
+                        cont.complete(err) {}
+                    }
+                }
+            }
+        )
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    private inline fun chmod(
+        file: File,
+        mode: Mode,
+        mustExist: Boolean,
+        _stat: (Path) -> JsStats,
+        _chmod: (Path, String) -> Unit,
+    ) {
+        contract {
+            callsInPlace(_stat, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_chmod, InvocationKind.AT_MOST_ONCE)
+        }
         val m = if (isWindows) {
             try {
-                if (file.stat().isDirectory) return
-            } catch (e: IOException) {
+                if (_stat(file.path).isDirectory()) return
+            } catch (t: Throwable) {
+                val e = t.toIOException(file)
                 if (e is FileNotFoundException && !mustExist) return
                 throw e
             }
@@ -126,7 +185,7 @@ internal class FsJsNode private constructor(
         }
 
         try {
-            jsExternTryCatch { fs.chmodSync(file.path, m) }
+            _chmod(file.path, m)
         } catch (t: Throwable) {
             val e = t.toIOException(file)
             if (e is FileNotFoundException && !mustExist) return
@@ -136,9 +195,81 @@ internal class FsJsNode private constructor(
 
     @Throws(IOException::class)
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
+        delete(
+            file,
+            ignoreReadOnly,
+            mustExist,
+            _access = { path, mode ->
+                jsExternTryCatch { fs.accessSync(path, mode) }
+            },
+            _unlink = { path ->
+                jsExternTryCatch { fs.unlinkSync(path) }
+            },
+            _rmdir = { path, options ->
+                jsExternTryCatch { fs.rmdirSync(path, options) }
+            },
+            _chmod = { path, mode ->
+                jsExternTryCatch { fs.chmodSync(path, mode) }
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean, suspendCancellable: SuspendCancellable<Any?>) {
+        delete(
+            file,
+            ignoreReadOnly,
+            mustExist,
+            _access = { path, mode ->
+                suspendCancellable { cont ->
+                    fs.access(path, mode) { err ->
+                        cont.complete(err) {}
+                    }
+                }
+            },
+            _unlink = { path ->
+                suspendCancellable { cont ->
+                    fs.unlink(path) { err ->
+                        cont.complete(err) {}
+                    }
+                }
+            },
+            _rmdir = { path, options ->
+                suspendCancellable { cont ->
+                    fs.rmdir(path, options) { err ->
+                        cont.complete(err) {}
+                    }
+                }
+            },
+            _chmod = { path, mode ->
+                suspendCancellable { cont ->
+                    fs.chmod(path, mode) { err ->
+                        cont.complete(err) {}
+                    }
+                }
+            },
+        )
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    private inline fun delete(
+        file: File,
+        ignoreReadOnly: Boolean,
+        mustExist: Boolean,
+        _access: (Path, Int) -> Unit,
+        _unlink: (Path) -> Unit,
+        _rmdir: (Path, JsObject) -> Unit,
+        _chmod: (Path, String) -> Unit,
+    ) {
+        contract {
+            callsInPlace(_access, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_unlink, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_rmdir, InvocationKind.UNKNOWN)
+            callsInPlace(_chmod, InvocationKind.AT_MOST_ONCE)
+        }
         if (isWindows && !ignoreReadOnly) {
             try {
-                jsExternTryCatch { fs.accessSync(file.path, fs.constants.W_OK) }
+                _access(file.path, fs.constants.W_OK)
                 // read-only = false
             } catch (t: Throwable) {
                 // read-only = true
@@ -149,7 +280,7 @@ internal class FsJsNode private constructor(
         }
 
         try {
-            jsExternTryCatch { fs.unlinkSync(file.path) }
+            _unlink(file.path)
             return
         } catch (t: Throwable) {
             if (t.errorCodeOrNull == "ENOENT") {
@@ -164,7 +295,7 @@ internal class FsJsNode private constructor(
 
         // Could be a directory
         try {
-            jsExternTryCatch { fs.rmdirSync(file.path, options) }
+            _rmdir(file.path, options)
         } catch (t: Throwable) {
             val e = t.toIOException(file)
             if (e is FileNotFoundException && !mustExist) return
@@ -190,14 +321,14 @@ internal class FsJsNode private constructor(
             // So, remove the read-only attribute from the directory and try again
             // to delete it.
             try {
-                jsExternTryCatch { fs.chmodSync(file.path, "666") }
+                _chmod(file.path, "666")
             } catch (tt: Throwable) {
                 e.addSuppressed(tt)
                 throw e
             }
 
             try {
-                jsExternTryCatch { fs.rmdirSync(file.path, options) }
+                _rmdir(file.path, options)
                 return // success
             } catch (tt: Throwable) {
                 e.addSuppressed(tt)
@@ -209,24 +340,103 @@ internal class FsJsNode private constructor(
 
     @Throws(IOException::class)
     internal override fun exists(file: File): Boolean {
+        return exists(
+            file,
+            _access = { path, mode ->
+                jsExternTryCatch { fs.accessSync(path, mode) }
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun exists(file: File, suspendCancellable: SuspendCancellable<Any?>): Boolean {
+        return exists(
+            file,
+            _access = { path, mode ->
+                suspendCancellable { cont ->
+                    fs.access(path, mode) { err ->
+                        cont.complete(err) {}
+                    }
+                }
+            }
+        )
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    private inline fun exists(
+        file: File,
+        _access: (Path, Int) -> Unit,
+    ): Boolean {
+        contract {
+            callsInPlace(_access, InvocationKind.EXACTLY_ONCE)
+        }
+
         try {
-            jsExternTryCatch { fs.accessSync(file.path, fs.constants.F_OK) }
+            _access(file.path, fs.constants.F_OK)
             return true
         } catch (t: Throwable) {
             val e = t.toIOException(file)
-            if (e is FileNotFoundException) return false
-            throw e
+            if (e !is FileNotFoundException) throw e
+            return false
         }
     }
 
     @Throws(IOException::class)
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
+        mkdir(
+            dir,
+            mode,
+            mustCreate,
+            _mkdir = { path, options ->
+                jsExternTryCatch { fs.mkdirSync(path, options) }
+            },
+            _stat = { path ->
+                jsExternTryCatch { fs.statSync(path) }
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun mkdir(dir: File, mode: Mode, mustCreate: Boolean, suspendCancellable: SuspendCancellable<Any?>) {
+        mkdir(
+            dir,
+            mode,
+            mustCreate,
+            _mkdir = { path, options ->
+                suspendCancellable { cont ->
+                    fs.mkdir(path, options) { err, created ->
+                        cont.complete(err) { created }
+                    }
+                } as Path?
+            },
+            _stat = { path ->
+                suspendCancellable { cont ->
+                    fs.stat(path) { err, stats ->
+                        cont.complete(err) { stats }
+                    }
+                } as JsStats
+            },
+        )
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    private inline fun mkdir(
+        dir: File,
+        mode: Mode,
+        mustCreate: Boolean,
+        _mkdir: (Path, JsObject) -> Path?,
+        _stat: (Path) -> JsStats,
+    ) {
+        contract {
+            callsInPlace(_mkdir, InvocationKind.EXACTLY_ONCE)
+            callsInPlace(_stat, InvocationKind.AT_MOST_ONCE)
+        }
         val options = jsObject()
         options["recursive"] = false
         if (!isWindows) options["mode"] = mode.value
 
         try {
-            jsExternTryCatch { fs.mkdirSync(dir.path, options) }
+            _mkdir(dir.path, options)
         } catch (t: Throwable) {
             val e = t.toIOException(dir)
             if (e is FileAlreadyExistsException && !mustCreate) return
@@ -237,13 +447,17 @@ internal class FsJsNode private constructor(
             // the parent is not a directory. Need to mimic that here
             // so the correct exception can be thrown.
             val parentExistsAndIsNotADir = try {
-                val stat = dir.parentFile?.stat()
-                if (stat != null) !stat.isDirectory else null
+                val stat = dir.parentPath?.let { _stat(it) }
+                if (stat != null) !stat.isDirectory() else null
             } catch (_: IOException) {
                 null
             }
 
-            if (parentExistsAndIsNotADir == true) throw NotDirectoryException(dir)
+            if (parentExistsAndIsNotADir == true) {
+                val ee = NotDirectoryException(dir)
+                e.addSuppressed(e)
+                throw ee
+            }
 
             throw e
         }
@@ -251,116 +465,340 @@ internal class FsJsNode private constructor(
 
     @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
+        return openRead(
+            file,
+            _open = { path, flags ->
+                jsExternTryCatch { fs.openSync(path, flags) }
+            },
+            _checkIsNotADir = { fd, file ->
+                checkIsNotADir(
+                    fd,
+                    file,
+                    _fstat = { fd ->
+                        jsExternTryCatch { fs.fstatSync(fd) }
+                    },
+                    _close = { fd ->
+                        jsExternTryCatch { fs.closeSync(fd) }
+                    },
+                )
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun openRead(file: File, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream {
+        return openRead(
+            file,
+            _open = { path, flags ->
+                suspendCancellable { cont ->
+                    fs.open(path, flags) { err, fd ->
+                        cont.complete(err) { fd }
+                    }
+                } as Double
+            },
+            _checkIsNotADir = { fd, file ->
+                checkIsNotADir(
+                    fd,
+                    file,
+                    _fstat = { fd ->
+                        suspendCancellable { cont ->
+                            fs.fstat(fd) { err, stats ->
+                                cont.complete(err) { stats }
+                            }
+                        } as JsStats
+                    },
+                    _close = { fd ->
+                        suspendCancellable { cont ->
+                            fs.close(fd) { err ->
+                                cont.complete(err) {}
+                            }
+                        }
+                    },
+                )
+            },
+        )
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    private inline fun openRead(
+        file: File,
+        _open: (Path, Int) -> Double,
+        _checkIsNotADir: (Double, File) -> Unit,
+    ): JsNodeFileStream {
+        contract {
+            callsInPlace(_open, InvocationKind.EXACTLY_ONCE)
+            callsInPlace(_checkIsNotADir, InvocationKind.AT_MOST_ONCE)
+        }
         val fd = try {
-            jsExternTryCatch { fs.openSync(file.path, fs.constants.O_RDONLY) }
+            _open(file.path, fs.constants.O_RDONLY)
         } catch (t: Throwable) {
             throw t.toIOException(file)
-        }.checkIsNotADir(file)
-
+        }
+        _checkIsNotADir(fd, file)
         return JsNodeFileStream(fd, canRead = true, canWrite = false, isAppending = false)
     }
 
     @Throws(IOException::class)
-    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream = try {
+    internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
+        return openReadWrite(
+            file,
+            excl,
+            _open1 = { path, flags, mode ->
+                jsExternTryCatch { fs.openSync(path, flags, mode) }
+            },
+            _open2 = { path, flags, mode ->
+                jsExternTryCatch { fs.openSync(path, flags, mode) }
+            },
+            _checkIsNotADir = { fd, file ->
+                checkIsNotADir(
+                    fd,
+                    file,
+                    _fstat = { fd ->
+                        jsExternTryCatch { fs.fstatSync(fd) }
+                    },
+                    _close = { fd ->
+                        jsExternTryCatch { fs.closeSync(fd) }
+                    },
+                )
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun openReadWrite(file: File, excl: OpenExcl, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream {
+        return openReadWrite(
+            file,
+            excl,
+            _open1 = { path, flags, mode ->
+                suspendCancellable { cont ->
+                    fs.open(path, flags, mode) { err, fd ->
+                        cont.complete(err) { fd }
+                    }
+                } as Double
+            },
+            _open2 = { path, flags, mode ->
+                suspendCancellable { cont ->
+                    fs.open(path, flags, mode) { err, fd ->
+                        cont.complete(err) { fd }
+                    }
+                } as Double
+            },
+            _checkIsNotADir = { fd, file ->
+                checkIsNotADir(
+                    fd,
+                    file,
+                    _fstat = { fd ->
+                        suspendCancellable { cont ->
+                            fs.fstat(fd) { err, stats ->
+                                cont.complete(err) { stats }
+                            }
+                        } as JsStats
+                    },
+                    _close = { fd ->
+                        suspendCancellable { cont ->
+                            fs.close(fd) { err ->
+                                cont.complete(err) {}
+                            }
+                        }
+                    },
+                )
+            },
+        )
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    private inline fun openReadWrite(
+        file: File,
+        excl: OpenExcl,
+        _open1: (Path, String, String) -> Double,
+        _open2: (Path, Int, String) -> Double,
+        _checkIsNotADir: (Double, File) -> Unit,
+    ): JsNodeFileStream {
+        contract {
+            callsInPlace(_open1, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_open2, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_checkIsNotADir, InvocationKind.AT_MOST_ONCE)
+        }
         val mode = if (isWindows) {
             if (excl._mode.containsOwnerWriteAccess) "666" else "444"
         } else {
             excl.mode
         }
-
-        val fd = if (isWindows && excl is OpenExcl.MustExist) {
-            // For some reason on Windows, or'ing flags will fail with illegal
-            // arguments. Specifying flags via String to force MustExist works though.
-            jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
-        } else {
-            val flags = fs.constants.O_RDWR or when (excl) {
-                is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
-                is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
-                is OpenExcl.MustExist -> 0
+        val fd = try {
+            if (isWindows && excl is OpenExcl.MustExist) {
+                // For some reason on Windows, or'ing flags will fail with illegal
+                // arguments. Specifying flags via String to force MustExist works though.
+                _open1(file.path, "r+", mode)
+            } else {
+                val flags = fs.constants.O_RDWR or when (excl) {
+                    is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
+                    is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
+                    is OpenExcl.MustExist -> 0
+                }
+                _open2(file.path, flags, mode)
             }
-            jsExternTryCatch { fs.openSync(file.path, flags, mode) }
+        } catch (t: Throwable) {
+            throw t.toIOException(file)
         }
-        if (isWindows) fd.checkIsNotADir(file)
-
-        JsNodeFileStream(fd, canRead = true, canWrite = true, isAppending = false)
-    } catch (t: Throwable) {
-        throw t.toIOException(file)
+        if (isWindows) _checkIsNotADir(fd, file)
+        return JsNodeFileStream(fd, canRead = true, canWrite = true, isAppending = false)
     }
 
     @Throws(IOException::class)
-    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream = try {
-//        val fd = if (isWindows) {
-//            var flags = if (appending) "a" else "w"
-//            when (excl) {
-//                is OpenExcl.MaybeCreate -> {}
-//                is OpenExcl.MustCreate -> flags += "x"
-//                is OpenExcl.MustExist -> if (!exists(file)) throw fileNotFoundException(file, null, null)
-//            }
-//            val mode = if (excl._mode.containsOwnerWriteAccess) "666" else "444"
-//            jsExternTryCatch { fs.openSync(file.path, flags, mode) }.checkIsNotADir(file)
-//        } else {
-//            var flags = fs.constants.O_WRONLY
-//            flags = flags or if (appending) fs.constants.O_APPEND else fs.constants.O_TRUNC
-//            flags = flags or when (excl) {
-//                is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
-//                is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
-//                is OpenExcl.MustExist -> 0
-//            }
-//            jsExternTryCatch { fs.openSync(file.path, flags, excl.mode) }
-//        }
-//
-//        JsNodeFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
+    internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
+        return openWrite(
+            file,
+            excl,
+            appending,
+            _open1 = { path, flags, mode ->
+                jsExternTryCatch { fs.openSync(path, flags, mode) }
+            },
+            _open2 = { path, flags, mode ->
+                jsExternTryCatch { fs.openSync(path, flags, mode) }
+            },
+            _checkIsNotADir = { fd, file ->
+                checkIsNotADir(
+                    fd,
+                    file,
+                    _fstat = { fd ->
+                        jsExternTryCatch { fs.fstatSync(fd) }
+                    },
+                    _close = { fd ->
+                        jsExternTryCatch { fs.closeSync(fd) }
+                    },
+                )
+            },
+            _ftruncate = { fd, len ->
+                jsExternTryCatch { fs.ftruncateSync(fd, len.toDouble()) }
+            },
+            _close = { fd ->
+                jsExternTryCatch { fs.closeSync(fd) }
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun openWrite(file: File, excl: OpenExcl, appending: Boolean, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream {
+        return openWrite(
+            file,
+            excl,
+            appending,
+            _open1 = { path, flags, mode ->
+                suspendCancellable { cont ->
+                    fs.open(path, flags, mode) { err, fd ->
+                        cont.complete(err) { fd }
+                    }
+                } as Double
+            },
+            _open2 = { path, flags, mode ->
+                suspendCancellable { cont ->
+                    fs.open(path, flags, mode) { err, fd ->
+                        cont.complete(err) { fd }
+                    }
+                } as Double
+            },
+            _checkIsNotADir = { fd, file ->
+                checkIsNotADir(
+                    fd,
+                    file,
+                    _fstat = { fd ->
+                        suspendCancellable { cont ->
+                            fs.fstat(fd) { err, stats ->
+                                cont.complete(err) { stats }
+                            }
+                        } as JsStats
+                    },
+                    _close = { fd ->
+                        suspendCancellable { cont ->
+                            fs.close(fd) { err ->
+                                cont.complete(err) {}
+                            }
+                        }
+                    },
+                )
+            },
+            _ftruncate = { fd, len ->
+                suspendCancellable { cont ->
+                    fs.ftruncate(fd, len.toDouble()) { err ->
+                        cont.complete(err) {}
+                    }
+                }
+            },
+            _close = { fd ->
+                suspendCancellable { cont ->
+                    fs.close(fd) { err ->
+                        cont.complete(err) {}
+                    }
+                }
+            },
+        )
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    private inline fun openWrite(
+        file: File,
+        excl: OpenExcl,
+        appending: Boolean,
+        _open1: (Path, String, String) -> Double,
+        _open2: (Path, Int, String) -> Double,
+        _checkIsNotADir: (Double, File) -> Unit,
+        _ftruncate: (Double, Long) -> Unit,
+        _close: (Double) -> Unit,
+    ): AbstractFileStream {
+        contract {
+            callsInPlace(_open1, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_open2, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_checkIsNotADir, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_ftruncate, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
+        }
         val mode = if (isWindows) {
             if (excl._mode.containsOwnerWriteAccess) "666" else "444"
         } else {
             excl.mode
         }
-
         var truncate = false
-        val fd = if (isWindows && excl is OpenExcl.MustExist) {
-            // Need to manually truncate if not appending.
-            if (!appending) truncate = true
-            // For some reason on Windows, or'ing flags will fail with illegal
-            // arguments. Specifying flags via String to force MustExist works though.
-            jsExternTryCatch { fs.openSync(file.path, "r+", mode) }
-        } else {
-            var flags = fs.constants.O_WRONLY
-            flags = flags or if (appending) {
-                // See Issue #175
-//                flags = flags or fs.constants.O_APPEND
-                0
+        val fd = try {
+            if (isWindows && excl is OpenExcl.MustExist) {
+                // Need to manually truncate if not appending.
+                if (!appending) truncate = true
+                // For some reason on Windows, or'ing flags will fail with illegal
+                // arguments. Specifying flags via String to force MustExist works though.
+                _open1(file.path, "r+", mode)
             } else {
-                fs.constants.O_TRUNC
+                var flags = fs.constants.O_WRONLY
+                flags = flags or if (appending) {
+                    // See Issue #175
+//                flags = flags or fs.constants.O_APPEND
+                    0
+                } else {
+                    fs.constants.O_TRUNC
+                }
+                flags = flags or when (excl) {
+                    is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
+                    is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
+                    is OpenExcl.MustExist -> 0
+                }
+                _open2(file.path, flags, mode)
             }
-            flags = flags or when (excl) {
-                is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
-                is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
-                is OpenExcl.MustExist -> 0
-            }
-            jsExternTryCatch { fs.openSync(file.path, flags, mode) }
+        } catch (t: Throwable) {
+            throw t.toIOException(file)
         }
-        if (isWindows) fd.checkIsNotADir(file)
-
-        val s = JsNodeFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
+        if (isWindows) _checkIsNotADir(fd, file)
         if (truncate) {
-            // Will only be true on Windows for OpenExcl.MustExist, meaning
-            // that if this fails, we need not do any sort of pre-open existence
-            // checks to clean up by deleting the file if it was just created. It
-            // must have existed prior to this open, so.
             try {
-                s.size(0L)
-            } catch (e: IOException) {
+                _ftruncate(fd, 0L)
+            } catch (t: Throwable) {
+                val e = t.toIOException()
                 try {
-                    s.close()
-                } catch (ee: IOException) {
-                    e.addSuppressed(ee)
+                    _close(fd)
+                } catch (tt: Throwable) {
+                    e.addSuppressed(tt)
                 }
                 throw e
             }
         }
-        s
-    } catch (t: Throwable) {
-        throw t.toIOException(file)
+        return JsNodeFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
     }
 
     @Throws(IOException::class)
@@ -368,6 +806,20 @@ internal class FsJsNode private constructor(
         jsExternTryCatch { fs.realpathSync(path) }
     } catch (t: Throwable) {
         throw t.toIOException(path.toFile())
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun realPath(path: Path, suspendCancellable: SuspendCancellable<Path>): Path {
+        return suspendCancellable { cont ->
+            fs.realpath(path) { err, resolved ->
+                if (err != null) {
+                    val e = err.toThrowable().toIOException(path.toFile())
+                    cont.resumeWithException(e)
+                } else {
+                    cont.resume(resolved)
+                }
+            }
+        }
     }
 
     internal companion object {
@@ -390,22 +842,31 @@ internal class FsJsNode private constructor(
         }
     }
 
-    @Throws(FileNotFoundException::class)
-    private inline fun Double.checkIsNotADir(file: File): Double {
-        try {
-            if (jsExternTryCatch { fs.fstatSync(this) }.isDirectory()) {
-                throw fileNotFoundException(file, null, "Is a directory")
-            }
+    @OptIn(ExperimentalContracts::class)
+    private inline fun checkIsNotADir(
+        fd: Double,
+        file: File,
+        _fstat: (Double) -> JsStats,
+        _close: (Double) -> Unit,
+    ) {
+        contract {
+            callsInPlace(_fstat, InvocationKind.EXACTLY_ONCE)
+            callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
+        }
+
+        val stats = try {
+            _fstat(fd)
         } catch (t: Throwable) {
-            val e = t.toIOException()
+            val e = t.toIOException(file)
             try {
-                jsExternTryCatch { fs.closeSync(this) }
-            } catch (t: Throwable) {
-                e.addSuppressed(t)
+                _close(fd)
+            } catch (tt: Throwable) {
+                e.addSuppressed(tt)
             }
             throw e
         }
-        return this
+        if (!stats.isDirectory()) return
+        throw fileNotFoundException(file, null, "Is a directory")
     }
 
     private inner class JsNodeFileStream(

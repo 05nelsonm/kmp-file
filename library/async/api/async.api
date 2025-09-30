@@ -1,61 +1,60 @@
-public final class io/matthewnelson/kmp/file/async/AsyncFileStreamCommonKt {
-	public static final fun readAsync (Lio/matthewnelson/kmp/file/FileStream$Read;[BJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun readAsync (Lio/matthewnelson/kmp/file/FileStream$Read;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun writeAsync (Lio/matthewnelson/kmp/file/FileStream$Write;[BJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun writeAsync (Lio/matthewnelson/kmp/file/FileStream$Write;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+public class io/matthewnelson/kmp/file/async/AsyncFs {
+	public static final field Default Lio/matthewnelson/kmp/file/async/AsyncFs$Default;
+	public final field ctx Lkotlin/coroutines/CoroutineContext;
+	public synthetic fun <init> (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun absoluteFile2Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun absolutePath2Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun canonicalFile2Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun canonicalPath2Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun chmod2Async (Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun chmod2Async$default (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun delete2Async (Ljava/io/File;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun delete2Async$default (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun equals (Ljava/lang/Object;)Z
+	public final fun exists2Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun hashCode ()I
+	public final fun mkdir2Async (Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun mkdir2Async$default (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun mkdirs2Async (Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun mkdirs2Async$default (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun of (Lkotlin/coroutines/CoroutineContext;)Lio/matthewnelson/kmp/file/async/AsyncFs;
+	public final fun openAppendAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun openReadAsync (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun openReadWriteAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun openWriteAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun openWriteAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/matthewnelson/kmp/file/async/AsyncFileStreamJvmKt {
-	public static final fun readAsync (Lio/matthewnelson/kmp/file/FileStream$Read;Ljava/nio/ByteBuffer;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun readAsync (Lio/matthewnelson/kmp/file/FileStream$Read;Ljava/nio/ByteBuffer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun writeAsync (Lio/matthewnelson/kmp/file/FileStream$Write;Ljava/nio/ByteBuffer;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun writeAsync (Lio/matthewnelson/kmp/file/FileStream$Write;Ljava/nio/ByteBuffer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+public final class io/matthewnelson/kmp/file/async/AsyncFs$Default : io/matthewnelson/kmp/file/async/AsyncFs {
+	public final fun of (Lkotlin/coroutines/CoroutineContext;)Lio/matthewnelson/kmp/file/async/AsyncFs;
+	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/matthewnelson/kmp/file/async/AsyncFileStreamNonJsKt {
-	public static final fun closeAsync (Lio/matthewnelson/kmp/file/FileStream;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun positionAsync (Lio/matthewnelson/kmp/file/FileStream;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun positionAsync (Lio/matthewnelson/kmp/file/FileStream;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun readAsync (Lio/matthewnelson/kmp/file/FileStream$Read;[BIIJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun readAsync (Lio/matthewnelson/kmp/file/FileStream$Read;[BIILkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun sizeAsync (Lio/matthewnelson/kmp/file/FileStream$Write;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun sizeAsync (Lio/matthewnelson/kmp/file/FileStream;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun syncAsync (Lio/matthewnelson/kmp/file/FileStream;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun writeAsync (Lio/matthewnelson/kmp/file/FileStream$Write;[BIIJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun writeAsync (Lio/matthewnelson/kmp/file/FileStream$Write;[BIILkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class io/matthewnelson/kmp/file/async/AsyncKmpFileCommonKt {
-	public static final fun openAppendAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun openAppendAsync$default (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun openWriteAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun openWriteAsync$default (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-}
-
-public final class io/matthewnelson/kmp/file/async/AsyncKmpFileNonJsKt {
-	public static final fun absoluteFile2Async (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun absoluteFile2Async$default (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun absolutePath2Async (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun absolutePath2Async$default (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun canonicalFile2Async (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun canonicalFile2Async$default (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun canonicalPath2Async (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun canonicalPath2Async$default (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun chmod2Async (Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun chmod2Async$default (Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun delete2Async (Ljava/io/File;ZZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun delete2Async$default (Ljava/io/File;ZZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun exists2Async (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun exists2Async$default (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun mkdir2Async (Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun mkdir2Async$default (Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun mkdirs2Async (Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun mkdirs2Async$default (Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun openReadAsync (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun openReadAsync$default (Ljava/io/File;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun openReadWriteAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun openReadWriteAsync$default (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun openWriteAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun openWriteAsync$default (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+public final class io/matthewnelson/kmp/file/async/AsyncFsCommonKt {
+	public static final fun absoluteFile2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun absolutePath2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun canonicalFile2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun canonicalPath2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun chmod2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun chmod2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun chmod2$default (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun delete2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun delete2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun delete2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun delete2$default (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun exists2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun mkdir2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun mkdir2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun mkdir2$default (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun mkdirs2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun mkdirs2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun mkdirs2$default (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun openAppend (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun openRead (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun openReadWrite (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun openWrite (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun openWrite (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun with (Lio/matthewnelson/kmp/file/async/AsyncFs;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
 

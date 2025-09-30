@@ -17,8 +17,9 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.async.AsyncFileStream
+import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import io.matthewnelson.kmp.file.internal.disappearingCheck
+import kotlin.concurrent.Volatile
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -28,7 +29,7 @@ import kotlin.jvm.JvmSynthetic
 // Strictly for supporting isInstance checks
 internal class FileStreamReadOnly private constructor(
     private val s: AbstractFileStream,
-): FileStream.Read by s, AsyncFileStream.Read by s {
+): FileStream.Read by s, InteropAsyncFileStream.Read by s {
     init { disappearingCheck(condition = { s.canRead }) { "AbstractFileStream.canRead != true" } }
     public override fun position(new: Long): FileStream.Read { s.position(new); return this }
     public override fun sync(meta: Boolean): FileStream.Read { s.sync(meta); return this }
@@ -44,7 +45,7 @@ internal class FileStreamReadOnly private constructor(
 // Strictly for supporting isInstance checks
 internal class FileStreamWriteOnly private constructor(
     private val s: AbstractFileStream,
-): FileStream.Write by s, AsyncFileStream.Write by s {
+): FileStream.Write by s, InteropAsyncFileStream.Write by s {
     init { disappearingCheck(condition = { s.canWrite }) { "AbstractFileStream.canWrite != true" } }
     public override fun position(new: Long): FileStream.Write { s.position(new); return this }
     public override fun size(new: Long): FileStream.Write { s.size(new); return this }
@@ -63,9 +64,17 @@ internal abstract class AbstractFileStream protected constructor(
     internal val canWrite: Boolean,
     public final override val isAppending: Boolean,
     init: Any,
-): FileStream.ReadWrite(), AsyncFileStream.Read, AsyncFileStream.Write {
+): FileStream.ReadWrite(), InteropAsyncFileStream.Read, InteropAsyncFileStream.Write {
 
-    public final override var ctx: CoroutineContext = AsyncFileStream.CTX_DEFAULT
+    @Volatile
+    private var _ctx: CoroutineContext? = null
+    public final override val ctx: CoroutineContext get() = _ctx ?: InteropAsyncFileStream.CTX_DEFAULT
+
+    @Throws(IllegalStateException::class)
+    public final override fun setContext(ctx: CoroutineContext) {
+        check(_ctx == null) { "ctx has already been set" }
+        _ctx = ctx
+    }
 
     init {
         disappearingCheck(condition = { canRead || canWrite }) { "!canRead && !canWrite" }

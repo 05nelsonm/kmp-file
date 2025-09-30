@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
 
-package io.matthewnelson.kmp.file.async.internal
+package io.matthewnelson.kmp.file.internal.js
 
-import kotlinx.coroutines.Dispatchers
-import kotlin.coroutines.CoroutineContext
+import kotlin.js.JsName
 
-internal actual val AsyncDispatcher: CoroutineContext = Dispatchers.IO
+@JsName("Error")
+internal expect class JsError {
+    val message: String?
+    val code: String?
+}
+
+internal expect inline fun JsError.toThrowable(): Throwable

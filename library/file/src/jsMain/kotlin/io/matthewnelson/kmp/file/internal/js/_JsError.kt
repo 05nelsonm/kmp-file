@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
 
-package io.matthewnelson.kmp.file.async.internal
+package io.matthewnelson.kmp.file.internal.js
 
-import io.matthewnelson.kmp.file.internal.async.AsyncFileStream
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlin.coroutines.CoroutineContext
-
-internal actual val AsyncDispatcher: CoroutineContext = run {
-    AsyncFileStream.setDefaultContext(Dispatchers.IO)
-    Dispatchers.IO
+@JsName("Error")
+internal actual external class JsError {
+    actual val message: String?
+    actual val code: String?
 }
+
+internal actual inline fun JsError.toThrowable(): Throwable = unsafeCast<Throwable>()

@@ -49,7 +49,7 @@ class ReadUnitTest: ReadSharedTest() {
     @Test
     fun givenFile_whenReadStreamSizeReportsInaccurately_thenReadBytesReturnsExpected() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
-        val expected = Random.Default.nextBytes(212_121)
+        val expected = Random.nextBytes(212_121)
         tmp.writeBytes(excl = null, expected)
 
         try {
@@ -63,7 +63,7 @@ class ReadUnitTest: ReadSharedTest() {
                 (expected.size + 1).toLong(),
             ).forEach { testSize ->
                 val stream = TestReadStream(s = tmp.openRead()) { testSize }
-                val actual = tmp.commonReadBytes(open = { stream })
+                val actual = tmp.commonReadBytes(_openRead = { stream })
 
                 assertFalse(stream.isOpen())
                 assertEquals(expected.size, actual.size)
@@ -86,7 +86,7 @@ class ReadUnitTest: ReadSharedTest() {
 
         try {
             stream = TestReadStream(s = tmp.openRead()) { Int.MAX_VALUE.toLong() + 1L }
-            tmp.commonReadBytes { stream }
+            tmp.commonReadBytes(_openRead = { stream })
             fail("readBytes should have thrown exception...")
         } catch (e: FileSystemException) {
             assertEquals(true, e.message?.contains("Size exceeds maximum"))

@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.js.JsError
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -77,8 +78,11 @@ public actual val Throwable.errorCodeOrNull: String? get() {
     if (this is WasmJsException) return code
     if (this is JsException) {
         val t = thrownValue ?: return null
-        if (t !is JsError) return null
-        return t.code
+        return try {
+            (t.unsafeCast<JsError>()).code
+        } catch (_: Throwable) {
+            null
+        }
     }
     return null
 }
@@ -87,9 +91,13 @@ public actual val Throwable.errorCodeOrNull: String? get() {
 // @Throws(WasmJsException::class)
 internal fun internalWasmJsExternTryCatch(block: () -> Unit) {
     val err = wasmJsTryCatch(block) ?: return
-    val message = err.message?.ifBlank { null }
-    val code = err.code?.ifBlank { null }
-    throw WasmJsException(message, code)
+    throw err.toWasmJsException()
+}
+
+internal fun JsError.toWasmJsException(): Throwable {
+    val m = message?.ifBlank { null }
+    val c = code?.ifBlank { null }
+    return WasmJsException(m, c)
 }
 
 private class WasmJsException(message: String?, val code: String?): Throwable(message)
@@ -107,9 +115,3 @@ private fun wasmJsTryCatch(block: () -> Unit): JsError? = js(code =
         return Error(e + "");
     }
 }""")
-
-@JsName("Error")
-private external class JsError: JsAny {
-    val message: String?
-    val code: String?
-}

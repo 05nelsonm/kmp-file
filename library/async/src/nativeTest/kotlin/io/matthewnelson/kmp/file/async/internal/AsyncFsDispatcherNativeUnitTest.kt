@@ -16,8 +16,9 @@
 package io.matthewnelson.kmp.file.async.internal
 
 import io.matthewnelson.kmp.file.SysTempDir
+import io.matthewnelson.kmp.file.async.AsyncFs
 import io.matthewnelson.kmp.file.delete2
-import io.matthewnelson.kmp.file.internal.async.AsyncFileStream
+import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import io.matthewnelson.kmp.file.openWrite
 import io.matthewnelson.kmp.file.resolve
 import io.matthewnelson.kmp.file.use
@@ -26,16 +27,16 @@ import kotlinx.coroutines.IO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class AsyncDispatcherNativeUnitTest {
+class AsyncFsDispatcherNativeUnitTest {
 
     @Test
-    fun givenAsyncDispatcher_whenReferenced_thenSetsAsyncFileStreamDefaultContext() {
-        AsyncDispatcher
+    fun givenAsyncFs_whenReferenced_thenSetsInteropAsyncFileStreamDefaultContext() {
+        AsyncFs.ctx
 
         val tmp = SysTempDir.resolve("default_context.tmp")
         try {
             tmp.openWrite(excl = null).use { stream ->
-                assertEquals(Dispatchers.IO, (stream as AsyncFileStream).ctx)
+                assertEquals(Dispatchers.IO, (stream as InteropAsyncFileStream).ctx)
             }
         } finally {
             tmp.delete2()

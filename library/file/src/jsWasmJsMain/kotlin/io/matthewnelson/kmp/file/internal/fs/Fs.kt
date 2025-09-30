@@ -24,6 +24,8 @@ import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.async.SuspendCancellable
+import kotlin.coroutines.cancellation.CancellationException
 
 internal actual sealed class Fs protected constructor(internal actual val info: FsInfo) {
 
@@ -47,33 +49,50 @@ internal actual sealed class Fs protected constructor(internal actual val info: 
     @Throws(IOException::class)
     internal actual abstract fun canonicalFile(file: File): File
 
+    @Throws(CancellationException::class, IOException::class)
+    internal abstract suspend fun realPath(path: Path, suspendCancellable: SuspendCancellable<Path>): Path
+
     /** See [io.matthewnelson.kmp.file.chmod2] */
     @Throws(IOException::class)
     internal actual abstract fun chmod(file: File, mode: Mode, mustExist: Boolean)
+    @Throws(CancellationException::class, IOException::class)
+    internal abstract suspend fun chmod(file: File, mode: Mode, mustExist: Boolean, suspendCancellable: SuspendCancellable<Any?>)
 
     /** See [io.matthewnelson.kmp.file.delete2] */
     @Throws(IOException::class)
     internal actual abstract fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean)
+    @Throws(CancellationException::class, IOException::class)
+    internal abstract suspend fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean, suspendCancellable: SuspendCancellable<Any?>)
 
     /** See [io.matthewnelson.kmp.file.exists2] */
     @Throws(IOException::class)
     internal actual abstract fun exists(file: File): Boolean
+    @Throws(CancellationException::class, IOException::class)
+    internal abstract suspend fun exists(file: File, suspendCancellable: SuspendCancellable<Any?>): Boolean
 
     /** See [io.matthewnelson.kmp.file.mkdir2] */
     @Throws(IOException::class)
     internal actual abstract fun mkdir(dir: File, mode: Mode, mustCreate: Boolean)
+    @Throws(CancellationException::class, IOException::class)
+    internal abstract suspend fun mkdir(dir: File, mode: Mode, mustCreate: Boolean, suspendCancellable: SuspendCancellable<Any?>)
 
     /** See [io.matthewnelson.kmp.file.openRead] */
     @Throws(IOException::class)
     internal actual abstract fun openRead(file: File): AbstractFileStream
+    @Throws(CancellationException::class, IOException::class)
+    internal abstract suspend fun openRead(file: File, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream
 
     /** See [io.matthewnelson.kmp.file.openReadWrite] */
     @Throws(IOException::class)
     internal actual abstract fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream
+    @Throws(CancellationException::class, IOException::class)
+    internal abstract suspend fun openReadWrite(file: File, excl: OpenExcl, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream
 
     /** See [io.matthewnelson.kmp.file.openWrite] */
     @Throws(IOException::class)
     internal actual abstract fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
+    @Throws(CancellationException::class, IOException::class)
+    internal abstract suspend fun openWrite(file: File, excl: OpenExcl, appending: Boolean, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream
 
     internal actual companion object {
         internal actual val INSTANCE: Fs by lazy {

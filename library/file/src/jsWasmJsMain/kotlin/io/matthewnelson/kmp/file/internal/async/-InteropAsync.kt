@@ -13,37 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-
 package io.matthewnelson.kmp.file.internal.async
 
 import io.matthewnelson.kmp.file.InternalKmpFileApi
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
+import io.matthewnelson.kmp.file.internal.js.JsError
+import io.matthewnelson.kmp.file.internal.js.toThrowable
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Interop hooks for `:kmp-file:async`
  * @suppress
  * */
 @InternalKmpFileApi
-public actual sealed interface AsyncFileStream {
+public typealias SuspendCancellable<T> = suspend ((Continuation<T>) -> Unit) -> T
 
-    public actual var ctx: CoroutineContext
-
-    @InternalKmpFileApi
-    public actual interface Read: AsyncFileStream
-
-    @InternalKmpFileApi
-    public actual interface Write: AsyncFileStream
-
-    @InternalKmpFileApi
-    public actual companion object {
-        internal actual val CTX_DEFAULT: CoroutineContext by lazy {
-            try {
-                kotlinx.coroutines.Dispatchers.IO
-            } catch (_: Throwable) {
-                EmptyCoroutineContext
-            }
-        }
+@OptIn(ExperimentalContracts::class)
+internal inline fun <T> Continuation<T>.complete(err: JsError?, success: () -> T) {
+    contract {
+        callsInPlace(success, InvocationKind.AT_MOST_ONCE)
+    }
+    if (err != null) {
+        val t = err.toThrowable()
+        resumeWithException(t)
+    } else {
+        val s = success()
+        resume(s)
     }
 }

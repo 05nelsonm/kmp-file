@@ -18,7 +18,7 @@
 package io.matthewnelson.kmp.file.internal.async
 
 import io.matthewnelson.kmp.file.InternalKmpFileApi
-import kotlin.concurrent.AtomicReference
+import kotlin.Throws
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -27,25 +27,27 @@ import kotlin.coroutines.EmptyCoroutineContext
  * @suppress
  * */
 @InternalKmpFileApi
-public actual sealed interface AsyncFileStream {
+public actual sealed interface InteropAsyncFileStream {
 
-    public actual var ctx: CoroutineContext
+    public actual val ctx: CoroutineContext
+
+    @Throws(IllegalStateException::class)
+    public actual fun setContext(ctx: CoroutineContext)
 
     @InternalKmpFileApi
-    public actual interface Read: AsyncFileStream
+    public actual interface Read: InteropAsyncFileStream
 
     @InternalKmpFileApi
-    public actual interface Write: AsyncFileStream
+    public actual interface Write: InteropAsyncFileStream
 
     @InternalKmpFileApi
     public actual companion object {
-        private val _ctx = AtomicReference<CoroutineContext?>(null)
-
-        internal actual val CTX_DEFAULT: CoroutineContext get() = _ctx.value ?: EmptyCoroutineContext
-
-        // Called from :kmp-file:async module DefaultContext
-        public fun setDefaultContext(ctx: CoroutineContext): Boolean {
-            return _ctx.compareAndSet(null, ctx)
+        internal actual val CTX_DEFAULT: CoroutineContext by lazy {
+            try {
+                kotlinx.coroutines.Dispatchers.IO
+            } catch (_: Throwable) {
+                EmptyCoroutineContext
+            }
         }
     }
 }

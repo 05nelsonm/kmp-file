@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("LocalVariableName")
+
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.openRead
 import io.matthewnelson.kmp.file.use
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -26,21 +29,26 @@ import kotlin.contracts.contract
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
 internal inline fun File.commonReadBytes(
-    open: File.() -> FileStream.Read,
+    _openRead: File.() -> FileStream.Read = File::openRead,
+    _size: FileStream.Read.() -> Long = FileStream.Read::size,
+    _read: FileStream.Read.(ByteArray, Int, Int) -> Int = FileStream.Read::read,
+    // TODO: use
 ): ByteArray {
     contract {
-        callsInPlace(open, InvocationKind.EXACTLY_ONCE)
+        callsInPlace(_openRead, InvocationKind.EXACTLY_ONCE)
+        callsInPlace(_size, InvocationKind.AT_MOST_ONCE)
+        callsInPlace(_read, InvocationKind.UNKNOWN)
     }
 
-    return open.invoke(this).use { s ->
-        var remainder = s.size().let { size ->
+    return _openRead(this).use { s ->
+        var remainder = _size(s).let { size ->
             if (size > Int.MAX_VALUE) throw fileSystemException(this, null, "Size exceeds maximum[${Int.MAX_VALUE}]")
             size.toInt()
         }
         var offset = 0
         var ret = ByteArray(remainder)
         while (remainder > 0) {
-            val read = s.read(ret, offset, remainder)
+            val read = _read(s, ret, offset, remainder)
             if (read == -1) break
             remainder -= read
             offset += read
@@ -48,7 +56,7 @@ internal inline fun File.commonReadBytes(
         if (remainder > 0) return@use ret.copyOf(offset)
 
         val single = ByteArray(1)
-        if (s.read(single) == -1) return@use ret
+        if (_read(s, single, 0, 1) == -1) return@use ret
 
         // We were lied to about the file size
         val chunks = ArrayDeque<ByteArray>(4)
@@ -59,7 +67,7 @@ internal inline fun File.commonReadBytes(
         var size = ret.size + single.size
 
         while (true) {
-            val read = s.read(buf)
+            val read = _read(s, buf, 0, buf.size)
             if (read == -1) break
             size += read
             if (size < 0) {

@@ -19,29 +19,27 @@ package io.matthewnelson.kmp.file.internal.async
 
 import io.matthewnelson.kmp.file.InternalKmpFileApi
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * Interop hooks for `:kmp-file:async`
  * @suppress
  * */
 @InternalKmpFileApi
-public actual sealed interface AsyncFileStream {
+public expect sealed interface InteropAsyncFileStream {
 
-    public actual var ctx: CoroutineContext
+    public val ctx: CoroutineContext
 
-    @InternalKmpFileApi
-    public actual interface Read: AsyncFileStream {
-
-    }
+    @Throws(IllegalStateException::class)
+    public fun setContext(ctx: CoroutineContext)
 
     @InternalKmpFileApi
-    public actual interface Write: AsyncFileStream {
-
-    }
+    public interface Read: InteropAsyncFileStream
 
     @InternalKmpFileApi
-    public actual companion object {
-        internal actual val CTX_DEFAULT: CoroutineContext = EmptyCoroutineContext
+    public interface Write: InteropAsyncFileStream
+
+    @InternalKmpFileApi
+    public companion object {
+        internal val CTX_DEFAULT: CoroutineContext
     }
 }

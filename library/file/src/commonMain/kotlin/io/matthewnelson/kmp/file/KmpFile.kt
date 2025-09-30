@@ -437,8 +437,7 @@ public fun File.mkdirs2(mode: String?, mustCreate: Boolean = false): File {
  * */
 @Throws(IOException::class)
 public fun File.openRead(): FileStream.Read {
-    val s = Fs.INSTANCE.openRead(this)
-    return FileStreamReadOnly.of(s)
+    return Fs.INSTANCE.commonOpenRead(this)
 }
 
 /**
@@ -466,10 +465,7 @@ public fun File.openRead(): FileStream.Read {
  * */
 @Throws(IOException::class)
 public fun File.openReadWrite(excl: OpenExcl?): FileStream.ReadWrite {
-    val s = Fs.INSTANCE.openReadWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT)
-    disappearingCheck(condition = { s.canRead }) { "!canRead" }
-    disappearingCheck(condition = { s.canWrite }) { "!canWrite" }
-    return s
+    return Fs.INSTANCE.commonOpenReadWrite(this, excl)
 }
 
 /**
@@ -497,8 +493,7 @@ public fun File.openReadWrite(excl: OpenExcl?): FileStream.ReadWrite {
  * */
 @Throws(IOException::class)
 public fun File.openWrite(excl: OpenExcl?, appending: Boolean): FileStream.Write {
-    val s = Fs.INSTANCE.openWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT, appending)
-    return FileStreamWriteOnly.of(s)
+    return Fs.INSTANCE.commonOpenWrite(this, excl, appending)
 }
 
 /**
@@ -573,7 +568,7 @@ public inline fun File.openAppend(excl: OpenExcl?): FileStream.Write {
 @JvmName("readBytesFrom")
 @Throws(IOException::class)
 public fun File.readBytes(): ByteArray {
-    return commonReadBytes(open = { openRead() })
+    return commonReadBytes()
 }
 
 /**
