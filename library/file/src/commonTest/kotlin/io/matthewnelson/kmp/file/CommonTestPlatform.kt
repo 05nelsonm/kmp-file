@@ -65,6 +65,21 @@ internal expect class TestReadStream(
 //    override fun write(buf: Buffer, offset: Long, len: Long) { error("Not implemented") }
 //    override fun write(buf: Buffer, position: Long) { error("Not implemented") }
 //    override fun write(buf: Buffer, offset: Long, len: Long, position: Long) { error("Not implemented") }
+//    override suspend fun _positionAsync(suspendCancellable: SuspendCancellable<Any?>): Long = error("Not implemented")
+//    override suspend fun _positionAsync(new: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+//    override suspend fun _readAsync(buf: ByteArray, offset: Int, len: Int, suspendCancellable: SuspendCancellable<Any?>): Int = error("Not implemented")
+//    override suspend fun _readAsync(buf: ByteArray, offset: Int, len: Int, position: Long, suspendCancellable: SuspendCancellable<Any?>): Int = error("Not implemented")
+//    override suspend fun _readAsync(buf: Buffer, offset: Long, len: Long, suspendCancellable: SuspendCancellable<Any?>): Long = error("Not implemented")
+//    override suspend fun _readAsync(buf: Buffer, offset: Long, len: Long, position: Long, suspendCancellable: SuspendCancellable<Any?>): Long  = error("Not implemented")
+//    override suspend fun _sizeAsync(suspendCancellable: SuspendCancellable<Any?>): Long = error("Not implemented")
+//    override suspend fun _sizeAsync(new: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+//    override suspend fun _syncAsync(meta: Boolean, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+//    override suspend fun _writeAsync(buf: ByteArray, offset: Int, len: Int, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+//    override suspend fun _writeAsync(buf: ByteArray, offset: Int, len: Int, position: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+//    override suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+//    override suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, position: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+//    override suspend fun _closeAsync() { error("Not implemented") }
+//    override fun _initAsyncLock(create: (isLocked: Boolean) -> InteropAsyncFileStream.Lock) { error("Not implemented") }
 
     // jvmTest
 //    override fun read(dst: ByteBuffer?): Int = s.read(dst)

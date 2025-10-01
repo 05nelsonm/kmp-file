@@ -116,6 +116,46 @@ public actual open class AsyncFs private actual constructor(public actual val ct
         return openAppend(this, excl)
     }
 
+    @Throws(CancellationException::class, IOException::class)
+    public actual suspend inline fun File.readBytesAsync(): ByteArray {
+        return readBytes(this)
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public actual suspend inline fun File.readUtf8Async(): String {
+        return readUtf8(this)
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public actual suspend inline fun File.writeBytesAsync(excl: OpenExcl?, appending: Boolean, array: ByteArray): File {
+        return writeBytes(this, excl, appending, array)
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public actual suspend inline fun File.writeBytesAsync(excl: OpenExcl?, array: ByteArray): File {
+        return writeBytes(this, excl, array)
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public actual suspend inline fun File.writeUtf8Async(excl: OpenExcl?, appending: Boolean, text: String): File {
+        return writeUtf8(this, excl, appending, text)
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public actual suspend inline fun File.writeUtf8Async(excl: OpenExcl?, text: String): File {
+        return writeUtf8(this, excl, text)
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public actual suspend inline fun File.appendBytesAsync(excl: OpenExcl?, array: ByteArray): File {
+        return appendBytes(this, excl, array)
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public actual suspend inline fun File.appendUtf8Async(excl: OpenExcl?, text: String): File {
+        return appendUtf8(this, excl, text)
+    }
+
     /** @suppress */
     public actual final override fun equals(other: Any?): Boolean = commonEquals(other)
     /** @suppress */

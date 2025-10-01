@@ -35,10 +35,10 @@ public actual sealed interface InteropAsyncFileStream {
     public actual fun setContext(ctx: CoroutineContext)
 
     @InternalKmpFileApi
-    public actual interface Read: InteropAsyncFileStream
+    public actual sealed interface Read: InteropAsyncFileStream
 
     @InternalKmpFileApi
-    public actual interface Write: InteropAsyncFileStream
+    public actual sealed interface Write: InteropAsyncFileStream
 
     @InternalKmpFileApi
     public actual companion object {

@@ -33,13 +33,17 @@ public expect sealed interface InteropAsyncFileStream {
     public fun setContext(ctx: CoroutineContext)
 
     @InternalKmpFileApi
-    public interface Read: InteropAsyncFileStream
+    public sealed interface Read: InteropAsyncFileStream
 
     @InternalKmpFileApi
-    public interface Write: InteropAsyncFileStream
+    public sealed interface Write: InteropAsyncFileStream
 
     @InternalKmpFileApi
     public companion object {
         internal val CTX_DEFAULT: CoroutineContext
     }
 }
+
+internal interface InternalInteropAsyncFileStreamRead: InteropAsyncFileStream.Read
+
+internal interface InternalInteropAsyncFileStreamWrite: InteropAsyncFileStream.Write

@@ -80,11 +80,44 @@ internal expect suspend inline fun File.openReadWriteInternal(excl: OpenExcl?): 
 @Throws(CancellationException::class, IOException::class)
 internal expect suspend inline fun File.openWriteInternal(excl: OpenExcl?, appending: Boolean): FileStream.Write
 
-// TODO: File.readBytesAsync(): ByteArray
-// TODO: File.readUtf8Async(): String
-// TODO: File.writeBytesAsync(excl: OpenExcl?, appending: Boolean, array: ByteArray): File
-// TODO: File.writeBytesAsync(excl: OpenExcl?, array: ByteArray): File
-// TODO: File.writeUtf8Async(excl: OpenExcl?, appending: Boolean, text: String): File
-// TODO: File.writeUtf8Async(excl: OpenExcl?, text: String): File
-// TODO: File.appendBytesAsync(excl: OpenExcl?, array: ByteArray): File
-// TODO: File.appendUtf8Async(excl: OpenExcl?, text: String): File
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun File.readBytesInternal(): ByteArray
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun File.readUtf8Internal(): String
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun File.writeBytesInternal(excl: OpenExcl?, appending: Boolean, array: ByteArray): File
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun File.writeUtf8Internal(excl: OpenExcl?, appending: Boolean, text: String): File
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.closeInternal()
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.positionInternal(): Long
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.positionInternal(new: Long)
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.sizeInternal(): Long
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.Write.sizeInternal(new: Long)
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.syncInternal(meta: Boolean)
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.Read.readInternal(buf: ByteArray, offset: Int, len: Int): Int
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.Read.readInternal(buf: ByteArray, offset: Int, len: Int, position: Long): Int
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.Write.writeInternal(buf: ByteArray, offset: Int, len: Int)
+
+@Throws(CancellationException::class, IOException::class)
+internal expect suspend inline fun FileStream.Write.writeInternal(buf: ByteArray, offset: Int, len: Int, position: Long)

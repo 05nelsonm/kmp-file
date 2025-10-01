@@ -17,12 +17,15 @@
 
 package io.matthewnelson.kmp.file.async.internal
 
+import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import io.matthewnelson.kmp.file.internal.async.InteropAsyncFs
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
 import kotlin.coroutines.cancellation.CancellationException
 
 @Throws(CancellationException::class, IOException::class)
@@ -72,15 +75,112 @@ internal actual suspend inline fun File.mkdirs2Internal(mode: String?, mustCreat
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.openReadInternal(): FileStream.Read {
-    return InteropAsyncFs.openRead(this, ::suspendCancellableCoroutine)
+    return InteropAsyncFs.openRead(this, ::suspendCancellableCoroutine).initMutex()
 }
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.openReadWriteInternal(excl: OpenExcl?): FileStream.ReadWrite {
-    return InteropAsyncFs.openReadWrite(this, excl, ::suspendCancellableCoroutine)
+    return InteropAsyncFs.openReadWrite(this, excl, ::suspendCancellableCoroutine).initMutex()
 }
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.openWriteInternal(excl: OpenExcl?, appending: Boolean): FileStream.Write {
-    return InteropAsyncFs.openWrite(this, excl, appending, ::suspendCancellableCoroutine)
+    return InteropAsyncFs.openWrite(this, excl, appending, ::suspendCancellableCoroutine).initMutex()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun File.readBytesInternal(): ByteArray {
+    TODO()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun File.readUtf8Internal(): String {
+    TODO()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun File.writeBytesInternal(excl: OpenExcl?, appending: Boolean, array: ByteArray): File {
+    TODO()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun File.writeUtf8Internal(excl: OpenExcl?, appending: Boolean, text: String): File {
+    TODO()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.closeInternal() {
+    try {
+        initMutex()
+    } catch (_: ClosedException) {
+        return
+    }
+    (this as InteropAsyncFileStream)._closeAsync()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.positionInternal(): Long {
+    initMutex()
+    return (this as InteropAsyncFileStream)._positionAsync(::suspendCancellableCoroutine)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.positionInternal(new: Long) {
+    initMutex()
+    return (this as InteropAsyncFileStream)._positionAsync(new, ::suspendCancellableCoroutine)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.sizeInternal(): Long {
+    initMutex()
+    return (this as InteropAsyncFileStream)._sizeAsync(::suspendCancellableCoroutine)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Write.sizeInternal(new: Long) {
+    initMutex()
+    (this as InteropAsyncFileStream.Write)._sizeAsync(new, ::suspendCancellableCoroutine)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.syncInternal(meta: Boolean) {
+    initMutex()
+    (this as InteropAsyncFileStream)._syncAsync(meta, ::suspendCancellableCoroutine)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Read.readInternal(buf: ByteArray, offset: Int, len: Int): Int {
+    initMutex()
+    return (this as InteropAsyncFileStream.Read)._readAsync(buf, offset, len, ::suspendCancellableCoroutine)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Read.readInternal(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+    initMutex()
+    return (this as InteropAsyncFileStream.Read)._readAsync(buf, offset, len, position, ::suspendCancellableCoroutine)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Write.writeInternal(buf: ByteArray, offset: Int, len: Int) {
+    initMutex()
+    (this as InteropAsyncFileStream.Write)._writeAsync(buf, offset, len, ::suspendCancellableCoroutine)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Write.writeInternal(buf: ByteArray, offset: Int, len: Int, position: Long) {
+    initMutex()
+    (this as InteropAsyncFileStream.Write)._writeAsync(buf, offset, len, position, ::suspendCancellableCoroutine)
+}
+
+internal fun <S: FileStream> S.initMutex(): S {
+    (this as InteropAsyncFileStream)._initAsyncLock(create = ::createMutex)
+    return this
+}
+
+private fun createMutex(isLocked: Boolean) = object: InteropAsyncFileStream.Lock {
+    private val mutex = Mutex(isLocked)
+    override val isLocked: Boolean get() = mutex.isLocked
+    override fun tryLock(): Boolean = mutex.tryLock()
+    override suspend fun lock() { mutex.lock() }
+    override fun unlock() { mutex.unlock() }
 }

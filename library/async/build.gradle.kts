@@ -13,12 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     id("configuration")
 }
 
 kmpConfiguration {
     configureShared(java9ModuleName = "io.matthewnelson.kmp.file.async", publish = true) {
+        js {
+            target {
+                browser {
+                    testTask { isEnabled = false }
+                }
+            }
+        }
+        @OptIn(ExperimentalWasmDsl::class)
+        wasmJs {
+            target {
+                browser {
+                    testTask { isEnabled = false }
+                }
+            }
+        }
         common {
             sourceSetMain {
                 dependencies {
@@ -29,6 +46,8 @@ kmpConfiguration {
             sourceSetTest {
                 dependencies {
                     implementation(libs.kotlinx.coroutines.test)
+                    implementation(libs.encoding.base16)
+                    implementation(kotlincrypto.hash.sha2)
                 }
             }
         }

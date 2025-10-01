@@ -17,6 +17,8 @@
 
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.async.InternalInteropAsyncFileStreamRead
+import io.matthewnelson.kmp.file.internal.async.InternalInteropAsyncFileStreamWrite
 import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import io.matthewnelson.kmp.file.internal.disappearingCheck
 import kotlin.concurrent.Volatile
@@ -29,7 +31,7 @@ import kotlin.jvm.JvmSynthetic
 // Strictly for supporting isInstance checks
 internal class FileStreamReadOnly private constructor(
     private val s: AbstractFileStream,
-): FileStream.Read by s, InteropAsyncFileStream.Read by s {
+): FileStream.Read by s, InternalInteropAsyncFileStreamRead by s {
     init { disappearingCheck(condition = { s.canRead }) { "AbstractFileStream.canRead != true" } }
     public override fun position(new: Long): FileStream.Read { s.position(new); return this }
     public override fun sync(meta: Boolean): FileStream.Read { s.sync(meta); return this }
@@ -45,7 +47,7 @@ internal class FileStreamReadOnly private constructor(
 // Strictly for supporting isInstance checks
 internal class FileStreamWriteOnly private constructor(
     private val s: AbstractFileStream,
-): FileStream.Write by s, InteropAsyncFileStream.Write by s {
+): FileStream.Write by s, InternalInteropAsyncFileStreamWrite by s {
     init { disappearingCheck(condition = { s.canWrite }) { "AbstractFileStream.canWrite != true" } }
     public override fun position(new: Long): FileStream.Write { s.position(new); return this }
     public override fun size(new: Long): FileStream.Write { s.size(new); return this }
@@ -64,7 +66,7 @@ internal abstract class AbstractFileStream protected constructor(
     internal val canWrite: Boolean,
     public final override val isAppending: Boolean,
     init: Any,
-): FileStream.ReadWrite(), InteropAsyncFileStream.Read, InteropAsyncFileStream.Write {
+): FileStream.ReadWrite(), InternalInteropAsyncFileStreamRead, InternalInteropAsyncFileStreamWrite {
 
     @Volatile
     private var _ctx: CoroutineContext? = null

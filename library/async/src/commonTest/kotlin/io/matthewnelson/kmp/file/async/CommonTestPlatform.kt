@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file
+package io.matthewnelson.kmp.file.async
 
 import io.matthewnelson.encoding.base16.Base16
 import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
+import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.SysTempDir
+import io.matthewnelson.kmp.file.resolve
+import kotlinx.coroutines.test.TestResult
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest as runCoroutineTest
 import org.kotlincrypto.hash.sha2.SHA256
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.random.Random
 
 private val BASE_16_LC = Base16 { encodeToLowercase = true }
@@ -30,35 +35,20 @@ fun randomName(): String = Random
     .encodeToString(Base16)
 
 fun randomTemp(): File = SysTempDir
-    .resolve("kmp_file_" + randomName())
+    .resolve("kmp_file_async" + randomName())
 
 fun ByteArray.sha256(): String = SHA256()
     .digest(this)
     .encodeToString(BASE_16_LC)
 
-val isJsBrowser: Boolean get() = SysFsInfo.name == "FsJsBrowser"
-
-@OptIn(ExperimentalContracts::class)
-inline fun skipTestIf(condition: Boolean, block: () -> Unit) {
-    contract {
-        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
-    }
-
-    if (condition) {
-        println("Skipping...")
-        return
-    }
-
-    block()
-}
-
-sealed interface PermissionChecker {
-    interface Windows: PermissionChecker {
-        fun isReadOnly(file: File): Boolean
-    }
-    interface Posix: PermissionChecker {
-        fun canRead(file: File): Boolean
-        fun canWrite(file: File): Boolean
-        fun canExecute(file: File): Boolean
+internal fun runTest(
+    context: CoroutineContext = EmptyCoroutineContext,
+    testBody: suspend TestScope.(tmp: File) -> Unit,
+): TestResult = runCoroutineTest(context) {
+    val tmp = randomTemp()
+    try {
+        testBody(tmp)
+    } finally {
+        AsyncFs.delete2(tmp, ignoreReadOnly = true)
     }
 }

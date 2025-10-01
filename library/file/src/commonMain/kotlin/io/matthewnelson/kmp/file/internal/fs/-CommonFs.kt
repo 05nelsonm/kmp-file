@@ -29,9 +29,11 @@ import io.matthewnelson.kmp.file.internal.disappearingCheck
 import io.matthewnelson.kmp.file.internal.fileAlreadyExistsException
 import io.matthewnelson.kmp.file.internal.toMode
 import io.matthewnelson.kmp.file.parentFile
+import io.matthewnelson.kmp.file.wrapIOException
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalContracts::class)
 @Throws(IllegalArgumentException::class, IOException::class)
@@ -120,7 +122,7 @@ internal inline fun Fs.commonMkdirs(
             _mkdir(directory, m, false)
             created.addFirst(directory)
         }
-    } catch (e: IOException) {
+    } catch (t: Throwable) {
         // Be good stewards of a filesystem and clean up
         // any parent directories that may have been created.
         try {
@@ -128,9 +130,10 @@ internal inline fun Fs.commonMkdirs(
                 _delete(directory, true, false)
             }
         } catch (ee: IOException) {
-            e.addSuppressed(ee)
+            t.addSuppressed(ee)
         }
-        throw e
+        if (t is CancellationException) throw t
+        throw t.wrapIOException()
     }
 
     return dir

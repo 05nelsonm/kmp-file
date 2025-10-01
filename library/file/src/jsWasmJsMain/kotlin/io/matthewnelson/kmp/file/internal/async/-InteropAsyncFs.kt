@@ -33,6 +33,7 @@ import io.matthewnelson.kmp.file.internal.fs.commonOpenRead
 import io.matthewnelson.kmp.file.internal.fs.commonOpenReadWrite
 import io.matthewnelson.kmp.file.internal.fs.commonOpenWrite
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Interop hooks for `:kmp-file:async`
@@ -121,7 +122,9 @@ public object InteropAsyncFs {
                 fs.exists(dir, suspendCancellable)
             },
             _delete = { dir, ignoreReadOnly, mustExist ->
-                fs.delete(dir, ignoreReadOnly, mustExist, suspendCancellable)
+                // Delete is utilized on cleanup in the event there is any errors.
+                // Do not want it to be cancellable, so.
+                fs.delete(dir, ignoreReadOnly, mustExist, ::suspendCoroutine)
             },
             _mkdir = { dir, mode, mustCreate ->
                 fs.mkdir(dir, mode, mustCreate, suspendCancellable)

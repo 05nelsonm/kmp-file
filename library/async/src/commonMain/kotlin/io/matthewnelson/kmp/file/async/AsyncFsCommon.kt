@@ -33,6 +33,10 @@ import io.matthewnelson.kmp.file.async.internal.mkdirs2Internal
 import io.matthewnelson.kmp.file.async.internal.openReadInternal
 import io.matthewnelson.kmp.file.async.internal.openReadWriteInternal
 import io.matthewnelson.kmp.file.async.internal.openWriteInternal
+import io.matthewnelson.kmp.file.async.internal.readBytesInternal
+import io.matthewnelson.kmp.file.async.internal.readUtf8Internal
+import io.matthewnelson.kmp.file.async.internal.writeBytesInternal
+import io.matthewnelson.kmp.file.async.internal.writeUtf8Internal
 import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import kotlinx.coroutines.withContext
 import kotlin.contracts.ExperimentalContracts
@@ -128,9 +132,9 @@ public suspend fun AsyncFs.exists2(file: File): Boolean {
  * */
 @JvmOverloads
 @Throws(CancellationException::class, IOException::class)
-public suspend fun AsyncFs.mkdir2(file: File, mode: String?, mustCreate: Boolean = false): File {
+public suspend fun AsyncFs.mkdir2(dir: File, mode: String?, mustCreate: Boolean = false): File {
     return withContext(ctx) {
-        file.mkdir2Internal(mode, mustCreate)
+        dir.mkdir2Internal(mode, mustCreate)
     }
 }
 
@@ -139,9 +143,9 @@ public suspend fun AsyncFs.mkdir2(file: File, mode: String?, mustCreate: Boolean
  * */
 @JvmOverloads
 @Throws(CancellationException::class, IOException::class)
-public suspend fun AsyncFs.mkdirs2(file: File, mode: String?, mustCreate: Boolean = false): File {
+public suspend fun AsyncFs.mkdirs2(dir: File, mode: String?, mustCreate: Boolean = false): File {
     return withContext(ctx) {
-        file.mkdirs2Internal(mode, mustCreate)
+        dir.mkdirs2Internal(mode, mustCreate)
     }
 }
 
@@ -200,6 +204,78 @@ public suspend inline fun AsyncFs.openAppend(file: File, excl: OpenExcl?): FileS
 /**
  * TODO
  * */
+@Throws(CancellationException::class, IOException::class)
+public suspend fun AsyncFs.readBytes(file: File): ByteArray {
+    return withContext(ctx) {
+        file.readBytesInternal()
+    }
+}
+
+/**
+ * TODO
+ * */
+@Throws(CancellationException::class, IOException::class)
+public suspend fun AsyncFs.readUtf8(file: File): String {
+    return withContext(ctx) {
+        file.readUtf8Internal()
+    }
+}
+
+/**
+ * TODO
+ * */
+@Throws(CancellationException::class, IOException::class)
+public suspend fun AsyncFs.writeBytes(file: File, excl: OpenExcl?, appending: Boolean, array: ByteArray): File {
+    return withContext(ctx) {
+        file.writeBytesInternal(excl, appending, array)
+    }
+}
+
+/**
+ * TODO
+ * */
+@Throws(CancellationException::class, IOException::class)
+public suspend inline fun AsyncFs.writeBytes(file: File, excl: OpenExcl?, array: ByteArray): File {
+    return writeBytes(file, excl, appending = false, array)
+}
+
+/**
+ * TODO
+ * */
+@Throws(CancellationException::class, IOException::class)
+public suspend fun AsyncFs.writeUtf8(file: File, excl: OpenExcl?, appending: Boolean, text: String): File {
+    return withContext(ctx) {
+        file.writeUtf8Internal(excl, appending, text)
+    }
+}
+
+/**
+ * TODO
+ * */
+@Throws(CancellationException::class, IOException::class)
+public suspend inline fun AsyncFs.writeUtf8(file: File, excl: OpenExcl?, text: String): File {
+    return writeUtf8(file, excl, appending = false, text)
+}
+
+/**
+ * TODO
+ * */
+@Throws(CancellationException::class, IOException::class)
+public suspend inline fun AsyncFs.appendBytes(file: File, excl: OpenExcl?, array: ByteArray): File {
+    return writeBytes(file, excl, appending = true, array)
+}
+
+/**
+ * TODO
+ * */
+@Throws(CancellationException::class, IOException::class)
+public suspend inline fun AsyncFs.appendUtf8(file: File, excl: OpenExcl?, text: String): File {
+    return writeUtf8(file, excl, appending = true, text)
+}
+
+/**
+ * TODO
+ * */
 public expect open class AsyncFs private constructor(ctx: CoroutineContext) {
 
     /**
@@ -245,6 +321,9 @@ public expect open class AsyncFs private constructor(ctx: CoroutineContext) {
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.canonicalFile2Async(): File
 
+    /**
+     * TODO
+     * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.chmod2Async(mode: String, mustExist: Boolean = true): File
 
@@ -301,6 +380,54 @@ public expect open class AsyncFs private constructor(ctx: CoroutineContext) {
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.openAppendAsync(excl: OpenExcl?): FileStream.Write
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.readBytesAsync(): ByteArray
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.readUtf8Async(): String
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.writeBytesAsync(excl: OpenExcl?, appending: Boolean, array: ByteArray): File
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.writeBytesAsync(excl: OpenExcl?, array: ByteArray): File
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.writeUtf8Async(excl: OpenExcl?, appending: Boolean, text: String): File
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.writeUtf8Async(excl: OpenExcl?, text: String): File
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.appendBytesAsync(excl: OpenExcl?, array: ByteArray): File
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.appendUtf8Async(excl: OpenExcl?, text: String): File
 
     /** @suppress */
     public final override fun equals(other: Any?): Boolean

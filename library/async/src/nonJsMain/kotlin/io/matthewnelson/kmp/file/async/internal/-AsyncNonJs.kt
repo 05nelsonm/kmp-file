@@ -31,6 +31,10 @@ import io.matthewnelson.kmp.file.mkdirs2
 import io.matthewnelson.kmp.file.openRead
 import io.matthewnelson.kmp.file.openReadWrite
 import io.matthewnelson.kmp.file.openWrite
+import io.matthewnelson.kmp.file.readBytes
+import io.matthewnelson.kmp.file.readUtf8
+import io.matthewnelson.kmp.file.writeBytes
+import io.matthewnelson.kmp.file.writeUtf8
 import kotlin.coroutines.cancellation.CancellationException
 
 @Throws(CancellationException::class, IOException::class)
@@ -91,4 +95,74 @@ internal actual suspend inline fun File.openReadWriteInternal(excl: OpenExcl?): 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.openWriteInternal(excl: OpenExcl?, appending: Boolean): FileStream.Write {
     return openWrite(excl, appending)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun File.readBytesInternal(): ByteArray {
+    return readBytes()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun File.readUtf8Internal(): String {
+    return readUtf8()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun File.writeBytesInternal(excl: OpenExcl?, appending: Boolean, array: ByteArray): File {
+    return writeBytes(excl, appending, array)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun File.writeUtf8Internal(excl: OpenExcl?, appending: Boolean, text: String): File {
+    return writeUtf8(excl, appending, text)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.closeInternal() {
+    close()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.positionInternal(): Long {
+    return position()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.positionInternal(new: Long) {
+    position(new)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.sizeInternal(): Long {
+    return size()
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Write.sizeInternal(new: Long) {
+    size(new)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.syncInternal(meta: Boolean) {
+    sync(meta)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Read.readInternal(buf: ByteArray, offset: Int, len: Int): Int {
+    return read(buf, offset, len)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Read.readInternal(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
+    return read(buf, offset, len, position)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Write.writeInternal(buf: ByteArray, offset: Int, len: Int) {
+    write(buf, offset, len)
+}
+
+@Throws(CancellationException::class, IOException::class)
+internal actual suspend inline fun FileStream.Write.writeInternal(buf: ByteArray, offset: Int, len: Int, position: Long) {
+    write(buf, offset, len, position)
 }

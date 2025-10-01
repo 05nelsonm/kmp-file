@@ -36,13 +36,13 @@ internal external interface ModuleFs {
     fun open(path: Path, flags: Int, callback: (err: JsError?, fd: Double) -> Unit)
     fun open(path: Path, flags: Int, mode: String, callback: (err: JsError?, fd: Double) -> Unit)
     fun open(path: Path, flags: String, mode: String, callback: (err: JsError?, fd: Double) -> Unit)
-    // TODO: read
+    fun read(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double, callback: (err: JsError?, read: Double, JsBuffer) -> Unit)
     // TODO: readFile
     fun realpath(path: Path, callback: (err: JsError?, resolved: Path) -> Unit)
     fun rmdir(path: Path, options: JsObject, callback: (err: JsError?) -> Unit)
     fun stat(path: Path, callback: (err: JsError?, stats: JsStats) -> Unit)
     fun unlink(path: Path, callback: (err: JsError?) -> Unit)
-    // TODO: write
+    fun write(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double, callback: (err: JsError?, write: Double, JsBuffer) -> Unit)
 
     fun accessSync(path: Path, mode: Int)
     fun chmodSync(path: Path, mode: String)
