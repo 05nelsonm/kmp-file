@@ -19,10 +19,8 @@ package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.commonWriteData
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
-import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 import io.matthewnelson.kmp.file.internal.node.nodeRead
 import io.matthewnelson.kmp.file.internal.node.nodeStats
-import io.matthewnelson.kmp.file.internal.require
 
 /**
  * Retrieve the symbolic [Stats] referred to by the abstract pathname.

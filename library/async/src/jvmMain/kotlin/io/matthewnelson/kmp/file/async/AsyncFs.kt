@@ -26,6 +26,7 @@ import io.matthewnelson.kmp.file.async.internal.commonHashCode
 import io.matthewnelson.kmp.file.async.internal.commonOf
 import io.matthewnelson.kmp.file.async.internal.commonToString
 import kotlinx.coroutines.Dispatchers
+import java.nio.ByteBuffer
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -151,7 +152,37 @@ public actual open class AsyncFs private constructor(@JvmField public actual val
         return appendUtf8(this, excl, text)
     }
 
-    // TODO: Jvm specific functions with ByteBuffer
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.readAsync(): ByteBuffer {
+        return read(this)
+    }
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.writeAsync(excl: OpenExcl?, appending: Boolean, src: ByteBuffer): Int {
+        return write(this, excl, appending, src)
+    }
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.writeAsync(excl: OpenExcl?, src: ByteBuffer): Int {
+        return write(this, excl, src)
+    }
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.appendAsync(excl: OpenExcl?, src: ByteBuffer): Int {
+        return append(this, excl, src)
+    }
 
     /** @suppress */
     public actual final override fun equals(other: Any?): Boolean = commonEquals(other)

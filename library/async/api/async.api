@@ -30,6 +30,7 @@ public class io/matthewnelson/kmp/file/async/AsyncFs {
 	public synthetic fun <init> (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun absoluteFile2Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun absolutePath2Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun appendAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/nio/ByteBuffer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun appendBytesAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun appendUtf8Async (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun canonicalFile2Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -51,9 +52,12 @@ public class io/matthewnelson/kmp/file/async/AsyncFs {
 	public final fun openReadWriteAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun openWriteAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun openWriteAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun readAsync (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun readBytesAsync (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun readUtf8Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
+	public final fun writeAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/nio/ByteBuffer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun writeAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLjava/nio/ByteBuffer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun writeBytesAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Z[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun writeBytesAsync (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun writeUtf8Async (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -98,5 +102,12 @@ public final class io/matthewnelson/kmp/file/async/AsyncFsCommonKt {
 	public static final fun writeBytes (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun writeUtf8 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun writeUtf8 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLjava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/matthewnelson/kmp/file/async/AsyncFsJvmKt {
+	public static final fun append (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/nio/ByteBuffer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun read (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun write (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/nio/ByteBuffer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun write (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;ZLjava/nio/ByteBuffer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
