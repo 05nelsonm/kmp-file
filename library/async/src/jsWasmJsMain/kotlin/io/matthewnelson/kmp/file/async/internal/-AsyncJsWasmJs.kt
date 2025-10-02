@@ -75,37 +75,37 @@ internal actual suspend inline fun File.mkdirs2Internal(mode: String?, mustCreat
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.openReadInternal(): FileStream.Read {
-    return InteropAsyncFs.openRead(this, ::suspendCancellableCoroutine).initMutex()
+    return InteropAsyncFs.openRead(this, ::createMutex, ::suspendCancellableCoroutine)
 }
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.openReadWriteInternal(excl: OpenExcl?): FileStream.ReadWrite {
-    return InteropAsyncFs.openReadWrite(this, excl, ::suspendCancellableCoroutine).initMutex()
+    return InteropAsyncFs.openReadWrite(this, excl, ::createMutex, ::suspendCancellableCoroutine)
 }
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.openWriteInternal(excl: OpenExcl?, appending: Boolean): FileStream.Write {
-    return InteropAsyncFs.openWrite(this, excl, appending, ::suspendCancellableCoroutine).initMutex()
+    return InteropAsyncFs.openWrite(this, excl, appending, ::createMutex, ::suspendCancellableCoroutine)
 }
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.readBytesInternal(): ByteArray {
-    TODO()
+    return InteropAsyncFs.readBytes(this, ::createMutex, ::suspendCancellableCoroutine)
 }
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.readUtf8Internal(): String {
-    TODO()
+    return InteropAsyncFs.readUtf8(this, ::createMutex, ::suspendCancellableCoroutine)
 }
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.writeBytesInternal(excl: OpenExcl?, appending: Boolean, array: ByteArray): File {
-    TODO()
+    return InteropAsyncFs.writeBytes(this, excl, appending, array, ::createMutex, ::suspendCancellableCoroutine)
 }
 
 @Throws(CancellationException::class, IOException::class)
 internal actual suspend inline fun File.writeUtf8Internal(excl: OpenExcl?, appending: Boolean, text: String): File {
-    TODO()
+    return InteropAsyncFs.writeUtf8(this, excl, appending, text, ::createMutex, ::suspendCancellableCoroutine)
 }
 
 @Throws(CancellationException::class, IOException::class)
@@ -172,12 +172,11 @@ internal actual suspend inline fun FileStream.Write.writeInternal(buf: ByteArray
     (this as InteropAsyncFileStream.Write)._writeAsync(buf, offset, len, position, ::suspendCancellableCoroutine)
 }
 
-internal fun <S: FileStream> S.initMutex(): S {
+internal inline fun FileStream.initMutex() {
     (this as InteropAsyncFileStream)._initAsyncLock(create = ::createMutex)
-    return this
 }
 
-private fun createMutex(isLocked: Boolean) = object: InteropAsyncFileStream.Lock {
+internal fun createMutex(isLocked: Boolean) = object: InteropAsyncFileStream.Lock {
     private val mutex = Mutex(isLocked)
     override val isLocked: Boolean get() = mutex.isLocked
     override fun tryLock(): Boolean = mutex.tryLock()

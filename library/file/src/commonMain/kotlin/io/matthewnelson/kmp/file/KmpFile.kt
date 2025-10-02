@@ -589,7 +589,7 @@ public fun File.readBytes(): ByteArray {
 @JvmName("readUtf8From")
 @Throws(IOException::class)
 public fun File.readUtf8(): String {
-    return readBytes().decodeToString()
+    return commonReadText()
 }
 
 /**
@@ -614,8 +614,7 @@ public fun File.readUtf8(): String {
 @JvmName("writeBytesTo")
 @Throws(IOException::class)
 public fun File.writeBytes(excl: OpenExcl?, appending: Boolean, array: ByteArray): File {
-    openWrite(excl, appending).use { s -> s.write(buf = array) }
-    return this
+    return commonWriteBytes(excl, appending, array)
 }
 
 /**
@@ -664,13 +663,7 @@ public inline fun File.writeBytes(excl: OpenExcl?, array: ByteArray): File {
 @JvmName("writeUtf8To")
 @Throws(IOException::class)
 public fun File.writeUtf8(excl: OpenExcl?, appending: Boolean, text: String): File {
-    val bytes = try {
-        text.encodeToByteArray()
-    } catch (t: Throwable) {
-        throw t.wrapIOException()
-    }
-
-    return writeBytes(excl, appending, bytes)
+    return commonWriteText(excl, appending, text)
 }
 
 /**

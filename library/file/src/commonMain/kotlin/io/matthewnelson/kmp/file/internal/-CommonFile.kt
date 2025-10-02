@@ -20,8 +20,12 @@ package io.matthewnelson.kmp.file.internal
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.openRead
-import io.matthewnelson.kmp.file.use
+import io.matthewnelson.kmp.file.openWrite
+import io.matthewnelson.kmp.file.readBytes
+import io.matthewnelson.kmp.file.writeBytes
+import io.matthewnelson.kmp.file.wrapIOException
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -29,34 +33,36 @@ import kotlin.contracts.contract
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
 internal inline fun File.commonReadBytes(
+    _close: FileStream.Read.() -> Unit = FileStream.Read::close,
     _openRead: File.() -> FileStream.Read = File::openRead,
-    _size: FileStream.Read.() -> Long = FileStream.Read::size,
     _read: FileStream.Read.(ByteArray, Int, Int) -> Int = FileStream.Read::read,
-    // TODO: use
+    _size: FileStream.Read.() -> Long = FileStream.Read::size,
 ): ByteArray {
     contract {
+        callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
         callsInPlace(_openRead, InvocationKind.EXACTLY_ONCE)
-        callsInPlace(_size, InvocationKind.AT_MOST_ONCE)
         callsInPlace(_read, InvocationKind.UNKNOWN)
+        callsInPlace(_size, InvocationKind.AT_MOST_ONCE)
     }
-
-    return _openRead(this).use { s ->
-        var remainder = _size(s).let { size ->
+    val s = _openRead()
+    var threw: Throwable? = null
+    try {
+        var remainder = s._size().let { size ->
             if (size > Int.MAX_VALUE) throw fileSystemException(this, null, "Size exceeds maximum[${Int.MAX_VALUE}]")
             size.toInt()
         }
         var offset = 0
         var ret = ByteArray(remainder)
         while (remainder > 0) {
-            val read = _read(s, ret, offset, remainder)
+            val read = s._read(ret, offset, remainder)
             if (read == -1) break
             remainder -= read
             offset += read
         }
-        if (remainder > 0) return@use ret.copyOf(offset)
+        if (remainder > 0) return ret.copyOf(offset)
 
         val single = ByteArray(1)
-        if (_read(s, single, 0, 1) == -1) return@use ret
+        if (s._read(single, 0, 1) == -1) return ret
 
         // We were lied to about the file size
         val chunks = ArrayDeque<ByteArray>(4)
@@ -67,7 +73,7 @@ internal inline fun File.commonReadBytes(
         var size = ret.size + single.size
 
         while (true) {
-            val read = _read(s, buf, 0, buf.size)
+            val read = s._read(buf, 0, buf.size)
             if (read == -1) break
             size += read
             if (size < 0) {
@@ -86,6 +92,82 @@ internal inline fun File.commonReadBytes(
             offset += chunk.size
         }
 
-        ret
+        return ret
+    } catch (t: Throwable) {
+        threw = t
+        throw t
+    } finally {
+        try {
+            s._close()
+        } catch (tt: Throwable) {
+            threw?.addSuppressed(tt) ?: throw tt
+        }
     }
+}
+
+@Throws(IOException::class)
+@OptIn(ExperimentalContracts::class)
+internal inline fun File.commonReadText(
+    _encode: ByteArray.() -> String = ByteArray::decodeToString,
+    _readBytes: File.() -> ByteArray = File::readBytes,
+): String {
+    contract {
+        callsInPlace(_readBytes, InvocationKind.EXACTLY_ONCE)
+        callsInPlace(_encode, InvocationKind.AT_MOST_ONCE)
+    }
+    return _readBytes()._encode()
+}
+
+@Throws(IOException::class)
+@OptIn(ExperimentalContracts::class)
+internal inline fun File.commonWriteBytes(
+    excl: OpenExcl?,
+    appending: Boolean,
+    array: ByteArray,
+    _close: FileStream.Write.() -> Unit = FileStream.Write::close,
+    _openWrite: File.(OpenExcl?, Boolean) -> FileStream.Write = File::openWrite,
+    _write: FileStream.Write.(ByteArray) -> Unit = FileStream.Write::write,
+): File {
+    contract {
+        callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
+        callsInPlace(_openWrite, InvocationKind.EXACTLY_ONCE)
+        callsInPlace(_write, InvocationKind.AT_MOST_ONCE)
+    }
+    val s = _openWrite(excl, appending)
+    var threw: Throwable? = null
+    try {
+        s._write(array)
+        return this
+    } catch (t: Throwable) {
+        threw = t
+        throw t
+    } finally {
+        try {
+            s._close()
+        } catch (tt: Throwable) {
+            threw?.addSuppressed(tt) ?: throw tt
+        }
+    }
+}
+
+@Throws(IOException::class)
+@OptIn(ExperimentalContracts::class)
+internal inline fun File.commonWriteText(
+    excl: OpenExcl?,
+    appending: Boolean,
+    text: String,
+    _encode: String.() -> ByteArray = String::encodeToByteArray,
+    _writeBytes: File.(OpenExcl?, Boolean, ByteArray) -> File = File::writeBytes,
+): File {
+    contract {
+        callsInPlace(_encode, InvocationKind.EXACTLY_ONCE)
+        callsInPlace(_writeBytes, InvocationKind.AT_MOST_ONCE)
+
+    }
+    val bytes = try {
+        text._encode()
+    } catch (t: Throwable) {
+        throw t.wrapIOException()
+    }
+    return _writeBytes(excl, appending, bytes)
 }

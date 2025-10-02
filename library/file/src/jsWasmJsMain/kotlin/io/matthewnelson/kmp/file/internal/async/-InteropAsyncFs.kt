@@ -20,6 +20,10 @@ import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.InternalKmpFileApi
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.internal.commonReadBytes
+import io.matthewnelson.kmp.file.internal.commonReadText
+import io.matthewnelson.kmp.file.internal.commonWriteBytes
+import io.matthewnelson.kmp.file.internal.commonWriteText
 import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.absoluteFile
 import io.matthewnelson.kmp.file.internal.fs.absolutePath
@@ -133,37 +137,100 @@ public object InteropAsyncFs {
     }
 
     @Throws(CancellationException::class, IOException::class)
-    public suspend fun openRead(file: File, suspendCancellable: SuspendCancellable<Any?>): FileStream.Read {
+    public suspend fun openRead(file: File, createLock: (Boolean) -> InteropAsyncFileStream.Lock, suspendCancellable: SuspendCancellable<Any?>): FileStream.Read {
         val fs = Fs.INSTANCE
         return fs.commonOpenRead(
             file,
             _openRead = { file ->
-                fs.openRead(file, suspendCancellable)
+                val s = fs.openRead(file, suspendCancellable)
+                (s as InteropAsyncFileStream)._initAsyncLock(createLock)
+                s
             },
         )
     }
 
     @Throws(CancellationException::class, IOException::class)
-    public suspend fun openReadWrite(file: File, excl: OpenExcl?, suspendCancellable: SuspendCancellable<Any?>): FileStream.ReadWrite {
+    public suspend fun openReadWrite(file: File, excl: OpenExcl?, createLock: (Boolean) -> InteropAsyncFileStream.Lock, suspendCancellable: SuspendCancellable<Any?>): FileStream.ReadWrite {
         val fs = Fs.INSTANCE
         return fs.commonOpenReadWrite(
             file,
             excl,
             _openReadWrite = { file, excl ->
-                fs.openReadWrite(file, excl, suspendCancellable)
+                val s = fs.openReadWrite(file, excl, suspendCancellable)
+                (s as InteropAsyncFileStream)._initAsyncLock(createLock)
+                s
             },
         )
     }
 
     @Throws(CancellationException::class, IOException::class)
-    public suspend fun openWrite(file: File, excl: OpenExcl?, appending: Boolean, suspendCancellable: SuspendCancellable<Any?>): FileStream.Write {
+    public suspend fun openWrite(file: File, excl: OpenExcl?, appending: Boolean, createLock: (Boolean) -> InteropAsyncFileStream.Lock, suspendCancellable: SuspendCancellable<Any?>): FileStream.Write {
         val fs = Fs.INSTANCE
         return fs.commonOpenWrite(
             file,
             excl,
             appending,
             _openWrite = { file, excl, appending ->
-                fs.openWrite(file, excl, appending, suspendCancellable)
+                val s = fs.openWrite(file, excl, appending, suspendCancellable)
+                (s as InteropAsyncFileStream)._initAsyncLock(createLock)
+                s
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public suspend fun readBytes(file: File, createLock: (Boolean) -> InteropAsyncFileStream.Lock, suspendCancellable: SuspendCancellable<Any?>): ByteArray {
+        return file.commonReadBytes(
+            _close = {
+                (this as InteropAsyncFileStream.Read)._closeAsync()
+            },
+            _openRead = {
+                openRead(this, createLock, suspendCancellable)
+            },
+            _read = { buf, offset, len ->
+                (this as InteropAsyncFileStream.Read)._readAsync(buf, offset, len, suspendCancellable)
+            },
+            _size = {
+                (this as InteropAsyncFileStream.Read)._sizeAsync(suspendCancellable)
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public suspend fun readUtf8(file: File, createLock: (Boolean) -> InteropAsyncFileStream.Lock, suspendCancellable: SuspendCancellable<Any?>): String {
+        return file.commonReadText(
+            _readBytes = {
+                readBytes(this, createLock, suspendCancellable)
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public suspend fun writeBytes(file: File, excl: OpenExcl?, appending: Boolean, array: ByteArray, createLock: (Boolean) -> InteropAsyncFileStream.Lock, suspendCancellable: SuspendCancellable<Any?>): File {
+        return file.commonWriteBytes(
+            excl,
+            appending,
+            array,
+            _close = {
+                (this as InteropAsyncFileStream.Write)._closeAsync()
+            },
+            _openWrite = { excl, appending ->
+                openWrite(this, excl, appending, createLock, suspendCancellable)
+            },
+            _write = { buf ->
+                (this as InteropAsyncFileStream.Write)._writeAsync(buf, 0, buf.size, suspendCancellable)
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public suspend fun writeUtf8(file: File, excl: OpenExcl?, appending: Boolean, text: String, createLock: (Boolean) -> InteropAsyncFileStream.Lock, suspendCancellable: SuspendCancellable<Any?>): File {
+        return file.commonWriteText(
+            excl,
+            appending,
+            text,
+            _writeBytes = { excl, appending, array ->
+                writeBytes(this, excl, appending, array, createLock, suspendCancellable)
             },
         )
     }
