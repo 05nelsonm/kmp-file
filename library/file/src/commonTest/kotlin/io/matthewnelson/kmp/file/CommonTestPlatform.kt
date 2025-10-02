@@ -79,7 +79,7 @@ internal expect class TestReadStream(
 //    override suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
 //    override suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, position: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
 //    override suspend fun _closeAsync() { error("Not implemented") }
-//    override fun _initAsyncLock(create: (isLocked: Boolean) -> InteropAsyncFileStream.Lock) { error("Not implemented") }
+//    override fun _initAsyncLock(create: (isLocked: Boolean) -> AsyncLock) { error("Not implemented") }
 
     // jvmTest
 //    override fun read(dst: ByteBuffer?): Int = s.read(dst)

@@ -33,6 +33,18 @@ import kotlin.coroutines.resumeWithException
 @InternalKmpFileApi
 public typealias SuspendCancellable<T> = suspend ((Continuation<T>) -> Unit) -> T
 
+/**
+ * Interop hooks for `:kmp-file:async`
+ * @suppress
+ * */
+@InternalKmpFileApi
+public interface AsyncLock {
+    public val isLocked: Boolean
+    public fun tryLock(): Boolean
+    public suspend fun lock()
+    public fun unlock()
+}
+
 @OptIn(ExperimentalContracts::class)
 internal inline fun <T> Continuation<T>.complete(err: JsError?, success: () -> T) {
     contract {
@@ -47,50 +59,36 @@ internal inline fun <T> Continuation<T>.complete(err: JsError?, success: () -> T
     }
 }
 
-// FileStream implementation utilizes this in the absence of kmp-file:async
-internal object NoOpLock: InteropAsyncFileStream.Lock {
-    override val isLocked: Boolean get() = false
-
-    @Deprecated("Use withTryLock", level = DeprecationLevel.ERROR)
-    override fun tryLock(): Boolean = true
-
-    @Deprecated("Use withLock", level = DeprecationLevel.ERROR)
-    override suspend fun lock() {
-        throw IOException("Failed to acquire lock for asynchronous operation. Are you not using 'kmp-file:async'?")
-    }
-
-    @Deprecated("Use withTryLock/withLock", level = DeprecationLevel.ERROR)
-    override fun unlock() {}
-}
-
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
-internal inline fun <R> InteropAsyncFileStream.Lock?.withTryLock(block: () -> R): R {
+internal inline fun <R> AsyncLock?.withTryLock(block: () -> R): R {
     contract {
         callsInPlace(block, InvocationKind.AT_MOST_ONCE)
     }
-    val lock = this ?: NoOpLock
-    if (!lock.tryLock()) {
+    if (this == null) return block()
+    if (!tryLock()) {
         throw IOException("Failed to acquire lock. An asynchronous operation using it has not completed.")
     }
     return try {
         block()
     } finally {
-        lock.unlock()
+        unlock()
     }
 }
 
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
-internal suspend inline fun <R> InteropAsyncFileStream.Lock?.withLockAsync(block: () -> R): R {
+internal suspend inline fun <R> AsyncLock?.withLockAsync(block: () -> R): R {
     contract {
         callsInPlace(block, InvocationKind.AT_MOST_ONCE)
     }
-    val lock = this ?: NoOpLock
-    lock.lock()
+    if (this == null) {
+        throw IOException("AsyncLock has not been initialized. Are you using 'kmp-file:async'?")
+    }
+    lock()
     return try {
         block()
     } finally {
-        lock.unlock()
+        unlock()
     }
 }

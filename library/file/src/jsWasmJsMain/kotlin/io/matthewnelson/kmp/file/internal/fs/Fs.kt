@@ -97,7 +97,7 @@ internal actual sealed class Fs protected constructor(internal actual val info: 
     internal actual companion object {
         internal actual val INSTANCE: Fs by lazy {
             FsJsNode.INSTANCE
-                // Will only be null if FsJsNode && FsJsWebWorker are both null.
+                // Will only be null if FsJsNode is null.
                 ?: FsJsBrowser.INSTANCE
                 ?: throw UnsupportedOperationException("All file systems returned null")
         }

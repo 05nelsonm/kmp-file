@@ -18,7 +18,7 @@
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.IsWindows
-import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
+import io.matthewnelson.kmp.file.internal.async.AsyncLock
 import io.matthewnelson.kmp.file.internal.async.SuspendCancellable
 import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
@@ -113,5 +113,5 @@ internal actual class TestReadStream actual constructor(
     override suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
     override suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, position: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
     override suspend fun _closeAsync() { error("Not implemented") }
-    override fun _initAsyncLock(create: (isLocked: Boolean) -> InteropAsyncFileStream.Lock) { error("Not implemented") }
+    override fun _initAsyncLock(create: (isLocked: Boolean) -> AsyncLock) { error("Not implemented") }
 }

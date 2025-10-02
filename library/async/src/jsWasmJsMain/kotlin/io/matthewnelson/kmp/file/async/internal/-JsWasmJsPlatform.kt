@@ -22,6 +22,7 @@ import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.internal.async.AsyncLock
 import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import io.matthewnelson.kmp.file.internal.async.InteropAsyncFs
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -176,7 +177,7 @@ internal inline fun FileStream.initMutex() {
     (this as InteropAsyncFileStream)._initAsyncLock(create = ::createMutex)
 }
 
-internal fun createMutex(isLocked: Boolean) = object: InteropAsyncFileStream.Lock {
+internal fun createMutex(isLocked: Boolean) = object: AsyncLock {
     private val mutex = Mutex(isLocked)
     override val isLocked: Boolean get() = mutex.isLocked
     override fun tryLock(): Boolean = mutex.tryLock()

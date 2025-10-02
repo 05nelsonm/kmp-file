@@ -34,7 +34,7 @@ import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
-import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
+import io.matthewnelson.kmp.file.internal.async.AsyncLock
 import io.matthewnelson.kmp.file.internal.async.SuspendCancellable
 import io.matthewnelson.kmp.file.internal.async.complete
 import io.matthewnelson.kmp.file.internal.async.withLockAsync
@@ -903,8 +903,8 @@ internal class FsJsNode private constructor(
         private var _position: Long = 0L
         private var _fd: Double? = fd
 
-        private var positionLock: InteropAsyncFileStream.Lock? = null
-        override fun _initAsyncLock(create: (isLocked: Boolean) -> InteropAsyncFileStream.Lock) {
+        private var positionLock: AsyncLock? = null
+        override fun _initAsyncLock(create: (isLocked: Boolean) -> AsyncLock) {
             if (positionLock != null) return
             checkIsOpen()
             positionLock = create(false)

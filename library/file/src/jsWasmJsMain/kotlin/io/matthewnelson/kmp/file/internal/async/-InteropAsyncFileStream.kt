@@ -22,7 +22,6 @@ import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.InternalKmpFileApi
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -87,14 +86,6 @@ public actual sealed interface InteropAsyncFileStream {
         public suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, position: Long, suspendCancellable: SuspendCancellable<Any?>)
     }
 
-    @InternalKmpFileApi
-    public interface Lock {
-        public val isLocked: Boolean
-        public fun tryLock(): Boolean
-        public suspend fun lock()
-        public fun unlock()
-    }
-
     @Throws(ClosedException::class)
-    public fun _initAsyncLock(create: (isLocked: Boolean) -> Lock)
+    public fun _initAsyncLock(create: (isLocked: Boolean) -> AsyncLock)
 }
