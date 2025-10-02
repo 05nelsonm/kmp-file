@@ -22,7 +22,7 @@ import io.matthewnelson.kmp.file.toWasmJsException
 @JsName("Error")
 internal actual external class JsError: JsAny {
     actual val message: String?
-    actual val code: String?
+    val code: String?
 }
 
 internal actual inline fun JsError.toThrowable(): Throwable = toWasmJsException()

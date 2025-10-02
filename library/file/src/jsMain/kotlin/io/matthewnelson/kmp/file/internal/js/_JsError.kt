@@ -17,10 +17,6 @@
 
 package io.matthewnelson.kmp.file.internal.js
 
-@JsName("Error")
-internal actual external class JsError {
-    actual val message: String?
-    actual val code: String?
-}
+internal actual typealias JsError = Throwable
 
-internal actual inline fun JsError.toThrowable(): Throwable = unsafeCast<Throwable>()
+internal actual inline fun JsError.toThrowable(): Throwable = this
