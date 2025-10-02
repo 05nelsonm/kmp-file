@@ -17,10 +17,12 @@
 
 package io.matthewnelson.kmp.file.async
 
+import io.matthewnelson.kmp.file.Buffer
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.Stats
 import io.matthewnelson.kmp.file.async.internal.commonEquals
 import io.matthewnelson.kmp.file.async.internal.commonHashCode
 import io.matthewnelson.kmp.file.async.internal.commonOf
@@ -150,7 +152,53 @@ public actual open class AsyncFs private constructor(public actual val ctx: Coro
         return appendUtf8(this, excl, text)
     }
 
-    // TODO: Js/WasmJs specific functions with Buffer
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.lstatAsync(): Stats {
+        return lstat(this)
+    }
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.statAsync(): Stats {
+        return stat(this)
+    }
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.readAsync(): Buffer {
+        return read(this)
+    }
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.writeAsync(excl: OpenExcl?, appending: Boolean, data: Buffer) {
+        return write(this, excl, appending, data)
+    }
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.writeAsync(excl: OpenExcl?, data: Buffer) {
+        return write(this, excl, data)
+    }
+
+    /**
+     * TODO
+     * */
+    @Throws(CancellationException::class, IOException::class)
+    public suspend inline fun File.appendAsync(excl: OpenExcl?, data: Buffer) {
+        return append(this, excl, data)
+    }
 
     /** @suppress */
     public actual final override fun equals(other: Any?): Boolean = commonEquals(other)

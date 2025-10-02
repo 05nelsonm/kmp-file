@@ -31,13 +31,13 @@ internal external interface ModuleFs {
     fun fstat(fd: Double, callback: (err: JsError?, stats: JsStats) -> Unit)
     fun fsync(fd: Double, callback: (err: JsError?) -> Unit)
     fun ftruncate(fd: Double, len: Double, callback: (err: JsError?) -> Unit)
-    // TODO: lstat
+    fun lstat(path: Path, callback: (err: JsError?, stats: JsStats) -> Unit)
     fun mkdir(path: Path, options: JsObject, callback: (err: JsError?, created: Path?) -> Unit)
     fun open(path: Path, flags: Int, callback: (err: JsError?, fd: Double) -> Unit)
     fun open(path: Path, flags: Int, mode: String, callback: (err: JsError?, fd: Double) -> Unit)
     fun open(path: Path, flags: String, mode: String, callback: (err: JsError?, fd: Double) -> Unit)
     fun read(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double, callback: (err: JsError?, read: Double, JsBuffer) -> Unit)
-    // TODO: readFile
+    fun readFile(path: Path, callback: (err: JsError?, JsBuffer) -> Unit)
     fun realpath(path: Path, callback: (err: JsError?, resolved: Path) -> Unit)
     fun rmdir(path: Path, options: JsObject, callback: (err: JsError?) -> Unit)
     fun stat(path: Path, callback: (err: JsError?, stats: JsStats) -> Unit)

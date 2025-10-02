@@ -15,14 +15,16 @@
  **/
 package io.matthewnelson.kmp.file.internal.async
 
+import io.matthewnelson.kmp.file.Buffer
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.InternalKmpFileApi
 import io.matthewnelson.kmp.file.OpenExcl
+import io.matthewnelson.kmp.file.Stats
 import io.matthewnelson.kmp.file.internal.commonReadBytes
 import io.matthewnelson.kmp.file.internal.commonReadText
-import io.matthewnelson.kmp.file.internal.commonWriteBytes
+import io.matthewnelson.kmp.file.internal.commonWriteData
 import io.matthewnelson.kmp.file.internal.commonWriteText
 import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.absoluteFile
@@ -36,6 +38,10 @@ import io.matthewnelson.kmp.file.internal.fs.commonMkdirs
 import io.matthewnelson.kmp.file.internal.fs.commonOpenRead
 import io.matthewnelson.kmp.file.internal.fs.commonOpenReadWrite
 import io.matthewnelson.kmp.file.internal.fs.commonOpenWrite
+import io.matthewnelson.kmp.file.internal.node.JsBuffer
+import io.matthewnelson.kmp.file.internal.node.JsStats
+import io.matthewnelson.kmp.file.internal.node.nodeRead
+import io.matthewnelson.kmp.file.internal.node.nodeStats
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.suspendCoroutine
 
@@ -207,7 +213,7 @@ public object InteropAsyncFs {
 
     @Throws(CancellationException::class, IOException::class)
     public suspend fun writeBytes(file: File, excl: OpenExcl?, appending: Boolean, array: ByteArray, createLock: (Boolean) -> InteropAsyncFileStream.Lock, suspendCancellable: SuspendCancellable<Any?>): File {
-        return file.commonWriteBytes(
+        return file.commonWriteData(
             excl,
             appending,
             array,
@@ -217,8 +223,8 @@ public object InteropAsyncFs {
             _openWrite = { excl, appending ->
                 openWrite(this, excl, appending, createLock, suspendCancellable)
             },
-            _write = { buf ->
-                (this as InteropAsyncFileStream.Write)._writeAsync(buf, 0, buf.size, suspendCancellable)
+            _write = { array ->
+                (this as InteropAsyncFileStream.Write)._writeAsync(array, 0, array.size, suspendCancellable)
             },
         )
     }
@@ -232,6 +238,63 @@ public object InteropAsyncFs {
             _writeBytes = { excl, appending, array ->
                 writeBytes(this, excl, appending, array, createLock, suspendCancellable)
             },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public suspend fun readBuffer(file: File, suspendCancellable: SuspendCancellable<Any?>): Buffer {
+        return file.nodeRead(
+            _readFile = { path ->
+                suspendCancellable { cont ->
+                    readFile(path) { err, buf ->
+                        cont.complete(err) { buf }
+                    }
+                } as JsBuffer
+            }
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public suspend fun writeBuffer(file: File, excl: OpenExcl?, appending: Boolean, data: Buffer, createLock: (Boolean) -> InteropAsyncFileStream.Lock, suspendCancellable: SuspendCancellable<Any?>): File {
+        return file.commonWriteData(
+            excl,
+            appending,
+            data,
+            _close = {
+                (this as InteropAsyncFileStream.Write)._closeAsync()
+            },
+            _openWrite = { excl, appending ->
+                openWrite(this, excl, appending, createLock, suspendCancellable)
+            },
+            _write = { data ->
+                (this as InteropAsyncFileStream.Write)._writeAsync(data, 0L, data.length.toLong(), suspendCancellable)
+            },
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public suspend fun lstat(file: File, suspendCancellable: SuspendCancellable<Any?>): Stats {
+        return file.nodeStats(
+            _stat = { path ->
+                suspendCancellable { cont ->
+                    lstat(path) { err, stats ->
+                        cont.complete(err) { stats }
+                    }
+                } as JsStats
+            }
+        )
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    public suspend fun stat(file: File, suspendCancellable: SuspendCancellable<Any?>): Stats {
+        return file.nodeStats(
+            _stat = { path ->
+                suspendCancellable { cont ->
+                    stat(path) { err, stats ->
+                        cont.complete(err) { stats }
+                    }
+                } as JsStats
+            }
         )
     }
 }

@@ -40,6 +40,24 @@ open class io.matthewnelson.kmp.file.async/AsyncFs { // io.matthewnelson.kmp.fil
         final fun of(kotlin.coroutines/CoroutineContext): io.matthewnelson.kmp.file.async/AsyncFs // io.matthewnelson.kmp.file.async/AsyncFs.Default.of|of(kotlin.coroutines.CoroutineContext){}[0]
         final fun toString(): kotlin/String // io.matthewnelson.kmp.file.async/AsyncFs.Default.toString|toString(){}[0]
     }
+
+    // Targets: [js, wasmJs]
+    final suspend inline fun (io.matthewnelson.kmp.file/File).appendAsync(io.matthewnelson.kmp.file/OpenExcl?, io.matthewnelson.kmp.file/Buffer) // io.matthewnelson.kmp.file.async/AsyncFs.appendAsync|appendAsync@io.matthewnelson.kmp.file.File(io.matthewnelson.kmp.file.OpenExcl?;io.matthewnelson.kmp.file.Buffer){}[0]
+
+    // Targets: [js, wasmJs]
+    final suspend inline fun (io.matthewnelson.kmp.file/File).lstatAsync(): io.matthewnelson.kmp.file/Stats // io.matthewnelson.kmp.file.async/AsyncFs.lstatAsync|lstatAsync@io.matthewnelson.kmp.file.File(){}[0]
+
+    // Targets: [js, wasmJs]
+    final suspend inline fun (io.matthewnelson.kmp.file/File).readAsync(): io.matthewnelson.kmp.file/Buffer // io.matthewnelson.kmp.file.async/AsyncFs.readAsync|readAsync@io.matthewnelson.kmp.file.File(){}[0]
+
+    // Targets: [js, wasmJs]
+    final suspend inline fun (io.matthewnelson.kmp.file/File).statAsync(): io.matthewnelson.kmp.file/Stats // io.matthewnelson.kmp.file.async/AsyncFs.statAsync|statAsync@io.matthewnelson.kmp.file.File(){}[0]
+
+    // Targets: [js, wasmJs]
+    final suspend inline fun (io.matthewnelson.kmp.file/File).writeAsync(io.matthewnelson.kmp.file/OpenExcl?, io.matthewnelson.kmp.file/Buffer) // io.matthewnelson.kmp.file.async/AsyncFs.writeAsync|writeAsync@io.matthewnelson.kmp.file.File(io.matthewnelson.kmp.file.OpenExcl?;io.matthewnelson.kmp.file.Buffer){}[0]
+
+    // Targets: [js, wasmJs]
+    final suspend inline fun (io.matthewnelson.kmp.file/File).writeAsync(io.matthewnelson.kmp.file/OpenExcl?, kotlin/Boolean, io.matthewnelson.kmp.file/Buffer) // io.matthewnelson.kmp.file.async/AsyncFs.writeAsync|writeAsync@io.matthewnelson.kmp.file.File(io.matthewnelson.kmp.file.OpenExcl?;kotlin.Boolean;io.matthewnelson.kmp.file.Buffer){}[0]
 }
 
 final inline fun <#A: kotlin/Any?> (io.matthewnelson.kmp.file.async/AsyncFs).io.matthewnelson.kmp.file.async/with(kotlin/Function1<io.matthewnelson.kmp.file.async/AsyncFs, #A>): #A // io.matthewnelson.kmp.file.async/with|with@io.matthewnelson.kmp.file.async.AsyncFs(kotlin.Function1<io.matthewnelson.kmp.file.async.AsyncFs,0:0>){0§<kotlin.Any?>}[0]
@@ -83,6 +101,18 @@ final suspend inline fun (io.matthewnelson.kmp.file/FileStream.Write).io.matthew
 final suspend inline fun <#A: io.matthewnelson.kmp.file/FileStream?, #B: kotlin/Any?> (#A).io.matthewnelson.kmp.file.async/useAsync(kotlin/Function1<#A, #B>): #B // io.matthewnelson.kmp.file.async/useAsync|useAsync@0:0(kotlin.Function1<0:0,0:1>){0§<io.matthewnelson.kmp.file.FileStream?>;1§<kotlin.Any?>}[0]
 
 // Targets: [js, wasmJs]
+final suspend fun (io.matthewnelson.kmp.file.async/AsyncFs).io.matthewnelson.kmp.file.async/lstat(io.matthewnelson.kmp.file/File): io.matthewnelson.kmp.file/Stats // io.matthewnelson.kmp.file.async/lstat|lstat@io.matthewnelson.kmp.file.async.AsyncFs(io.matthewnelson.kmp.file.File){}[0]
+
+// Targets: [js, wasmJs]
+final suspend fun (io.matthewnelson.kmp.file.async/AsyncFs).io.matthewnelson.kmp.file.async/read(io.matthewnelson.kmp.file/File): io.matthewnelson.kmp.file/Buffer // io.matthewnelson.kmp.file.async/read|read@io.matthewnelson.kmp.file.async.AsyncFs(io.matthewnelson.kmp.file.File){}[0]
+
+// Targets: [js, wasmJs]
+final suspend fun (io.matthewnelson.kmp.file.async/AsyncFs).io.matthewnelson.kmp.file.async/stat(io.matthewnelson.kmp.file/File): io.matthewnelson.kmp.file/Stats // io.matthewnelson.kmp.file.async/stat|stat@io.matthewnelson.kmp.file.async.AsyncFs(io.matthewnelson.kmp.file.File){}[0]
+
+// Targets: [js, wasmJs]
+final suspend fun (io.matthewnelson.kmp.file.async/AsyncFs).io.matthewnelson.kmp.file.async/write(io.matthewnelson.kmp.file/File, io.matthewnelson.kmp.file/OpenExcl?, kotlin/Boolean, io.matthewnelson.kmp.file/Buffer) // io.matthewnelson.kmp.file.async/write|write@io.matthewnelson.kmp.file.async.AsyncFs(io.matthewnelson.kmp.file.File;io.matthewnelson.kmp.file.OpenExcl?;kotlin.Boolean;io.matthewnelson.kmp.file.Buffer){}[0]
+
+// Targets: [js, wasmJs]
 final suspend fun (io.matthewnelson.kmp.file/FileStream.Read).io.matthewnelson.kmp.file.async/readAsync(io.matthewnelson.kmp.file/Buffer, kotlin/Long, kotlin/Long): kotlin/Long // io.matthewnelson.kmp.file.async/readAsync|readAsync@io.matthewnelson.kmp.file.FileStream.Read(io.matthewnelson.kmp.file.Buffer;kotlin.Long;kotlin.Long){}[0]
 
 // Targets: [js, wasmJs]
@@ -93,6 +123,12 @@ final suspend fun (io.matthewnelson.kmp.file/FileStream.Write).io.matthewnelson.
 
 // Targets: [js, wasmJs]
 final suspend fun (io.matthewnelson.kmp.file/FileStream.Write).io.matthewnelson.kmp.file.async/writeAsync(io.matthewnelson.kmp.file/Buffer, kotlin/Long, kotlin/Long, kotlin/Long) // io.matthewnelson.kmp.file.async/writeAsync|writeAsync@io.matthewnelson.kmp.file.FileStream.Write(io.matthewnelson.kmp.file.Buffer;kotlin.Long;kotlin.Long;kotlin.Long){}[0]
+
+// Targets: [js, wasmJs]
+final suspend inline fun (io.matthewnelson.kmp.file.async/AsyncFs).io.matthewnelson.kmp.file.async/append(io.matthewnelson.kmp.file/File, io.matthewnelson.kmp.file/OpenExcl?, io.matthewnelson.kmp.file/Buffer) // io.matthewnelson.kmp.file.async/append|append@io.matthewnelson.kmp.file.async.AsyncFs(io.matthewnelson.kmp.file.File;io.matthewnelson.kmp.file.OpenExcl?;io.matthewnelson.kmp.file.Buffer){}[0]
+
+// Targets: [js, wasmJs]
+final suspend inline fun (io.matthewnelson.kmp.file.async/AsyncFs).io.matthewnelson.kmp.file.async/write(io.matthewnelson.kmp.file/File, io.matthewnelson.kmp.file/OpenExcl?, io.matthewnelson.kmp.file/Buffer) // io.matthewnelson.kmp.file.async/write|write@io.matthewnelson.kmp.file.async.AsyncFs(io.matthewnelson.kmp.file.File;io.matthewnelson.kmp.file.OpenExcl?;io.matthewnelson.kmp.file.Buffer){}[0]
 
 // Targets: [js, wasmJs]
 final suspend inline fun (io.matthewnelson.kmp.file/FileStream.Read).io.matthewnelson.kmp.file.async/readAsync(io.matthewnelson.kmp.file/Buffer): kotlin/Long // io.matthewnelson.kmp.file.async/readAsync|readAsync@io.matthewnelson.kmp.file.FileStream.Read(io.matthewnelson.kmp.file.Buffer){}[0]

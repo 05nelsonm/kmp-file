@@ -120,13 +120,13 @@ internal inline fun File.commonReadText(
 
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
-internal inline fun File.commonWriteBytes(
+internal inline fun <Data> File.commonWriteData(
     excl: OpenExcl?,
     appending: Boolean,
-    array: ByteArray,
+    data: Data,
     _close: FileStream.Write.() -> Unit = FileStream.Write::close,
     _openWrite: File.(OpenExcl?, Boolean) -> FileStream.Write = File::openWrite,
-    _write: FileStream.Write.(ByteArray) -> Unit = FileStream.Write::write,
+    _write: FileStream.Write.(Data) -> Unit,
 ): File {
     contract {
         callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
@@ -136,7 +136,7 @@ internal inline fun File.commonWriteBytes(
     val s = _openWrite(excl, appending)
     var threw: Throwable? = null
     try {
-        s._write(array)
+        s._write(data)
         return this
     } catch (t: Throwable) {
         threw = t

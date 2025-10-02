@@ -65,7 +65,7 @@ public final class io/matthewnelson/kmp/file/async/AsyncFs$Default : io/matthewn
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/matthewnelson/kmp/file/async/AsyncFsExtKt {
+public final class io/matthewnelson/kmp/file/async/AsyncFsCommonKt {
 	public static final fun absoluteFile2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun absolutePath2 (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun appendBytes (Lio/matthewnelson/kmp/file/async/AsyncFs;Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;

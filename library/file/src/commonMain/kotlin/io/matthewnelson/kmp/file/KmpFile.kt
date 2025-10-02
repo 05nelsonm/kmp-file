@@ -614,7 +614,7 @@ public fun File.readUtf8(): String {
 @JvmName("writeBytesTo")
 @Throws(IOException::class)
 public fun File.writeBytes(excl: OpenExcl?, appending: Boolean, array: ByteArray): File {
-    return commonWriteBytes(excl, appending, array)
+    return commonWriteData(excl, appending, array, _write = FileStream.Write::write)
 }
 
 /**
