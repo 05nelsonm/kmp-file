@@ -26,7 +26,8 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 internal inline fun ((CoroutineContext) -> AsyncFs).commonOf(ctx: CoroutineContext): AsyncFs {
-    return if (ctx == AsyncFs.ctx) AsyncFs else this(ctx)
+    @Suppress("RedundantCompanionReference")
+    return if (ctx == AsyncFs.Default.ctx) AsyncFs.Default else this(ctx)
 }
 
 internal inline fun AsyncFs.commonEquals(other: Any?): Boolean {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE", "UNUSED")
+@file:Suppress("NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.async
 
@@ -42,7 +42,6 @@ import kotlinx.coroutines.withContext
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.jvm.JvmOverloads
 
@@ -271,168 +270,4 @@ public suspend inline fun AsyncFs.appendBytes(file: File, excl: OpenExcl?, array
 @Throws(CancellationException::class, IOException::class)
 public suspend inline fun AsyncFs.appendUtf8(file: File, excl: OpenExcl?, text: String): File {
     return writeUtf8(file, excl, appending = true, text)
-}
-
-/**
- * TODO
- * */
-public expect open class AsyncFs private constructor(ctx: CoroutineContext) {
-
-    /**
-     * TODO
-     * */
-    public val ctx: CoroutineContext
-
-    /**
-     * TODO
-     * */
-    public companion object Default: AsyncFs {
-
-        /**
-         * TODO
-         * */
-        public fun of(ctx: CoroutineContext): AsyncFs
-
-        /** @suppress */
-        public override fun toString(): String
-    }
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.absolutePath2Async(): String
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.absoluteFile2Async(): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.canonicalPath2Async(): String
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.canonicalFile2Async(): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.chmod2Async(mode: String, mustExist: Boolean = true): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.delete2Async(ignoreReadOnly: Boolean = false, mustExist: Boolean = false): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.exists2Async(): Boolean
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.mkdir2Async(mode: String?, mustCreate: Boolean = false): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.mkdirs2Async(mode: String?, mustCreate: Boolean = false): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.openReadAsync(): FileStream.Read
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.openReadWriteAsync(excl: OpenExcl?): FileStream.ReadWrite
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.openWriteAsync(excl: OpenExcl?, appending: Boolean): FileStream.Write
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.openWriteAsync(excl: OpenExcl?): FileStream.Write
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.openAppendAsync(excl: OpenExcl?): FileStream.Write
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.readBytesAsync(): ByteArray
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.readUtf8Async(): String
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.writeBytesAsync(excl: OpenExcl?, appending: Boolean, array: ByteArray): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.writeBytesAsync(excl: OpenExcl?, array: ByteArray): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.writeUtf8Async(excl: OpenExcl?, appending: Boolean, text: String): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.writeUtf8Async(excl: OpenExcl?, text: String): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.appendBytesAsync(excl: OpenExcl?, array: ByteArray): File
-
-    /**
-     * TODO
-     * */
-    @Throws(CancellationException::class, IOException::class)
-    public suspend inline fun File.appendUtf8Async(excl: OpenExcl?, text: String): File
-
-    /** @suppress */
-    public final override fun equals(other: Any?): Boolean
-    /** @suppress */
-    public final override fun hashCode(): Int
-    /** @suppress */
-    public override fun toString(): String
 }

@@ -32,7 +32,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 // native
-public actual open class AsyncFs private actual constructor(public actual val ctx: CoroutineContext) {
+public actual open class AsyncFs private constructor(public actual val ctx: CoroutineContext) {
 
     public actual companion object Default: AsyncFs(ctx = Dispatchers.IO) {
 

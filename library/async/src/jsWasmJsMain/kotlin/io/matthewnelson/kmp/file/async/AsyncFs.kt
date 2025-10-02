@@ -29,12 +29,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
-// jvm
-public actual open class AsyncFs private actual constructor(@JvmField public actual val ctx: CoroutineContext) {
+// jsWasmJs
+public actual open class AsyncFs private constructor(public actual val ctx: CoroutineContext) {
 
-    public actual companion object Default: AsyncFs(ctx = Dispatchers.IO) {
+    public actual companion object Default: AsyncFs(ctx = Dispatchers.Default) {
 
-        @JvmStatic
         public actual fun of(ctx: CoroutineContext): AsyncFs = ::AsyncFs.commonOf(ctx)
 
         /** @suppress */
@@ -151,7 +150,7 @@ public actual open class AsyncFs private actual constructor(@JvmField public act
         return appendUtf8(this, excl, text)
     }
 
-    // TODO: Jvm specific functions with ByteBuffer
+    // TODO: Js/WasmJs specific functions with Buffer
 
     /** @suppress */
     public actual final override fun equals(other: Any?): Boolean = commonEquals(other)
