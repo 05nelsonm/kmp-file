@@ -25,7 +25,6 @@ import io.matthewnelson.kmp.file.async.internal.commonEquals
 import io.matthewnelson.kmp.file.async.internal.commonHashCode
 import io.matthewnelson.kmp.file.async.internal.commonOf
 import io.matthewnelson.kmp.file.async.internal.commonToString
-import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlin.coroutines.CoroutineContext
@@ -37,10 +36,6 @@ public actual open class AsyncFs private constructor(public actual val ctx: Coro
     public actual companion object Default: AsyncFs(ctx = Dispatchers.IO) {
 
         public actual fun of(ctx: CoroutineContext): AsyncFs = ::AsyncFs.commonOf(ctx)
-
-        init {
-            InteropAsyncFileStream.setDefaultContext(Dispatchers.IO)
-        }
 
         /** @suppress */
         public actual override fun toString(): String = commonToString(isDefault = true)

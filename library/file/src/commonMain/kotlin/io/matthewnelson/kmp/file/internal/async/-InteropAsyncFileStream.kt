@@ -27,7 +27,7 @@ import kotlin.coroutines.CoroutineContext
 @InternalKmpFileApi
 public expect sealed interface InteropAsyncFileStream {
 
-    public val ctx: CoroutineContext
+    public val ctx: CoroutineContext?
 
     @Throws(IllegalStateException::class)
     public fun setContext(ctx: CoroutineContext)
@@ -37,11 +37,6 @@ public expect sealed interface InteropAsyncFileStream {
 
     @InternalKmpFileApi
     public sealed interface Write: InteropAsyncFileStream
-
-    @InternalKmpFileApi
-    public companion object {
-        internal val CTX_DEFAULT: CoroutineContext
-    }
 }
 
 internal interface InternalInteropAsyncFileStreamRead: InteropAsyncFileStream.Read

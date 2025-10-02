@@ -32,7 +32,7 @@ import kotlin.coroutines.cancellation.CancellationException
 @InternalKmpFileApi
 public actual sealed interface InteropAsyncFileStream {
 
-    public actual val ctx: CoroutineContext
+    public actual val ctx: CoroutineContext?
 
     @Throws(IllegalStateException::class)
     public actual fun setContext(ctx: CoroutineContext)
@@ -85,11 +85,6 @@ public actual sealed interface InteropAsyncFileStream {
 
         @Throws(CancellationException::class, IOException::class)
         public suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, position: Long, suspendCancellable: SuspendCancellable<Any?>)
-    }
-
-    @InternalKmpFileApi
-    public actual companion object {
-        internal actual val CTX_DEFAULT: CoroutineContext = EmptyCoroutineContext
     }
 
     @InternalKmpFileApi

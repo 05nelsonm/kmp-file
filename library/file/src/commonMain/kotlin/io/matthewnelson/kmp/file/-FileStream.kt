@@ -19,7 +19,6 @@ package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.async.InternalInteropAsyncFileStreamRead
 import io.matthewnelson.kmp.file.internal.async.InternalInteropAsyncFileStreamWrite
-import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import io.matthewnelson.kmp.file.internal.disappearingCheck
 import kotlin.concurrent.Volatile
 import kotlin.contracts.ExperimentalContracts
@@ -70,7 +69,7 @@ internal abstract class AbstractFileStream protected constructor(
 
     @Volatile
     private var _ctx: CoroutineContext? = null
-    public final override val ctx: CoroutineContext get() = _ctx ?: InteropAsyncFileStream.CTX_DEFAULT
+    public final override val ctx: CoroutineContext? get() = _ctx
 
     @Throws(IllegalStateException::class)
     public final override fun setContext(ctx: CoroutineContext) {

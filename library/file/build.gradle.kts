@@ -22,11 +22,6 @@ private val configInject = ConfigInject()
 kmpConfiguration {
     configureShared(java9ModuleName = ConfigInject.PKG_NAME, publish = true) {
         jvm {
-            sourceSetMain {
-                dependencies {
-                    compileOnly(libs.kotlinx.coroutines.core)
-                }
-            }
             sourceSetTest {
                 kotlin.srcDir("src/jvmTestShared/kotlin")
             }
