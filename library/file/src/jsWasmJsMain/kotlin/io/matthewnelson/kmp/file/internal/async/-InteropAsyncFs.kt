@@ -19,7 +19,7 @@ import io.matthewnelson.kmp.file.Buffer
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.InternalKmpFileApi
+import io.matthewnelson.kmp.file.InternalFileApi
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.Stats
 import io.matthewnelson.kmp.file.internal.commonReadBytes
@@ -49,7 +49,7 @@ import kotlin.coroutines.suspendCoroutine
  * Interop hooks for `:kmp-file:async`
  * @suppress
  * */
-@InternalKmpFileApi
+@InternalFileApi
 public object InteropAsyncFs {
 
     @Throws(CancellationException::class, IOException::class)

@@ -20,7 +20,7 @@ package io.matthewnelson.kmp.file.internal.async
 import io.matthewnelson.kmp.file.Buffer
 import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.InternalKmpFileApi
+import io.matthewnelson.kmp.file.InternalFileApi
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -28,7 +28,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * Interop hooks for `:kmp-file:async`
  * @suppress
  * */
-@InternalKmpFileApi
+@InternalFileApi
 public actual sealed interface InteropAsyncFileStream {
 
     public actual val ctx: CoroutineContext?
@@ -51,7 +51,7 @@ public actual sealed interface InteropAsyncFileStream {
     @Throws(CancellationException::class, IOException::class)
     public suspend fun _syncAsync(meta: Boolean, suspendCancellable: SuspendCancellable<Any?>)
 
-    @InternalKmpFileApi
+    @InternalFileApi
     public actual sealed interface Read: InteropAsyncFileStream {
 
         @Throws(CancellationException::class, IOException::class)
@@ -67,7 +67,7 @@ public actual sealed interface InteropAsyncFileStream {
         public suspend fun _readAsync(buf: Buffer, offset: Long, len: Long, position: Long, suspendCancellable: SuspendCancellable<Any?>): Long
     }
 
-    @InternalKmpFileApi
+    @InternalFileApi
     public actual sealed interface Write: InteropAsyncFileStream {
 
         @Throws(CancellationException::class, IOException::class)

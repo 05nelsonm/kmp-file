@@ -18,12 +18,12 @@ package io.matthewnelson.kmp.file
 /**
  * Denotes an api as internal and subject to change at any time.
  *
- * Any usage of a declaration annotated with [InternalKmpFileApi]
+ * Any usage of a declaration annotated with [InternalFileApi]
  * must be accepted by annotating that usage with the [OptIn]
- * annotation, e.g. @OptIn(InternalKmpFileApi::class), or by using
+ * annotation, e.g. @OptIn(InternalFileApi::class), or by using
  * the following compiler argument:
  *
- *   -Xopt-in=io.matthewnelson.kmp.file.InternalKmpFileApi
+ *   -Xopt-in=io.matthewnelson.kmp.file.InternalFileApi
  * */
 @RequiresOptIn
 @MustBeDocumented
@@ -41,4 +41,4 @@ package io.matthewnelson.kmp.file
     AnnotationTarget.TYPEALIAS,
 )
 @Retention(AnnotationRetention.BINARY)
-public annotation class InternalKmpFileApi
+public annotation class InternalFileApi

@@ -16,7 +16,7 @@
 package io.matthewnelson.kmp.file.internal.async
 
 import io.matthewnelson.kmp.file.IOException
-import io.matthewnelson.kmp.file.InternalKmpFileApi
+import io.matthewnelson.kmp.file.InternalFileApi
 import io.matthewnelson.kmp.file.internal.js.JsError
 import io.matthewnelson.kmp.file.internal.js.toThrowable
 import kotlin.contracts.ExperimentalContracts
@@ -30,14 +30,14 @@ import kotlin.coroutines.resumeWithException
  * Interop hooks for `:kmp-file:async`
  * @suppress
  * */
-@InternalKmpFileApi
+@InternalFileApi
 public typealias SuspendCancellable<T> = suspend ((Continuation<T>) -> Unit) -> T
 
 /**
  * Interop hooks for `:kmp-file:async`
  * @suppress
  * */
-@InternalKmpFileApi
+@InternalFileApi
 public interface AsyncLock {
     public val isLocked: Boolean
     public fun tryLock(): Boolean

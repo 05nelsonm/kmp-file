@@ -101,7 +101,7 @@ public final class io/matthewnelson/kmp/file/FsInfo {
 public final class io/matthewnelson/kmp/file/FsInfo$Companion {
 }
 
-public abstract interface annotation class io/matthewnelson/kmp/file/InternalKmpFileApi : java/lang/annotation/Annotation {
+public abstract interface annotation class io/matthewnelson/kmp/file/InternalFileApi : java/lang/annotation/Annotation {
 }
 
 public final class io/matthewnelson/kmp/file/JvmPlatformKt {

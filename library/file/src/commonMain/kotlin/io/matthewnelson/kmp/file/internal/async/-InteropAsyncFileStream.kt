@@ -17,14 +17,14 @@
 
 package io.matthewnelson.kmp.file.internal.async
 
-import io.matthewnelson.kmp.file.InternalKmpFileApi
+import io.matthewnelson.kmp.file.InternalFileApi
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Interop hooks for `:kmp-file:async`
  * @suppress
  * */
-@InternalKmpFileApi
+@InternalFileApi
 public expect sealed interface InteropAsyncFileStream {
 
     public val ctx: CoroutineContext?
@@ -32,10 +32,10 @@ public expect sealed interface InteropAsyncFileStream {
     @Throws(IllegalStateException::class)
     public fun setContext(ctx: CoroutineContext)
 
-    @InternalKmpFileApi
+    @InternalFileApi
     public sealed interface Read: InteropAsyncFileStream
 
-    @InternalKmpFileApi
+    @InternalFileApi
     public sealed interface Write: InteropAsyncFileStream
 }
 

@@ -51,7 +51,7 @@ kmpConfiguration {
 
         kotlin {
             compilerOptions {
-                optIn.add("io.matthewnelson.kmp.file.InternalKmpFileApi")
+                optIn.add("io.matthewnelson.kmp.file.InternalFileApi")
             }
         }
     }
