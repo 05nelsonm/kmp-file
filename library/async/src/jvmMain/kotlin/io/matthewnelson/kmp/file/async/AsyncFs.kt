@@ -153,7 +153,10 @@ public actual open class AsyncFs private constructor(@JvmField public actual val
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.read]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.readAsync(): ByteBuffer {
@@ -161,7 +164,10 @@ public actual open class AsyncFs private constructor(@JvmField public actual val
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.write]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.writeAsync(excl: OpenExcl?, appending: Boolean, src: ByteBuffer): Int {
@@ -169,7 +175,10 @@ public actual open class AsyncFs private constructor(@JvmField public actual val
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.write]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.writeAsync(excl: OpenExcl?, src: ByteBuffer): Int {
@@ -177,7 +186,10 @@ public actual open class AsyncFs private constructor(@JvmField public actual val
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.append]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.appendAsync(excl: OpenExcl?, src: ByteBuffer): Int {

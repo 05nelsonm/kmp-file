@@ -20,27 +20,44 @@ package io.matthewnelson.kmp.file.async
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.InternalFileApi
 import io.matthewnelson.kmp.file.OpenExcl
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * TODO
+ * A contextual reference which provides access to a secondary, asynchronous implementation
+ * of the `kmp-file:file` API. On Jvm/Native, the synchronous `kmp-file:file` functions are
+ * simply called within the provided [ctx] (such as a background dispatcher). On Js/WasmJs,
+ * the `kmp-file:file` module exposes via [InternalFileApi] JavaScript's asynchronous callback
+ * API which is used in lieu of its synchronous API, which is called within the provided [ctx].
+ *
+ * @see [Default]
+ * @see [AsyncFs.with]
  * */
 public expect open class AsyncFs {
 
     /**
-     * TODO
+     * The [CoroutineContext] for which all asynchronous functionality for this [AsyncFs] is
+     * derived from.
      * */
     public val ctx: CoroutineContext
 
     /**
-     * TODO
+     * The default [AsyncFs] implementation. On Jvm/Native, [ctx] is `Dispatchers.IO`. On
+     * Js/WasmJs, [ctx] is `Dispatchers.Default`.
      * */
     public companion object Default: AsyncFs {
 
         /**
-         * TODO
+         * Creates a new instance of [AsyncFs] with the provided [CoroutineContext]. This can
+         * be useful in a number of situations, such as scoping things to a job, or redirecting
+         * error handling via a custom coroutine exception handler.
+         *
+         * @param [ctx] The [CoroutineContext]
+         *
+         * @return A new instance of [AsyncFs]. If provided [ctx] is equal to [Default.ctx],
+         *   then [Default] is returned.
          * */
         public fun of(ctx: CoroutineContext): AsyncFs
 
@@ -49,133 +66,199 @@ public expect open class AsyncFs {
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.absolutePath2]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.absolutePath2Async(): String
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.absoluteFile2]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.absoluteFile2Async(): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.canonicalPath2]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.canonicalPath2Async(): String
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.canonicalFile2]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.canonicalFile2Async(): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.chmod2]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.chmod2Async(mode: String, mustExist: Boolean = true): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.delete2]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.delete2Async(ignoreReadOnly: Boolean = false, mustExist: Boolean = false): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.exists2]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.exists2Async(): Boolean
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.mkdir2]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.mkdir2Async(mode: String?, mustCreate: Boolean = false): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.mkdirs2]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.mkdirs2Async(mode: String?, mustCreate: Boolean = false): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.openRead]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.openReadAsync(): FileStream.Read
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.openReadWrite]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.openReadWriteAsync(excl: OpenExcl?): FileStream.ReadWrite
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.openWrite]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.openWriteAsync(excl: OpenExcl?, appending: Boolean): FileStream.Write
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.openWrite]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.openWriteAsync(excl: OpenExcl?): FileStream.Write
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.openAppend]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.openAppendAsync(excl: OpenExcl?): FileStream.Write
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.readBytes]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.readBytesAsync(): ByteArray
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.readUtf8]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.readUtf8Async(): String
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.writeBytes]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.writeBytesAsync(excl: OpenExcl?, appending: Boolean, array: ByteArray): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.writeBytes]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.writeBytesAsync(excl: OpenExcl?, array: ByteArray): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.writeUtf8]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.writeUtf8Async(excl: OpenExcl?, appending: Boolean, text: String): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.writeUtf8]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.writeUtf8Async(excl: OpenExcl?, text: String): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.appendBytes]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.appendBytesAsync(excl: OpenExcl?, array: ByteArray): File
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.appendUtf8]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.appendUtf8Async(excl: OpenExcl?, text: String): File

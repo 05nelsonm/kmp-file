@@ -20,10 +20,17 @@ import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import kotlinx.coroutines.withContext
 import java.nio.ByteBuffer
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Read.read]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * @see [FileStream.Read.read]
+ * @see [AsyncFs.openReadAsync]
+ * @see [AsyncFs.openReadWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Read.readAsync(dst: ByteBuffer?): Int {
@@ -33,7 +40,13 @@ public suspend fun FileStream.Read.readAsync(dst: ByteBuffer?): Int {
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Read.read]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * @see [FileStream.Read.read]
+ * @see [AsyncFs.openReadAsync]
+ * @see [AsyncFs.openReadWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Read.readAsync(dst: ByteBuffer?, position: Long): Int {
@@ -43,7 +56,13 @@ public suspend fun FileStream.Read.readAsync(dst: ByteBuffer?, position: Long): 
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Write.write]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * @see [FileStream.Write.write]
+ * @see [AsyncFs.openReadWriteAsync]
+ * @see [AsyncFs.openWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Write.writesAsync(src: ByteBuffer?): Int {
@@ -53,7 +72,13 @@ public suspend fun FileStream.Write.writesAsync(src: ByteBuffer?): Int {
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Write.write]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * @see [FileStream.Write.write]
+ * @see [AsyncFs.openReadWriteAsync]
+ * @see [AsyncFs.openWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Write.writesAsync(src: ByteBuffer?, position: Long): Int {

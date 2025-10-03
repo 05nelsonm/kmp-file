@@ -23,9 +23,13 @@ A no-nonsense `File` API for Kotlin Multiplatform. It gets the job done.
 
 ```kotlin
 fun main() {
-    val file = "/path/to/thing.txt".toFile()
+    val file = SysTempDir.resolve("path/to/../somewhere")
+        .canonicalFile2()
+        .mkdirs2(mode = "700", mustCreate = true)
+        .resolve("my_file.txt")
+
     assertFalse(file.exists2())
-    file.parentFile?.mkdirs2(mode = "775", mustCreate = true)
+    assertEquals(true, file.parentFile?.exists2())
 
     val data = "Hello World!".encodeToByteArray()
 
@@ -56,7 +60,54 @@ fun main() {
 }
 ```
 
+<!-- :::TODO::: Uncomment
+The `:async` extension module
+
+```kotlin
+suspend fun main() {
+    AsyncFs.Default.with {
+        val file = SysTempDir.resolve("path/to/../somewhere")
+            .canonicalFile2Async()
+            .mkdirs2Async(mode = "700", mustCreate = true)
+            .resolve("my_file.txt")
+
+        assertFalse(file.exists2Async())
+        assertEquals(true, file.parentFile?.exists2Async())
+
+        val data = "Hello World!".encodeToByteArray()
+
+        // See also openRead, openWrite, openAppend
+        file.openReadWriteAsync(excl = OpenExcl.MustCreate.of("644")).use { stream ->
+            assertEquals(0L, stream.sizeAsync())
+            assertEquals(0L, stream.postionAsync())
+
+            stream.write(data)
+            assertEquals(data.size.toLong(), stream.sizeAsync())
+            assertEquals(data.size.toLong(), stream.positionAsync())
+
+            val buf = ByteArray(data.size)
+            stream.positionAsync(new = 2L)
+            stream.readAsync(buf, position = 0L)
+            assertEquals(2L, stream.positionAsync())
+            assertContentEquals(data, buf)
+
+            stream.sizeAsync(new = 0L).syncAsync(meta = true).writeAsync(buf)
+        }
+
+        file.appendBytesAsync(excl = OpenExcl.MustExist, data)
+        file.chmod2Async("400")
+        assertContentEquals(data + data, file.readBytesAsync())
+        assertEquals("Hello World!Hello World!", file.readUtf8Async())
+
+        file.delete2Async(ignoreReadOnly = true)
+    }
+}
+```
+-->
+
 ### Get Started
+
+<!-- :::TODO::: Add module :async -->
 
 <!-- TAG_VERSION -->
 ```kotlin

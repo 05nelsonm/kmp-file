@@ -153,7 +153,10 @@ public actual open class AsyncFs private constructor(public actual val ctx: Coro
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.lstat]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.lstatAsync(): Stats {
@@ -161,7 +164,10 @@ public actual open class AsyncFs private constructor(public actual val ctx: Coro
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.stat]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.statAsync(): Stats {
@@ -169,7 +175,10 @@ public actual open class AsyncFs private constructor(public actual val ctx: Coro
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.read]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.readAsync(): Buffer {
@@ -177,7 +186,10 @@ public actual open class AsyncFs private constructor(public actual val ctx: Coro
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.write]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.writeAsync(excl: OpenExcl?, appending: Boolean, data: Buffer) {
@@ -185,7 +197,10 @@ public actual open class AsyncFs private constructor(public actual val ctx: Coro
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.write]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.writeAsync(excl: OpenExcl?, data: Buffer) {
@@ -193,7 +208,10 @@ public actual open class AsyncFs private constructor(public actual val ctx: Coro
     }
 
     /**
-     * TODO
+     * Syntactic sugar. To be used with [AsyncFs.with].
+     *
+     * @see [AsyncFs.with]
+     * @see [AsyncFs.append]
      * */
     @Throws(CancellationException::class, IOException::class)
     public suspend inline fun File.appendAsync(excl: OpenExcl?, data: Buffer) {

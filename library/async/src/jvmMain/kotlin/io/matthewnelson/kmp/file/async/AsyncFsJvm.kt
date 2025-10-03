@@ -25,7 +25,11 @@ import java.nio.ByteBuffer
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * TODO
+ * An asynchronous version of [io.matthewnelson.kmp.file.read].
+ *
+ * @see [AsyncFs.with]
+ * @see [AsyncFs.readAsync]
+ * @see [io.matthewnelson.kmp.file.read]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun AsyncFs.read(file: File): ByteBuffer {
@@ -35,7 +39,11 @@ public suspend fun AsyncFs.read(file: File): ByteBuffer {
 }
 
 /**
- * TODO
+ * An asynchronous version of [io.matthewnelson.kmp.file.write].
+ *
+ * @see [AsyncFs.with]
+ * @see [AsyncFs.writeAsync]
+ * @see [io.matthewnelson.kmp.file.write]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun AsyncFs.write(file: File, excl: OpenExcl?, appending: Boolean, src: ByteBuffer): Int {
@@ -45,7 +53,11 @@ public suspend fun AsyncFs.write(file: File, excl: OpenExcl?, appending: Boolean
 }
 
 /**
- * TODO
+ * An asynchronous version of [io.matthewnelson.kmp.file.write].
+ *
+ * @see [AsyncFs.with]
+ * @see [AsyncFs.writeAsync]
+ * @see [io.matthewnelson.kmp.file.write]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend inline fun AsyncFs.write(file: File, excl: OpenExcl?, src: ByteBuffer): Int {
@@ -53,7 +65,11 @@ public suspend inline fun AsyncFs.write(file: File, excl: OpenExcl?, src: ByteBu
 }
 
 /**
- * TODO
+ * An asynchronous version of [io.matthewnelson.kmp.file.append].
+ *
+ * @see [AsyncFs.with]
+ * @see [AsyncFs.appendAsync]
+ * @see [io.matthewnelson.kmp.file.append]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend inline fun AsyncFs.append(file: File, excl: OpenExcl?, src: ByteBuffer): Int {

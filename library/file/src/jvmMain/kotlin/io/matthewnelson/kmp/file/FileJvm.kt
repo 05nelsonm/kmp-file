@@ -22,7 +22,16 @@ import java.nio.ByteBuffer
 import kotlin.Throws
 
 /**
- * TODO
+ * Read the entire contents of a [File] into a [ByteBuffer].
+ *
+ * **NOTE:** This function is not recommended for large files. There
+ * is an internal limitation of 2GB file size.
+ *
+ * @return The data held in a [ByteBuffer].
+ *
+ * @throws [IOException] If there was a failure to read the [File], such as
+ *   its non-existence, not being a regular file, being too large, or the
+ *   filesystem threw a security exception.
  * */
 @Throws(IOException::class)
 public fun File.read(): ByteBuffer {
@@ -31,7 +40,21 @@ public fun File.read(): ByteBuffer {
 }
 
 /**
- * TODO
+ * Writes the remaining contents of [src] to the file.
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [appending] If `true`, data written to this file will occur at the
+ *   end of the file. If `false`, the file will be truncated if it exists.
+ * @param [src] of bytes to write.
+ *
+ * @return The number of bytes written to the file.
+ *
+ * @see [append]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
  * */
 @Throws(IOException::class)
 public fun File.write(excl: OpenExcl?, appending: Boolean, src: ByteBuffer): Int {
@@ -41,7 +64,20 @@ public fun File.write(excl: OpenExcl?, appending: Boolean, src: ByteBuffer): Int
 }
 
 /**
- * TODO
+ * Writes the remaining contents of [src] to the file. The [File] will be truncated
+ * if it exists.
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [src] of bytes to write.
+ *
+ * @return The number of bytes written to the file.
+ *
+ * @see [append]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
  * */
 @Throws(IOException::class)
 public inline fun File.write(excl: OpenExcl?, src: ByteBuffer): Int {
@@ -49,7 +85,20 @@ public inline fun File.write(excl: OpenExcl?, src: ByteBuffer): Int {
 }
 
 /**
- * TODO
+ * Writes the remaining contents of [src] to the file. If the file exists, all
+ * new data will be appended to the end of the file.
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ * @param [src] of bytes to write.
+ *
+ * @return The number of bytes written to the file.
+ *
+ * @see [write]
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
  * */
 @Throws(IOException::class)
 public inline fun File.append(excl: OpenExcl?, src: ByteBuffer): Int {

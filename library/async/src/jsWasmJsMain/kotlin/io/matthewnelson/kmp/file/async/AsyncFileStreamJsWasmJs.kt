@@ -22,10 +22,22 @@ import io.matthewnelson.kmp.file.async.internal.initMutex
 import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Read.read]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * **NOTE:** This function acquires a position lock. Synchronous [FileStream] function
+ * calls also requiring the position lock will result in failure until this asynchronous
+ * function returns. This is a platform limitation and can be avoided by not intermixing
+ * synchronous, and asynchronous functionality.
+ *
+ * @see [FileStream.Read.read]
+ * @see [AsyncFs.openReadAsync]
+ * @see [AsyncFs.openReadWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Read.readAsync(buf: Buffer, offset: Long, len: Long): Long {
@@ -36,7 +48,13 @@ public suspend fun FileStream.Read.readAsync(buf: Buffer, offset: Long, len: Lon
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Read.read]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * @see [FileStream.Read.read]
+ * @see [AsyncFs.openReadAsync]
+ * @see [AsyncFs.openReadWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Read.readAsync(buf: Buffer, offset: Long, len: Long, position: Long): Long {
@@ -47,7 +65,18 @@ public suspend fun FileStream.Read.readAsync(buf: Buffer, offset: Long, len: Lon
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Read.read]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * **NOTE:** This function acquires a position lock. Synchronous [FileStream] function
+ * calls also requiring the position lock will result in failure until this asynchronous
+ * function returns. This is a platform limitation and can be avoided by not intermixing
+ * synchronous, and asynchronous functionality.
+ *
+ * @see [FileStream.Read.read]
+ * @see [AsyncFs.openReadAsync]
+ * @see [AsyncFs.openReadWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend inline fun FileStream.Read.readAsync(buf: Buffer): Long {
@@ -55,7 +84,13 @@ public suspend inline fun FileStream.Read.readAsync(buf: Buffer): Long {
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Read.read]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * @see [FileStream.Read.read]
+ * @see [AsyncFs.openReadAsync]
+ * @see [AsyncFs.openReadWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend inline fun FileStream.Read.readAsync(buf: Buffer, position: Long): Long {
@@ -63,7 +98,18 @@ public suspend inline fun FileStream.Read.readAsync(buf: Buffer, position: Long)
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Write.write]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * **NOTE:** This function acquires a position lock. Synchronous [FileStream] function
+ * calls also requiring the position lock will result in failure until this asynchronous
+ * function returns. This is a platform limitation and can be avoided by not intermixing
+ * synchronous, and asynchronous functionality.
+ *
+ * @see [FileStream.Write.write]
+ * @see [AsyncFs.openReadWriteAsync]
+ * @see [AsyncFs.openWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Write.writeAsync(buf: Buffer, offset: Long, len: Long) {
@@ -74,7 +120,13 @@ public suspend fun FileStream.Write.writeAsync(buf: Buffer, offset: Long, len: L
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Write.write]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * @see [FileStream.Write.write]
+ * @see [AsyncFs.openReadWriteAsync]
+ * @see [AsyncFs.openWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Write.writeAsync(buf: Buffer, offset: Long, len: Long, position: Long) {
@@ -85,7 +137,18 @@ public suspend fun FileStream.Write.writeAsync(buf: Buffer, offset: Long, len: L
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Write.write]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * **NOTE:** This function acquires a position lock. Synchronous [FileStream] function
+ * calls also requiring the position lock will result in failure until this asynchronous
+ * function returns. This is a platform limitation and can be avoided by not intermixing
+ * synchronous, and asynchronous functionality.
+ *
+ * @see [FileStream.Write.write]
+ * @see [AsyncFs.openReadWriteAsync]
+ * @see [AsyncFs.openWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend inline fun FileStream.Write.writeAsync(buf: Buffer) {
@@ -93,7 +156,13 @@ public suspend inline fun FileStream.Write.writeAsync(buf: Buffer) {
 }
 
 /**
- * TODO
+ * An asynchronous version of [FileStream.Write.write]. If [FileStream] was not opened
+ * using [AsyncFs], thus not inheriting its [CoroutineContext], then the default
+ * [AsyncFs.ctx] will be used instead.
+ *
+ * @see [FileStream.Write.write]
+ * @see [AsyncFs.openReadWriteAsync]
+ * @see [AsyncFs.openWriteAsync]
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend inline fun FileStream.Write.writeAsync(buf: Buffer, position: Long) {
