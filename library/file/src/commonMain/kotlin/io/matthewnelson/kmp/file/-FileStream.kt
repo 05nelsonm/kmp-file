@@ -67,21 +67,25 @@ internal abstract class AbstractFileStream protected constructor(
     init: Any,
 ): FileStream.ReadWrite(), InternalInteropAsyncFileStreamRead, InternalInteropAsyncFileStreamWrite {
 
-    @Volatile
-    private var _ctx: CoroutineContext? = null
-    public final override val ctx: CoroutineContext? get() = _ctx
-
-    @Throws(IllegalStateException::class)
-    public final override fun setContext(ctx: CoroutineContext) {
-        check(_ctx == null) { "ctx has already been set" }
-        _ctx = ctx
-    }
-
     init {
         disappearingCheck(condition = { canRead || canWrite }) { "!canRead && !canWrite" }
         disappearingCheck(condition = { if (isAppending) canWrite else true }) { "isAppending && !canWrite" }
         disappearingCheck(condition = { if (canRead && canWrite) !isAppending else true }) { "isAppending && (canRead && canWrite)" }
     }
+
+    @Volatile
+    private var _ctx: CoroutineContext? = null
+    public final override val ctx: CoroutineContext? get() = _ctx
+
+    @Throws(ClosedException::class, IllegalStateException::class)
+    public final override fun setContext(ctx: CoroutineContext) {
+        checkIsOpen()
+        check(_ctx == null) { "ctx has already been set" }
+        _ctx = ctx
+    }
+
+    // To be called from close
+    protected fun unsetCoroutineContext() { _ctx = null }
 
     @Throws(ClosedException::class)
     protected inline fun checkIsOpen() { if (!isOpen()) throw ClosedException() }

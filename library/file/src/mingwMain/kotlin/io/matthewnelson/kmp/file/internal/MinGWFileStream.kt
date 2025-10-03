@@ -261,6 +261,7 @@ internal class MinGWFileStream(
 
     override fun close() {
         val h = _h.getAndSet(null) ?: return
+        unsetCoroutineContext()
         val ret = CloseHandle(h)
         if (ret == FALSE) throw lastErrorToIOException()
     }

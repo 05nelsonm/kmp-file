@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal.async
 
+import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.InternalFileApi
 import kotlin.coroutines.CoroutineContext
 
@@ -27,9 +28,10 @@ import kotlin.coroutines.CoroutineContext
 @InternalFileApi
 public expect sealed interface InteropAsyncFileStream {
 
+    // AsyncFs
     public val ctx: CoroutineContext?
 
-    @Throws(IllegalStateException::class)
+    @Throws(ClosedException::class, IllegalStateException::class)
     public fun setContext(ctx: CoroutineContext)
 
     @InternalFileApi

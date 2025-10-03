@@ -33,7 +33,7 @@ public actual sealed interface InteropAsyncFileStream {
 
     public actual val ctx: CoroutineContext?
 
-    @Throws(IllegalStateException::class)
+    @Throws(ClosedException::class, IllegalStateException::class)
     public actual fun setContext(ctx: CoroutineContext)
 
     @Throws(CancellationException::class, IOException::class)

@@ -223,6 +223,7 @@ internal class NioFileStream private constructor(
             ch to parents
         }
 
+        unsetCoroutineContext()
         var threw: IOException? = null
 
         try {

@@ -369,6 +369,7 @@ internal class FsJvmAndroid private constructor(
                 @Suppress("NAME_SHADOWING")
                 val fd = _fd ?: return
                 _fd = null
+                unsetCoroutineContext()
                 fd.doClose(null)?.let { throw it }
             }
         }

@@ -1622,6 +1622,7 @@ internal class FsJsNode private constructor(
         override fun close() {
             val fd = _fd ?: return
             _fd = null
+            unsetCoroutineContext()
             try {
                 jsExternTryCatch { fs.closeSync(fd) }
             } catch (t: Throwable) {
@@ -1632,6 +1633,7 @@ internal class FsJsNode private constructor(
         override suspend fun _closeAsync() {
             val fd = _fd ?: return
             _fd = null
+            unsetCoroutineContext()
             var wasClosed = false
             try {
                 suspendCoroutine<Unit> { cont ->
