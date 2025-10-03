@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
 
-package io.matthewnelson.kmp.file.internal
+package io.matthewnelson.kmp.file.internal.js
 
-internal expect value class RealPathScope private constructor(private val _buf: Any)
+import kotlin.js.JsName
 
-internal expect inline fun <T: Any?> realPathScope(block: RealPathScope.() -> T): T
+@JsName("Error")
+internal expect class JsError {
+    val message: String?
+}
+
+internal expect inline fun JsError.toThrowable(): Throwable

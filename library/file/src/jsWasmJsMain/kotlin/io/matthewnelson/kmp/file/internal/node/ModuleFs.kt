@@ -19,10 +19,31 @@ package io.matthewnelson.kmp.file.internal.node
 
 import io.matthewnelson.kmp.file.internal.js.JsObject
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.js.JsError
 import kotlin.js.JsName
 
 /** [docs](https://nodejs.org/api/fs.html) */
 internal external interface ModuleFs {
+    fun access(path: Path, mode: Int, callback: (err: JsError?) -> Unit)
+    fun chmod(path: Path, mode: String, callback: (err: JsError?) -> Unit)
+    fun close(fd: Double, callback: (err: JsError?) -> Unit)
+    fun fdatasync(fd: Double, callback: (err: JsError?) -> Unit)
+    fun fstat(fd: Double, callback: (err: JsError?, stats: JsStats) -> Unit)
+    fun fsync(fd: Double, callback: (err: JsError?) -> Unit)
+    fun ftruncate(fd: Double, len: Double, callback: (err: JsError?) -> Unit)
+    fun lstat(path: Path, callback: (err: JsError?, stats: JsStats) -> Unit)
+    fun mkdir(path: Path, options: JsObject, callback: (err: JsError?, created: Path?) -> Unit)
+    fun open(path: Path, flags: Int, callback: (err: JsError?, fd: Double) -> Unit)
+    fun open(path: Path, flags: Int, mode: String, callback: (err: JsError?, fd: Double) -> Unit)
+    fun open(path: Path, flags: String, mode: String, callback: (err: JsError?, fd: Double) -> Unit)
+    fun read(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double, callback: (err: JsError?, read: Double, JsBuffer) -> Unit)
+    fun readFile(path: Path, callback: (err: JsError?, JsBuffer) -> Unit)
+    fun realpath(path: Path, callback: (err: JsError?, resolved: Path) -> Unit)
+    fun rmdir(path: Path, options: JsObject, callback: (err: JsError?) -> Unit)
+    fun stat(path: Path, callback: (err: JsError?, stats: JsStats) -> Unit)
+    fun unlink(path: Path, callback: (err: JsError?) -> Unit)
+    fun write(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double, callback: (err: JsError?, write: Double, JsBuffer) -> Unit)
+
     fun accessSync(path: Path, mode: Int)
     fun chmodSync(path: Path, mode: String)
     fun closeSync(fd: Double)

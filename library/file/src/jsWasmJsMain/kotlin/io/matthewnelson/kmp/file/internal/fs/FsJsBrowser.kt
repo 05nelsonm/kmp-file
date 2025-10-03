@@ -25,14 +25,15 @@ import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
-import io.matthewnelson.kmp.file.internal.RealPathScope
+import io.matthewnelson.kmp.file.internal.async.SuspendCancellable
 import io.matthewnelson.kmp.file.internal.commonDriveRootOrNull
 import io.matthewnelson.kmp.file.internal.js.jsNavigator
 import io.matthewnelson.kmp.file.path
+import kotlin.coroutines.cancellation.CancellationException
 
 internal class FsJsBrowser private constructor(
     internal override val isWindows: Boolean,
-): FsJs(info = FsInfo.of(name = "FsJsBrowser", isPosix = !isWindows)) {
+): Fs(info = FsInfo.of(name = "FsJsBrowser", isPosix = !isWindows)) {
 
     internal override val dirSeparator: String get() = if (isWindows) "\\" else "/"
     internal override val pathSeparator: String get() = if (isWindows) ";" else ":"
@@ -57,7 +58,32 @@ internal class FsJsBrowser private constructor(
     }
 
     @Throws(IOException::class)
+    internal override fun absolutePath(file: File): Path {
+        return absolutePath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun absoluteFile(file: File): File {
+        return absoluteFile(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalPath(file: File): Path {
+        return canonicalPath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalFile(file: File): File {
+        return canonicalFile(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
+        throw UnsupportedOperationException("chmod is not supported on $this.")
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun chmod(file: File, mode: Mode, mustExist: Boolean, suspendCancellable: SuspendCancellable<Any?>) {
         throw UnsupportedOperationException("chmod is not supported on $this.")
     }
 
@@ -65,9 +91,17 @@ internal class FsJsBrowser private constructor(
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
         throw UnsupportedOperationException("delete is not supported on $this.")
     }
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean, suspendCancellable: SuspendCancellable<Any?>) {
+        throw UnsupportedOperationException("delete is not supported on $this.")
+    }
 
     @Throws(IOException::class)
     internal override fun exists(file: File): Boolean {
+        throw UnsupportedOperationException("exists is not supported on $this.")
+    }
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun exists(file: File, suspendCancellable: SuspendCancellable<Any?>): Boolean {
         throw UnsupportedOperationException("exists is not supported on $this.")
     }
 
@@ -75,9 +109,17 @@ internal class FsJsBrowser private constructor(
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
         throw UnsupportedOperationException("mkdir is not supported on $this.")
     }
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun mkdir(dir: File, mode: Mode, mustCreate: Boolean, suspendCancellable: SuspendCancellable<Any?>) {
+        throw UnsupportedOperationException("mkdir is not supported on $this.")
+    }
 
     @Throws(IOException::class)
     internal override fun openRead(file: File): AbstractFileStream {
+        throw UnsupportedOperationException("openRead is not supported on $this.")
+    }
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun openRead(file: File, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream {
         throw UnsupportedOperationException("openRead is not supported on $this.")
     }
 
@@ -85,14 +127,27 @@ internal class FsJsBrowser private constructor(
     internal override fun openReadWrite(file: File, excl: OpenExcl): AbstractFileStream {
         throw UnsupportedOperationException("openReadWrite is not supported on $this.")
     }
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun openReadWrite(file: File, excl: OpenExcl, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream {
+        throw UnsupportedOperationException("openReadWrite is not supported on $this.")
+    }
 
     @Throws(IOException::class)
     internal override fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream {
         throw UnsupportedOperationException("openWrite is not supported on $this.")
     }
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun openWrite(file: File, excl: OpenExcl, appending: Boolean, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream {
+        throw UnsupportedOperationException("openWrite is not supported on $this.")
+    }
 
     @Throws(IOException::class)
-    override fun RealPathScope.realPath(path: Path): Path {
+    private fun realPath(scope: RealPathScope, path: Path): Path {
+        throw UnsupportedOperationException("realpath is not supported on $this.")
+    }
+
+    @Throws(CancellationException::class, IOException::class)
+    internal override suspend fun realPath(path: Path, suspendCancellable: SuspendCancellable<Path>): Path {
         throw UnsupportedOperationException("realpath is not supported on $this.")
     }
 

@@ -37,7 +37,6 @@ import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.wrapIOException
 import java.io.FileInputStream
 import kotlin.Throws
-import kotlin.concurrent.Volatile
 
 internal actual sealed class Fs private constructor(internal actual val info: FsInfo) {
 
@@ -84,7 +83,7 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
     @Throws(IOException::class)
     internal actual abstract fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
 
-    internal sealed class Jvm(info: FsInfo): Fs(info) {
+    internal sealed class Jvm protected constructor(info: FsInfo): Fs(info) {
 
         internal final override fun isAbsolute(file: File): Boolean = file.isAbsolute
 
@@ -209,37 +208,15 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
 
     internal actual companion object {
 
-        @Volatile
-        private var _instance: Fs? = null
-
-        @JvmSynthetic
-        internal actual fun get(): Fs = _instance ?: synchronized(Companion) {
-            _instance ?: run {
-                var fs: Fs? = FsJvmAndroid.getOrNull()
-
-                if (fs == null && ANDROID.SDK_INT == null) {
-                    fs = FsJvmNio.get()
-                }
-
-                if (fs == null) {
-                    val isAvailable = try {
-                        Class.forName("java.nio.file.Files") != null
-                    } catch (_: Throwable) {
-                        false
-                    }
-
-                    if (isAvailable) {
-                        fs = FsJvmNio.get()
-                    }
-                }
-
-                if (fs == null) {
-                    fs = FsJvmAndroidLegacy.get()
-                }
-
-                _instance = fs
-                fs
+        internal actual val INSTANCE: Fs by lazy {
+            FsJvmAndroid.getOrNull()?.let { return@lazy it }
+            if (ANDROID.SDK_INT == null) return@lazy FsJvmNio.get()
+            val isAvailable = try {
+                Class.forName("java.nio.file.Files") != null
+            } catch (_: Throwable) {
+                false
             }
+            if (isAvailable) FsJvmNio.get() else FsJvmAndroidLegacy.get()
         }
     }
 

@@ -14,6 +14,10 @@ open annotation class io.matthewnelson.kmp.file/DelicateFileApi : kotlin/Annotat
     constructor <init>() // io.matthewnelson.kmp.file/DelicateFileApi.<init>|<init>(){}[0]
 }
 
+open annotation class io.matthewnelson.kmp.file/InternalFileApi : kotlin/Annotation { // io.matthewnelson.kmp.file/InternalFileApi|null[0]
+    constructor <init>() // io.matthewnelson.kmp.file/InternalFileApi.<init>|<init>(){}[0]
+}
+
 abstract fun interface io.matthewnelson.kmp.file/Closeable { // io.matthewnelson.kmp.file/Closeable|null[0]
     abstract fun close() // io.matthewnelson.kmp.file/Closeable.close|close(){}[0]
 }

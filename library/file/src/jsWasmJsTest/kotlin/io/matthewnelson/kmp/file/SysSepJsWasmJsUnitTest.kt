@@ -16,7 +16,7 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 
 internal expect fun jsEnvPath(): String?
@@ -24,7 +24,7 @@ internal expect fun jsEnvPath(): String?
 @Suppress("UNUSED")
 class SysSepJsWasmJsUnitTest: SysSepSharedTest() {
     override fun getenvPATH(): String? {
-        if (FsJs.INSTANCE !is FsJsNode) return null
+        if (Fs.INSTANCE !is FsJsNode) return null
         return jsEnvPath()
     }
 }

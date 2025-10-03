@@ -48,6 +48,12 @@ kmpConfiguration {
                 implementation(libs.kotlinx.atomicfu)
             }
         }
+
+        kotlin {
+            compilerOptions {
+                optIn.add("io.matthewnelson.kmp.file.InternalFileApi")
+            }
+        }
     }
 }
 

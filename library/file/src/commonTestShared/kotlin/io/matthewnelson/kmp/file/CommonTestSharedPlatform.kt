@@ -26,7 +26,6 @@ import kotlin.random.Random
 private val BASE_16_LC = Base16 { encodeToLowercase = true }
 
 fun randomName(): String = Random
-    .Default
     .nextBytes(8)
     .encodeToString(Base16)
 

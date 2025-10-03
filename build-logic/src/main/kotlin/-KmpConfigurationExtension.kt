@@ -94,6 +94,8 @@ fun KmpConfigurationExtension.configureShared(
             }
         }
 
+        action.execute(this)
+
         if (publish) kotlin {
             @Suppress("DEPRECATION")
             compilerOptions {
@@ -113,7 +115,5 @@ fun KmpConfigurationExtension.configureShared(
                 }
             }
         }
-
-        action.execute(this)
     }
 }

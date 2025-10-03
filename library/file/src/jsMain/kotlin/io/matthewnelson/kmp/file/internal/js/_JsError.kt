@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
 
-package io.matthewnelson.kmp.file.internal.fs
+package io.matthewnelson.kmp.file.internal.js
 
-import io.matthewnelson.kmp.file.FsInfo
+internal actual typealias JsError = Throwable
 
-internal actual sealed class FsNative(info: FsInfo): FsNonJvm.Native(info) {
-    internal actual companion object {
-        internal actual val INSTANCE: FsNative = FsMinGW
-    }
-}
+internal actual inline fun JsError.toThrowable(): Throwable = this

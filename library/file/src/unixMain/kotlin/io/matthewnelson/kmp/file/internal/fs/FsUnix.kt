@@ -26,7 +26,6 @@ import io.matthewnelson.kmp.file.errnoToIOException
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Mode.Mask.Companion.convert
 import io.matthewnelson.kmp.file.internal.Path
-import io.matthewnelson.kmp.file.internal.RealPathScope
 import io.matthewnelson.kmp.file.internal.UnixFileStream
 import io.matthewnelson.kmp.file.internal.errnoToString
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
@@ -71,7 +70,7 @@ import platform.posix.remove
 import platform.posix.stat
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
-internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix = true)) {
+internal data object FsUnix: Fs(info = FsInfo.of(name = "FsUnix", isPosix = true)) {
 
     internal val MODE_MASK: Mode.Mask = Mode.Mask(
         S_IRUSR = S_IRUSR,
@@ -90,6 +89,26 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
     }
 
     @Throws(IOException::class)
+    internal override fun absolutePath(file: File): Path {
+        return absolutePath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun absoluteFile(file: File): File {
+        return absoluteFile(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalPath(file: File): Path {
+        return canonicalPath(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
+    internal override fun canonicalFile(file: File): File {
+        return canonicalFile(file, ::realPath)
+    }
+
+    @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
         val m = MODE_MASK.convert(mode = mode)
         @Suppress("RemoveRedundantCallsOfConversionMethods")
@@ -103,6 +122,11 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
         if (ignoreEINTR32 { remove(file.path) } == 0) return
         if (!mustExist && errno == ENOENT) return
         throw errnoToIOException(errno, file)
+    }
+
+    @Throws(IOException::class)
+    internal override fun exists(file: File): Boolean {
+        return file.posixExists()
     }
 
     @Throws(IOException::class)
@@ -161,13 +185,6 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
         return UnixFileStream(fd, canRead = false, canWrite = true, isAppending = appending)
     }
 
-    @Throws(IOException::class)
-    override fun RealPathScope.realPath(path: Path): Path {
-        return ignoreEINTR { realpath(path, buf) }
-            ?.toKString()
-            ?: throw errnoToIOException(errno, path.toFile())
-    }
-
     @Throws(IllegalArgumentException::class, IOException::class)
     private fun File.open(flags: Int, excl: OpenExcl): Int {
         val m = MODE_MASK.convert(excl._mode)
@@ -188,5 +205,12 @@ internal data object FsUnix: FsNative(info = FsInfo.of(name = "FsUnix", isPosix 
         }
 
         return fd
+    }
+
+    @Throws(IOException::class)
+    private fun realPath(scope: RealPathScope, path: Path): Path {
+        return ignoreEINTR { realpath(path, scope.buf) }
+            ?.toKString()
+            ?: throw errnoToIOException(errno, path.toFile())
     }
 }

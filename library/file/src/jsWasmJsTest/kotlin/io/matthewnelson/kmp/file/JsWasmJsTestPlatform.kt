@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "TestFunctionName")
 
 package io.matthewnelson.kmp.file
 
 import io.matthewnelson.kmp.file.internal.IsWindows
-import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.internal.async.AsyncLock
+import io.matthewnelson.kmp.file.internal.async.SuspendCancellable
+import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 
 actual val IS_SIMULATOR: Boolean = false
@@ -28,7 +30,7 @@ actual typealias AbstractFileStreamReadSharedTest = FileStreamReadJsSharedTest
 actual typealias AbstractFileStreamWriteSharedTest = FileStreamWriteJsSharedTest
 
 actual fun permissionChecker(): PermissionChecker? {
-    val node = FsJs.INSTANCE
+    val node = Fs.INSTANCE
     if (node !is FsJsNode) return null
 
     return if (IsWindows) {
@@ -96,4 +98,20 @@ internal actual class TestReadStream actual constructor(
     override fun write(buf: Buffer, offset: Long, len: Long) { error("Not implemented") }
     override fun write(buf: Buffer, position: Long) { error("Not implemented") }
     override fun write(buf: Buffer, offset: Long, len: Long, position: Long) { error("Not implemented") }
+
+    override suspend fun _positionAsync(suspendCancellable: SuspendCancellable<Any?>): Long = error("Not implemented")
+    override suspend fun _positionAsync(new: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+    override suspend fun _readAsync(buf: ByteArray, offset: Int, len: Int, suspendCancellable: SuspendCancellable<Any?>): Int = error("Not implemented")
+    override suspend fun _readAsync(buf: ByteArray, offset: Int, len: Int, position: Long, suspendCancellable: SuspendCancellable<Any?>): Int = error("Not implemented")
+    override suspend fun _readAsync(buf: Buffer, offset: Long, len: Long, suspendCancellable: SuspendCancellable<Any?>): Long = error("Not implemented")
+    override suspend fun _readAsync(buf: Buffer, offset: Long, len: Long, position: Long, suspendCancellable: SuspendCancellable<Any?>): Long  = error("Not implemented")
+    override suspend fun _sizeAsync(suspendCancellable: SuspendCancellable<Any?>): Long = error("Not implemented")
+    override suspend fun _sizeAsync(new: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+    override suspend fun _syncAsync(meta: Boolean, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+    override suspend fun _writeAsync(buf: ByteArray, offset: Int, len: Int, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+    override suspend fun _writeAsync(buf: ByteArray, offset: Int, len: Int, position: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+    override suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+    override suspend fun _writeAsync(buf: Buffer, offset: Long, len: Long, position: Long, suspendCancellable: SuspendCancellable<Any?>) { error("Not implemented") }
+    override suspend fun _closeAsync() { error("Not implemented") }
+    override fun _initAsyncLock(create: (isLocked: Boolean) -> AsyncLock) { error("Not implemented") }
 }

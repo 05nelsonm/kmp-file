@@ -72,6 +72,12 @@ public expect sealed interface FileStream: Closeable {
      * **NOTE:** If this is a [Write] stream and [Write.isAppending] is `true`,
      * this is silently ignored as data is always written to the end of the [File].
      *
+     * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+     * this synchronous function can fail to acquire the necessary position lock
+     * if an asynchronous [FileStream] operation is holding it. In that event,
+     * an [IOException] is raised. This is a platform limitation and can be avoided
+     * by not intermixing synchronous, and asynchronous functionality.
+     *
      * @param [new] The new position for the [FileStream].
      *
      * @return The [FileStream] for chaining operations.
@@ -108,6 +114,12 @@ public expect sealed interface FileStream: Closeable {
      * Only changes made via this stream are guaranteed to be updated as a
      * result of this function call.
      *
+     * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+     * this synchronous function can fail to acquire the necessary position lock
+     * if an asynchronous [FileStream] operation is holding it. In that event,
+     * an [IOException] is raised. This is a platform limitation and can be avoided
+     * by not intermixing synchronous, and asynchronous functionality.
+     *
      * @param [meta] If `false`, only updates to the [File] content will be
      *   written to storage. If `true`, updates to both the [File] content
      *   and its metadata will be written to storage.
@@ -129,6 +141,12 @@ public expect sealed interface FileStream: Closeable {
         /**
          * Sets the [FileStream.position] to [new].
          *
+         * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+         * this synchronous function can fail to acquire the necessary position lock
+         * if an asynchronous [FileStream] operation is holding it. In that event,
+         * an [IOException] is raised. This is a platform limitation and can be avoided
+         * by not intermixing synchronous, and asynchronous functionality.
+         *
          * @param [new] The new position for the [Read] stream.
          *
          * @return The [Read] stream for chaining operations.
@@ -145,6 +163,12 @@ public expect sealed interface FileStream: Closeable {
          * [FileStream.position]. The [FileStream.position] will automatically
          * increment by the number of bytes that have been read.
          *
+         * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+         * this synchronous function can fail to acquire the necessary position lock
+         * if an asynchronous [FileStream] operation is holding it. In that event,
+         * an [IOException] is raised. This is a platform limitation and can be avoided
+         * by not intermixing synchronous, and asynchronous functionality.
+         *
          * @param [buf] The array to place data into.
          *
          * @return The number of bytes read into [buf], or `-1` if no more data
@@ -160,6 +184,12 @@ public expect sealed interface FileStream: Closeable {
          * the provided array. Bytes are read starting at the current
          * [FileStream.position]. The [FileStream.position] will automatically
          * increment by the number of bytes that have been read.
+         *
+         * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+         * this synchronous function can fail to acquire the necessary position lock
+         * if an asynchronous [FileStream] operation is holding it. In that event,
+         * an [IOException] is raised. This is a platform limitation and can be avoided
+         * by not intermixing synchronous, and asynchronous functionality.
          *
          * @param [buf] The array to place data into.
          * @param [offset] The index in [buf] to start placing data.
@@ -266,6 +296,12 @@ public expect sealed interface FileStream: Closeable {
          * **NOTE:** If [isAppending] is `true`, this is silently ignored as data
          * is always written to the end of the [File].
          *
+         * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+         * this synchronous function can fail to acquire the necessary position lock
+         * if an asynchronous [FileStream] operation is holding it. In that event,
+         * an [IOException] is raised. This is a platform limitation and can be avoided
+         * by not intermixing synchronous, and asynchronous functionality.
+         *
          * @param [new] The new position for the [Write] stream.
          *
          * @return The [Write] stream for chaining operations.
@@ -287,6 +323,12 @@ public expect sealed interface FileStream: Closeable {
          * If and only if the current [FileStream.position] is greater than [new],
          * then the [FileStream.position] will be set to [new]. Otherwise, the
          * current [FileStream.position] will remain unmodified.
+         *
+         * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+         * this synchronous function can fail to acquire the necessary position lock
+         * if an asynchronous [FileStream] operation is holding it. In that event,
+         * an [IOException] is raised. This is a platform limitation and can be avoided
+         * by not intermixing synchronous, and asynchronous functionality.
          *
          * @param [new] The desired size.
          *
@@ -331,6 +373,12 @@ public expect sealed interface FileStream: Closeable {
          * The [FileStream.position] will automatically increment by the number of
          * bytes that were written.
          *
+         * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+         * this synchronous function can fail to acquire the necessary position lock
+         * if an asynchronous [FileStream] operation is holding it. In that event,
+         * an [IOException] is raised. This is a platform limitation and can be avoided
+         * by not intermixing synchronous, and asynchronous functionality.
+         *
          * @param [buf] The array of data to write.
          *
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
@@ -343,6 +391,12 @@ public expect sealed interface FileStream: Closeable {
          * to the [File] for which this stream belongs. Bytes are written starting
          * at the current [FileStream.position]. The [FileStream.position] will
          * automatically increment by the number of bytes that were written.
+         *
+         * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+         * this synchronous function can fail to acquire the necessary position lock
+         * if an asynchronous [FileStream] operation is holding it. In that event,
+         * an [IOException] is raised. This is a platform limitation and can be avoided
+         * by not intermixing synchronous, and asynchronous functionality.
          *
          * @param [buf] The array of data to write.
          * @param [offset] The index in [buf] to start at when writing data.
@@ -403,6 +457,12 @@ public expect sealed interface FileStream: Closeable {
         /**
          * Sets the [FileStream.position] to [new].
          *
+         * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+         * this synchronous function can fail to acquire the necessary position lock
+         * if an asynchronous [FileStream] operation is holding it. In that event,
+         * an [IOException] is raised. This is a platform limitation and can be avoided
+         * by not intermixing synchronous, and asynchronous functionality.
+         *
          * @param [new] The new position for the [ReadWrite] stream.
          *
          * @return The [ReadWrite] stream for chaining operations.
@@ -424,6 +484,12 @@ public expect sealed interface FileStream: Closeable {
          * If and only if the current [FileStream.position] is greater than [new],
          * then the [FileStream.position] will be set to [new]. Otherwise, the
          * current [FileStream.position] will remain unmodified.
+         *
+         * **NOTE:** On Js/WasmJs, if using the `:kmp-file:async` extension module,
+         * this synchronous function can fail to acquire the necessary position lock
+         * if an asynchronous [FileStream] operation is holding it. In that event,
+         * an [IOException] is raised. This is a platform limitation and can be avoided
+         * by not intermixing synchronous, and asynchronous functionality.
          *
          * @param [new] The desired size.
          *

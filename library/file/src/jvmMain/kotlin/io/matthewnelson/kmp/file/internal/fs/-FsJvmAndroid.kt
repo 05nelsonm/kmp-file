@@ -104,11 +104,16 @@ internal class FsJvmAndroid private constructor(
         val f = const.O_WRONLY or const.O_TRUNC or O_CLOEXEC or const.O_CREAT or const.O_EXCL
         val tmp = SysTempDir.resolve(UUID.randomUUID().toString())
 
+        var fd: FileDescriptor? = null
+        val deleteTmp = object : Runnable {
+            private val execute by lazy { if (fd != null) tmp.delete(); Unit }
+            override fun run() { execute.toString() }
+        }
+        val hook = Thread(deleteTmp)
         try {
-            tmp.deleteOnExit()
+            Runtime.getRuntime().addShutdownHook(hook)
         } catch (_: Throwable) {}
 
-        var fd: FileDescriptor? = null
         val result = try {
             fd = os.open.invoke(null, tmp.path, f, m) as FileDescriptor
             val flags = os.fcntlVoid.invoke(null, fd, const.F_GETFD) as Int
@@ -125,7 +130,11 @@ internal class FsJvmAndroid private constructor(
         fd?.doClose(null)
 
         try {
-            tmp.delete()
+            deleteTmp.run()
+        } catch (_: Throwable) {}
+
+        try {
+            Runtime.getRuntime().removeShutdownHook(hook)
         } catch (_: Throwable) {}
 
         if (result == 0) {
@@ -360,6 +369,7 @@ internal class FsJvmAndroid private constructor(
                 @Suppress("NAME_SHADOWING")
                 val fd = _fd ?: return
                 _fd = null
+                unsetCoroutineContext()
                 fd.doClose(null)?.let { throw it }
             }
         }

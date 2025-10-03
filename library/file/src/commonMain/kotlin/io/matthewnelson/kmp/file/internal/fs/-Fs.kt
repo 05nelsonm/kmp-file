@@ -72,7 +72,7 @@ internal expect sealed class Fs {
     internal abstract fun openWrite(file: File, excl: OpenExcl, appending: Boolean): AbstractFileStream
 
     internal companion object {
-        internal fun get(): Fs
+        internal val INSTANCE: Fs
     }
 
     public final override fun toString(): String // = info.name

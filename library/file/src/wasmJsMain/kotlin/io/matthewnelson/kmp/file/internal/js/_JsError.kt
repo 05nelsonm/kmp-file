@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
 
-package io.matthewnelson.kmp.file.internal.fs
+package io.matthewnelson.kmp.file.internal.js
 
-internal expect sealed class FsNative: FsNonJvm.Native {
-    internal companion object {
-        internal val INSTANCE: FsNative
-    }
+import io.matthewnelson.kmp.file.toWasmJsException
+
+@JsName("Error")
+internal actual external class JsError: JsAny {
+    actual val message: String?
+    val code: String?
 }
+
+internal actual inline fun JsError.toThrowable(): Throwable = toWasmJsException()

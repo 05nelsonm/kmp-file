@@ -236,6 +236,7 @@ internal class UnixFileStream(
 
     override fun close() {
         val fd = _fd.getAndSet(null) ?: return
+        unsetCoroutineContext()
         if (platform.posix.close(fd) == 0) return
         throw errnoToIOException(errno)
     }

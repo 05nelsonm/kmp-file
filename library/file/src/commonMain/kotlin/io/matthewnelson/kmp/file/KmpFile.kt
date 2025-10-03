@@ -72,7 +72,7 @@ public val SysTempDir: File = platformTempDirectory()
  * @see [FsInfo]
  * */
 @get:JvmName("SysFsInfo")
-public val SysFsInfo: FsInfo get() = Fs.get().info
+public val SysFsInfo: FsInfo get() = Fs.INSTANCE.info
 
 /**
  * Syntactic Kotlin sugar.
@@ -150,7 +150,7 @@ public inline val File.path: String get() = getPath()
 @JvmName("absolutePath2Of")
 @Throws(IOException::class)
 public fun File.absolutePath2(): String {
-    return Fs.get().absolutePath(this)
+    return Fs.INSTANCE.absolutePath(this)
 }
 
 /**
@@ -175,7 +175,7 @@ public fun File.absolutePath2(): String {
 @JvmName("absoluteFile2Of")
 @Throws(IOException::class)
 public fun File.absoluteFile2(): File {
-    return Fs.get().absoluteFile(this)
+    return Fs.INSTANCE.absoluteFile(this)
 }
 
 /**
@@ -200,7 +200,7 @@ public fun File.absoluteFile2(): File {
 @Throws(IOException::class)
 @JvmName("canonicalPath2Of")
 public fun File.canonicalPath2(): String {
-    return Fs.get().canonicalPath(this)
+    return Fs.INSTANCE.canonicalPath(this)
 }
 
 /**
@@ -225,7 +225,7 @@ public fun File.canonicalPath2(): String {
 @Throws(IOException::class)
 @JvmName("canonicalFile2Of")
 public fun File.canonicalFile2(): File {
-    return Fs.get().canonicalFile(this)
+    return Fs.INSTANCE.canonicalFile(this)
 }
 
 /**
@@ -308,7 +308,7 @@ public fun File.resolve(relative: String): File {
 @JvmOverloads
 @Throws(IOException::class)
 public fun File.chmod2(mode: String, mustExist: Boolean = true): File {
-    return Fs.get().commonChmod(this, mode, mustExist)
+    return Fs.INSTANCE.commonChmod(this, mode, mustExist)
 }
 
 /**
@@ -337,7 +337,7 @@ public fun File.chmod2(mode: String, mustExist: Boolean = true): File {
 @JvmOverloads
 @Throws(IOException::class)
 public fun File.delete2(ignoreReadOnly: Boolean = false, mustExist: Boolean = false): File {
-    return Fs.get().commonDelete(this, ignoreReadOnly, mustExist)
+    return Fs.INSTANCE.commonDelete(this, ignoreReadOnly, mustExist)
 }
 
 /**
@@ -352,7 +352,7 @@ public fun File.delete2(ignoreReadOnly: Boolean = false, mustExist: Boolean = fa
  * */
 @Throws(IOException::class)
 public fun File.exists2(): Boolean {
-    return Fs.get().exists(this)
+    return Fs.INSTANCE.exists(this)
 }
 
 /**
@@ -381,7 +381,7 @@ public fun File.exists2(): Boolean {
 @JvmOverloads
 @Throws(IOException::class)
 public fun File.mkdir2(mode: String?, mustCreate: Boolean = false): File {
-    return Fs.get().commonMkdir(this, mode, mustCreate)
+    return Fs.INSTANCE.commonMkdir(this, mode, mustCreate)
 }
 
 /**
@@ -415,7 +415,7 @@ public fun File.mkdir2(mode: String?, mustCreate: Boolean = false): File {
 @JvmOverloads
 @Throws(IOException::class)
 public fun File.mkdirs2(mode: String?, mustCreate: Boolean = false): File {
-    return Fs.get().commonMkdirs(this, mode, mustCreate)
+    return Fs.INSTANCE.commonMkdirs(this, mode, mustCreate)
 }
 
 /**
@@ -437,8 +437,7 @@ public fun File.mkdirs2(mode: String?, mustCreate: Boolean = false): File {
  * */
 @Throws(IOException::class)
 public fun File.openRead(): FileStream.Read {
-    val s = Fs.get().openRead(this)
-    return FileStreamReadOnly.of(s)
+    return Fs.INSTANCE.commonOpenRead(this)
 }
 
 /**
@@ -466,10 +465,7 @@ public fun File.openRead(): FileStream.Read {
  * */
 @Throws(IOException::class)
 public fun File.openReadWrite(excl: OpenExcl?): FileStream.ReadWrite {
-    val s = Fs.get().openReadWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT)
-    disappearingCheck(condition = { s.canRead }) { "!canRead" }
-    disappearingCheck(condition = { s.canWrite }) { "!canWrite" }
-    return s
+    return Fs.INSTANCE.commonOpenReadWrite(this, excl)
 }
 
 /**
@@ -497,8 +493,7 @@ public fun File.openReadWrite(excl: OpenExcl?): FileStream.ReadWrite {
  * */
 @Throws(IOException::class)
 public fun File.openWrite(excl: OpenExcl?, appending: Boolean): FileStream.Write {
-    val s = Fs.get().openWrite(this, excl ?: OpenExcl.MaybeCreate.DEFAULT, appending)
-    return FileStreamWriteOnly.of(s)
+    return Fs.INSTANCE.commonOpenWrite(this, excl, appending)
 }
 
 /**
@@ -573,7 +568,7 @@ public inline fun File.openAppend(excl: OpenExcl?): FileStream.Write {
 @JvmName("readBytesFrom")
 @Throws(IOException::class)
 public fun File.readBytes(): ByteArray {
-    return commonReadBytes(open = { openRead() })
+    return commonReadBytes()
 }
 
 /**
@@ -594,7 +589,7 @@ public fun File.readBytes(): ByteArray {
 @JvmName("readUtf8From")
 @Throws(IOException::class)
 public fun File.readUtf8(): String {
-    return readBytes().decodeToString()
+    return commonReadText()
 }
 
 /**
@@ -619,8 +614,7 @@ public fun File.readUtf8(): String {
 @JvmName("writeBytesTo")
 @Throws(IOException::class)
 public fun File.writeBytes(excl: OpenExcl?, appending: Boolean, array: ByteArray): File {
-    openWrite(excl, appending).use { s -> s.write(buf = array) }
-    return this
+    return commonWriteData(excl, appending, array, _write = FileStream.Write::write)
 }
 
 /**
@@ -669,13 +663,7 @@ public inline fun File.writeBytes(excl: OpenExcl?, array: ByteArray): File {
 @JvmName("writeUtf8To")
 @Throws(IOException::class)
 public fun File.writeUtf8(excl: OpenExcl?, appending: Boolean, text: String): File {
-    val bytes = try {
-        text.encodeToByteArray()
-    } catch (t: Throwable) {
-        throw t.wrapIOException()
-    }
-
-    return writeBytes(excl, appending, bytes)
+    return commonWriteText(excl, appending, text)
 }
 
 /**

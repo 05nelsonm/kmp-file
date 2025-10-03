@@ -17,9 +17,10 @@
 
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.commonWriteData
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
-import io.matthewnelson.kmp.file.internal.fs.FsJsNode
-import io.matthewnelson.kmp.file.internal.require
+import io.matthewnelson.kmp.file.internal.node.nodeRead
+import io.matthewnelson.kmp.file.internal.node.nodeStats
 
 /**
  * Retrieve the symbolic [Stats] referred to by the abstract pathname.
@@ -34,14 +35,12 @@ import io.matthewnelson.kmp.file.internal.require
  * */
 @Throws(IOException::class)
 public fun File.lstat(): Stats {
-    val node = FsJsNode.require()
-    return try {
-        @OptIn(DelicateFileApi::class)
-        val s = jsExternTryCatch { node.fs.lstatSync(path) }
-        Stats(s)
-    } catch (t: Throwable) {
-        throw t.toIOException(this)
-    }
+    @OptIn(DelicateFileApi::class)
+    return nodeStats(
+        _stat = { path ->
+            jsExternTryCatch { lstatSync(path) }
+        }
+    )
 }
 
 /**
@@ -57,14 +56,12 @@ public fun File.lstat(): Stats {
  * */
 @Throws(IOException::class)
 public fun File.stat(): Stats {
-    val node = FsJsNode.require()
-    return try {
-        @OptIn(DelicateFileApi::class)
-        val s = jsExternTryCatch { node.fs.statSync(path) }
-        Stats(s)
-    } catch (t: Throwable) {
-        throw t.toIOException(this)
-    }
+    @OptIn(DelicateFileApi::class)
+    return nodeStats(
+        _stat = { path ->
+            jsExternTryCatch { statSync(path) }
+        }
+    )
 }
 
 /**
@@ -81,33 +78,12 @@ public fun File.stat(): Stats {
  * */
 @Throws(IOException::class)
 public fun File.read(): Buffer {
-    val node = FsJsNode.require()
-    return try {
-        @OptIn(DelicateFileApi::class)
-        val b = jsExternTryCatch { node.fs.readFileSync(path) }
-        Buffer(b)
-    } catch (t: Throwable) {
-        throw t.toIOException(this)
-    }
-}
-
-/**
- * Writes the contents of a [Buffer] to the file associated with the
- * abstract pathname. The [File] will be truncated if it exists.
- *
- * [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options)
- *
- * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
- *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
- *
- * @throws [IOException] If there was a failure to open the [File] for the
- *   provided [excl] argument, if the [File] points to an existing directory,
- *   or if the filesystem threw a security exception.
- * @throws [UnsupportedOperationException] If Node.js is not being used.
- * */
-@Throws(IOException::class)
-public inline fun File.write(excl: OpenExcl?, data: Buffer) {
-    write(excl, appending = false, data)
+    @OptIn(DelicateFileApi::class)
+    return nodeRead(
+        _readFile = { path ->
+            jsExternTryCatch { readFileSync(path) }
+        }
+    )
 }
 
 /**
@@ -128,10 +104,26 @@ public inline fun File.write(excl: OpenExcl?, data: Buffer) {
  * */
 @Throws(IOException::class)
 public fun File.write(excl: OpenExcl?, appending: Boolean, data: Buffer) {
-    val node = FsJsNode.require()
-    @Suppress("NAME_SHADOWING")
-    val excl = excl ?: OpenExcl.MaybeCreate.DEFAULT
-    node.openWrite(this, excl, appending).use { s -> s.write(data) }
+    commonWriteData(excl, appending, data, _write = FileStream.Write::write)
+}
+
+/**
+ * Writes the contents of a [Buffer] to the file associated with the
+ * abstract pathname. The [File] will be truncated if it exists.
+ *
+ * [docs](https://nodejs.org/api/fs.html#fswritefilesyncfile-data-options)
+ *
+ * @param [excl] The [OpenExcl] desired for this open operation. If `null`,
+ *   then [OpenExcl.MaybeCreate.DEFAULT] will be used.
+ *
+ * @throws [IOException] If there was a failure to open the [File] for the
+ *   provided [excl] argument, if the [File] points to an existing directory,
+ *   or if the filesystem threw a security exception.
+ * @throws [UnsupportedOperationException] If Node.js is not being used.
+ * */
+@Throws(IOException::class)
+public inline fun File.write(excl: OpenExcl?, data: Buffer) {
+    write(excl, appending = false, data)
 }
 
 /**

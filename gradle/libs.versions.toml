@@ -14,6 +14,7 @@ gradle-kotlin               = "2.2.20"
 gradle-publish-maven        = "0.34.0"
 
 kotlincrypto-catalog        = "0.8.0" # Utilized from settings.gradle.kts
+kotlinx-coroutines          = "1.10.2"
 kotlinx-atomicfu            = "0.29.0"
 
 [libraries]
@@ -23,12 +24,15 @@ gradle-kotlin               = { module = "org.jetbrains.kotlin:kotlin-gradle-plu
 gradle-publish-maven        = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "gradle-publish-maven" }
 
 kotlinx-atomicfu            = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "kotlinx-atomicfu" }
+kotlinx-coroutines-core     = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
 # tests
 androidx-test-core          = { module = "androidx.test:core", version.ref = "androidx-test-core" }
 androidx-test-runner        = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
 
 encoding-base16             = { module = "io.matthewnelson.encoding:base16", version.ref = "encoding" }
+
+kotlinx-coroutines-test     = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 
 [plugins]
 android-library             = { id = "com.android.library", version.ref = "gradle-android" }

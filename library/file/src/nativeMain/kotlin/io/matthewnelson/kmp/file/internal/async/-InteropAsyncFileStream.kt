@@ -15,12 +15,27 @@
  **/
 @file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 
-package io.matthewnelson.kmp.file.internal
+package io.matthewnelson.kmp.file.internal.async
 
-internal actual value class RealPathScope private actual constructor(private actual val _buf: Any) {
-    internal companion object {
-        internal val INSTANCE = RealPathScope(Companion)
-    }
+import io.matthewnelson.kmp.file.ClosedException
+import io.matthewnelson.kmp.file.InternalFileApi
+import kotlin.coroutines.CoroutineContext
+
+/**
+ * Interop hooks for `:kmp-file:async`
+ * @suppress
+ * */
+@InternalFileApi
+public actual sealed interface InteropAsyncFileStream {
+
+    public actual val ctx: CoroutineContext?
+
+    @Throws(ClosedException::class, IllegalStateException::class)
+    public actual fun setContext(ctx: CoroutineContext)
+
+    @InternalFileApi
+    public actual sealed interface Read: InteropAsyncFileStream
+
+    @InternalFileApi
+    public actual sealed interface Write: InteropAsyncFileStream
 }
-
-internal actual inline fun <T> realPathScope(block: RealPathScope.() -> T): T = block(RealPathScope.INSTANCE)

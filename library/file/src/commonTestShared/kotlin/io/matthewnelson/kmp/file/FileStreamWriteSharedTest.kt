@@ -15,6 +15,8 @@
  **/
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.async.InteropAsyncFileStream
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -314,5 +316,20 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
                 assertEquals(e, a, "expected[$e] != actual[$a] >> index[$i]")
             }
         }
+    }
+
+    @Test
+    @OptIn(InternalFileApi::class)
+    fun givenStream_whenClosed_thenCoroutineContextIsCleared() = runTest { tmp ->
+        val s = tmp.testOpen(excl = null, appending = false).use { stream ->
+            assertEquals(null, (stream as InteropAsyncFileStream).ctx)
+            stream.setContext(EmptyCoroutineContext)
+            assertEquals(EmptyCoroutineContext, stream.ctx)
+            assertFailsWith<IllegalStateException> { stream.setContext(EmptyCoroutineContext) }
+            stream
+        }
+
+        assertEquals(null, s.ctx)
+        assertFailsWith<ClosedException> { s.setContext(EmptyCoroutineContext) }
     }
 }

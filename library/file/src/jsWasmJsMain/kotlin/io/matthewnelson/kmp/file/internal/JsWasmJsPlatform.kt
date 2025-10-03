@@ -18,9 +18,9 @@
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.File
-import io.matthewnelson.kmp.file.internal.fs.FsJs
+import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.toFile
 
-internal actual inline fun platformTempDirectory(): File = FsJs.INSTANCE.tempDirectory.toFile()
+internal actual inline fun platformTempDirectory(): File = Fs.INSTANCE.tempDirectory.toFile()
 
-internal actual val IsWindows: Boolean get() = FsJs.INSTANCE.isWindows
+internal actual val IsWindows: Boolean get() = Fs.INSTANCE.isWindows

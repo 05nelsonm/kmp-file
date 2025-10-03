@@ -60,6 +60,12 @@ public actual sealed interface FileStream: Closeable {
          * [FileStream.position]. The [FileStream.position] will automatically
          * increment by the number of bytes that have been read.
          *
+         * **NOTE:** If using the `:kmp-file:async` extension module, this synchronous
+         * function can fail to acquire the necessary position lock if an asynchronous
+         * [FileStream] operation is holding it. In that event, an [IOException] is
+         * raised. This is a platform limitation and can be avoided by not intermixing
+         * synchronous, and asynchronous functionality.
+         *
          * @param [buf] The buffer to place data into.
          *
          * @return The number of bytes read into [buf], or `-1` if no more data
@@ -75,6 +81,12 @@ public actual sealed interface FileStream: Closeable {
          * the provided buffer. Bytes are read starting at the current
          * [FileStream.position]. The [FileStream.position] will automatically
          * increment by the number of bytes that have been read.
+         *
+         * **NOTE:** If using the `:kmp-file:async` extension module, this synchronous
+         * function can fail to acquire the necessary position lock if an asynchronous
+         * [FileStream] operation is holding it. In that event, an [IOException] is
+         * raised. This is a platform limitation and can be avoided by not intermixing
+         * synchronous, and asynchronous functionality.
          *
          * @param [buf] The buffer to place data into.
          * @param [offset] The index in [buf] to start placing data.
@@ -167,6 +179,12 @@ public actual sealed interface FileStream: Closeable {
          * The [FileStream.position] will automatically increment by the number of
          * bytes that were written.
          *
+         * **NOTE:** If using the `:kmp-file:async` extension module, this synchronous
+         * function can fail to acquire the necessary position lock if an asynchronous
+         * [FileStream] operation is holding it. In that event, an [IOException] is
+         * raised. This is a platform limitation and can be avoided by not intermixing
+         * synchronous, and asynchronous functionality.
+         *
          * @param [buf] The buffer of data to write.
          *
          * @throws [IOException] If an I/O error occurs, or the stream is closed.
@@ -179,6 +197,12 @@ public actual sealed interface FileStream: Closeable {
          * to the [File] for which this stream belongs. Bytes are written starting
          * at the current [FileStream.position]. The [FileStream.position] will
          * automatically increment by the number of bytes that were written.
+         *
+         * **NOTE:** If using the `:kmp-file:async` extension module, this synchronous
+         * function can fail to acquire the necessary position lock if an asynchronous
+         * [FileStream] operation is holding it. In that event, an [IOException] is
+         * raised. This is a platform limitation and can be avoided by not intermixing
+         * synchronous, and asynchronous functionality.
          *
          * @param [buf] The buffer of data to write.
          * @param [offset] The index in [buf] to start at when writing data.
