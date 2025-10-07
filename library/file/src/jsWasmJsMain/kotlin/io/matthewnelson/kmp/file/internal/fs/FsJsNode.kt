@@ -480,8 +480,8 @@ internal class FsJsNode private constructor(
             _open = { path, flags ->
                 jsExternTryCatch { fs.openSync(path, flags) }
             },
-            _checkIsNotADir = { fd, file ->
-                checkIsNotADir(
+            _checkIsNotADirElseCloseAndThrow = { fd, file ->
+                checkIsNotADirElseCloseAndThrow(
                     fd,
                     file,
                     _fstat = { fd ->
@@ -508,8 +508,8 @@ internal class FsJsNode private constructor(
                     }
                 }
             },
-            _checkIsNotADir = { fd, file ->
-                checkIsNotADir(
+            _checkIsNotADirElseCloseAndThrow = { fd, file ->
+                checkIsNotADirElseCloseAndThrow(
                     fd,
                     file,
                     _fstat = { fd ->
@@ -536,18 +536,18 @@ internal class FsJsNode private constructor(
     private inline fun openRead(
         file: File,
         _open: (Path, Int) -> Double,
-        _checkIsNotADir: (Double, File) -> Unit,
+        _checkIsNotADirElseCloseAndThrow: (Double, File) -> Unit,
     ): JsNodeFileStream {
         contract {
             callsInPlace(_open, InvocationKind.EXACTLY_ONCE)
-            callsInPlace(_checkIsNotADir, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_checkIsNotADirElseCloseAndThrow, InvocationKind.AT_MOST_ONCE)
         }
         val fd = try {
             _open(file.path, fs.constants.O_RDONLY)
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
-        _checkIsNotADir(fd, file)
+        _checkIsNotADirElseCloseAndThrow(fd, file)
         return JsNodeFileStream(fd, canRead = true, canWrite = false, isAppending = false)
     }
 
@@ -562,8 +562,8 @@ internal class FsJsNode private constructor(
             _open2 = { path, flags, mode ->
                 jsExternTryCatch { fs.openSync(path, flags, mode) }
             },
-            _checkIsNotADir = { fd, file ->
-                checkIsNotADir(
+            _checkIsNotADirElseCloseAndThrow = { fd, file ->
+                checkIsNotADirElseCloseAndThrow(
                     fd,
                     file,
                     _fstat = { fd ->
@@ -600,8 +600,8 @@ internal class FsJsNode private constructor(
                     }
                 }
             },
-            _checkIsNotADir = { fd, file ->
-                checkIsNotADir(
+            _checkIsNotADirElseCloseAndThrow = { fd, file ->
+                checkIsNotADirElseCloseAndThrow(
                     fd,
                     file,
                     _fstat = { fd ->
@@ -630,12 +630,12 @@ internal class FsJsNode private constructor(
         excl: OpenExcl,
         _open1: (Path, String, String) -> Double,
         _open2: (Path, Int, String) -> Double,
-        _checkIsNotADir: (Double, File) -> Unit,
+        _checkIsNotADirElseCloseAndThrow: (Double, File) -> Unit,
     ): JsNodeFileStream {
         contract {
             callsInPlace(_open1, InvocationKind.AT_MOST_ONCE)
             callsInPlace(_open2, InvocationKind.AT_MOST_ONCE)
-            callsInPlace(_checkIsNotADir, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_checkIsNotADirElseCloseAndThrow, InvocationKind.AT_MOST_ONCE)
         }
         val mode = if (isWindows) {
             if (excl._mode.containsOwnerWriteAccess) "666" else "444"
@@ -658,7 +658,7 @@ internal class FsJsNode private constructor(
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
-        if (isWindows) _checkIsNotADir(fd, file)
+        if (isWindows) _checkIsNotADirElseCloseAndThrow(fd, file)
         return JsNodeFileStream(fd, canRead = true, canWrite = true, isAppending = false)
     }
 
@@ -674,8 +674,8 @@ internal class FsJsNode private constructor(
             _open2 = { path, flags, mode ->
                 jsExternTryCatch { fs.openSync(path, flags, mode) }
             },
-            _checkIsNotADir = { fd, file ->
-                checkIsNotADir(
+            _checkIsNotADirElseCloseAndThrow = { fd, file ->
+                checkIsNotADirElseCloseAndThrow(
                     fd,
                     file,
                     _fstat = { fd ->
@@ -719,8 +719,8 @@ internal class FsJsNode private constructor(
                     }
                 }
             },
-            _checkIsNotADir = { fd, file ->
-                checkIsNotADir(
+            _checkIsNotADirElseCloseAndThrow = { fd, file ->
+                checkIsNotADirElseCloseAndThrow(
                     fd,
                     file,
                     _fstat = { fd ->
@@ -765,14 +765,14 @@ internal class FsJsNode private constructor(
         appending: Boolean,
         _open1: (Path, String, String) -> Double,
         _open2: (Path, Int, String) -> Double,
-        _checkIsNotADir: (Double, File) -> Unit,
+        _checkIsNotADirElseCloseAndThrow: (Double, File) -> Unit,
         _ftruncate: (Double, Long) -> Unit,
         _close: (Double) -> Unit,
     ): AbstractFileStream {
         contract {
             callsInPlace(_open1, InvocationKind.AT_MOST_ONCE)
             callsInPlace(_open2, InvocationKind.AT_MOST_ONCE)
-            callsInPlace(_checkIsNotADir, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_checkIsNotADirElseCloseAndThrow, InvocationKind.AT_MOST_ONCE)
             callsInPlace(_ftruncate, InvocationKind.AT_MOST_ONCE)
             callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
         }
@@ -808,7 +808,7 @@ internal class FsJsNode private constructor(
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
-        if (isWindows) _checkIsNotADir(fd, file)
+        if (isWindows) _checkIsNotADirElseCloseAndThrow(fd, file)
         if (truncate) {
             try {
                 _ftruncate(fd, 0L)
@@ -866,8 +866,9 @@ internal class FsJsNode private constructor(
         }
     }
 
+    @Throws(Throwable::class)
     @OptIn(ExperimentalContracts::class)
-    private inline fun checkIsNotADir(
+    private inline fun checkIsNotADirElseCloseAndThrow(
         fd: Double,
         file: File,
         _fstat: (Double) -> JsStats,
@@ -878,19 +879,18 @@ internal class FsJsNode private constructor(
             callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
         }
 
-        val stats = try {
-            _fstat(fd)
+        val e: Throwable? = try {
+            if (_fstat(fd).isDirectory()) fileNotFoundException(file, null, "Is a directory") else null
         } catch (t: Throwable) {
-            val e = t as? CancellationException ?: t.toIOException(file)
-            try {
-                _close(fd)
-            } catch (tt: Throwable) {
-                e.addSuppressed(tt)
-            }
-            throw e
+            (t as? CancellationException) ?: t.toIOException(file)
         }
-        if (!stats.isDirectory()) return
-        throw fileNotFoundException(file, null, "Is a directory")
+        if (e == null) return
+        try {
+            _close(fd)
+        } catch (t: Throwable) {
+            e.addSuppressed(t)
+        }
+        throw e
     }
 
     private inner class JsNodeFileStream(
