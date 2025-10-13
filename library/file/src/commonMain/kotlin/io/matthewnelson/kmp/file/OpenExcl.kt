@@ -116,6 +116,20 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
      * */
     public data object MustExist : OpenExcl(_mode = Mode.DEFAULT_FILE)
 
+    public companion object {
+
+        /**
+         * Checks if a `String` is a valid mode.
+         *
+         * @param [mode] The 3 character mode to check.
+         *
+         * @throws [IllegalArgumentException] If [mode] is invalid.
+         * */
+        @JvmStatic
+        @Throws(IllegalArgumentException::class)
+        public fun checkMode(mode: String) { mode.toMode() }
+    }
+
     /** @suppress */
     public final override fun equals(other: Any?): Boolean {
         if (other !is OpenExcl) return false

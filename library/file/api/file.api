@@ -167,11 +167,17 @@ public final class io/matthewnelson/kmp/file/NotDirectoryException : kotlin/io/F
 }
 
 public abstract class io/matthewnelson/kmp/file/OpenExcl {
+	public static final field Companion Lio/matthewnelson/kmp/file/OpenExcl$Companion;
 	public final field mode Ljava/lang/String;
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun checkMode (Ljava/lang/String;)V
 	public final fun equals (Ljava/lang/Object;)Z
 	public final fun hashCode ()I
 	public final fun toString ()Ljava/lang/String;
+}
+
+public final class io/matthewnelson/kmp/file/OpenExcl$Companion {
+	public final fun checkMode (Ljava/lang/String;)V
 }
 
 public final class io/matthewnelson/kmp/file/OpenExcl$MaybeCreate : io/matthewnelson/kmp/file/OpenExcl {
