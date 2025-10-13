@@ -162,7 +162,6 @@ internal inline fun File.commonWriteText(
     contract {
         callsInPlace(_encode, InvocationKind.EXACTLY_ONCE)
         callsInPlace(_writeBytes, InvocationKind.AT_MOST_ONCE)
-
     }
     val bytes = try {
         text._encode()

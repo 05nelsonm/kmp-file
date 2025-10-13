@@ -210,6 +210,10 @@ sealed class io.matthewnelson.kmp.file/OpenExcl { // io.matthewnelson.kmp.file/O
         }
     }
 
+    final object Companion { // io.matthewnelson.kmp.file/OpenExcl.Companion|null[0]
+        final fun checkMode(kotlin/String) // io.matthewnelson.kmp.file/OpenExcl.Companion.checkMode|checkMode(kotlin.String){}[0]
+    }
+
     final object MustExist : io.matthewnelson.kmp.file/OpenExcl // io.matthewnelson.kmp.file/OpenExcl.MustExist|null[0]
 }
 
