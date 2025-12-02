@@ -124,7 +124,7 @@ dependencies {
 [badge-atomicfu]: https://img.shields.io/badge/kotlinx.atomicfu-0.29.0-blue.svg?logo=kotlin
 [badge-coroutines]: https://img.shields.io/badge/kotlinx.coroutines-1.10.2-blue.svg?logo=kotlin
 [badge-encoding]: https://img.shields.io/badge/encoding-2.6.0--SNAPSHOT-blue.svg?style=flat
-[badge-kotlin]: https://img.shields.io/badge/kotlin-2.2.20-blue.svg?logo=kotlin
+[badge-kotlin]: https://img.shields.io/badge/kotlin-2.2.21-blue.svg?logo=kotlin
 
 <!-- TAG_PLATFORMS -->
 [badge-platform-android]: http://img.shields.io/badge/-android-6EDB8D.svg?style=flat
