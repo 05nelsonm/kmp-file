@@ -23,9 +23,9 @@ import io.matthewnelson.kmp.file.InternalFileApi
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.Stats
 import io.matthewnelson.kmp.file.internal.commonReadBytes
-import io.matthewnelson.kmp.file.internal.commonReadText
+import io.matthewnelson.kmp.file.internal.commonReadUtf8
 import io.matthewnelson.kmp.file.internal.commonWriteData
-import io.matthewnelson.kmp.file.internal.commonWriteText
+import io.matthewnelson.kmp.file.internal.commonWriteUtf8
 import io.matthewnelson.kmp.file.internal.fs.Fs
 import io.matthewnelson.kmp.file.internal.fs.absoluteFile
 import io.matthewnelson.kmp.file.internal.fs.absolutePath
@@ -204,7 +204,7 @@ public object InteropAsyncFs {
 
     @Throws(CancellationException::class, IOException::class)
     public suspend fun readUtf8(file: File, createLock: (Boolean) -> AsyncLock, suspendCancellable: SuspendCancellable<Any?>): String {
-        return file.commonReadText(
+        return file.commonReadUtf8(
             _readBytes = {
                 readBytes(this, createLock, suspendCancellable)
             },
@@ -231,12 +231,18 @@ public object InteropAsyncFs {
 
     @Throws(CancellationException::class, IOException::class)
     public suspend fun writeUtf8(file: File, excl: OpenExcl?, appending: Boolean, text: String, createLock: (Boolean) -> AsyncLock, suspendCancellable: SuspendCancellable<Any?>): File {
-        return file.commonWriteText(
+        return file.commonWriteUtf8(
             excl,
             appending,
             text,
-            _writeBytes = { excl, appending, array ->
-                writeBytes(this, excl, appending, array, createLock, suspendCancellable)
+            _close = {
+                (this as InteropAsyncFileStream.Write)._closeAsync()
+            },
+            _openWrite = { excl, appending ->
+                openWrite(this, excl, appending, createLock, suspendCancellable)
+            },
+            _write = { buf, offset, len ->
+                (this as InteropAsyncFileStream.Write)._writeAsync(buf, offset, len, suspendCancellable)
             },
         )
     }

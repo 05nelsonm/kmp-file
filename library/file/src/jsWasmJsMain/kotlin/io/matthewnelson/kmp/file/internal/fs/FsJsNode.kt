@@ -32,6 +32,7 @@ import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
+import io.matthewnelson.kmp.file.internal.DEFAULT_BUFFER_SIZE
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.async.AsyncLock
@@ -85,7 +86,7 @@ internal class FsJsNode private constructor(
     // Until Kotlin provides better interop between native JS and ByteArray,
     // we are left copying bytes to/from a buffer.
     @OptIn(DelicateFileApi::class)
-    private val syncBuf: JsBuffer = jsBufferAlloc((1024 * 16).toDouble())
+    private val syncBuf: JsBuffer = jsBufferAlloc((DEFAULT_BUFFER_SIZE * 2).toDouble())
 
     internal override val dirSeparator: String get() = path.sep
     internal override val pathSeparator: String get() = path.delimiter
@@ -914,7 +915,7 @@ internal class FsJsNode private constructor(
         private val asyncPool = ArrayDeque<JsBuffer>(1)
         @Suppress("UnusedReceiverParameter")
         private inline fun <R: Any?> ArrayDeque<JsBuffer>.useBuffer(block: (jsBuf: JsBuffer) -> R): R {
-            val buf = asyncPool.removeFirstOrNull() ?: jsBufferAlloc((1024 * 8).toDouble())
+            val buf = asyncPool.removeFirstOrNull() ?: jsBufferAlloc(DEFAULT_BUFFER_SIZE.toDouble())
             try {
                 return block(buf)
             } finally {

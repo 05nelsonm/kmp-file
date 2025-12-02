@@ -589,7 +589,7 @@ public fun File.readBytes(): ByteArray {
 @JvmName("readUtf8From")
 @Throws(IOException::class)
 public fun File.readUtf8(): String {
-    return commonReadText()
+    return commonReadUtf8()
 }
 
 /**
@@ -663,7 +663,7 @@ public inline fun File.writeBytes(excl: OpenExcl?, array: ByteArray): File {
 @JvmName("writeUtf8To")
 @Throws(IOException::class)
 public fun File.writeUtf8(excl: OpenExcl?, appending: Boolean, text: String): File {
-    return commonWriteText(excl, appending, text)
+    return commonWriteUtf8(excl, appending, text)
 }
 
 /**
