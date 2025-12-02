@@ -41,7 +41,7 @@ class WriteUnitTest {
     fun givenFile_whenWriteBytes_thenIsSuccessful() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
 
-        val bytes = Random.Default.nextBytes(500_000)
+        val bytes = Random.nextBytes(500_000)
         try {
             tmp.writeBytes(excl = null, bytes)
             assertEquals(bytes.sha256(), tmp.readBytes().sha256())
@@ -67,19 +67,32 @@ class WriteUnitTest {
     fun givenFile_whenWriteUtf8_thenIsSuccessful() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
 
-        val text = Random.Default.nextBytes(20_000).encodeToString(Base16.Companion)
-        try {
-            tmp.writeUtf8(excl = null, text)
-            assertEquals(text, tmp.readUtf8())
-        } finally {
-            tmp.delete2(mustExist = true)
+        val pool = Random.nextBytes(40_000).encodeToString(Base16)
+
+        intArrayOf(
+            // Single-shot (no chunking)
+            (8192 / 3) - 4,
+            // Chunking (no overflow)
+            8192 - 4,
+            // Chunking (overflow)
+            8192 + 4,
+            // Chunking (overflow)
+            pool.length,
+        ).forEach { len ->
+            try {
+                val text = pool.take(len) + '\uffff'
+                tmp.writeUtf8(excl = null, text)
+                assertEquals(text, tmp.readUtf8())
+            } finally {
+                tmp.delete2(mustExist = true)
+            }
         }
     }
 
     @Test
     fun givenFile_whenExists_thenIsTruncated() = skipTestIf(isJsBrowser) {
         val tmp = randomTemp()
-        val bytes = Random.Default.nextBytes(500_000)
+        val bytes = Random.nextBytes(500_000)
 
         try {
             tmp.writeBytes(excl = null, bytes)

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("OPT_IN_USAGE")
+
 package io.matthewnelson.kmp.file.internal.node
 
 internal actual fun isNodeJs(): Boolean = js(CODE_IS_NODE_JS)
