@@ -28,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.random.Random
 
-private val BASE_16_LC = Base16 { encodeToLowercase = true }
+private val BASE_16_LC = Base16.Builder { encodeLowercase(enable = true) }
 
 fun randomName(): String = Random
     .nextBytes(8)

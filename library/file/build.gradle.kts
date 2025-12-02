@@ -30,6 +30,10 @@ kmpConfiguration {
         common {
             sourceSetMain {
                 kotlin.srcDir(configInject.runtimeConfigSrcDir)
+
+                dependencies {
+                    implementation(libs.encoding.utf8)
+                }
             }
 
             sourceSetTest {
