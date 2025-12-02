@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 @file:OptIn(DelicateFileApi::class)
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "OPT_IN_USAGE")
 
 package io.matthewnelson.kmp.file
 

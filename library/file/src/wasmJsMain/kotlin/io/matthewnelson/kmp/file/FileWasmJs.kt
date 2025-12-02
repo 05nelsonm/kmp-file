@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT", "LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
+@file:Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT", "LEAKED_IN_PLACE_LAMBDA", "OPT_IN_USAGE", "WRONG_INVOCATION_KIND")
 
 package io.matthewnelson.kmp.file
 
