@@ -747,7 +747,6 @@ public inline fun File.appendUtf8(excl: OpenExcl?, text: String): File {
 /**
  * DEPRECATED
  * @see [absolutePath2]
- * @throws `java.lang.SecurityException`
  * @suppress
  * */
 @Deprecated(
@@ -755,7 +754,8 @@ public inline fun File.appendUtf8(excl: OpenExcl?, text: String): File {
     replaceWith = ReplaceWith(
         expression = "this.absolutePath2()",
         "io.matthewnelson.kmp.file.absolutePath2",
-    )
+    ),
+    level = DeprecationLevel.WARNING,
 )
 @get:JvmName("absolutePathOf")
 public inline val File.absolutePath: String get() = absolutePath2()
@@ -763,7 +763,6 @@ public inline val File.absolutePath: String get() = absolutePath2()
 /**
  * DEPRECATED
  * @see [absoluteFile2]
- * @throws `java.lang.SecurityException`
  * @suppress
  * */
 @Deprecated(
@@ -771,7 +770,8 @@ public inline val File.absolutePath: String get() = absolutePath2()
     replaceWith = ReplaceWith(
         expression = "this.absoluteFile2()",
         "io.matthewnelson.kmp.file.absoluteFile2",
-    )
+    ),
+    level = DeprecationLevel.WARNING,
 )
 @get:JvmName("absoluteFileOf")
 public inline val File.absoluteFile: File get() = absoluteFile2()
@@ -780,7 +780,6 @@ public inline val File.absoluteFile: File get() = absoluteFile2()
  * DEPRECATED
  * @see [canonicalPath2]
  * @throws [IOException]
- * @throws `java.lang.SecurityException`
  * @suppress
  * */
 @Deprecated(
@@ -788,7 +787,8 @@ public inline val File.absoluteFile: File get() = absoluteFile2()
     replaceWith = ReplaceWith(
         expression = "this.canonicalPath2()",
         "io.matthewnelson.kmp.file.canonicalPath2",
-    )
+    ),
+    level = DeprecationLevel.WARNING,
 )
 @Throws(IOException::class)
 @JvmName("canonicalPathOf")
@@ -798,7 +798,6 @@ public inline fun File.canonicalPath(): String = canonicalPath2()
  * DEPRECATED
  * @see [canonicalFile2]
  * @throws [IOException]
- * @throws `java.lang.SecurityException`
  * @suppress
  * */
 @Deprecated(
@@ -806,7 +805,8 @@ public inline fun File.canonicalPath(): String = canonicalPath2()
     replaceWith = ReplaceWith(
         expression = "this.canonicalFile2()",
         "io.matthewnelson.kmp.file.canonicalFile2",
-    )
+    ),
+    level = DeprecationLevel.WARNING,
 )
 @Throws(IOException::class)
 @JvmName("canonicalFileOf")
@@ -822,7 +822,8 @@ public inline fun File.canonicalFile(): File = canonicalFile2()
     replaceWith = ReplaceWith(
         expression = "this.normalize()",
         "io.matthewnelson.kmp.file.normalize",
-    )
+    ),
+    level = DeprecationLevel.WARNING,
 )
 public inline fun File.normalizedFileOf(): File = normalize()
 
@@ -836,7 +837,8 @@ public inline fun File.normalizedFileOf(): File = normalize()
     message = "Missing file exclusivity parameter. Use other writeBytes function.",
     replaceWith = ReplaceWith(
         expression = "this.writeBytes(excl = null, array)",
-    )
+    ),
+    level = DeprecationLevel.WARNING,
 )
 @JvmName("writeBytesTo")
 @Throws(IOException::class)
@@ -852,7 +854,8 @@ public fun File.writeBytes(array: ByteArray) { writeBytes(excl = null, array) }
     message = "Missing file exclusivity parameter. Use other writeUtf8 function.",
     replaceWith = ReplaceWith(
         expression = "this.writeUtf8(excl = null, text)",
-    )
+    ),
+    level = DeprecationLevel.WARNING,
 )
 @JvmName("writeUtf8To")
 @Throws(IOException::class)
