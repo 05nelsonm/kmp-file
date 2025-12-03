@@ -122,7 +122,8 @@ public actual class File: Comparable<File> {
         replaceWith = ReplaceWith(
             expression = "this.chmod2(mode = mode)",
             "io.matthewnelson.kmp.file.chmod2"
-        )
+        ),
+        level = DeprecationLevel.WARNING,
     )
     @Throws(IOException::class)
     public fun chmod(mode: String) {
@@ -136,7 +137,6 @@ public actual class File: Comparable<File> {
     /**
      * DEPRECATED
      * @see [delete2]
-     * @throws `java.lang.SecurityException`
      * @suppress
      * */
     @Deprecated(
@@ -144,7 +144,8 @@ public actual class File: Comparable<File> {
         replaceWith = ReplaceWith(
             expression = "this.delete2(ignoreReadOnly = true)",
             "io.matthewnelson.kmp.file.delete2"
-        )
+        ),
+        level = DeprecationLevel.WARNING,
     )
     public actual fun delete(): Boolean = try {
         Fs.INSTANCE.delete(this, ignoreReadOnly = true, mustExist = true)
@@ -164,7 +165,8 @@ public actual class File: Comparable<File> {
         replaceWith = ReplaceWith(
             expression = "this.exists2()",
             "io.matthewnelson.kmp.file.exists2"
-        )
+        ),
+        level = DeprecationLevel.WARNING,
     )
     public actual fun exists(): Boolean = try {
         Fs.INSTANCE.exists(this)
@@ -175,7 +177,6 @@ public actual class File: Comparable<File> {
     /**
      * DEPRECATED
      * @see [mkdir2]
-     * @throws `java.lang.SecurityException`
      * @suppress
      * */
     @Deprecated(
@@ -183,7 +184,8 @@ public actual class File: Comparable<File> {
         replaceWith = ReplaceWith(
             expression = "this.mkdir2(mode = null)",
             "io.matthewnelson.kmp.file.mkdir2"
-        )
+        ),
+        level = DeprecationLevel.WARNING,
     )
     public actual fun mkdir(): Boolean = try {
         Fs.INSTANCE.mkdir(this, Mode.DEFAULT_DIR, mustCreate = true)
@@ -195,7 +197,6 @@ public actual class File: Comparable<File> {
     /**
      * DEPRECATED
      * @see [mkdirs2]
-     * @throws `java.lang.SecurityException`
      * @suppress
      * */
     @Deprecated(
@@ -203,7 +204,8 @@ public actual class File: Comparable<File> {
         replaceWith = ReplaceWith(
             expression = "this.mkdirs2(mode = null)",
             "io.matthewnelson.kmp.file.mkdirs2"
-        )
+        ),
+        level = DeprecationLevel.WARNING,
     )
     public actual fun mkdirs(): Boolean = try {
         Fs.INSTANCE.commonMkdirs(this, mode = null, mustCreate = true)

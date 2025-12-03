@@ -31,6 +31,7 @@ import kotlin.concurrent.Volatile
 // jvmMain
 public actual sealed interface FileStream: Closeable, Flushable, InterruptibleChannel {
 
+    /** @suppress */ // https://github.com/Kotlin/dokka/issues/4311
     public actual override fun isOpen(): Boolean
 
     @Throws(IOException::class)

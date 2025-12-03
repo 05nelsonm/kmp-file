@@ -88,7 +88,8 @@ public actual val Throwable.errorCodeOrNull: String? get() = try {
     message = "Missing file exclusivity parameter. Use other write function.",
     replaceWith = ReplaceWith(
         expression = "this.write(excl = null, data)",
-    )
+    ),
+    level = DeprecationLevel.WARNING,
 )
 //@Throws(IOException::class)
 public fun File.write(data: Buffer) { write(excl = null, data) }

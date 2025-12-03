@@ -100,7 +100,6 @@ public expect class File(pathname: String): Comparable<File> {
     /**
      * DEPRECATED
      * @see [delete2]
-     * @throws `java.lang.SecurityException`
      * @suppress
      * */
     @Deprecated(
@@ -108,7 +107,8 @@ public expect class File(pathname: String): Comparable<File> {
         replaceWith = ReplaceWith(
             expression = "this.delete2(ignoreReadOnly = true)",
             "io.matthewnelson.kmp.file.delete2"
-        )
+        ),
+        level = DeprecationLevel.WARNING,
     )
     public fun delete(): Boolean
 
@@ -116,7 +116,6 @@ public expect class File(pathname: String): Comparable<File> {
      * DEPRECATED
      * @see [exists2]
      * @throws [IOException]
-     * @throws `java.lang.SecurityException`
      * @suppress
      * */
     @Deprecated(
@@ -124,14 +123,14 @@ public expect class File(pathname: String): Comparable<File> {
         replaceWith = ReplaceWith(
             expression = "this.exists2()",
             "io.matthewnelson.kmp.file.exists2"
-        )
+        ),
+        level = DeprecationLevel.WARNING,
     )
     public fun exists(): Boolean
 
     /**
      * DEPRECATED
      * @see [mkdir2]
-     * @throws `java.lang.SecurityException`
      * @suppress
      * */
     @Deprecated(
@@ -139,14 +138,14 @@ public expect class File(pathname: String): Comparable<File> {
         replaceWith = ReplaceWith(
             expression = "this.mkdir2(mode = null)",
             "io.matthewnelson.kmp.file.mkdir2"
-        )
+        ),
+        level = DeprecationLevel.WARNING,
     )
     public fun mkdir(): Boolean
 
     /**
      * DEPRECATED
      * @see [mkdirs2]
-     * @throws `java.lang.SecurityException`
      * @suppress
      * */
     @Deprecated(
@@ -154,7 +153,8 @@ public expect class File(pathname: String): Comparable<File> {
         replaceWith = ReplaceWith(
             expression = "this.mkdirs2(mode = null)",
             "io.matthewnelson.kmp.file.mkdirs2"
-        )
+        ),
+        level = DeprecationLevel.WARNING,
     )
     public fun mkdirs(): Boolean
 }
