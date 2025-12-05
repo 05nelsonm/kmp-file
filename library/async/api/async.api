@@ -26,6 +26,7 @@ public final class io/matthewnelson/kmp/file/async/AsyncFileStreamJvmKt {
 
 public class io/matthewnelson/kmp/file/async/AsyncFs {
 	public static final field Default Lio/matthewnelson/kmp/file/async/AsyncFs$Default;
+	public static final field Empty Lio/matthewnelson/kmp/file/async/AsyncFs;
 	public final field ctx Lkotlin/coroutines/CoroutineContext;
 	public synthetic fun <init> (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun absoluteFile2Async (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

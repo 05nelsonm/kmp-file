@@ -28,12 +28,16 @@ import io.matthewnelson.kmp.file.async.internal.commonToString
 import kotlinx.coroutines.Dispatchers
 import java.nio.ByteBuffer
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 // jvm
 public actual open class AsyncFs private constructor(@JvmField public actual val ctx: CoroutineContext) {
 
     public actual companion object Default: AsyncFs(ctx = Dispatchers.IO) {
+
+        @JvmField
+        public actual val Empty: AsyncFs = AsyncFs(ctx = EmptyCoroutineContext)
 
         @JvmStatic
         public actual fun of(ctx: CoroutineContext): AsyncFs = ::AsyncFs.commonOf(ctx)

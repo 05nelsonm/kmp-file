@@ -23,6 +23,7 @@ import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.InternalFileApi
 import io.matthewnelson.kmp.file.OpenExcl
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -50,14 +51,20 @@ public expect open class AsyncFs {
     public companion object Default: AsyncFs {
 
         /**
+         * A static [AsyncFs] instance instantiated with [EmptyCoroutineContext].
+         * */
+        public val Empty: AsyncFs
+
+        /**
          * Creates a new instance of [AsyncFs] with the provided [CoroutineContext]. This can
          * be useful in a number of situations, such as scoping things to a job, or redirecting
          * error handling via a custom coroutine exception handler.
          *
          * @param [ctx] The [CoroutineContext]
          *
-         * @return A new instance of [AsyncFs]. If provided [ctx] is equal to [Default.ctx],
-         *   then [Default] is returned.
+         * @return An instance of [AsyncFs]. If provided [ctx] is equal to [Default.ctx],
+         *   then [Default] is returned. If provided [ctx] is [EmptyCoroutineContext], then
+         *   [Empty] is returned.
          * */
         public fun of(ctx: CoroutineContext): AsyncFs
 
