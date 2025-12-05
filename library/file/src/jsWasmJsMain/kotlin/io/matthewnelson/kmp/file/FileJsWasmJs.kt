@@ -235,6 +235,6 @@ public fun Throwable.toIOException(file: File?, other: File? = null): IOExceptio
             "ENOTEMPTY" -> DirectoryNotEmptyException(file)
             else -> FileSystemException(file, other, message)
         }
-        else -> IOException(this)
+        else -> wrapIOException()
     }
 }

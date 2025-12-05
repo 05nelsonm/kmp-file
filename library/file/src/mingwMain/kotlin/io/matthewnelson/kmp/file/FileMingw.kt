@@ -68,6 +68,9 @@ public inline fun lastErrorToIOException(
  * Retrieves the human-readable message for `GetLastError` via `FormatMessageA` and
  * returns it as an [IOException]. When the last error is `ERROR_FILE_NOT_FOUND` or
  * `ERROR_PATH_NOT_FOUND`, then this function will return [FileNotFoundException].
+ * When the last error is `ERROR_OPERATION_ABORTED`, then this function will return
+ * [InterruptedIOException]. When the last error is `ERROR_HANDLE_EOF`, then this
+ * function returns [EOFException].
  *
  * If and only if the [file] parameter is non-null, an appropriate [FileSystemException]
  * will be returned for the given last error.
