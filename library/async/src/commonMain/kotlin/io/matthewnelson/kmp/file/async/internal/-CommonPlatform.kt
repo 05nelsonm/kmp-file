@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE", "RedundantCompanionReference")
 
 package io.matthewnelson.kmp.file.async.internal
 
@@ -25,9 +25,12 @@ import io.matthewnelson.kmp.file.async.AsyncFs
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
-internal inline fun ((CoroutineContext) -> AsyncFs).commonOf(ctx: CoroutineContext): AsyncFs {
-    @Suppress("RedundantCompanionReference")
-    return if (ctx == AsyncFs.Default.ctx) AsyncFs.Default else this(ctx)
+internal inline fun ((CoroutineContext) -> AsyncFs).commonOf(
+    ctx: CoroutineContext,
+): AsyncFs = when (ctx) {
+    AsyncFs.Empty.ctx -> AsyncFs.Empty
+    AsyncFs.Default.ctx -> AsyncFs.Default
+    else -> this(ctx)
 }
 
 internal inline fun AsyncFs.commonEquals(other: Any?): Boolean {

@@ -28,12 +28,15 @@ import io.matthewnelson.kmp.file.async.internal.commonToString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 // native
 public actual open class AsyncFs private constructor(public actual val ctx: CoroutineContext) {
 
     public actual companion object Default: AsyncFs(ctx = Dispatchers.IO) {
+
+        public actual val Empty: AsyncFs = AsyncFs(ctx = EmptyCoroutineContext)
 
         public actual fun of(ctx: CoroutineContext): AsyncFs = ::AsyncFs.commonOf(ctx)
 
