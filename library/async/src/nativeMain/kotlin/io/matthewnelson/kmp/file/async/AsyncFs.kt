@@ -38,7 +38,7 @@ public actual open class AsyncFs private constructor(public actual val ctx: Coro
 
         public actual val Empty: AsyncFs = AsyncFs(ctx = EmptyCoroutineContext)
 
-        public actual fun of(ctx: CoroutineContext): AsyncFs = ::AsyncFs.commonOf(ctx)
+        public actual fun of(ctx: CoroutineContext?): AsyncFs = ::AsyncFs.commonOf(ctx)
 
         /** @suppress */
         public actual override fun toString(): String = commonToString(isDefault = true)

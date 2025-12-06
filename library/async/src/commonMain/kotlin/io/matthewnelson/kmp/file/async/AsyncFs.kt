@@ -62,11 +62,11 @@ public expect open class AsyncFs {
          *
          * @param [ctx] The [CoroutineContext]
          *
-         * @return An instance of [AsyncFs]. If provided [ctx] is equal to [Default.ctx],
+         * @return An instance of [AsyncFs]. If provided [ctx] is `null` or equal to [Default.ctx],
          *   then [Default] is returned. If provided [ctx] is [EmptyCoroutineContext], then
          *   [Empty] is returned.
          * */
-        public fun of(ctx: CoroutineContext): AsyncFs
+        public fun of(ctx: CoroutineContext?): AsyncFs
 
         /** @suppress */
         public override fun toString(): String
