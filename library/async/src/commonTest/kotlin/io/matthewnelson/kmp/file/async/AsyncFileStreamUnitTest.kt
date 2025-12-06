@@ -27,8 +27,14 @@ class AsyncFileStreamUnitTest {
     @Test
     fun smokerTest() = runTest { tmp ->
         AsyncFs.with {
-            val s = tmp.openReadWriteAsync(null)
+            val f = tmp.canonicalFile2Async()
+            assertFalse(f.exists2Async())
+            val s = f.openReadWriteAsync(excl = null)
+
             s.useAsync { stream ->
+                f.openReadAsync().closeAsync()
+                f.openWriteAsync(excl = null).closeAsync()
+
                 val data = "Hello World!".encodeToByteArray()
                 stream.writeAsync(data)
                 stream.positionAsync(0)

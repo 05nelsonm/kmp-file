@@ -505,7 +505,7 @@ internal class FsJsNode private constructor(
                 // open, but job cancelled, then descriptor is leaked
                 suspendCoroutine { cont ->
                     fs.open(path, flags) { err, fd ->
-                        cont.complete(err) { fd }
+                        cont.complete(err) { fd!! }
                     }
                 }
             },
@@ -588,7 +588,7 @@ internal class FsJsNode private constructor(
                 // open, but job cancelled, then descriptor is leaked
                 suspendCoroutine { cont ->
                     fs.open(path, flags, mode) { err, fd ->
-                        cont.complete(err) { fd }
+                        cont.complete(err) { fd!! }
                     }
                 }
             },
@@ -597,7 +597,7 @@ internal class FsJsNode private constructor(
                 // open, but job cancelled, then descriptor is leaked
                 suspendCoroutine { cont ->
                     fs.open(path, flags, mode) { err, fd ->
-                        cont.complete(err) { fd }
+                        cont.complete(err) { fd!! }
                     }
                 }
             },
@@ -707,7 +707,7 @@ internal class FsJsNode private constructor(
                 // open, but job cancelled, then descriptor is leaked
                 suspendCoroutine { cont ->
                     fs.open(path, flags, mode) { err, fd ->
-                        cont.complete(err) { fd }
+                        cont.complete(err) { fd!! }
                     }
                 }
             },
@@ -716,7 +716,7 @@ internal class FsJsNode private constructor(
                 // open, but job cancelled, then descriptor is leaked
                 suspendCoroutine { cont ->
                     fs.open(path, flags, mode) { err, fd ->
-                        cont.complete(err) { fd }
+                        cont.complete(err) { fd!! }
                     }
                 }
             },
@@ -841,7 +841,7 @@ internal class FsJsNode private constructor(
                     val e = err.toThrowable().toIOException(path.toFile())
                     cont.resumeWithException(e)
                 } else {
-                    cont.resume(resolved)
+                    cont.resume(resolved!!)
                 }
             }
         }
