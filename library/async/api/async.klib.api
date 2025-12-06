@@ -40,7 +40,7 @@ open class io.matthewnelson.kmp.file.async/AsyncFs { // io.matthewnelson.kmp.fil
         final val Empty // io.matthewnelson.kmp.file.async/AsyncFs.Default.Empty|{}Empty[0]
             final fun <get-Empty>(): io.matthewnelson.kmp.file.async/AsyncFs // io.matthewnelson.kmp.file.async/AsyncFs.Default.Empty.<get-Empty>|<get-Empty>(){}[0]
 
-        final fun of(kotlin.coroutines/CoroutineContext): io.matthewnelson.kmp.file.async/AsyncFs // io.matthewnelson.kmp.file.async/AsyncFs.Default.of|of(kotlin.coroutines.CoroutineContext){}[0]
+        final fun of(kotlin.coroutines/CoroutineContext?): io.matthewnelson.kmp.file.async/AsyncFs // io.matthewnelson.kmp.file.async/AsyncFs.Default.of|of(kotlin.coroutines.CoroutineContext?){}[0]
         final fun toString(): kotlin/String // io.matthewnelson.kmp.file.async/AsyncFs.Default.toString|toString(){}[0]
     }
 

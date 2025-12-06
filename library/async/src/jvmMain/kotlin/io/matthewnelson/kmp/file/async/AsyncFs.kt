@@ -40,7 +40,7 @@ public actual open class AsyncFs private constructor(@JvmField public actual val
         public actual val Empty: AsyncFs = AsyncFs(ctx = EmptyCoroutineContext)
 
         @JvmStatic
-        public actual fun of(ctx: CoroutineContext): AsyncFs = ::AsyncFs.commonOf(ctx)
+        public actual fun of(ctx: CoroutineContext?): AsyncFs = ::AsyncFs.commonOf(ctx)
 
         /** @suppress */
         public actual override fun toString(): String = commonToString(isDefault = true)

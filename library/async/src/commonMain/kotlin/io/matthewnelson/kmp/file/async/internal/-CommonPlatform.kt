@@ -26,10 +26,10 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 internal inline fun ((CoroutineContext) -> AsyncFs).commonOf(
-    ctx: CoroutineContext,
+    ctx: CoroutineContext?,
 ): AsyncFs = when (ctx) {
+    null, AsyncFs.Default.ctx -> AsyncFs.Default
     AsyncFs.Empty.ctx -> AsyncFs.Empty
-    AsyncFs.Default.ctx -> AsyncFs.Default
     else -> this(ctx)
 }
 
