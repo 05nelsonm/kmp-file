@@ -79,6 +79,7 @@ kmpConfiguration {
                     implementation(libs.androidx.test.runner)
 
                     implementation(libs.encoding.base16)
+                    implementation(libs.encoding.utf8)
                     implementation(kotlincrypto.hash.sha2)
                 }
             }

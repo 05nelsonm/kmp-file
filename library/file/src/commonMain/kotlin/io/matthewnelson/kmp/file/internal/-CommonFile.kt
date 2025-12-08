@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("LocalVariableName", "RedundantCompanionReference")
+@file:Suppress("LocalVariableName")
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.encoding.core.Decoder.Companion.decodeToByteArray
 import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
-import io.matthewnelson.encoding.core.use
+import io.matthewnelson.encoding.core.EncoderDecoder.Companion.DEFAULT_BUFFER_SIZE
 import io.matthewnelson.encoding.utf8.UTF8
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
@@ -31,8 +30,6 @@ import io.matthewnelson.kmp.file.readBytes
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-
-internal const val DEFAULT_BUFFER_SIZE: Int = 1024 * 8
 
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
@@ -160,37 +157,17 @@ internal inline fun File.commonWriteUtf8(
     text: String,
     _close: FileStream.Write.() -> Unit = FileStream.Write::close,
     _openWrite: File.(OpenExcl?, Boolean) -> FileStream.Write = File::openWrite,
-    _write: FileStream.Write.(ByteArray, Int, Int) -> Unit = FileStream.Write::write,
+    _decodeBuffered: String.(UTF8, FileStream.Write) -> Long,
 ): File {
     contract {
         callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
         callsInPlace(_openWrite, InvocationKind.EXACTLY_ONCE)
-        callsInPlace(_write, InvocationKind.UNKNOWN)
+        callsInPlace(_decodeBuffered, InvocationKind.AT_MOST_ONCE)
     }
     val s = _openWrite(excl, appending)
     var threw: Throwable? = null
     try {
-        if (text.length <= (DEFAULT_BUFFER_SIZE / 3)) {
-            val utf8 = text.decodeToByteArray(UTF8.Default)
-            s._write(utf8, 0, utf8.size)
-            return this
-        }
-
-        // Chunk
-        val buf = ByteArray(DEFAULT_BUFFER_SIZE)
-        val limit = buf.size - 4
-        var iBuf = 0
-        var iText = 0
-        UTF8.Default.newDecoderFeed { b -> buf[iBuf++] = b }.use { feed ->
-            while (iText < text.length) {
-                feed.consume(text[iText++])
-                if (iBuf <= limit) continue
-                s._write(buf, 0, iBuf)
-                iBuf = 0
-            }
-        }
-
-        if (iBuf > 0) s._write(buf, 0, iBuf)
+        text._decodeBuffered(UTF8.Default, s)
         return this
     } catch (t: Throwable) {
         threw = t

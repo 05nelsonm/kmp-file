@@ -15,6 +15,7 @@
  **/
 package io.matthewnelson.kmp.file.internal.async
 
+import io.matthewnelson.encoding.core.Decoder.Companion.decodeBufferedAsync
 import io.matthewnelson.kmp.file.Buffer
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
@@ -241,8 +242,10 @@ public object InteropAsyncFs {
             _openWrite = { excl, appending ->
                 openWrite(this, excl, appending, createLock, suspendCancellable)
             },
-            _write = { buf, offset, len ->
-                (this as InteropAsyncFileStream.Write)._writeAsync(buf, offset, len, suspendCancellable)
+            _decodeBuffered = { decoder, stream ->
+                decodeBufferedAsync(decoder) { buf, offset, len ->
+                    (stream as InteropAsyncFileStream.Write)._writeAsync(buf, offset, len, suspendCancellable)
+                }
             },
         )
     }

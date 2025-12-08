@@ -17,6 +17,8 @@ package io.matthewnelson.kmp.file
 
 import io.matthewnelson.encoding.base16.Base16
 import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
+import io.matthewnelson.encoding.core.EncoderDecoder.Companion.DEFAULT_BUFFER_SIZE
+import io.matthewnelson.encoding.utf8.UTF8
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -71,11 +73,11 @@ class WriteUnitTest {
 
         intArrayOf(
             // Single-shot (no chunking)
-            (8192 / 3) - 4,
+            (DEFAULT_BUFFER_SIZE / 3) - UTF8.config.maxDecodeEmit,
             // Chunking (no overflow)
-            8192 - 4,
+            DEFAULT_BUFFER_SIZE - UTF8.config.maxDecodeEmit,
             // Chunking (overflow)
-            8192 + 4,
+            DEFAULT_BUFFER_SIZE + UTF8.config.maxDecodeEmit,
             // Chunking (overflow)
             pool.length,
         ).forEach { len ->
