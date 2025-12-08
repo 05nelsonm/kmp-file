@@ -48,6 +48,11 @@ class AndroidNativeExecutableTest {
     }
 
     @Test
+    fun givenAndroidNative_whenExecuteAsyncTestBinary_thenIsSuccessful() {
+        run(executable = "libTestAsync.so")
+    }
+
+    @Test
     fun givenAndroidNative_whenExecuteFileTestBinary_thenIsSuccessful() {
         run(executable = "libTestFile.so")
     }

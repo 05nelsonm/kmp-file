@@ -104,6 +104,7 @@ kmpConfiguration {
             if (!project.plugins.hasPlugin("com.android.base")) return@kotlin
 
             val projectTests = arrayOf(
+                ":library:async" to "libTestAsync.so",
                 ":library:file" to "libTestFile.so",
                 null to "libTestAndroid.so"
             ).map { (path, libName) ->
