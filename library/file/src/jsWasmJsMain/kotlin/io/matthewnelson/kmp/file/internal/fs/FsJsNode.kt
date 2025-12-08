@@ -17,6 +17,7 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
+import io.matthewnelson.encoding.core.EncoderDecoder.Companion.DEFAULT_BUFFER_SIZE
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.Buffer
@@ -32,7 +33,6 @@ import io.matthewnelson.kmp.file.NotDirectoryException
 import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.SysDirSep
 import io.matthewnelson.kmp.file.errorCodeOrNull
-import io.matthewnelson.kmp.file.internal.DEFAULT_BUFFER_SIZE
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.async.AsyncLock

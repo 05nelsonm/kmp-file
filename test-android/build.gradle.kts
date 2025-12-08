@@ -79,6 +79,7 @@ kmpConfiguration {
                     implementation(libs.androidx.test.runner)
 
                     implementation(libs.encoding.base16)
+                    implementation(libs.encoding.utf8)
                     implementation(kotlincrypto.hash.sha2)
                 }
             }
@@ -103,6 +104,7 @@ kmpConfiguration {
             if (!project.plugins.hasPlugin("com.android.base")) return@kotlin
 
             val projectTests = arrayOf(
+                ":library:async" to "libTestAsync.so",
                 ":library:file" to "libTestFile.so",
                 null to "libTestAndroid.so"
             ).map { (path, libName) ->
