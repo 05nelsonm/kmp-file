@@ -18,7 +18,6 @@
 
 package io.matthewnelson.kmp.file
 
-import io.matthewnelson.encoding.core.Decoder.Companion.decodeBuffered
 import io.matthewnelson.kmp.file.internal.*
 import io.matthewnelson.kmp.file.internal.fs.*
 import kotlin.jvm.JvmField
@@ -664,9 +663,7 @@ public inline fun File.writeBytes(excl: OpenExcl?, array: ByteArray): File {
 @JvmName("writeUtf8To")
 @Throws(IOException::class)
 public fun File.writeUtf8(excl: OpenExcl?, appending: Boolean, text: String): File {
-    return commonWriteUtf8(excl, appending, text) { decoder, stream ->
-        decodeBuffered(decoder, action = stream::write)
-    }
+    return commonWriteUtf8(excl, appending, text)
 }
 
 /**

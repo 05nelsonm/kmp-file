@@ -242,10 +242,10 @@ public object InteropAsyncFs {
             _openWrite = { excl, appending ->
                 openWrite(this, excl, appending, createLock, suspendCancellable)
             },
-            _decodeBuffered = { decoder, stream ->
-                decodeBufferedAsync(decoder) { buf, offset, len ->
+            _decodeBuffered = { utf8, throwOnOverflow, stream ->
+                decodeBufferedAsync(decoder = utf8, throwOnOverflow, action = { buf, offset, len ->
                     (stream as InteropAsyncFileStream.Write)._writeAsync(buf, offset, len, suspendCancellable)
-                }
+                })
             },
         )
     }
