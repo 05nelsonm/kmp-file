@@ -17,8 +17,10 @@
 
 package io.matthewnelson.kmp.file.internal
 
+import io.matthewnelson.encoding.core.Decoder.Companion.decodeBuffered
 import io.matthewnelson.encoding.core.Encoder.Companion.encodeToString
 import io.matthewnelson.encoding.core.EncoderDecoder.Companion.DEFAULT_BUFFER_SIZE
+import io.matthewnelson.encoding.core.EncodingSizeException
 import io.matthewnelson.encoding.utf8.UTF8
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileStream
@@ -27,6 +29,7 @@ import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.openRead
 import io.matthewnelson.kmp.file.openWrite
 import io.matthewnelson.kmp.file.readBytes
+import io.matthewnelson.kmp.file.wrapIOException
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -157,7 +160,9 @@ internal inline fun File.commonWriteUtf8(
     text: String,
     _close: FileStream.Write.() -> Unit = FileStream.Write::close,
     _openWrite: File.(OpenExcl?, Boolean) -> FileStream.Write = File::openWrite,
-    _decodeBuffered: String.(UTF8, FileStream.Write) -> Long,
+    _decodeBuffered: String.(UTF8, Boolean, FileStream.Write) -> Long = { utf8, throwOnOverflow, stream ->
+        decodeBuffered(decoder = utf8, throwOnOverflow, action = stream::write)
+    },
 ): File {
     contract {
         callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
@@ -167,11 +172,15 @@ internal inline fun File.commonWriteUtf8(
     val s = _openWrite(excl, appending)
     var threw: Throwable? = null
     try {
-        text._decodeBuffered(UTF8.Default, s)
+        // Using `throwOnOverflow = true` here because if the UTF-8 byte output
+        // we write to the file were to exceed Int.MAX_VALUE, then File.readUtf8()
+        // will fail because the file size is too large.
+        text._decodeBuffered(UTF8.Default, true, s)
         return this
     } catch (t: Throwable) {
-        threw = t
-        throw t
+        val e = if (t is EncodingSizeException) t.wrapIOException() else t
+        threw = e
+        throw e
     } finally {
         try {
             s._close()
