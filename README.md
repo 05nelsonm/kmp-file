@@ -60,7 +60,6 @@ fun main() {
 }
 ```
 
-<!-- :::TODO::: Uncomment
 The `:async` extension module
 
 ```kotlin
@@ -103,27 +102,28 @@ suspend fun main() {
     }
 }
 ```
--->
 
 ### Get Started
-
-<!-- :::TODO::: Add module :async -->
 
 <!-- TAG_VERSION -->
 ```kotlin
 dependencies {
-    implementation("io.matthewnelson.kmp-file:file:0.5.0")
+    val vKmpFile = "0.6.0"
+    implementation("io.matthewnelson.kmp-file:file:$vKmpFile")
+
+    // If you need async APIs
+    implementation("io.matthewnelson.kmp-file:async:$vKmpFile")
 }
 ```
 
 <!-- TAG_VERSION -->
-[badge-latest-release]: https://img.shields.io/badge/latest--release-0.5.0-blue.svg?style=flat
+[badge-latest-release]: https://img.shields.io/badge/latest--release-0.6.0-blue.svg?style=flat
 [badge-license]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
 
 <!-- TAG_DEPENDENCIES -->
 [badge-atomicfu]: https://img.shields.io/badge/kotlinx.atomicfu-0.29.0-blue.svg?logo=kotlin
 [badge-coroutines]: https://img.shields.io/badge/kotlinx.coroutines-1.10.2-blue.svg?logo=kotlin
-[badge-encoding]: https://img.shields.io/badge/encoding-2.6.0--SNAPSHOT-blue.svg?style=flat
+[badge-encoding]: https://img.shields.io/badge/encoding-2.6.0-blue.svg?style=flat
 [badge-kotlin]: https://img.shields.io/badge/kotlin-2.2.21-blue.svg?logo=kotlin
 
 <!-- TAG_PLATFORMS -->

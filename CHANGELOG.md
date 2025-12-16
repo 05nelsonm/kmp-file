@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## Version 0.6.0 (2025-12-16)
+ - Updates `kotlin` to `2.2.21` [[#199]][199]
+ - Adds asynchronous APIs via new extension module `:async` [[#192]][192] [[#193]][193] [[#201]][201] [[#203]][203] [[#204]][204]
+ - Adds `OpenExcl.Companion.checkMode` helper function [[#196]][196]
+ - `File.writeUtf8` and `File.appendUtf8` implementations now stream encode `UTF-8` to a 
+   buffer, flushing to `FileStream.Write.write` when needed, instead of encoding all at once 
+   and then writing [[#198]][198] [[#205]][205] [[#206]][206]
+
 ## Version 0.5.0 (2025-09-19)
  - Updates `kotlin` to `2.2.20` [[#188]][188]
  - Updates `kotlinx.atomicfu` to `0.29.0` [[#188]][188]
@@ -215,3 +223,13 @@
 [188]: https://github.com/05nelsonm/kmp-file/pull/188
 [189]: https://github.com/05nelsonm/kmp-file/pull/189
 [190]: https://github.com/05nelsonm/kmp-file/pull/190
+[192]: https://github.com/05nelsonm/kmp-file/pull/192
+[193]: https://github.com/05nelsonm/kmp-file/pull/193
+[196]: https://github.com/05nelsonm/kmp-file/pull/196
+[198]: https://github.com/05nelsonm/kmp-file/pull/198
+[199]: https://github.com/05nelsonm/kmp-file/pull/199
+[201]: https://github.com/05nelsonm/kmp-file/pull/201
+[203]: https://github.com/05nelsonm/kmp-file/pull/203
+[204]: https://github.com/05nelsonm/kmp-file/pull/204
+[205]: https://github.com/05nelsonm/kmp-file/pull/205
+[206]: https://github.com/05nelsonm/kmp-file/pull/206
