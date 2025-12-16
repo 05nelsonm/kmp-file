@@ -1,0 +1,682 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>io.matthewnelson.kmp.file.async</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    kmp-file
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">0.6.0
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":library:async/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":library:async/jsWasmJsMain">jsWasmJs</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":library:async/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":library:async/nativeMain">native</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:async/commonMain" data-filter=":library:async/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:async/jsWasmJsMain" data-filter=":library:async/jsWasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                jsWasmJs
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:async/jvmMain" data-filter=":library:async/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":library:async/nativeMain" data-filter=":library:async/nativeMain">
+                                <span class="checkbox--icon"></span>
+                                native
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    kmp-file
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="async::io.matthewnelson.kmp.file.async////PointingToDeclaration//62988194">
+  <div class="breadcrumbs"><a href="../index.html">async</a><span class="delimiter">/</span><span class="current">io.matthewnelson.kmp.file.async</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="488179066%2FClasslikes%2F62988194" anchor-label="AsyncFs" id="488179066%2FClasslikes%2F62988194" data-filterable-set=":library:async/commonMain,:library:async/jsWasmJsMain,:library:async/jvmMain,:library:async/nativeMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain,:library:async/jsWasmJsMain,:library:async/jvmMain,:library:async/nativeMain" data-filterable-set=":library:async/commonMain,:library:async/jsWasmJsMain,:library:async/jvmMain,:library:async/nativeMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-async-fs/index.html"><span>Async</span><wbr><span><span>Fs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="488179066%2FClasslikes%2F62988194"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain" data-active="" data-toggle=":library:async/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain" data-toggle=":library:async/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:async/jvmMain" data-filterable-set=":library:async/jvmMain" data-toggle=":library:async/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":library:async/nativeMain" data-filterable-set=":library:async/nativeMain" data-toggle=":library:async/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-async-fs/index.html">AsyncFs</a></div><div class="brief "><p class="paragraph">A contextual reference which provides access to a secondary, asynchronous implementation of the <code class="lang-kotlin">kmp-file:file</code> API. On Jvm/Native, the synchronous <code class="lang-kotlin">kmp-file:file</code> functions are simply called within the provided <a href="-async-fs/ctx.html">ctx</a> (such as a background dispatcher). On Js/WasmJs, the <code class="lang-kotlin">kmp-file:file</code> module exposes via <a href="../../../library/file/io.matthewnelson.kmp.file/-internal-file-api/index.html">InternalFileApi</a> JavaScript's asynchronous callback API which is used in lieu of its synchronous API, which is called within the provided <a href="-async-fs/ctx.html">ctx</a>.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:async/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-async-fs/index.html">AsyncFs</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:async/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-async-fs/index.html">AsyncFs</a></div></div><div class="content sourceset-dependent-content" data-togglable=":library:async/nativeMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">open </span><span class="token keyword">class </span><a href="-async-fs/index.html">AsyncFs</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="140960094%2FFunctions%2F-1938573258" anchor-label="absoluteFile2" id="140960094%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="absolute-file2.html"><span>absolute</span><wbr><span><span>File2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="140960094%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="absolute-file2.html"><span class="token function">absoluteFile2</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.absoluteFile2</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="561096085%2FFunctions%2F-1938573258" anchor-label="absolutePath2" id="561096085%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="absolute-path2.html"><span>absolute</span><wbr><span><span>Path2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="561096085%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="absolute-path2.html"><span class="token function">absolutePath2</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.absolutePath2</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1479871708%2FFunctions%2F1259989898" anchor-label="append" id="1479871708%2FFunctions%2F1259989898" data-filterable-set=":library:async/jsWasmJsMain,:library:async/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/jsWasmJsMain,:library:async/jvmMain" data-filterable-set=":library:async/jsWasmJsMain,:library:async/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="append.html"><span><span>append</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1479871708%2FFunctions%2F1259989898"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain" data-active="" data-toggle=":library:async/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:async/jvmMain" data-filterable-set=":library:async/jvmMain" data-toggle=":library:async/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="append.html"><span class="token function">append</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.append</a>.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:async/jvmMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="append.html"><span class="token function">append</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">src<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/ByteBuffer.html">ByteBuffer</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.append</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1050811518%2FFunctions%2F-1938573258" anchor-label="appendBytes" id="-1050811518%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="append-bytes.html"><span>append</span><wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1050811518%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="append-bytes.html"><span class="token function">appendBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">array<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.appendBytes</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1205368178%2FFunctions%2F-1938573258" anchor-label="appendUtf8" id="1205368178%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="append-utf8.html"><span>append</span><wbr><span><span>Utf8</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1205368178%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="append-utf8.html"><span class="token function">appendUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">text<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.appendUtf8</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1973007525%2FFunctions%2F-1938573258" anchor-label="canonicalFile2" id="-1973007525%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="canonical-file2.html"><span>canonical</span><wbr><span><span>File2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1973007525%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="canonical-file2.html"><span class="token function">canonicalFile2</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.canonicalFile2</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1552871534%2FFunctions%2F-1938573258" anchor-label="canonicalPath2" id="-1552871534%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="canonical-path2.html"><span>canonical</span><wbr><span><span>Path2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1552871534%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="canonical-path2.html"><span class="token function">canonicalPath2</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.canonicalPath2</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="889738225%2FFunctions%2F-1938573258" anchor-label="chmod2" id="889738225%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="chmod2.html"><span><span>chmod2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="889738225%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmOverloads///PointingToDeclaration/"><span class="token annotation builtin">JvmOverloads</span></span></div></div><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="chmod2.html"><span class="token function">chmod2</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">mode<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token punctuation">, </span></span><span class="parameter ">mustExist<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="token operator"> = </span><span class="token boolean">true</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.chmod2</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-989577289%2FFunctions%2F-1938573258" anchor-label="closeAsync" id="-989577289%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="close-async.html"><span>close</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-989577289%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a><span class="token punctuation">.</span><a href="close-async.html"><span class="token function">closeAsync</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/close.html">FileStream.close</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead. Additionally, this function uses the <span data-unresolved-link="kotlinx.coroutines/NonCancellable///PointingToDeclaration/">NonCancellable</span> job for <span data-unresolved-link="kotlinx.coroutines//withContext/#kotlin.coroutines.CoroutineContext#kotlin.coroutines.SuspendFunction1[kotlinx.coroutines.CoroutineScope,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/">withContext</span> to ensure closure is always had.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1234879610%2FFunctions%2F-1938573258" anchor-label="delete2" id="-1234879610%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete2.html"><span><span>delete2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1234879610%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmOverloads///PointingToDeclaration/"><span class="token annotation builtin">JvmOverloads</span></span></div></div><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="delete2.html"><span class="token function">delete2</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">ignoreReadOnly<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">mustExist<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.delete2</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1868817845%2FFunctions%2F-1938573258" anchor-label="exists2" id="1868817845%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="exists2.html"><span><span>exists2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1868817845%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="exists2.html"><span class="token function">exists2</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.exists2</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-611678625%2FFunctions%2F-508758250" anchor-label="lstat" id="-611678625%2FFunctions%2F-508758250" data-filterable-set=":library:async/jsWasmJsMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="lstat.html"><span><span>lstat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-611678625%2FFunctions%2F-508758250"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain" data-active="" data-toggle=":library:async/jsWasmJsMain">jsWasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="lstat.html"><span class="token function">lstat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-stats/index.html">Stats</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.lstat</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="463662850%2FFunctions%2F-1938573258" anchor-label="mkdir2" id="463662850%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mkdir2.html"><span><span>mkdir2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="463662850%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmOverloads///PointingToDeclaration/"><span class="token annotation builtin">JvmOverloads</span></span></div></div><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="mkdir2.html"><span class="token function">mkdir2</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dir<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">mode<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">mustCreate<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.mkdir2</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1643501907%2FFunctions%2F-1938573258" anchor-label="mkdirs2" id="1643501907%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mkdirs2.html"><span><span>mkdirs2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1643501907%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlin.jvm/JvmOverloads///PointingToDeclaration/"><span class="token annotation builtin">JvmOverloads</span></span></div></div><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="mkdirs2.html"><span class="token function">mkdirs2</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dir<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">mode<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">mustCreate<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.mkdirs2</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="579635558%2FFunctions%2F-1938573258" anchor-label="openAppend" id="579635558%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open-append.html"><span>open</span><wbr><span><span>Append</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="579635558%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="open-append.html"><span class="token function">openAppend</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.openAppend</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="358245881%2FFunctions%2F-1938573258" anchor-label="openRead" id="358245881%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open-read.html"><span>open</span><wbr><span><span>Read</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="358245881%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="open-read.html"><span class="token function">openRead</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.openRead</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1452861767%2FFunctions%2F-1938573258" anchor-label="openReadWrite" id="1452861767%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open-read-write.html"><span>open</span><wbr><span>Read</span><wbr><span><span>Write</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1452861767%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="open-read-write.html"><span class="token function">openReadWrite</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read-write/index.html">FileStream.ReadWrite</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.openReadWrite</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2017059560%2FFunctions%2F-1938573258" anchor-label="openWrite" id="-2017059560%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open-write.html"><span>open</span><wbr><span><span>Write</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2017059560%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="open-write.html"><span class="token function">openWrite</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="open-write.html"><span class="token function">openWrite</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">appending<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.openWrite</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1657792779%2FFunctions%2F-1938573258" anchor-label="positionAsync" id="1657792779%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="position-async.html"><span>position</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1657792779%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a><span class="token punctuation">.</span><a href="position-async.html"><span class="token function">positionAsync</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="position-async.html">S</a><span class="token operator"> : </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a><span class="token operator">&gt; </span><a href="position-async.html">S</a><span class="token punctuation">.</span><a href="position-async.html"><span class="token function">positionAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">new<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="position-async.html">S</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/position.html">FileStream.position</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1444652623%2FFunctions%2F1259989898" anchor-label="read" id="1444652623%2FFunctions%2F1259989898" data-filterable-set=":library:async/jsWasmJsMain,:library:async/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/jsWasmJsMain,:library:async/jvmMain" data-filterable-set=":library:async/jsWasmJsMain,:library:async/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read.html"><span><span>read</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1444652623%2FFunctions%2F1259989898"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain" data-active="" data-toggle=":library:async/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:async/jvmMain" data-filterable-set=":library:async/jvmMain" data-toggle=":library:async/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="read.html"><span class="token function">read</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.read</a>.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:async/jvmMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="read.html"><span class="token function">read</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/ByteBuffer.html">ByteBuffer</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.read</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1095884474%2FFunctions%2F456170784" anchor-label="readAsync" id="1095884474%2FFunctions%2F456170784" data-filterable-set=":library:async/jsWasmJsMain,:library:async/jvmMain,:library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/jsWasmJsMain,:library:async/jvmMain,:library:async/commonMain" data-filterable-set=":library:async/jsWasmJsMain,:library:async/jvmMain,:library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read-async.html"><span>read</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1095884474%2FFunctions%2F456170784"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain" data-active="" data-toggle=":library:async/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain" data-toggle=":library:async/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:async/jvmMain" data-filterable-set=":library:async/jvmMain" data-toggle=":library:async/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/read.html">FileStream.Read.read</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></div><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/read.html">FileStream.Read.read</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:async/jvmMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dst<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/ByteBuffer.html">ByteBuffer</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/index.html">FileStream.Read</a><span class="token punctuation">.</span><a href="read-async.html"><span class="token function">readAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dst<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/ByteBuffer.html">ByteBuffer</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-read/read.html">FileStream.Read.read</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1995578836%2FFunctions%2F-1938573258" anchor-label="readBytes" id="1995578836%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read-bytes.html"><span>read</span><wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1995578836%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="read-bytes.html"><span class="token function">readBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.readBytes</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="490681056%2FFunctions%2F-1938573258" anchor-label="readUtf8" id="490681056%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read-utf8.html"><span>read</span><wbr><span><span>Utf8</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="490681056%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="read-utf8.html"><span class="token function">readUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.readUtf8</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1833383988%2FFunctions%2F-1938573258" anchor-label="sizeAsync" id="-1833383988%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="size-async.html"><span>size</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1833383988%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a><span class="token punctuation">.</span><a href="size-async.html"><span class="token function">sizeAsync</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/size.html">FileStream.size</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="size-async.html">S</a><span class="token operator"> : </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token operator">&gt; </span><a href="size-async.html">S</a><span class="token punctuation">.</span><a href="size-async.html"><span class="token function">sizeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">new<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="size-async.html">S</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/size.html">FileStream.Write.size</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-665016115%2FFunctions%2F-508758250" anchor-label="stat" id="-665016115%2FFunctions%2F-508758250" data-filterable-set=":library:async/jsWasmJsMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="stat.html"><span><span>stat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-665016115%2FFunctions%2F-508758250"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain" data-active="" data-toggle=":library:async/jsWasmJsMain">jsWasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="stat.html"><span class="token function">stat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-stats/index.html">Stats</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.stat</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-525550515%2FFunctions%2F-1938573258" anchor-label="syncAsync" id="-525550515%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="sync-async.html"><span>sync</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-525550515%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="sync-async.html">S</a><span class="token operator"> : </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a><span class="token operator">&gt; </span><a href="sync-async.html">S</a><span class="token punctuation">.</span><a href="sync-async.html"><span class="token function">syncAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">meta<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="sync-async.html">S</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/sync.html">FileStream.sync</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1380341213%2FFunctions%2F-1938573258" anchor-label="useAsync" id="1380341213%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="use-async.html"><span>use</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1380341213%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="use-async.html">S</a><span class="token operator"> : </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a><span class="token operator">?</span><span class="token punctuation">, </span><a href="use-async.html">R</a><span class="token operator">&gt; </span><a href="use-async.html">S</a><span class="token punctuation">.</span><a href="use-async.html"><span class="token function">useAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span><a href="use-async.html">S</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="use-async.html">R</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="use-async.html">R</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.use</a> whereby <a href="close-async.html">closeAsync</a> is called in lieu of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/close.html">FileStream.close</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1928348780%2FFunctions%2F-1938573258" anchor-label="with" id="1928348780%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="with.html"><span><span>with</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1928348780%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="with.html">R</a><span class="token operator">&gt; </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="with.html"><span class="token function">with</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="with.html">R</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="with.html">R</a></div><div class="brief "><p class="paragraph">All <a href="-async-fs/index.html">AsyncFs</a> function implementations are top-level extension functions. This provides a way for callers to easily switch context where <a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a> extension functions can be used, matching the syntax of <code class="lang-kotlin">kmp-file:file</code>'s synchronous API.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="834708568%2FFunctions%2F1259989898" anchor-label="write" id="834708568%2FFunctions%2F1259989898" data-filterable-set=":library:async/jsWasmJsMain,:library:async/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/jsWasmJsMain,:library:async/jvmMain" data-filterable-set=":library:async/jsWasmJsMain,:library:async/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="write.html"><span><span>write</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="834708568%2FFunctions%2F1259989898"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain" data-active="" data-toggle=":library:async/jsWasmJsMain">jsWasmJs</button><button class="platform-bookmark" data-filterable-current=":library:async/jvmMain" data-filterable-set=":library:async/jvmMain" data-toggle=":library:async/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="write.html"><span class="token function">write</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="write.html"><span class="token function">write</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">appending<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.write</a>.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":library:async/jvmMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="write.html"><span class="token function">write</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">src<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/ByteBuffer.html">ByteBuffer</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="write.html"><span class="token function">write</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">appending<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="token punctuation">, </span></span><span class="parameter ">src<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/ByteBuffer.html">ByteBuffer</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.write</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1644009064%2FFunctions%2F825826476" anchor-label="writeAsync" id="1644009064%2FFunctions%2F825826476" data-filterable-set=":library:async/jsWasmJsMain,:library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/jsWasmJsMain,:library:async/commonMain" data-filterable-set=":library:async/jsWasmJsMain,:library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="write-async.html"><span>write</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1644009064%2FFunctions%2F825826476"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain" data-active="" data-toggle=":library:async/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":library:async/jsWasmJsMain" data-filterable-set=":library:async/jsWasmJsMain" data-toggle=":library:async/jsWasmJsMain">jsWasmJs</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="write-async.html"><span class="token function">writeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="write-async.html"><span class="token function">writeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="write-async.html"><span class="token function">writeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="write-async.html"><span class="token function">writeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/write.html">FileStream.Write.write</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/jsWasmJsMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="write-async.html"><span class="token function">writeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="write-async.html"><span class="token function">writeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="write-async.html"><span class="token function">writeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="write-async.html"><span class="token function">writeAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buf<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-buffer/index.html">Buffer</a><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span><span class="token punctuation">, </span></span><span class="parameter ">len<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/write.html">FileStream.Write.write</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1253313946%2FFunctions%2F-1938573258" anchor-label="writeBytes" id="-1253313946%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="write-bytes.html"><span>write</span><wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1253313946%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="write-bytes.html"><span class="token function">writeBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">array<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="write-bytes.html"><span class="token function">writeBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">appending<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="token punctuation">, </span></span><span class="parameter ">array<span class="token operator">: </span><span data-unresolved-link="kotlin/ByteArray///PointingToDeclaration/">ByteArray</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.writeBytes</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2079236462%2FFunctions%2F-845386240" anchor-label="writesAsync" id="-2079236462%2FFunctions%2F-845386240" data-filterable-set=":library:async/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/jvmMain" data-filterable-set=":library:async/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="writes-async.html"><span>writes</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2079236462%2FFunctions%2F-845386240"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":library:async/jvmMain" data-filterable-set=":library:async/jvmMain" data-active="" data-toggle=":library:async/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/jvmMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="writes-async.html"><span class="token function">writesAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">src<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/ByteBuffer.html">ByteBuffer</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/index.html">FileStream.Write</a><span class="token punctuation">.</span><a href="writes-async.html"><span class="token function">writesAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">src<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/ByteBuffer.html">ByteBuffer</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="kotlin/Long///PointingToDeclaration/">Long</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlin/Int///PointingToDeclaration/">Int</span></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/-write/write.html">FileStream.Write.write</a>. If <a href="../../../library/file/io.matthewnelson.kmp.file/-file-stream/index.html">FileStream</a> was not opened using <a href="-async-fs/index.html">AsyncFs</a>, thus not inheriting its <span data-unresolved-link="kotlin.coroutines/CoroutineContext///PointingToDeclaration/">CoroutineContext</span>, then the default <a href="-async-fs/ctx.html">AsyncFs.ctx</a> will be used instead.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="422849602%2FFunctions%2F-1938573258" anchor-label="writeUtf8" id="422849602%2FFunctions%2F-1938573258" data-filterable-set=":library:async/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":library:async/commonMain" data-filterable-set=":library:async/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="write-utf8.html"><span>write</span><wbr><span><span>Utf8</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="422849602%2FFunctions%2F-1938573258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:async/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="write-utf8.html"><span class="token function">writeUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">text<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-async-fs/index.html">AsyncFs</a><span class="token punctuation">.</span><a href="write-utf8.html"><span class="token function">writeUtf8</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a><span class="token punctuation">, </span></span><span class="parameter ">excl<span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-open-excl/index.html">OpenExcl</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">appending<span class="token operator">: </span><span data-unresolved-link="kotlin/Boolean///PointingToDeclaration/">Boolean</span><span class="token punctuation">, </span></span><span class="parameter ">text<span class="token operator">: </span><span data-unresolved-link="kotlin/String///PointingToDeclaration/">String</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../library/file/io.matthewnelson.kmp.file/-file/index.html">File</a></div><div class="brief "><p class="paragraph">An asynchronous version of <a href="../../../library/file/io.matthewnelson.kmp.file/index.html">io.matthewnelson.kmp.file.writeUtf8</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2023-2025 Copyright Matthew Nelson</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
