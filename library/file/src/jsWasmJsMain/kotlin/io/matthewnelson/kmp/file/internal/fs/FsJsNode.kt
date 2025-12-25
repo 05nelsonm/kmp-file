@@ -478,7 +478,7 @@ internal class FsJsNode private constructor(
     internal override fun openRead(file: File): AbstractFileStream {
         return openRead(
             file,
-            _open = { path, flags ->
+            _openNonCancellable = { path, flags ->
                 jsExternTryCatch { fs.openSync(path, flags) }
             },
             _checkIsNotADirElseCloseAndThrow = { fd, file ->
@@ -488,7 +488,7 @@ internal class FsJsNode private constructor(
                     _fstat = { fd ->
                         jsExternTryCatch { fs.fstatSync(fd) }
                     },
-                    _close = { fd ->
+                    _closeNonCancellable = { fd ->
                         jsExternTryCatch { fs.closeSync(fd) }
                     },
                 )
@@ -500,9 +500,7 @@ internal class FsJsNode private constructor(
     internal override suspend fun openRead(file: File, suspendCancellable: SuspendCancellable<Any?>): AbstractFileStream {
         return openRead(
             file,
-            _open = { path, flags ->
-                // Do not use cancellable here because if successful
-                // open, but job cancelled, then descriptor is leaked
+            _openNonCancellable = { path, flags ->
                 suspendCoroutine { cont ->
                     fs.open(path, flags) { err, fd ->
                         cont.complete(err) { fd!! }
@@ -520,8 +518,7 @@ internal class FsJsNode private constructor(
                             }
                         } as JsStats
                     },
-                    _close = { fd ->
-                        // Do not use cancellable here.
+                    _closeNonCancellable = { fd ->
                         suspendCoroutine { cont ->
                             fs.close(fd) { err ->
                                 cont.complete(err) {}
@@ -536,15 +533,15 @@ internal class FsJsNode private constructor(
     @OptIn(ExperimentalContracts::class)
     private inline fun openRead(
         file: File,
-        _open: (Path, Int) -> Double,
+        _openNonCancellable: (Path, Int) -> Double,
         _checkIsNotADirElseCloseAndThrow: (Double, File) -> Unit,
     ): JsNodeFileStream {
         contract {
-            callsInPlace(_open, InvocationKind.EXACTLY_ONCE)
+            callsInPlace(_openNonCancellable, InvocationKind.EXACTLY_ONCE)
             callsInPlace(_checkIsNotADirElseCloseAndThrow, InvocationKind.AT_MOST_ONCE)
         }
         val fd = try {
-            _open(file.path, fs.constants.O_RDONLY)
+            _openNonCancellable(file.path, fs.constants.O_RDONLY)
         } catch (t: Throwable) {
             throw t.toIOException(file)
         }
@@ -557,10 +554,10 @@ internal class FsJsNode private constructor(
         return openReadWrite(
             file,
             excl,
-            _open1 = { path, flags, mode ->
+            _open1NonCancellable = { path, flags, mode ->
                 jsExternTryCatch { fs.openSync(path, flags, mode) }
             },
-            _open2 = { path, flags, mode ->
+            _open2NonCancellable = { path, flags, mode ->
                 jsExternTryCatch { fs.openSync(path, flags, mode) }
             },
             _checkIsNotADirElseCloseAndThrow = { fd, file ->
@@ -570,7 +567,7 @@ internal class FsJsNode private constructor(
                     _fstat = { fd ->
                         jsExternTryCatch { fs.fstatSync(fd) }
                     },
-                    _close = { fd ->
+                    _closeNonCancellable = { fd ->
                         jsExternTryCatch { fs.closeSync(fd) }
                     },
                 )
@@ -583,18 +580,14 @@ internal class FsJsNode private constructor(
         return openReadWrite(
             file,
             excl,
-            _open1 = { path, flags, mode ->
-                // Do not use cancellable here because if successful
-                // open, but job cancelled, then descriptor is leaked
+            _open1NonCancellable = { path, flags, mode ->
                 suspendCoroutine { cont ->
                     fs.open(path, flags, mode) { err, fd ->
                         cont.complete(err) { fd!! }
                     }
                 }
             },
-            _open2 = { path, flags, mode ->
-                // Do not use cancellable here because if successful
-                // open, but job cancelled, then descriptor is leaked
+            _open2NonCancellable = { path, flags, mode ->
                 suspendCoroutine { cont ->
                     fs.open(path, flags, mode) { err, fd ->
                         cont.complete(err) { fd!! }
@@ -612,8 +605,7 @@ internal class FsJsNode private constructor(
                             }
                         } as JsStats
                     },
-                    _close = { fd ->
-                        // Do not use cancellable here.
+                    _closeNonCancellable = { fd ->
                         suspendCoroutine { cont ->
                             fs.close(fd) { err ->
                                 cont.complete(err) {}
@@ -629,13 +621,13 @@ internal class FsJsNode private constructor(
     private inline fun openReadWrite(
         file: File,
         excl: OpenExcl,
-        _open1: (Path, String, String) -> Double,
-        _open2: (Path, Int, String) -> Double,
+        _open1NonCancellable: (Path, String, String) -> Double,
+        _open2NonCancellable: (Path, Int, String) -> Double,
         _checkIsNotADirElseCloseAndThrow: (Double, File) -> Unit,
     ): JsNodeFileStream {
         contract {
-            callsInPlace(_open1, InvocationKind.AT_MOST_ONCE)
-            callsInPlace(_open2, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_open1NonCancellable, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_open2NonCancellable, InvocationKind.AT_MOST_ONCE)
             callsInPlace(_checkIsNotADirElseCloseAndThrow, InvocationKind.AT_MOST_ONCE)
         }
         val mode = if (isWindows) {
@@ -647,14 +639,14 @@ internal class FsJsNode private constructor(
             if (isWindows && excl is OpenExcl.MustExist) {
                 // For some reason on Windows, or'ing flags will fail with illegal
                 // arguments. Specifying flags via String to force MustExist works though.
-                _open1(file.path, "r+", mode)
+                _open1NonCancellable(file.path, "r+", mode)
             } else {
                 val flags = fs.constants.O_RDWR or when (excl) {
                     is OpenExcl.MaybeCreate -> fs.constants.O_CREAT
                     is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
                     is OpenExcl.MustExist -> 0
                 }
-                _open2(file.path, flags, mode)
+                _open2NonCancellable(file.path, flags, mode)
             }
         } catch (t: Throwable) {
             throw t.toIOException(file)
@@ -669,10 +661,10 @@ internal class FsJsNode private constructor(
             file,
             excl,
             appending,
-            _open1 = { path, flags, mode ->
+            _open1NonCancellable = { path, flags, mode ->
                 jsExternTryCatch { fs.openSync(path, flags, mode) }
             },
-            _open2 = { path, flags, mode ->
+            _open2NonCancellable = { path, flags, mode ->
                 jsExternTryCatch { fs.openSync(path, flags, mode) }
             },
             _checkIsNotADirElseCloseAndThrow = { fd, file ->
@@ -682,7 +674,7 @@ internal class FsJsNode private constructor(
                     _fstat = { fd ->
                         jsExternTryCatch { fs.fstatSync(fd) }
                     },
-                    _close = { fd ->
+                    _closeNonCancellable = { fd ->
                         jsExternTryCatch { fs.closeSync(fd) }
                     },
                 )
@@ -690,7 +682,7 @@ internal class FsJsNode private constructor(
             _ftruncate = { fd, len ->
                 jsExternTryCatch { fs.ftruncateSync(fd, len.toDouble()) }
             },
-            _close = { fd ->
+            _closeNonCancellable = { fd ->
                 jsExternTryCatch { fs.closeSync(fd) }
             },
         )
@@ -702,18 +694,14 @@ internal class FsJsNode private constructor(
             file,
             excl,
             appending,
-            _open1 = { path, flags, mode ->
-                // Do not use cancellable here because if successful
-                // open, but job cancelled, then descriptor is leaked
+            _open1NonCancellable = { path, flags, mode ->
                 suspendCoroutine { cont ->
                     fs.open(path, flags, mode) { err, fd ->
                         cont.complete(err) { fd!! }
                     }
                 }
             },
-            _open2 = { path, flags, mode ->
-                // Do not use cancellable here because if successful
-                // open, but job cancelled, then descriptor is leaked
+            _open2NonCancellable = { path, flags, mode ->
                 suspendCoroutine { cont ->
                     fs.open(path, flags, mode) { err, fd ->
                         cont.complete(err) { fd!! }
@@ -731,8 +719,7 @@ internal class FsJsNode private constructor(
                             }
                         } as JsStats
                     },
-                    _close = { fd ->
-                        // Do not use cancellable here.
+                    _closeNonCancellable = { fd ->
                         suspendCoroutine { cont ->
                             fs.close(fd) { err ->
                                 cont.complete(err) {}
@@ -748,8 +735,7 @@ internal class FsJsNode private constructor(
                     }
                 }
             },
-            _close = { fd ->
-                // Do not use cancellable here.
+            _closeNonCancellable = { fd ->
                 suspendCoroutine { cont ->
                     fs.close(fd) { err ->
                         cont.complete(err) {}
@@ -764,18 +750,18 @@ internal class FsJsNode private constructor(
         file: File,
         excl: OpenExcl,
         appending: Boolean,
-        _open1: (Path, String, String) -> Double,
-        _open2: (Path, Int, String) -> Double,
+        _open1NonCancellable: (Path, String, String) -> Double,
+        _open2NonCancellable: (Path, Int, String) -> Double,
         _checkIsNotADirElseCloseAndThrow: (Double, File) -> Unit,
         _ftruncate: (Double, Long) -> Unit,
-        _close: (Double) -> Unit,
+        _closeNonCancellable: (Double) -> Unit,
     ): AbstractFileStream {
         contract {
-            callsInPlace(_open1, InvocationKind.AT_MOST_ONCE)
-            callsInPlace(_open2, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_open1NonCancellable, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_open2NonCancellable, InvocationKind.AT_MOST_ONCE)
             callsInPlace(_checkIsNotADirElseCloseAndThrow, InvocationKind.AT_MOST_ONCE)
             callsInPlace(_ftruncate, InvocationKind.AT_MOST_ONCE)
-            callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_closeNonCancellable, InvocationKind.AT_MOST_ONCE)
         }
         val mode = if (isWindows) {
             if (excl._mode.containsOwnerWriteAccess) "666" else "444"
@@ -789,7 +775,7 @@ internal class FsJsNode private constructor(
                 if (!appending) truncate = true
                 // For some reason on Windows, or'ing flags will fail with illegal
                 // arguments. Specifying flags via String to force MustExist works though.
-                _open1(file.path, "r+", mode)
+                _open1NonCancellable(file.path, "r+", mode)
             } else {
                 var flags = fs.constants.O_WRONLY
                 flags = flags or if (appending) {
@@ -804,7 +790,7 @@ internal class FsJsNode private constructor(
                     is OpenExcl.MustCreate -> fs.constants.O_CREAT or fs.constants.O_EXCL
                     is OpenExcl.MustExist -> 0
                 }
-                _open2(file.path, flags, mode)
+                _open2NonCancellable(file.path, flags, mode)
             }
         } catch (t: Throwable) {
             throw t.toIOException(file)
@@ -816,7 +802,7 @@ internal class FsJsNode private constructor(
             } catch (t: Throwable) {
                 val e = t as? CancellationException ?: t.toIOException()
                 try {
-                    _close(fd)
+                    _closeNonCancellable(fd)
                 } catch (tt: Throwable) {
                     e.addSuppressed(tt)
                 }
@@ -873,11 +859,11 @@ internal class FsJsNode private constructor(
         fd: Double,
         file: File,
         _fstat: (Double) -> JsStats,
-        _close: (Double) -> Unit,
+        _closeNonCancellable: (Double) -> Unit,
     ) {
         contract {
             callsInPlace(_fstat, InvocationKind.EXACTLY_ONCE)
-            callsInPlace(_close, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(_closeNonCancellable, InvocationKind.AT_MOST_ONCE)
         }
 
         val e: Throwable? = try {
@@ -887,7 +873,7 @@ internal class FsJsNode private constructor(
         }
         if (e == null) return
         try {
-            _close(fd)
+            _closeNonCancellable(fd)
         } catch (t: Throwable) {
             e.addSuppressed(t)
         }
