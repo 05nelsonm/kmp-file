@@ -919,7 +919,7 @@ internal class FsJsNode private constructor(
             try {
                 return block(buf)
             } finally {
-                if (asyncPool.size < 3) asyncPool.add(buf)
+                if (isOpen() && asyncPool.size < 3) asyncPool.add(buf)
             }
         }
 
@@ -1628,6 +1628,8 @@ internal class FsJsNode private constructor(
                 jsExternTryCatch { fs.closeSync(fd) }
             } catch (t: Throwable) {
                 throw t.toIOException()
+            } finally {
+                asyncPool.clear()
             }
         }
 
@@ -1653,6 +1655,8 @@ internal class FsJsNode private constructor(
                 }
 
                 throw t.toIOException()
+            } finally {
+                asyncPool.clear()
             }
         }
     }
