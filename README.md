@@ -75,8 +75,8 @@ suspend fun main() {
 
         val data = "Hello World!".encodeToByteArray()
 
-        // See also openRead, openWrite, openAppend
-        file.openReadWriteAsync(excl = OpenExcl.MustCreate.of("644")).use { stream ->
+        // See also openReadAsync, openWriteAsync, openAppendAsync
+        file.openReadWriteAsync(excl = OpenExcl.MustCreate.of("644")).useAsync { stream ->
             assertEquals(0L, stream.sizeAsync())
             assertEquals(0L, stream.postionAsync())
 
