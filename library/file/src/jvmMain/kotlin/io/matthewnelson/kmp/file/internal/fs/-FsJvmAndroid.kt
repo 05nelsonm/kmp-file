@@ -102,7 +102,7 @@ internal class FsJvmAndroid private constructor(
         val O_CLOEXEC = 0x80000 // 524288
         val m = MODE_MASK.convert(Mode.DEFAULT_FILE)
         val f = const.O_WRONLY or const.O_TRUNC or O_CLOEXEC or const.O_CREAT or const.O_EXCL
-        val tmp = SysTempDir.resolve(UUID.randomUUID().toString())
+        val tmp = SysTempDir.resolve("cloexec_" + UUID.randomUUID().toString())
 
         var fd: FileDescriptor? = null
         val deleteTmp = object : Runnable {
@@ -115,7 +115,17 @@ internal class FsJvmAndroid private constructor(
         } catch (_: Throwable) {}
 
         val result = try {
-            fd = os.open.invoke(null, tmp.path, f, m) as FileDescriptor
+            try {
+                fd = os.open.invoke(null, tmp.path, f, m) as FileDescriptor
+            } finally {
+                try {
+                    deleteTmp.run()
+                } catch (_: Throwable) {}
+                try {
+                    Runtime.getRuntime().removeShutdownHook(hook)
+                } catch (_: Throwable) {}
+            }
+
             val flags = os.fcntlVoid.invoke(null, fd, const.F_GETFD) as Int
             if ((flags or const.FD_CLOEXEC) == flags) {
                 // We have the correct value for O_CLOEXEC
@@ -125,17 +135,9 @@ internal class FsJvmAndroid private constructor(
             }
         } catch (_: Throwable) {
             0
+        } finally {
+            fd?.doClose(null)
         }
-
-        fd?.doClose(null)
-
-        try {
-            deleteTmp.run()
-        } catch (_: Throwable) {}
-
-        try {
-            Runtime.getRuntime().removeShutdownHook(hook)
-        } catch (_: Throwable) {}
 
         if (result == 0) {
             try {
