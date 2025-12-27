@@ -96,13 +96,21 @@ class AndroidFsTest {
                     }
                 }
 
-                assertTrue(
-                    (flags or OsConstants.FD_CLOEXEC) == flags,
-                    "FileDescriptor was not opened with FD_CLOEXEC"
+                assertEquals(
+                    (flags or OsConstants.FD_CLOEXEC),
+                    flags,
+                    "FileDescriptor was not opened with FD_CLOEXEC",
                 )
             }
         } finally {
             tmp.delete2()
+        }
+
+        if (Build.VERSION.SDK_INT <= 26) {
+            // Ensure temporary cloexec_{UUID} file was deleted
+            SysTempDir.walkTopDown().maxDepth(1).forEach { file ->
+                assertFalse(file.name.startsWith("cloexec_"), file.toString())
+            }
         }
 
         if (fd == null) return // non-SNAPSHOT version
