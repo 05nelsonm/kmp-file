@@ -456,7 +456,8 @@ internal class FsJvmAndroid private constructor(
             interruptible.doBlocking(lock = if (p == -1L) positionLock else null) { completed ->
                 // Os.read/write previously did not update ByteBuffer position after a successful invocation.
                 // https://cs.android.com/android/_/android/platform/libcore/+/d9f7e57f5d09b587d8c8d1bd42b895f7de8fbf54
-                val posBefore = if ((SDK_INT ?: 0) < 23) dst.position() else null
+                // https://cs.android.com/android/_/android/platform/libcore/+/d9f7e57f5d09b587d8c8d1bd42b895f7de8fbf54:luni/src/main/java/libcore/io/Posix.java;dlc=7c3ed526ed9a4a508c3ae6d6e104f51dd9d7a1c1
+                val posBefore = if ((SDK_INT ?: 0) < 23) dst.position() else -1
                 val fd = _fd ?: return 0
                 val read = tryCatchErrno(null) {
                     if (p == -1L) {
@@ -465,7 +466,7 @@ internal class FsJvmAndroid private constructor(
                         readBufP.invoke(null, fd, dst, p) as Int
                     }
                 }
-                if (posBefore != null && read > 0) {
+                if (posBefore != -1 && read > 0) {
                     // Sanity check that Os.write did in fact NOT update
                     // the position. Unsure when that fix landed previous
                     // to API 23, so.
@@ -562,15 +563,15 @@ internal class FsJvmAndroid private constructor(
 
                 var total = 0
                 while (total < len) {
-                    val o = offset + total
-                    val c = len - total
+                    val offs = offset + total
+                    val count = len - total
                     val fd = delegateOrClosed(isWrite = true, total) { _fd }
                     val write = try {
                         tryCatchErrno(null) {
                             if (p == -1L) {
-                                writeBytes.invoke(null, fd, buf, o, c) as Int
+                                writeBytes.invoke(null, fd, buf, offs, count) as Int
                             } else {
-                                writeBytesP.invoke(null, fd, buf, o, c, p + total) as Int
+                                writeBytesP.invoke(null, fd, buf, offs, count, p + total) as Int
                             }
                         }
                     } catch (e: IOException) {
@@ -661,6 +662,7 @@ internal class FsJvmAndroid private constructor(
                     if (write > 0 && (SDK_INT ?: 0) < 23) {
                         // Os.read/write previously did not update ByteBuffer position after a successful invocation.
                         // https://cs.android.com/android/_/android/platform/libcore/+/d9f7e57f5d09b587d8c8d1bd42b895f7de8fbf54
+                        // https://cs.android.com/android/_/android/platform/libcore/+/d9f7e57f5d09b587d8c8d1bd42b895f7de8fbf54:luni/src/main/java/libcore/io/Posix.java;dlc=7c3ed526ed9a4a508c3ae6d6e104f51dd9d7a1c1
                         if (src.position() == posBefore) {
                             src.position(posBefore + write)
                         }

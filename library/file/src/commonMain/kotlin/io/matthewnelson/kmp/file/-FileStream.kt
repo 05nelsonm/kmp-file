@@ -107,7 +107,7 @@ internal abstract class AbstractFileStream protected constructor(
 
     @Throws(IOException::class)
     @OptIn(ExperimentalContracts::class)
-    protected inline fun <T: Any> delegateOrClosed(isWrite: Boolean, bytesTransferred: Number, block: () -> T?): T {
+    protected inline fun <T: Any> delegateOrClosed(isWrite: Boolean, bytesTransferred: Int, block: () -> T?): T {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
@@ -119,13 +119,12 @@ internal abstract class AbstractFileStream protected constructor(
         }
 
         if (d == null) {
-            val tInt = bytesTransferred.toInt()
-            if (tInt != 0) {
+            if (bytesTransferred != 0) {
                 var msg = if (isWrite) "Write" else "Read"
                 msg += " was interrupted"
                 if (!isOpen()) msg += " by closure"
                 val e = InterruptedIOException(msg)
-                e.bytesTransferred = tInt
+                e.bytesTransferred = bytesTransferred
                 throw e
             }
             throw ClosedException()
@@ -133,19 +132,18 @@ internal abstract class AbstractFileStream protected constructor(
         return d
     }
 
-    protected fun IOException.toMaybeInterruptedIOException(isWrite: Boolean, bytesTransferred: Number): IOException {
-        val tInt = bytesTransferred.toInt()
+    protected fun IOException.toMaybeInterruptedIOException(isWrite: Boolean, bytesTransferred: Int): IOException {
         when {
             this is InterruptedIOException -> {
-                this.bytesTransferred += tInt
+                this.bytesTransferred += bytesTransferred
                 return this
             }
-            tInt != 0 -> {
+            bytesTransferred != 0 -> {
                 var msg = if (isWrite) "Write" else "Read"
                 msg += " was interrupted"
                 if (!isOpen()) msg += " by closure"
                 val e = InterruptedIOException(msg)
-                e.bytesTransferred = tInt
+                e.bytesTransferred = bytesTransferred
                 e.addSuppressed(this)
                 return e
             }

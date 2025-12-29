@@ -1587,7 +1587,7 @@ internal class FsJsNode private constructor(
             var total = 0L
             while (total < len) {
                 val position = if (p == -1L) _position else p + total
-                val fd = delegateOrClosed(isWrite = true, total) { _fd }
+                val fd = delegateOrClosed(isWrite = true, total.toInt()) { _fd }
                 val write = try {
                     _write(
                         fd,
@@ -1598,7 +1598,7 @@ internal class FsJsNode private constructor(
                     )
                 } catch (t: Throwable) {
                     if (t is CancellationException) throw t
-                    throw t.toIOException().toMaybeInterruptedIOException(isWrite = true, total)
+                    throw t.toIOException().toMaybeInterruptedIOException(isWrite = true, total.toInt())
                 }.toLong()
 
                 total += write
