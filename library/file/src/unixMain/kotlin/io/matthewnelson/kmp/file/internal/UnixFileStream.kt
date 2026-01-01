@@ -41,14 +41,12 @@ import platform.posix.stat
 import kotlin.concurrent.AtomicReference
 
 @OptIn(ExperimentalForeignApi::class)
-internal class UnixFileStream(
+internal class UnixFileStream internal constructor(
     fd: Int,
     canRead: Boolean,
     canWrite: Boolean,
     isAppending: Boolean,
 ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
-
-    init { if (fd == -1) throw errnoToIOException(errno) }
 
     private val _fd = AtomicReference<Int?>(fd)
     private val positionLock = SynchronizedObject()
@@ -239,6 +237,10 @@ internal class UnixFileStream(
         unsetCoroutineContext()
         if (platform.posix.close(fd) == 0) return
         throw errnoToIOException(errno)
+    }
+
+    init {
+        disappearingCheck(condition = { fd >= 0 }) { "fd < 0" }
     }
 }
 

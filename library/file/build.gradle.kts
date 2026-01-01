@@ -88,21 +88,27 @@ private class ConfigInject {
             append(PKG_NAME).append(".internal")
             appendLine().appendLine()
 
+            appendLine("import kotlin.contracts.ExperimentalContracts")
+            appendLine("import kotlin.contracts.InvocationKind")
+            appendLine("import kotlin.contracts.contract")
+            appendLine()
+
             append("internal const val KMP_FILE_VERSION: String = \"")
             append(version.toString()).appendLine('"')
             appendLine()
 
+            appendLine("@Suppress(\"UNUSED_PARAMETER\")")
+            appendLine("@OptIn(ExperimentalContracts::class)")
             appendLine("@Throws(IllegalStateException::class)")
-            appendLine("internal inline fun disappearingCheck(")
-            appendLine("    condition: () -> Boolean,")
-            appendLine("    lazyMessage: () -> Any,")
-            append(") { ")
+            appendLine("internal inline fun disappearingCheck(condition: () -> Boolean, lazyMessage: () -> Any) {")
+            appendLine("    contract { callsInPlace(condition, InvocationKind.AT_MOST_ONCE) }")
 
             if (version.toString().endsWith("-SNAPSHOT")) {
-                appendLine("check(condition(), lazyMessage) }")
+                appendLine("    check(condition(), lazyMessage)")
             } else {
-                appendLine("/* no-op */ }")
+                appendLine("    // no-op")
             }
+            appendLine("}")
 
         }.toString()
 

@@ -53,14 +53,12 @@ import kotlin.concurrent.AtomicReference
 import kotlin.concurrent.Volatile
 
 @OptIn(ExperimentalForeignApi::class)
-internal class MinGWFileStream(
+internal class MinGWFileStream internal constructor(
     h: HANDLE,
     canRead: Boolean,
     canWrite: Boolean,
     isAppending: Boolean,
 ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
-
-    init { if (h == INVALID_HANDLE_VALUE) throw lastErrorToIOException() }
 
     // Windows ReadFile/WriteFile always advancing the HANDLE position,
     // even when OVERLAPPED is non-NULL. This is problematic because if
@@ -264,6 +262,10 @@ internal class MinGWFileStream(
         unsetCoroutineContext()
         val ret = CloseHandle(h)
         if (ret == FALSE) throw lastErrorToIOException()
+    }
+
+    init {
+        disappearingCheck(condition = { h != INVALID_HANDLE_VALUE }) { "h == INVALID_HANDLE_VALUE" }
     }
 }
 
