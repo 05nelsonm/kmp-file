@@ -395,7 +395,7 @@ internal class FsJvmAndroid private constructor(
 
         override fun position(new: Long): FileStream.ReadWrite {
             checkIsOpen()
-            new.checkIsNotNegative()
+            new.checkIsNotNegative { "new" }
             if (isAppending) return this
             interruptible.doBlocking(positionLock) { completed ->
                 val fd = _fd ?: return this
@@ -416,7 +416,7 @@ internal class FsJvmAndroid private constructor(
         override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
             checkIsOpen()
             checkCanRead()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             return realRead(buf, offset, len, position)
         }
 
@@ -446,7 +446,7 @@ internal class FsJvmAndroid private constructor(
         override fun read(dst: ByteBuffer?, position: Long): Int {
             checkIsOpen()
             if (!canRead) throw NonReadableChannelException()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             return realRead(dst, position)
         }
 
@@ -496,7 +496,7 @@ internal class FsJvmAndroid private constructor(
         override fun size(new: Long): FileStream.ReadWrite {
             checkIsOpen()
             checkCanSizeNew()
-            new.checkIsNotNegative()
+            new.checkIsNotNegative { "new" }
             interruptible.doBlocking(positionLock) { completed ->
                 val fd = _fd ?: return this
                 tryCatchErrno(null) {
@@ -546,7 +546,7 @@ internal class FsJvmAndroid private constructor(
         override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
             checkIsOpen()
             checkCanWrite()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             realWrite(buf, offset, len, position)
         }
 
@@ -594,7 +594,7 @@ internal class FsJvmAndroid private constructor(
         override fun write(src: ByteBuffer?, position: Long): Int {
             checkIsOpen()
             if (!canWrite) throw NonWritableChannelException()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             return realWrite(src, position)
         }
 
@@ -675,6 +675,9 @@ internal class FsJvmAndroid private constructor(
             }
         }
 
+        // TODO: Android API 21-23 FileChannel does not use a global LockTable based
+        //  on st_dev/st_ino to invalidate and mitigate issuance of overlapping locks.
+        //  Need to utilize our own table and provider in that case.
         override fun lockExclusive(position: Long, len: Long): FileAdvisoryLock {
             throw IOException("Not yet implemented")
         }

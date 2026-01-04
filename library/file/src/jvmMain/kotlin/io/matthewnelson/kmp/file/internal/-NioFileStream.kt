@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("LocalVariableName")
+
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.ANDROID
@@ -25,8 +27,12 @@ import io.matthewnelson.kmp.file.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousCloseException
 import java.nio.channels.FileChannel
+import java.nio.channels.FileLock
 import java.nio.channels.NonReadableChannelException
 import java.nio.channels.NonWritableChannelException
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 internal class NioFileStream private constructor(
     ch: FileChannel,
@@ -56,7 +62,7 @@ internal class NioFileStream private constructor(
 
     override fun position(new: Long): FileStream.ReadWrite {
         checkIsOpen()
-        new.checkIsNotNegative()
+        new.checkIsNotNegative { "new" }
         if (isAppending) return this
         synchronized(positionLock) {
             val ch = _ch ?: throw ClosedException()
@@ -74,7 +80,7 @@ internal class NioFileStream private constructor(
     override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
         checkIsOpen()
         checkCanRead()
-        position.checkIsNotNegative()
+        position.checkIsNotNegative { "position" }
         return realRead(buf, offset, len, position)
     }
 
@@ -109,7 +115,7 @@ internal class NioFileStream private constructor(
     override fun read(dst: ByteBuffer?, position: Long): Int {
         checkIsOpen()
         if (!canRead) throw NonReadableChannelException()
-        position.checkIsNotNegative()
+        position.checkIsNotNegative { "position" }
         return realRead(dst, position)
     }
 
@@ -131,7 +137,7 @@ internal class NioFileStream private constructor(
     override fun size(new: Long): FileStream.ReadWrite {
         checkIsOpen()
         checkCanSizeNew()
-        new.checkIsNotNegative()
+        new.checkIsNotNegative { "new" }
         synchronized(positionLock) {
             val ch = _ch ?: throw ClosedException()
             if (new > ch.size()) {
@@ -167,7 +173,7 @@ internal class NioFileStream private constructor(
     override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
         checkIsOpen()
         checkCanWrite()
-        position.checkIsNotNegative()
+        position.checkIsNotNegative { "position" }
         realWrite(buf, offset, len, position)
     }
 
@@ -186,12 +192,13 @@ internal class NioFileStream private constructor(
     override fun write(src: ByteBuffer?, position: Long): Int {
         checkIsOpen()
         if (!canWrite) throw NonWritableChannelException()
-        position.checkIsNotNegative()
+        position.checkIsNotNegative { "position" }
         return realWrite(src, position)
     }
 
     private fun realWrite(src: ByteBuffer?, p: Long): Int {
         if (src == null) throw NullPointerException("src == null")
+        if (!src.hasRemaining()) return 0
         synchronizedIfNotNull(lock = positionLockOrNull(p)) {
             val ch = _ch ?: throw AsynchronousCloseException()
             if (p == -1L) {
@@ -208,11 +215,35 @@ internal class NioFileStream private constructor(
     }
 
     override fun lockExclusive(position: Long, len: Long): FileAdvisoryLock {
-        throw IOException("Not yet implemented")
+        return realLock(position, len, shared = false) { _position, _size, _shared ->
+            lock(_position, _size, _shared)
+        }
     }
 
     override fun tryLockExclusive(position: Long, len: Long): FileAdvisoryLock? {
-        throw IOException("Not yet implemented")
+        return realLock(position, len, shared = false) { _position, _size, _shared ->
+            tryLock(_position, _size, _shared) ?: return null
+        }
+    }
+
+    @Suppress("SameParameterValue") // TODO: expose shared lock API
+    @OptIn(ExperimentalContracts::class)
+    private inline fun realLock(
+        position: Long,
+        len: Long,
+        shared: Boolean,
+        _lock: FileChannel.(Long, Long, Boolean) -> FileLock,
+    ): FileAdvisoryLock {
+        contract { callsInPlace(_lock, InvocationKind.AT_MOST_ONCE) }
+        checkIsOpen()
+        if (shared) checkCanRead() else checkCanWrite()
+        val length = coerceLockRange(position, len)
+        val ch = _ch ?: throw ClosedException()
+        val lock = ch._lock(position, length, shared)
+        return object : FileAdvisoryLock(lock.position(), lock.size(), INIT) {
+            override fun isValid(): Boolean = lock.isValid
+            override fun close() { lock.release() }
+        }
     }
 
     override fun close() {

@@ -24,6 +24,7 @@ import io.matthewnelson.kmp.file.SysFsInfo
 import io.matthewnelson.kmp.file.SysTempDir
 import io.matthewnelson.kmp.file.delete2
 import io.matthewnelson.kmp.file.openReadWrite
+import io.matthewnelson.kmp.file.resolve
 import java.io.FileDescriptor
 import java.lang.reflect.InvocationTargetException
 import java.util.UUID

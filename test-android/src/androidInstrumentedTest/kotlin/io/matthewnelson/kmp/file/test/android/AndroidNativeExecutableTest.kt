@@ -38,7 +38,7 @@ class AndroidNativeExecutableTest {
 
     @Test
     fun givenAndroidNative_whenExecuteTestAndroidBinary_thenIsSuccessful() {
-        run(executable = "libTestAndroid.so") {
+        run(executable = "libTestAndroid.so", timeout = 2.minutes) {
             this[ENV_KEY_EXPECTED_TEMP_PATH] = SysTempDir.path
             this[ENV_KEY_EXPECTED_ABSOLUTE_PATH_EMPTY] = "".toFile().absolutePath
             this[ENV_KEY_EXPECTED_ABSOLUTE_PATH_DOT] = ".".toFile().absolutePath
@@ -49,15 +49,15 @@ class AndroidNativeExecutableTest {
 
     @Test
     fun givenAndroidNative_whenExecuteAsyncTestBinary_thenIsSuccessful() {
-        run(executable = "libTestAsync.so")
+        run(executable = "libTestAsync.so", timeout = 3.minutes)
     }
 
     @Test
     fun givenAndroidNative_whenExecuteFileTestBinary_thenIsSuccessful() {
-        run(executable = "libTestFile.so")
+        run(executable = "libTestFile.so", timeout = 3.minutes)
     }
 
-    private fun run(executable: String, configureEnv: MutableMap<String, String>.() -> Unit = {}) {
+    private fun run(executable: String, timeout: Duration, configureEnv: MutableMap<String, String>.() -> Unit = {}) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             println("Skipping...")
             return
@@ -108,13 +108,13 @@ class AndroidNativeExecutableTest {
                 priority = Thread.MAX_PRIORITY
             }.start()
 
-            var timeout = 1.minutes
+            var to = timeout.coerceAtLeast(1.minutes)
             while (true) {
                 if (isComplete) break
-                if (timeout <= Duration.ZERO) break
+                if (to <= Duration.ZERO) break
 
                 Thread.sleep(100)
-                timeout -= 100.milliseconds
+                to -= 100.milliseconds
             }
         } finally {
             p?.destroy()

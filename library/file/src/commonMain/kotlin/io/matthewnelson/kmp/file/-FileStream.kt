@@ -97,8 +97,24 @@ internal abstract class AbstractFileStream protected constructor(
     @Throws(IllegalStateException::class)
     protected inline fun checkCanWrite() { check(canWrite) { "O_RDONLY" } }
 
+    @OptIn(ExperimentalContracts::class)
     @Throws(IllegalArgumentException::class)
-    protected inline fun Long.checkIsNotNegative() { require(this >= 0L) { "$this < 0" } }
+    protected inline fun Long.checkIsNotNegative(paramName: () -> String) {
+        contract { callsInPlace(paramName, InvocationKind.AT_MOST_ONCE) }
+        if (this >= 0L) return
+        val param = paramName()
+        throw IllegalArgumentException("$param[$this] < 0L")
+    }
+
+    // Returns length
+    @Throws(IllegalArgumentException::class)
+    protected fun coerceLockRange(position: Long, len: Long): Long {
+        position.checkIsNotNegative { "position" }
+        len.checkIsNotNegative { "len" }
+        if (len == 0L) return Long.MAX_VALUE - position
+        (position + len).checkIsNotNegative { "(position[$position] + len[$len])" }
+        return len
+    }
 
     public final override fun read(buf: ByteArray): Int = read(buf, 0, buf.size)
     public final override fun read(buf: ByteArray, position: Long): Int = read(buf, 0, buf.size, position)
@@ -162,6 +178,6 @@ internal abstract class AbstractFileStream protected constructor(
     }
 
     init {
-        check(init == INIT) { "AbstractFileStream cannot be extended." }
+        if (init != INIT) throw UnsupportedOperationException("AbstractFileStream cannot be extended.")
     }
 }

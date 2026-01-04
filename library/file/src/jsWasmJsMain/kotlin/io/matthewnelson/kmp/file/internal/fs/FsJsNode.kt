@@ -939,7 +939,7 @@ internal class FsJsNode private constructor(
 
         private inline fun position(new: Long, _withLock: (block: () -> Unit) -> Unit): FileStream.ReadWrite {
             checkIsOpen()
-            new.checkIsNotNegative()
+            new.checkIsNotNegative { "new" }
             if (isAppending) return this
             _withLock { _position = new }
             return this
@@ -965,7 +965,7 @@ internal class FsJsNode private constructor(
         override fun read(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
             checkIsOpen()
             checkCanRead()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             return realRead(
                 syncBuf,
                 buf,
@@ -1015,7 +1015,7 @@ internal class FsJsNode private constructor(
         ): Int {
             checkIsOpen()
             checkCanRead()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             return asyncPool.useBuffer { jsBuf ->
                 realRead(
                     jsBuf,
@@ -1106,7 +1106,7 @@ internal class FsJsNode private constructor(
         override fun read(buf: Buffer, offset: Long, len: Long, position: Long): Long {
             checkIsOpen()
             checkCanRead()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             return realRead(
                 buf,
                 offset,
@@ -1152,7 +1152,7 @@ internal class FsJsNode private constructor(
         ): Long {
             checkIsOpen()
             checkCanRead()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             return realRead(
                 buf,
                 offset,
@@ -1239,7 +1239,7 @@ internal class FsJsNode private constructor(
         override fun size(new: Long): FileStream.ReadWrite {
             checkIsOpen()
             checkCanSizeNew()
-            new.checkIsNotNegative()
+            new.checkIsNotNegative { "new" }
             return positionLock.withTryLock {
                 size(
                     new,
@@ -1253,7 +1253,7 @@ internal class FsJsNode private constructor(
         override suspend fun _sizeAsync(new: Long, suspendCancellable: SuspendCancellable<Any?>) {
             checkIsOpen()
             checkCanSizeNew()
-            new.checkIsNotNegative()
+            new.checkIsNotNegative { "new" }
             positionLock.withLockAsync {
                 size(
                     new,
@@ -1359,7 +1359,7 @@ internal class FsJsNode private constructor(
         override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) {
             checkIsOpen()
             checkCanWrite()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             realWrite(
                 syncBuf,
                 buf,
@@ -1411,7 +1411,7 @@ internal class FsJsNode private constructor(
         ) {
             checkIsOpen()
             checkCanWrite()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             asyncPool.useBuffer { jsBuf ->
                 realWrite(
                     jsBuf,
@@ -1502,7 +1502,7 @@ internal class FsJsNode private constructor(
         override fun write(buf: Buffer, offset: Long, len: Long, position: Long) {
             checkIsOpen()
             checkCanWrite()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             realWrite(
                 buf,
                 offset,
@@ -1550,7 +1550,7 @@ internal class FsJsNode private constructor(
         ) {
             checkIsOpen()
             checkCanWrite()
-            position.checkIsNotNegative()
+            position.checkIsNotNegative { "position" }
             realWrite(
                 buf,
                 offset,
