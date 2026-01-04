@@ -74,7 +74,7 @@ public suspend inline fun <S: FileStream?, R: Any?> S.useAsync(block: (S) -> R):
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.closeAsync() {
-    withContext(((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) + NonCancellable) {
+    withContext(((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) + NonCancellable) {
         closeInternal()
     }
 }
@@ -91,7 +91,7 @@ public suspend fun FileStream.closeAsync() {
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.positionAsync(): Long {
-    return withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    return withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         positionInternal()
     }
 }
@@ -113,7 +113,7 @@ public suspend fun FileStream.positionAsync(): Long {
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun <S: FileStream> S.positionAsync(new: Long): S {
-    withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         positionInternal(new)
     }
     return this
@@ -131,7 +131,7 @@ public suspend fun <S: FileStream> S.positionAsync(new: Long): S {
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.sizeAsync(): Long {
-    return withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    return withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         sizeInternal()
     }
 }
@@ -153,7 +153,7 @@ public suspend fun FileStream.sizeAsync(): Long {
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun <S: FileStream.Write> S.sizeAsync(new: Long): S {
-    withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         sizeInternal(new)
     }
     return this
@@ -171,7 +171,7 @@ public suspend fun <S: FileStream.Write> S.sizeAsync(new: Long): S {
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun <S: FileStream> S.syncAsync(meta: Boolean): S {
-    withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         syncInternal(meta)
     }
     return this
@@ -193,7 +193,7 @@ public suspend fun <S: FileStream> S.syncAsync(meta: Boolean): S {
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Read.readAsync(buf: ByteArray, offset: Int, len: Int): Int {
-    return withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    return withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         readInternal(buf, offset, len)
     }
 }
@@ -209,7 +209,7 @@ public suspend fun FileStream.Read.readAsync(buf: ByteArray, offset: Int, len: I
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Read.readAsync(buf: ByteArray, offset: Int, len: Int, position: Long): Int {
-    return withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    return withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         readInternal(buf, offset, len, position)
     }
 }
@@ -263,7 +263,7 @@ public suspend inline fun FileStream.Read.readAsync(buf: ByteArray, position: Lo
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Write.writeAsync(buf: ByteArray, offset: Int, len: Int) {
-    withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         writeInternal(buf, offset, len)
     }
 }
@@ -279,7 +279,7 @@ public suspend fun FileStream.Write.writeAsync(buf: ByteArray, offset: Int, len:
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Write.writeAsync(buf: ByteArray, offset: Int, len: Int, position: Long) {
-    withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         writeInternal(buf, offset, len, position)
     }
 }

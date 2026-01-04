@@ -23,6 +23,7 @@ import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.FileAdvisoryLock
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
@@ -325,7 +326,7 @@ internal class FsJvmAndroid private constructor(
     // android.system.ErrnoException
     @OptIn(ExperimentalContracts::class)
     @Throws(IllegalArgumentException::class, IOException::class)
-    private inline fun <T: Any?> tryCatchErrno(file: File?, other: File? = null, block: Os.() -> T): T {
+    private inline fun <T> tryCatchErrno(file: File?, other: File? = null, block: Os.() -> T): T {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
@@ -672,6 +673,14 @@ internal class FsJvmAndroid private constructor(
                 completed(total > 0)
                 return total
             }
+        }
+
+        override fun lockExclusive(position: Long, len: Long): FileAdvisoryLock {
+            throw IOException("Not yet implemented")
+        }
+
+        override fun tryLockExclusive(position: Long, len: Long): FileAdvisoryLock? {
+            throw IOException("Not yet implemented")
         }
 
         override fun close() { interruptible.close() }

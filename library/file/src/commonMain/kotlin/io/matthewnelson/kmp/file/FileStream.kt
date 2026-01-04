@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "RedundantVisibilityModifier")
 
 package io.matthewnelson.kmp.file
 
@@ -281,7 +281,7 @@ public expect sealed interface FileStream: Closeable {
      * @see [openWrite]
      * @see [openAppend]
      * */
-    public sealed interface Write: FileStream {
+    public sealed interface Write: FileStream, FileAdvisoryLock.LockableExclusive {
 
         /**
          * If the [Write] stream was opened in appending mode.

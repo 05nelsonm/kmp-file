@@ -34,7 +34,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Read.readAsync(dst: ByteBuffer?): Int {
-    return withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    return withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         read(dst)
     }
 }
@@ -50,7 +50,7 @@ public suspend fun FileStream.Read.readAsync(dst: ByteBuffer?): Int {
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Read.readAsync(dst: ByteBuffer?, position: Long): Int {
-    return withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    return withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         read(dst, position)
     }
 }
@@ -66,7 +66,7 @@ public suspend fun FileStream.Read.readAsync(dst: ByteBuffer?, position: Long): 
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Write.writesAsync(src: ByteBuffer?): Int {
-    return withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    return withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         write(src)
     }
 }
@@ -82,7 +82,7 @@ public suspend fun FileStream.Write.writesAsync(src: ByteBuffer?): Int {
  * */
 @Throws(CancellationException::class, IOException::class)
 public suspend fun FileStream.Write.writesAsync(src: ByteBuffer?, position: Long): Int {
-    return withContext((this as InteropAsyncFileStream).ctx ?: AsyncFs.ctx) {
+    return withContext((this as? InteropAsyncFileStream)?.ctx ?: AsyncFs.ctx) {
         write(src, position)
     }
 }

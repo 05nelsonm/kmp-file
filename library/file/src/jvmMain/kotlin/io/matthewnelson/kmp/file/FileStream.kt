@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "NOTHING_TO_INLINE", "RedundantVisibilityModifier", "SEALED_INHERITOR_IN_DIFFERENT_MODULE")
 
 package io.matthewnelson.kmp.file
 
@@ -116,7 +116,7 @@ public actual sealed interface FileStream: Closeable, Flushable, InterruptibleCh
         public actual override fun sync(meta: Boolean): Read
     }
 
-    public actual sealed interface Write: FileStream, WritableByteChannel {
+    public actual sealed interface Write: FileStream, FileAdvisoryLock.LockableExclusive, WritableByteChannel {
 
         public actual val isAppending: Boolean
 

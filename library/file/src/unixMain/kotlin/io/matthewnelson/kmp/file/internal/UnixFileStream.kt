@@ -17,7 +17,9 @@ package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.ClosedException
+import io.matthewnelson.kmp.file.FileAdvisoryLock
 import io.matthewnelson.kmp.file.FileStream
+import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.errnoToIOException
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
@@ -230,6 +232,14 @@ internal class UnixFileStream internal constructor(
                 }
             }
         }
+    }
+
+    override fun lockExclusive(position: Long, len: Long): FileAdvisoryLock {
+        throw IOException("Not yet implemented")
+    }
+
+    override fun tryLockExclusive(position: Long, len: Long): FileAdvisoryLock? {
+        throw IOException("Not yet implemented")
     }
 
     override fun close() {

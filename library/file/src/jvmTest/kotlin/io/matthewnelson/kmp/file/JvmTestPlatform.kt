@@ -58,4 +58,6 @@ internal actual class TestReadStream actual constructor(
     override fun read(dst: ByteBuffer?, position: Long): Int = s.read(dst, position)
     override fun write(src: ByteBuffer?): Int = error("Not implemented")
     override fun write(src: ByteBuffer?, position: Long): Int = error("Not implemented")
+    override fun lockExclusive(position: Long, len: Long): FileAdvisoryLock = error("Not implemented")
+    override fun tryLockExclusive(position: Long, len: Long): FileAdvisoryLock = error("Not implemented")
 }

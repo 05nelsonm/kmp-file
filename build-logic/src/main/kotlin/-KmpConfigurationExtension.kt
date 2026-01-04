@@ -94,6 +94,20 @@ fun KmpConfigurationExtension.configureShared(
             }
         }
 
+        kotlin {
+            with(sourceSets) {
+                val sets = arrayOf("jvm", "native").mapNotNull { name ->
+                    val main = findByName(name + "Main") ?: return@mapNotNull null
+                    main to getByName(name + "Test")
+                }
+                if (sets.isEmpty()) return@kotlin
+
+                val main = maybeCreate("nonJsMain").apply { dependsOn(getByName("commonMain")) }
+                val test = maybeCreate("nonJsTest").apply { dependsOn(getByName("commonTest")) }
+                sets.forEach { (m, t) -> m.dependsOn(main); t.dependsOn(test) }
+            }
+        }
+
         action.execute(this)
 
         if (publish) kotlin {

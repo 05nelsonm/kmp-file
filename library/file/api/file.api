@@ -19,6 +19,30 @@ public final class io/matthewnelson/kmp/file/Exceptions {
 	public static final fun wrapIO (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)Ljava/io/IOException;
 }
 
+public abstract class io/matthewnelson/kmp/file/FileAdvisoryLock : java/io/Closeable {
+	protected static final field Companion Lio/matthewnelson/kmp/file/FileAdvisoryLock$Companion;
+	public final field len J
+	public final field position J
+	public abstract fun close ()V
+	public abstract fun isValid ()Z
+	public final fun toString ()Ljava/lang/String;
+}
+
+protected final class io/matthewnelson/kmp/file/FileAdvisoryLock$Companion {
+}
+
+public abstract interface class io/matthewnelson/kmp/file/FileAdvisoryLock$LockableExclusive {
+	public abstract fun lockExclusive ()Lio/matthewnelson/kmp/file/FileAdvisoryLock;
+	public abstract fun lockExclusive (JJ)Lio/matthewnelson/kmp/file/FileAdvisoryLock;
+	public abstract fun tryLockExclusive ()Lio/matthewnelson/kmp/file/FileAdvisoryLock;
+	public abstract fun tryLockExclusive (JJ)Lio/matthewnelson/kmp/file/FileAdvisoryLock;
+}
+
+public final class io/matthewnelson/kmp/file/FileAdvisoryLock$LockableExclusive$DefaultImpls {
+	public static fun lockExclusive (Lio/matthewnelson/kmp/file/FileAdvisoryLock$LockableExclusive;)Lio/matthewnelson/kmp/file/FileAdvisoryLock;
+	public static fun tryLockExclusive (Lio/matthewnelson/kmp/file/FileAdvisoryLock$LockableExclusive;)Lio/matthewnelson/kmp/file/FileAdvisoryLock;
+}
+
 public final class io/matthewnelson/kmp/file/FileJvmKt {
 	public static final fun append (Ljava/io/File;Lio/matthewnelson/kmp/file/OpenExcl;Ljava/nio/ByteBuffer;)I
 	public static final fun read (Ljava/io/File;)Ljava/nio/ByteBuffer;
@@ -65,12 +89,14 @@ public final class io/matthewnelson/kmp/file/FileStream$Read$DefaultImpls {
 
 public abstract class io/matthewnelson/kmp/file/FileStream$ReadWrite : io/matthewnelson/kmp/file/FileStream$Read, io/matthewnelson/kmp/file/FileStream$Write, java/nio/channels/ByteChannel {
 	public fun flush ()V
+	public fun lockExclusive ()Lio/matthewnelson/kmp/file/FileAdvisoryLock;
 	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
 	public abstract fun size (J)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
 	public abstract fun sync (Z)Lio/matthewnelson/kmp/file/FileStream$ReadWrite;
+	public fun tryLockExclusive ()Lio/matthewnelson/kmp/file/FileAdvisoryLock;
 }
 
-public abstract interface class io/matthewnelson/kmp/file/FileStream$Write : io/matthewnelson/kmp/file/FileStream, java/nio/channels/WritableByteChannel {
+public abstract interface class io/matthewnelson/kmp/file/FileStream$Write : io/matthewnelson/kmp/file/FileAdvisoryLock$LockableExclusive, io/matthewnelson/kmp/file/FileStream, java/nio/channels/WritableByteChannel {
 	public abstract fun isAppending ()Z
 	public abstract fun position (J)Lio/matthewnelson/kmp/file/FileStream$Write;
 	public abstract fun size (J)Lio/matthewnelson/kmp/file/FileStream$Write;
@@ -85,6 +111,8 @@ public abstract interface class io/matthewnelson/kmp/file/FileStream$Write : io/
 
 public final class io/matthewnelson/kmp/file/FileStream$Write$DefaultImpls {
 	public static fun flush (Lio/matthewnelson/kmp/file/FileStream$Write;)V
+	public static fun lockExclusive (Lio/matthewnelson/kmp/file/FileStream$Write;)Lio/matthewnelson/kmp/file/FileAdvisoryLock;
+	public static fun tryLockExclusive (Lio/matthewnelson/kmp/file/FileStream$Write;)Lio/matthewnelson/kmp/file/FileAdvisoryLock;
 }
 
 public final class io/matthewnelson/kmp/file/FsInfo {

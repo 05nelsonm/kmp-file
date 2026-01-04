@@ -19,6 +19,7 @@ import io.matthewnelson.kmp.file.ANDROID
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.Closeable
 import io.matthewnelson.kmp.file.ClosedException
+import io.matthewnelson.kmp.file.FileAdvisoryLock
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.IOException
 import java.nio.ByteBuffer
@@ -206,12 +207,12 @@ internal class NioFileStream private constructor(
         }
     }
 
-    private fun positionLockOrNull(p: Long): Any? {
-        if (p == -1L) return positionLock
-        // Windows always needs a lock
-        if (IsWindows) return positionLock
-        // Unix pread/pwrite (no lock needed)
-        return null
+    override fun lockExclusive(position: Long, len: Long): FileAdvisoryLock {
+        throw IOException("Not yet implemented")
+    }
+
+    override fun tryLockExclusive(position: Long, len: Long): FileAdvisoryLock? {
+        throw IOException("Not yet implemented")
     }
 
     override fun close() {
@@ -248,6 +249,14 @@ internal class NioFileStream private constructor(
         }
 
         threw?.let { throw it }
+    }
+
+    private fun positionLockOrNull(p: Long): Any? {
+        if (p == -1L) return positionLock
+        // Windows always needs a lock
+        if (IsWindows) return positionLock
+        // Unix pread/pwrite (no lock needed)
+        return null
     }
 
     internal companion object {

@@ -51,4 +51,7 @@ internal actual class TestReadStream actual constructor(
     actual override fun write(buf: ByteArray, offset: Int, len: Int) { error("Not implemented") }
     actual override fun write(buf: ByteArray, offset: Int, len: Int, position: Long) { error("Not implemented") }
     actual override fun close() { s.close() }
+
+    override fun lockExclusive(position: Long, len: Long): FileAdvisoryLock = error("Not implemented")
+    override fun tryLockExclusive(position: Long, len: Long): FileAdvisoryLock = error("Not implemented")
 }

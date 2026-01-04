@@ -1,3 +1,9 @@
+public final class io/matthewnelson/kmp/file/async/AsyncFileAdvisoryLockKt {
+	public static final fun lockExclusiveAsync (Lio/matthewnelson/kmp/file/FileAdvisoryLock$LockableExclusive;JJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun lockExclusiveAsync (Lio/matthewnelson/kmp/file/FileAdvisoryLock$LockableExclusive;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun lockExclusiveAsync-zkXUZaI (Lio/matthewnelson/kmp/file/FileAdvisoryLock$LockableExclusive;JJJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class io/matthewnelson/kmp/file/async/AsyncFileStreamCommonKt {
 	public static final fun closeAsync (Lio/matthewnelson/kmp/file/FileStream;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun doFinallyAsync (Lio/matthewnelson/kmp/file/FileStream;Ljava/lang/Throwable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

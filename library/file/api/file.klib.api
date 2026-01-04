@@ -51,7 +51,7 @@ sealed interface io.matthewnelson.kmp.file/FileStream : io.matthewnelson.kmp.fil
         abstract fun read(io.matthewnelson.kmp.file/Buffer, kotlin/Long, kotlin/Long, kotlin/Long): kotlin/Long // io.matthewnelson.kmp.file/FileStream.Read.read|read(io.matthewnelson.kmp.file.Buffer;kotlin.Long;kotlin.Long;kotlin.Long){}[0]
     }
 
-    sealed interface Write : io.matthewnelson.kmp.file/FileStream { // io.matthewnelson.kmp.file/FileStream.Write|null[0]
+    sealed interface Write : io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive, io.matthewnelson.kmp.file/FileStream { // io.matthewnelson.kmp.file/FileStream.Write|null[0]
         abstract val isAppending // io.matthewnelson.kmp.file/FileStream.Write.isAppending|{}isAppending[0]
             abstract fun <get-isAppending>(): kotlin/Boolean // io.matthewnelson.kmp.file/FileStream.Write.isAppending.<get-isAppending>|<get-isAppending>(){}[0]
 
@@ -81,6 +81,31 @@ sealed interface io.matthewnelson.kmp.file/FileStream : io.matthewnelson.kmp.fil
         abstract fun size(kotlin/Long): io.matthewnelson.kmp.file/FileStream.ReadWrite // io.matthewnelson.kmp.file/FileStream.ReadWrite.size|size(kotlin.Long){}[0]
         abstract fun sync(kotlin/Boolean): io.matthewnelson.kmp.file/FileStream.ReadWrite // io.matthewnelson.kmp.file/FileStream.ReadWrite.sync|sync(kotlin.Boolean){}[0]
     }
+}
+
+abstract class io.matthewnelson.kmp.file/FileAdvisoryLock : io.matthewnelson.kmp.file/Closeable { // io.matthewnelson.kmp.file/FileAdvisoryLock|null[0]
+    final val len // io.matthewnelson.kmp.file/FileAdvisoryLock.len|{}len[0]
+        final fun <get-len>(): kotlin/Long // io.matthewnelson.kmp.file/FileAdvisoryLock.len.<get-len>|<get-len>(){}[0]
+    final val position // io.matthewnelson.kmp.file/FileAdvisoryLock.position|{}position[0]
+        final fun <get-position>(): kotlin/Long // io.matthewnelson.kmp.file/FileAdvisoryLock.position.<get-position>|<get-position>(){}[0]
+
+    abstract fun close() // io.matthewnelson.kmp.file/FileAdvisoryLock.close|close(){}[0]
+    abstract fun isValid(): kotlin/Boolean // io.matthewnelson.kmp.file/FileAdvisoryLock.isValid|isValid(){}[0]
+    final fun toString(): kotlin/String // io.matthewnelson.kmp.file/FileAdvisoryLock.toString|toString(){}[0]
+
+    // Targets: [native]
+    sealed interface LockableExclusive { // io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive|null[0]
+        abstract fun lockExclusive(kotlin/Long, kotlin/Long): io.matthewnelson.kmp.file/FileAdvisoryLock // io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive.lockExclusive|lockExclusive(kotlin.Long;kotlin.Long){}[0]
+        abstract fun tryLockExclusive(kotlin/Long, kotlin/Long): io.matthewnelson.kmp.file/FileAdvisoryLock? // io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive.tryLockExclusive|tryLockExclusive(kotlin.Long;kotlin.Long){}[0]
+        open fun lockExclusive(): io.matthewnelson.kmp.file/FileAdvisoryLock // io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive.lockExclusive|lockExclusive(){}[0]
+        open fun tryLockExclusive(): io.matthewnelson.kmp.file/FileAdvisoryLock? // io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive.tryLockExclusive|tryLockExclusive(){}[0]
+    }
+
+    // Targets: [native]
+    final object Companion // io.matthewnelson.kmp.file/FileAdvisoryLock.Companion|null[0]
+
+    // Targets: [js, wasmJs]
+    sealed interface LockableExclusive // io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive|null[0]
 }
 
 final class io.matthewnelson.kmp.file/AccessDeniedException : io.matthewnelson.kmp.file/FileSystemException { // io.matthewnelson.kmp.file/AccessDeniedException|null[0]

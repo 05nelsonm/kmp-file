@@ -158,7 +158,6 @@ internal abstract class AbstractFileStream protected constructor(
 
     protected companion object {
         @get:JvmSynthetic
-        @Suppress("RedundantVisibilityModifier")
         internal val INIT = Any()
     }
 

@@ -1,5 +1,6 @@
 // Klib ABI Dump
 // Targets: [androidNativeArm32, androidNativeArm64, androidNativeX64, androidNativeX86, iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, tvosArm64, tvosSimulatorArm64, tvosX64, wasmJs, watchosArm32, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64, watchosX64]
+// Alias: native => [androidNativeArm32, androidNativeArm64, androidNativeX64, androidNativeX86, iosArm64, iosSimulatorArm64, iosX64, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, tvosArm64, tvosSimulatorArm64, tvosX64, watchosArm32, watchosArm64, watchosDeviceArm64, watchosSimulatorArm64, watchosX64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -102,6 +103,15 @@ final suspend inline fun (io.matthewnelson.kmp.file/FileStream.Read).io.matthewn
 final suspend inline fun (io.matthewnelson.kmp.file/FileStream.Write).io.matthewnelson.kmp.file.async/writeAsync(kotlin/ByteArray) // io.matthewnelson.kmp.file.async/writeAsync|writeAsync@io.matthewnelson.kmp.file.FileStream.Write(kotlin.ByteArray){}[0]
 final suspend inline fun (io.matthewnelson.kmp.file/FileStream.Write).io.matthewnelson.kmp.file.async/writeAsync(kotlin/ByteArray, kotlin/Long) // io.matthewnelson.kmp.file.async/writeAsync|writeAsync@io.matthewnelson.kmp.file.FileStream.Write(kotlin.ByteArray;kotlin.Long){}[0]
 final suspend inline fun <#A: io.matthewnelson.kmp.file/FileStream?, #B: kotlin/Any?> (#A).io.matthewnelson.kmp.file.async/useAsync(kotlin/Function1<#A, #B>): #B // io.matthewnelson.kmp.file.async/useAsync|useAsync@0:0(kotlin.Function1<0:0,0:1>){0§<io.matthewnelson.kmp.file.FileStream?>;1§<kotlin.Any?>}[0]
+
+// Targets: [native]
+final suspend fun (io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive).io.matthewnelson.kmp.file.async/lockExclusiveAsync(kotlin/Long, kotlin/Long, kotlin.time/Duration): io.matthewnelson.kmp.file/FileAdvisoryLock // io.matthewnelson.kmp.file.async/lockExclusiveAsync|lockExclusiveAsync@io.matthewnelson.kmp.file.FileAdvisoryLock.LockableExclusive(kotlin.Long;kotlin.Long;kotlin.time.Duration){}[0]
+
+// Targets: [native]
+final suspend inline fun (io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive).io.matthewnelson.kmp.file.async/lockExclusiveAsync(): io.matthewnelson.kmp.file/FileAdvisoryLock // io.matthewnelson.kmp.file.async/lockExclusiveAsync|lockExclusiveAsync@io.matthewnelson.kmp.file.FileAdvisoryLock.LockableExclusive(){}[0]
+
+// Targets: [native]
+final suspend inline fun (io.matthewnelson.kmp.file/FileAdvisoryLock.LockableExclusive).io.matthewnelson.kmp.file.async/lockExclusiveAsync(kotlin/Long, kotlin/Long): io.matthewnelson.kmp.file/FileAdvisoryLock // io.matthewnelson.kmp.file.async/lockExclusiveAsync|lockExclusiveAsync@io.matthewnelson.kmp.file.FileAdvisoryLock.LockableExclusive(kotlin.Long;kotlin.Long){}[0]
 
 // Targets: [js, wasmJs]
 final suspend fun (io.matthewnelson.kmp.file.async/AsyncFs).io.matthewnelson.kmp.file.async/lstat(io.matthewnelson.kmp.file/File): io.matthewnelson.kmp.file/Stats // io.matthewnelson.kmp.file.async/lstat|lstat@io.matthewnelson.kmp.file.async.AsyncFs(io.matthewnelson.kmp.file.File){}[0]
