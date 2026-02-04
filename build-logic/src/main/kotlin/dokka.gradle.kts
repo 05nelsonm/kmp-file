@@ -35,7 +35,9 @@ extensions.configure<DokkaExtension> {
 
         sourceLink {
             localDirectory.set(rootDir)
-            remoteUrl.set(URI("https://github.com/05nelsonm/kmp-file/tree/master"))
+            val version = version.toString()
+            val branch = if (version.endsWith("-SNAPSHOT")) "master" else version
+            remoteUrl.set(URI("https://github.com/05nelsonm/kmp-file/tree/$branch"))
             remoteLineSuffix.set("#L")
         }
 
