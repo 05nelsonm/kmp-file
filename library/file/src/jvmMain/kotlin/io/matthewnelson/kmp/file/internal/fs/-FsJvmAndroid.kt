@@ -19,9 +19,11 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.ANDROID.SDK_INT
 import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException

@@ -37,7 +37,6 @@ import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.wrapIOException
 import java.io.FileInputStream
-import kotlin.Throws
 
 internal actual sealed class Fs private constructor(internal actual val info: FsInfo) {
 
@@ -202,8 +201,7 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                                     .alsoAddSuppressed(ee)
                             }
                         } catch (t: SecurityException) {
-                            val eee = t.toAccessDeniedException(file)
-                            ee.addSuppressed(eee)
+                            ee.addSuppressed(t)
                         }
                         ee
                     }
