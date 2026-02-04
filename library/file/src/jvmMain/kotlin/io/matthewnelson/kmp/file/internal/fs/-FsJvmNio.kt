@@ -91,23 +91,32 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                     // Windows file is read-only
 
                     if (!ignoreReadOnly) {
-                        // Configured not to ignore, create a more informative exception message.
-                        throw AccessDeniedException(file, reason = "File is read-only && ignoreReadOnly = false")
+                        // Configured not to ignore, create a more informative reason.
+                        val ee = AccessDeniedException(file, reason = "File is read-only && ignoreReadOnly = false")
+                        ee.addSuppressed(e)
+                        throw ee
                     }
 
-                    // Clear windows read-only flag
-                    file.setWritable(true)
+                    // Clear windows read-only attribute
+                    val wasSetWritable = file.setWritable(true)
 
                     try {
                         Files.delete(path)
                     } catch (tt: Throwable) {
                         val ee = tt.mapNioException(file)
                         ee.addSuppressed(e)
+
+                        if (wasSetWritable) try {
+                            // Restore read-only attribute
+                            file.setWritable(false)
+                        } catch (ttt: SecurityException) {
+                            ee.addSuppressed(ttt)
+                        }
+
                         throw ee
                     }
                 } catch (tt: SecurityException) {
-                    val ee = tt.toAccessDeniedException(file)
-                    e.addSuppressed(ee)
+                    e.addSuppressed(tt)
                     throw e
                 }
             }
