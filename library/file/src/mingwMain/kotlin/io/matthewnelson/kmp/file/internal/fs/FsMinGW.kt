@@ -18,8 +18,10 @@
 package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileNotFoundException
+import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.OpenExcl
@@ -226,7 +228,7 @@ internal data object FsMinGW: Fs(info = FsInfo.of(name = "FsMinGW", isPosix = fa
             dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL.convert(),
             hTemplateFile = null,
         )
-        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
+        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToFileOpenIOException(file)
 
         return MinGWFileStream(handle, canRead = true, canWrite = false, isAppending = false)
     }
@@ -255,7 +257,7 @@ internal data object FsMinGW: Fs(info = FsInfo.of(name = "FsMinGW", isPosix = fa
             dwFlagsAndAttributes = attributes.convert(),
             hTemplateFile = null,
         )
-        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
+        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToFileOpenIOException(file)
 
         return MinGWFileStream(handle, canRead = true, canWrite = true, isAppending = false)
     }
@@ -282,7 +284,7 @@ internal data object FsMinGW: Fs(info = FsInfo.of(name = "FsMinGW", isPosix = fa
             dwFlagsAndAttributes = attributes.convert(),
             hTemplateFile = null,
         )
-        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToIOException(file)
+        if (handle == null || handle == INVALID_HANDLE_VALUE) throw lastErrorToFileOpenIOException(file)
 
         return MinGWFileStream(handle, canRead = false, canWrite = true, isAppending = appending)
     }
@@ -319,5 +321,17 @@ internal data object FsMinGW: Fs(info = FsInfo.of(name = "FsMinGW", isPosix = fa
         } else {
             null
         }
+    }
+
+    private fun lastErrorToFileOpenIOException(file: File): IOException {
+        val e = lastErrorToIOException(file)
+        if (e !is AccessDeniedException) return e
+
+        if (file.isDirectoryOrNull() != true) return e
+
+        // Failure was attributed to being a directory
+        val ee = FileSystemException(file, reason = "Is a directory")
+        ee.addSuppressed(e)
+        return ee
     }
 }

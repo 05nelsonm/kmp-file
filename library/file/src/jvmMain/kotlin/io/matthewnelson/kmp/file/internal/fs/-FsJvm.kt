@@ -190,13 +190,26 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                 FileInputStream(file)
             } catch (t: SecurityException) {
                 throw t.toAccessDeniedException(file)
-            } catch (t: FileNotFoundException) {
-                val m = t.message ?: throw t
+            } catch (e: FileNotFoundException) {
+                val m = e.message ?: throw e
                 throw when {
-                    m.contains("denied") -> AccessDeniedException(file, reason = m)
+                    m.contains("denied") -> {
+                        var ee: FileSystemException = AccessDeniedException(file, reason = m)
+                        if (IsWindows) try {
+                            // Windows throws (Access is denied) when is a directory
+                            if (file.isDirectory) {
+                                ee = FileSystemException(file, reason = "Is a directory")
+                                    .alsoAddSuppressed(ee)
+                            }
+                        } catch (t: SecurityException) {
+                            val eee = t.toAccessDeniedException(file)
+                            ee.addSuppressed(eee)
+                        }
+                        ee
+                    }
                     m.contains("Is a directory") -> FileSystemException(file, reason = m)
-                    else -> throw t
-                }.alsoAddSuppressed(t)
+                    else -> throw e
+                }.alsoAddSuppressed(e)
             }
 
             return NioFileStream.of(

@@ -299,7 +299,20 @@ internal class FsJvmAndroidLegacy private constructor(): Fs.Jvm(
                 is FileNotFoundException -> run {
                     val m = c.message ?: return@run c
                     when {
-                        m.contains("denied") -> AccessDeniedException(this, reason = m)
+                        m.contains("denied") -> {
+                            var e: FileSystemException = AccessDeniedException(this, reason = m)
+                            if (IsWindows) try {
+                                // Windows throws (Access is denied) when is a directory
+                                if (isDirectory) {
+                                    e = FileSystemException(this, reason = "Is a directory")
+                                        .alsoAddSuppressed(e)
+                                }
+                            } catch (tt: SecurityException) {
+                                val ee = tt.toAccessDeniedException(this)
+                                e.addSuppressed(ee)
+                            }
+                            e
+                        }
                         m.contains("Is a directory") -> FileSystemException(this, reason = m)
                         else -> return@run c
                     }.alsoAddSuppressed(c)
