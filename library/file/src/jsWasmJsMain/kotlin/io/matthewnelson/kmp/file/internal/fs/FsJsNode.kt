@@ -27,6 +27,7 @@ import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileStream
+import io.matthewnelson.kmp.file.FileSystemException
 import io.matthewnelson.kmp.file.FsInfo
 import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
@@ -42,7 +43,6 @@ import io.matthewnelson.kmp.file.internal.async.withLockAsync
 import io.matthewnelson.kmp.file.internal.async.withTryLock
 import io.matthewnelson.kmp.file.internal.checkBounds
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
-import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.js.JsObject
 import io.matthewnelson.kmp.file.internal.js.jsObject
 import io.matthewnelson.kmp.file.internal.js.set
@@ -867,7 +867,7 @@ internal class FsJsNode private constructor(
         }
 
         val e: Throwable? = try {
-            if (_fstat(fd).isDirectory()) fileNotFoundException(file, null, "Is a directory") else null
+            if (_fstat(fd).isDirectory()) FileSystemException(file, reason = "Is a directory") else null
         } catch (t: Throwable) {
             (t as? CancellationException) ?: t.toIOException(file)
         }

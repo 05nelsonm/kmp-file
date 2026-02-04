@@ -31,6 +31,7 @@ import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.NioFileStream
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
@@ -189,6 +190,13 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                 FileInputStream(file)
             } catch (t: SecurityException) {
                 throw t.toAccessDeniedException(file)
+            } catch (t: FileNotFoundException) {
+                val m = t.message ?: throw t
+                throw when {
+                    m.contains("denied") -> AccessDeniedException(file, reason = m)
+                    m.contains("Is a directory") -> FileSystemException(file, reason = m)
+                    else -> throw t
+                }.alsoAddSuppressed(t)
             }
 
             return NioFileStream.of(

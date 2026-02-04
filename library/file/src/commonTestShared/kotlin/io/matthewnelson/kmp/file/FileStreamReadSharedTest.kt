@@ -41,14 +41,16 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenRead_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
+    fun givenOpenRead_whenIsDirectory_thenThrowsFileSystemException() = runTest { tmp ->
         tmp.mkdirs2(mode = null, mustCreate = true)
         var s: FileStream.Read? = null
         try {
             s = tmp.testOpen()
             fail("open should have failed because is a directory...")
-        } catch (_: IOException) {
-            // pass
+        } catch (e: FileSystemException) {
+            val r = e.reason ?: throw AssertionError("reason == null", e)
+            assertTrue(r.contains("Is a directory"), e.message)
+            assertEquals(tmp, e.file)
         } finally {
             try {
                 s?.close()

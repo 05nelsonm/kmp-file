@@ -364,7 +364,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             }
         }
         is kotlin.io.FileSystemException -> when (this) {
-            is kotlin.io.NoSuchFileException -> FileNotFoundException(message)
+            is kotlin.io.NoSuchFileException -> FileNotFoundException(message).alsoAddSuppressed(this)
             else -> this
         }
         is SecurityException -> toAccessDeniedException(file)

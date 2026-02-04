@@ -74,9 +74,8 @@ internal class FsJvmAndroidLegacy private constructor(): Fs.Jvm(
             }
 
             val files = file.list()
-
-            // Either an I/O exception with file.list(), or is not a directory
-            if (files == null) throw FileSystemException(file, reason = "Failed to delete")
+                // Either an I/O exception with file.list(), or is not a directory
+                ?: throw FileSystemException(file, reason = "Failed to delete")
 
             // dir not empty
             if (files.isNotEmpty()) throw DirectoryNotEmptyException(file)
@@ -299,9 +298,11 @@ internal class FsJvmAndroidLegacy private constructor(): Fs.Jvm(
                 is SecurityException -> c.toAccessDeniedException(this)
                 is FileNotFoundException -> run {
                     val m = c.message ?: return@run c
-                    if (!m.contains("denied")) return@run c
-                    AccessDeniedException(this, null, "Permission denied")
-                        .alsoAddSuppressed(c)
+                    when {
+                        m.contains("denied") -> AccessDeniedException(this, reason = m)
+                        m.contains("Is a directory") -> FileSystemException(this, reason = m)
+                        else -> return@run c
+                    }.alsoAddSuppressed(c)
                 }
                 else -> c.wrapIOException()
             }

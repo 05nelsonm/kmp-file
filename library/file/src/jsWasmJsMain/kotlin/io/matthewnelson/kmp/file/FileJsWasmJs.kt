@@ -233,6 +233,18 @@ public fun Throwable.toIOException(file: File?, other: File? = null): IOExceptio
             "EEXIST" -> FileAlreadyExistsException(file, other, message)
             "ENOTDIR" -> NotDirectoryException(file)
             "ENOTEMPTY" -> DirectoryNotEmptyException(file)
+            "EISDIR" -> {
+                var reason = "EISDIR: Is a directory"
+                message?.let { msg ->
+                    if (msg.contains("Is a directory")) {
+                        reason = msg
+                    } else {
+                        reason += ". "
+                        reason += msg.substringAfter("EISDIR: ")
+                    }
+                }
+                FileSystemException(file, other, reason)
+            }
             else -> FileSystemException(file, other, message)
         }
         else -> wrapIOException()
