@@ -100,7 +100,8 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
             try {
                 s = tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = appending)
                 fail("open should have failed... >> ${OpenExcl.MustCreate.DEFAULT} >> appending[$appending]")
-            } catch (_: FileAlreadyExistsException) {
+            } catch (e: FileAlreadyExistsException) {
+                assertEquals(tmp, e.file)
                 // pass
             } finally {
                 s?.close()

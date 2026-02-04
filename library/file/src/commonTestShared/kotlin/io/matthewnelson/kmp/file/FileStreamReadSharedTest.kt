@@ -48,9 +48,9 @@ abstract class FileStreamReadSharedTest: FileStreamBaseTest() {
             s = tmp.testOpen()
             fail("open should have failed because is a directory...")
         } catch (e: FileSystemException) {
+            assertEquals(tmp, e.file)
             val r = e.reason ?: throw AssertionError("reason == null", e)
             assertTrue(r.contains("Is a directory"), e.message)
-            assertEquals(tmp, e.file)
         } finally {
             try {
                 s?.close()
