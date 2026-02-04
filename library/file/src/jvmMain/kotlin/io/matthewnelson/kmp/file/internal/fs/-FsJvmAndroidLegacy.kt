@@ -58,9 +58,10 @@ internal class FsJvmAndroidLegacy private constructor(): Fs.Jvm(
     internal override fun delete(file: File, ignoreReadOnly: Boolean, mustExist: Boolean) {
         checkThread()
         try {
-            if (IsWindows && !ignoreReadOnly) {
-                // Need to check before executing anything b/c File.delete() will just
-                // go ahead and ignore the read-only flag entirely.
+            if (!ignoreReadOnly && IsWindows) {
+                // Need to check before executing anything b/c File.delete() will just go
+                // ahead and ignore the read-only attribute entirely on JDK 24 and below, and
+                // on JDK 25+ with runtime arg `-Djdk.io.File.allowDeleteReadOnlyFiles=true`
                 if (file.exists() && !file.isDirectory && !file.canWrite()) {
                     throw AccessDeniedException(file, reason = "File is read-only && ignoreReadOnly = false")
                 }
@@ -73,14 +74,30 @@ internal class FsJvmAndroidLegacy private constructor(): Fs.Jvm(
                 throw fileNotFoundException(file, null, null)
             }
 
+            // Check for failure due to Windows & JDK 25+
+            // See: https://bugs.openjdk.org/browse/JDK-8356195
+            if (ignoreReadOnly && IsWindows && !file.isDirectory && !file.canWrite()) {
+                val wasSetWritable = file.setWritable(true)
+                if (file.delete()) return
+                val e = FileSystemException(file, reason = "Failed to delete")
+
+                if (wasSetWritable) try {
+                    // Restore read-only attribute
+                    file.setWritable(false)
+                } catch (t: SecurityException) {
+                    e.addSuppressed(t)
+                }
+
+                throw e
+            }
+
             val files = file.list()
-                // Either an I/O exception with file.list(), or is not a directory
+                // null -> either an I/O error with file.list(), or is not a directory
                 ?: throw FileSystemException(file, reason = "Failed to delete")
 
-            // dir not empty
             if (files.isNotEmpty()) throw DirectoryNotEmptyException(file)
 
-            // Last resort, should never make it here ideally?
+            // Unknown reason...
             throw FileSystemException(file, reason = "Failed to delete directory")
         } catch (t: SecurityException) {
             throw t.toAccessDeniedException(file)
