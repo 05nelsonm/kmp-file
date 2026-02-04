@@ -330,16 +330,16 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             var e = t.mapNioException(this)
             if (e !is AccessDeniedException) throw e
             if (this@FsJvmNio !is NonPosix) throw e
+            if (e.reason == "SecurityException") throw e
 
             // NonPosix (i.e. Windows) & AccessDeniedException. Check if it's a directory.
             try {
-                if (e.reason != "SecurityException" && isDirectory) {
+                if (isDirectory) {
                     e = FileSystemException(this, reason = "Is a directory")
                         .alsoAddSuppressed(e)
                 }
             } catch (tt: SecurityException) {
-                val ee = tt.toAccessDeniedException(this)
-                e.addSuppressed(ee)
+                e.addSuppressed(tt)
             }
 
             throw e

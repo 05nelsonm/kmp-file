@@ -92,8 +92,11 @@ abstract class FileStreamWriteJvmSharedTest: FileStreamWriteSharedTest() {
                 s = tmp.testOpen(excl = OpenExcl.MustExist, appending = true)
                 fail("open should have failed due to missing write permissions...")
             } catch (e: AccessDeniedException) {
-                assertEquals(true, e.message?.contains("permission denied", ignoreCase = true))
-                // pass
+                assertEquals(
+                    true,
+                    e.message?.contains("permission denied", ignoreCase = true),
+                    e.message,
+                )
             } finally {
                 s?.close()
             }

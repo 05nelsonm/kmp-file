@@ -308,8 +308,7 @@ internal class FsJvmAndroidLegacy private constructor(): Fs.Jvm(
                                         .alsoAddSuppressed(e)
                                 }
                             } catch (tt: SecurityException) {
-                                val ee = tt.toAccessDeniedException(this)
-                                e.addSuppressed(ee)
+                                e.addSuppressed(tt)
                             }
                             e
                         }
