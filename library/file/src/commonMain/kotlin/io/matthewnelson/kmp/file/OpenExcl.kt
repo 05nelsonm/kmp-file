@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("RedundantVisibilityModifier", "PropertyName")
+@file:Suppress("LocalVariableName", "PropertyName", "RedundantVisibilityModifier")
 
 package io.matthewnelson.kmp.file
 
@@ -46,7 +46,7 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
      * @see [Companion.of]
      * @see [Companion.DEFAULT]
      * */
-    public class MaybeCreate private constructor(mode: Mode) : OpenExcl(mode) {
+    public class MaybeCreate private constructor(_mode: Mode) : OpenExcl(_mode) {
 
         public companion object {
 
@@ -54,17 +54,17 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
              * The default [MaybeCreate] value with permissions `666`.
              * */
             @JvmField
-            public val DEFAULT: MaybeCreate = MaybeCreate(mode = Mode.DEFAULT_FILE)
+            public val DEFAULT: MaybeCreate = MaybeCreate(Mode.DEFAULT_FILE)
 
             /**
              * Creates a new instance of [MaybeCreate] with provided [mode], or
-             * returns [DEFAULT] when [mode] == `666` or `null`.
+             * returns [DEFAULT] when [mode] is `null` or `666`.
              *
              * @param [mode] The permissions to use if the file is created.
              *
              * @see [chmod2]
              *
-             * @throws [IllegalArgumentException] if [mode] is inappropriate.
+             * @throws [IllegalArgumentException] If [mode] is inappropriate.
              * */
             @JvmStatic
             public fun of(mode: String?): MaybeCreate {
@@ -82,7 +82,7 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
      * @see [Companion.of]
      * @see [Companion.DEFAULT]
      * */
-    public class MustCreate private constructor(mode: Mode) : OpenExcl(mode) {
+    public class MustCreate private constructor(_mode: Mode) : OpenExcl(_mode) {
 
         public companion object {
 
@@ -90,17 +90,17 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
              * The default [MustCreate] value with permissions `666`.
              * */
             @JvmField
-            public val DEFAULT: MustCreate = MustCreate(mode = Mode.DEFAULT_FILE)
+            public val DEFAULT: MustCreate = MustCreate(Mode.DEFAULT_FILE)
 
             /**
              * Creates a new instance of [MustCreate] with provided [mode], or
-             * returns [DEFAULT] when [mode] == `666` or `null`.
+             * returns [DEFAULT] when [mode] is `null` or `666`.
              *
              * @param [mode] The permissions to use when the file is created.
              *
              * @see [chmod2]
              *
-             * @throws [IllegalArgumentException] if [mode] is inappropriate.
+             * @throws [IllegalArgumentException] If [mode] is inappropriate.
              * */
             @JvmStatic
             public fun of(mode: String?): MustCreate {
@@ -114,7 +114,7 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
      * When opening a [File], it **MUST** exist. A new file will **NOT** be created. If
      * the file being opened does not exist, a [FileNotFoundException] will be thrown.
      * */
-    public data object MustExist : OpenExcl(_mode = Mode.DEFAULT_FILE)
+    public data object MustExist : OpenExcl(Mode.DEFAULT_FILE)
 
     public companion object {
 
@@ -122,6 +122,8 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
          * Checks if a `String` is a valid mode.
          *
          * @param [mode] The 3 character mode to check.
+         *
+         * @see [chmod2]
          *
          * @throws [IllegalArgumentException] If [mode] is invalid.
          * */
@@ -146,8 +148,8 @@ public sealed class OpenExcl private constructor(internal val _mode: Mode) {
 
     /** @suppress */
     public final override fun toString(): String = when (this) {
-        is MaybeCreate -> "MaybeCreate[flags=O_CREAT, "
-        is MustCreate -> "MustCreate[flags=O_CREAT|O_EXCL, "
-        is MustExist -> "MustExist["
-    }.let { value -> "OpenExcl.${value}mode=$mode]" }
+        is MaybeCreate -> "OpenExcl.MaybeCreate[mode=$mode, flags=O_CREAT]"
+        is MustCreate -> "OpenExcl.MustCreate[mode=$mode, flags=O_CREAT|O_EXCL]"
+        is MustExist -> "OpenExcl.MustExist"
+    }
 }
