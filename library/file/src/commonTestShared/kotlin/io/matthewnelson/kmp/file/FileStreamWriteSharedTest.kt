@@ -22,6 +22,7 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertIsNot
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -42,7 +43,7 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
     }
 
     @Test
-    fun givenOpenWrite_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
+    fun givenOpenWrite_whenIsDirectory_thenThrowsFileSystemException() = runTest { tmp ->
         tmp.mkdirs2(mode = null, mustCreate = true)
         arrayOf(
             OpenExcl.MaybeCreate.DEFAULT,
@@ -52,13 +53,21 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
             arrayOf(
                 true,
                 false,
-            ).forEach { appending ->
+            ).forEach appending@ { appending ->
                 var s: FileStream.Write? = null
                 try {
                     s = tmp.testOpen(excl = excl, appending = appending)
                     fail("open should have failed because is directory... >> $excl >> APPENDING[$appending]")
-                } catch (_: IOException) {
-                    // pass
+                } catch (e: FileSystemException) {
+                    assertEquals(tmp, e.file)
+
+                    if (e is FileAlreadyExistsException) {
+                        assertIs<OpenExcl.MustCreate>(excl)
+                        return@appending
+                    }
+
+                    val r = e.reason ?: throw AssertionError("reason == null", e)
+                    assertTrue(r.contains("Is a directory"), e.message + " >> $excl")
                 } finally {
                     try {
                         s?.close()
@@ -91,7 +100,8 @@ abstract class FileStreamWriteSharedTest: FileStreamBaseTest() {
             try {
                 s = tmp.testOpen(excl = OpenExcl.MustCreate.DEFAULT, appending = appending)
                 fail("open should have failed... >> ${OpenExcl.MustCreate.DEFAULT} >> appending[$appending]")
-            } catch (_: FileAlreadyExistsException) {
+            } catch (e: FileAlreadyExistsException) {
+                assertEquals(tmp, e.file)
                 // pass
             } finally {
                 s?.close()

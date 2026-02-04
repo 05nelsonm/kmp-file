@@ -17,11 +17,17 @@
 
 package io.matthewnelson.kmp.file.internal.fs
 
-import io.matthewnelson.kmp.file.*
+import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
+import io.matthewnelson.kmp.file.File
 import io.matthewnelson.kmp.file.FileAlreadyExistsException
+import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileSystemException
+import io.matthewnelson.kmp.file.FsInfo
+import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.NotDirectoryException
+import io.matthewnelson.kmp.file.OpenExcl
 import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.NioFileStream
@@ -29,12 +35,17 @@ import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.disappearingCheck
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
+import io.matthewnelson.kmp.file.toFile
+import io.matthewnelson.kmp.file.wrapIOException
 import java.nio.channels.FileChannel
-import java.nio.file.*
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.InvalidPathException
+import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import java.nio.file.attribute.FileAttribute
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
-import kotlin.io.AccessDeniedException
 import kotlin.text.equals
 import kotlin.text.forEach
 import kotlin.text.startsWith
@@ -327,7 +338,22 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
                 FileChannel.open(path, options, attrs)
             }
         } catch (t: Throwable) {
-            throw t.mapNioException(this)
+            var e = t.mapNioException(this)
+            if (e !is AccessDeniedException) throw e
+            if (this@FsJvmNio !is NonPosix) throw e
+            if (e.reason == "SecurityException") throw e
+
+            // NonPosix (i.e. Windows) & AccessDeniedException. Check if it's a directory.
+            try {
+                if (isDirectory) {
+                    e = FileSystemException(this, reason = "Is a directory")
+                        .alsoAddSuppressed(e)
+                }
+            } catch (tt: SecurityException) {
+                e.addSuppressed(tt)
+            }
+
+            throw e
         }
 
         return NioFileStream.of(ch, canRead, canWrite, isAppending, parents = emptyArray())
@@ -364,7 +390,7 @@ internal abstract class FsJvmNio private constructor(info: FsInfo): Fs.Jvm(info)
             }
         }
         is kotlin.io.FileSystemException -> when (this) {
-            is kotlin.io.NoSuchFileException -> FileNotFoundException(message)
+            is kotlin.io.NoSuchFileException -> FileNotFoundException(message).alsoAddSuppressed(this)
             else -> this
         }
         is SecurityException -> toAccessDeniedException(file)

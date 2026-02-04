@@ -31,12 +31,12 @@ import io.matthewnelson.kmp.file.internal.IsWindows
 import io.matthewnelson.kmp.file.internal.Mode
 import io.matthewnelson.kmp.file.internal.NioFileStream
 import io.matthewnelson.kmp.file.internal.Path
+import io.matthewnelson.kmp.file.internal.alsoAddSuppressed
 import io.matthewnelson.kmp.file.internal.containsOwnerWriteAccess
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.toAccessDeniedException
 import io.matthewnelson.kmp.file.wrapIOException
 import java.io.FileInputStream
-import kotlin.Throws
 
 internal actual sealed class Fs private constructor(internal actual val info: FsInfo) {
 
@@ -189,6 +189,25 @@ internal actual sealed class Fs private constructor(internal actual val info: Fs
                 FileInputStream(file)
             } catch (t: SecurityException) {
                 throw t.toAccessDeniedException(file)
+            } catch (e: FileNotFoundException) {
+                val m = e.message ?: throw e
+                throw when {
+                    m.contains("denied") -> {
+                        var ee: FileSystemException = AccessDeniedException(file, reason = m)
+                        if (IsWindows) try {
+                            // Windows throws (Access is denied) when is a directory
+                            if (file.isDirectory) {
+                                ee = FileSystemException(file, reason = "Is a directory")
+                                    .alsoAddSuppressed(ee)
+                            }
+                        } catch (t: SecurityException) {
+                            ee.addSuppressed(t)
+                        }
+                        ee
+                    }
+                    m.contains("Is a directory") -> FileSystemException(file, reason = m)
+                    else -> throw e
+                }.alsoAddSuppressed(e)
             }
 
             return NioFileStream.of(

@@ -69,7 +69,7 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
     }
 
     @Test
-    fun givenOpenReadWrite_whenIsDirectory_thenThrowsIOException() = runTest { tmp ->
+    fun givenOpenReadWrite_whenIsDirectory_thenThrowsFileSystemException() = runTest { tmp ->
         tmp.mkdirs2(mode = null, mustCreate = true)
         arrayOf(
             OpenExcl.MaybeCreate.DEFAULT,
@@ -80,8 +80,16 @@ abstract class FileStreamReadWriteSharedTest: FileStreamReadSharedTest() {
             try {
                 s = tmp.testOpen(excl = excl)
                 fail("open should have failed because is directory... >> $excl")
-            } catch (_: IOException) {
-                // pass
+            } catch (e: FileSystemException) {
+                assertEquals(tmp, e.file)
+
+                if (e is FileAlreadyExistsException) {
+                    assertIs<OpenExcl.MustCreate>(excl)
+                    return@forEach
+                }
+
+                val r = e.reason ?: throw AssertionError("reason == null", e)
+                assertTrue(r.contains("Is a directory"), e.message + " >> $excl")
             } finally {
                 try {
                     s?.close()

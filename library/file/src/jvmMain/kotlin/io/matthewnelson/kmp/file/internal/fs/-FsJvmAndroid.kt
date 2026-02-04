@@ -19,9 +19,11 @@ package io.matthewnelson.kmp.file.internal.fs
 
 import io.matthewnelson.kmp.file.ANDROID.SDK_INT
 import io.matthewnelson.kmp.file.AbstractFileStream
+import io.matthewnelson.kmp.file.AccessDeniedException
 import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.DirectoryNotEmptyException
 import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.FileAlreadyExistsException
 import io.matthewnelson.kmp.file.FileNotFoundException
 import io.matthewnelson.kmp.file.FileStream
 import io.matthewnelson.kmp.file.FileSystemException
@@ -189,7 +191,7 @@ internal class FsJvmAndroid private constructor(
                 val s = fstat.invoke(null, fd)
                 (stat.st_mode.getInt(s) and const.S_IFMT) == const.S_IFDIR
             }
-            if (isDirectory) throw fileNotFoundException(file, null, "Is a directory")
+            if (isDirectory) throw FileSystemException(file, null, "Is a directory")
         } catch (e: IOException) {
             fd.doClose(null)?.let { ee -> e.addSuppressed(ee) }
             throw e
@@ -325,7 +327,7 @@ internal class FsJvmAndroid private constructor(
     // android.system.ErrnoException
     @OptIn(ExperimentalContracts::class)
     @Throws(IllegalArgumentException::class, IOException::class)
-    private inline fun <T: Any?> tryCatchErrno(file: File?, other: File? = null, block: Os.() -> T): T {
+    private inline fun <T> tryCatchErrno(file: File?, other: File? = null, block: Os.() -> T): T {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }

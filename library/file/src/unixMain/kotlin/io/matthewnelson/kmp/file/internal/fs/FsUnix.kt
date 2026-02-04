@@ -41,6 +41,7 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
 import platform.posix.EEXIST
 import platform.posix.EINVAL
+import platform.posix.EISDIR
 import platform.posix.ENOENT
 import platform.posix.O_CLOEXEC
 import platform.posix.O_CREAT
@@ -148,7 +149,7 @@ internal data object FsUnix: Fs(info = FsInfo.of(name = "FsUnix", isPosix = true
                 return@memScoped errnoToIOException(errno)
             }
             if ((stat.st_mode.toInt() and S_IFMT) == S_IFDIR) {
-                return@memScoped errnoToIOException(ENOENT, file)
+                return@memScoped errnoToIOException(EISDIR, file)
             }
             null
         }
