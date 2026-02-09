@@ -116,6 +116,7 @@ class AndroidNativeExecutableTest {
                 Thread.sleep(100)
                 timeout -= 100.milliseconds
             }
+            Thread.sleep(50)
         } finally {
             p?.destroy()
         }
