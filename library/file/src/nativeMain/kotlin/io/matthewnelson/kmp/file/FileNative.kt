@@ -20,8 +20,23 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.internal.errnoToString
 import io.matthewnelson.kmp.file.internal.fileNotFoundException
 import io.matthewnelson.kmp.file.internal.ignoreEINTR32
-import kotlinx.cinterop.*
-import platform.posix.*
+import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
+import platform.posix.EACCES
+import platform.posix.EEXIST
+import platform.posix.EINTR
+import platform.posix.ENOENT
+import platform.posix.ENOTDIR
+import platform.posix.ENOTEMPTY
+import platform.posix.EPERM
+import platform.posix.FILE
+import platform.posix.errno
+import platform.posix.fclose
+import platform.posix.fopen
+import platform.posix.strerror
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -98,7 +113,7 @@ public fun errnoToIOException(errno: Int, file: File?, other: File? = null): IOE
 @Throws(IOException::class)
 @OptIn(ExperimentalContracts::class)
 @Deprecated("Replaced by (File.openRead, File.openReadWrite, File.openWrite, File.openAppend).use {} functionality.")
-public inline fun <T: Any?> File.fOpen(
+public inline fun <T> File.fOpen(
     flags: String,
     block: (file: CPointer<FILE>) -> T,
 ): T {

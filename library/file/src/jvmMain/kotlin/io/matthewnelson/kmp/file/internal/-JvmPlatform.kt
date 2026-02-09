@@ -23,8 +23,7 @@ import io.matthewnelson.kmp.file.toFile
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.io.resolve
-import kotlin.io.resolve as kResolve
+import kotlin.io.resolve as _resolve
 
 internal actual inline fun platformDirSeparator(): Char = File.separatorChar
 
@@ -58,7 +57,7 @@ internal actual inline fun platformTempDirectory(): File {
         return jTemp
     }
 
-    val cache = parent.resolve("cache")
+    val cache = parent._resolve("cache")
 
     try {
         if (!cache.exists() && !cache.mkdirs()) return jTemp
@@ -75,7 +74,7 @@ internal actual val IsWindows: Boolean = System.getProperty("os.name")
     ?.contains("windows", ignoreCase = true)
     ?: (File.separatorChar == '\\')
 
-internal actual inline fun File.platformResolve(relative: File): File = kResolve(relative)
+internal actual inline fun File.platformResolve(relative: File): File = _resolve(relative)
 
 @OptIn(ExperimentalContracts::class)
 internal inline fun synchronizedIfNotNull(lock: Any?, block: () -> Unit) {
