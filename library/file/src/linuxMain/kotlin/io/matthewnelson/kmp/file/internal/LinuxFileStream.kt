@@ -22,31 +22,27 @@ import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.convert
 import platform.posix.fdatasync
+import platform.posix.fsync
 import platform.posix.ftruncate
 import platform.posix.lseek
 import platform.posix.pread
 import platform.posix.pwrite
 
 @ExperimentalForeignApi
-internal actual inline fun platformFDataSync(
-    fd: Int,
-): Int = fdatasync(fd)
-
-@ExperimentalForeignApi
-internal actual inline fun platformFTruncate(
+internal actual inline fun unixFTruncate(
     fd: Int,
     offset: Long,
 ): Int = ftruncate(fd, offset)
 
 @ExperimentalForeignApi
-internal actual inline fun platformLSeek(
+internal actual inline fun unixLSeek(
     fd: Int,
     offset: Long,
     whence: Int,
 ): Long = lseek(fd, offset, whence)
 
 @ExperimentalForeignApi
-internal actual inline fun platformPRead(
+internal actual inline fun unixPRead(
     fd: Int,
     buf: CPointer<ByteVarOf<Byte>>,
     len: Int,
@@ -54,9 +50,15 @@ internal actual inline fun platformPRead(
 ): Int = pread(fd, buf, len.convert(), position).toInt()
 
 @ExperimentalForeignApi
-internal actual inline fun platformPWrite(
+internal actual inline fun unixPWrite(
     fd: Int,
     buf: CPointer<ByteVarOf<Byte>>,
     len: Int,
     position: Long,
 ): Int = pwrite(fd, buf, len.convert(), position).toInt()
+
+@ExperimentalForeignApi
+internal actual inline fun unixSync(
+    fd: Int,
+    meta: Boolean,
+): Int = if (meta) fsync(fd) else fdatasync(fd)

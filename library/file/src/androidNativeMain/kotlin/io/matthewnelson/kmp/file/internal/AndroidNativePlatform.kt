@@ -17,12 +17,33 @@
 
 package io.matthewnelson.kmp.file.internal
 
-import io.matthewnelson.kmp.file.*
-import kotlinx.cinterop.CPointer
+import io.matthewnelson.kmp.file.DelicateFileApi
+import io.matthewnelson.kmp.file.File
+import io.matthewnelson.kmp.file.IOException
+import io.matthewnelson.kmp.file.SysDirSep
+import io.matthewnelson.kmp.file.errnoToIOException
+import io.matthewnelson.kmp.file.openRead
+import io.matthewnelson.kmp.file.readUtf8
+import io.matthewnelson.kmp.file.toFile
+import io.matthewnelson.kmp.file.use
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.toKString
-import platform.posix.*
+import platform.posix.O_CLOEXEC
+import platform.posix.O_DIRECTORY
+import platform.posix.O_RDONLY
+import platform.posix.R_OK
+import platform.posix.W_OK
+import platform.posix.X_OK
+import platform.posix.access
+import platform.posix.close
+import platform.posix.closedir
+import platform.posix.errno
+import platform.posix.fdopendir
+import platform.posix.getenv
+import platform.posix.getppid
+import platform.posix.open
+import platform.posix.readdir
 
 internal actual inline fun platformTempDirectory(): File = __TempDir
 

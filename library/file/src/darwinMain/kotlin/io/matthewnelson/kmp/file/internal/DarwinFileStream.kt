@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE", "REDUNDANT_CALL_OF_CONVERSION_METHOD")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -30,18 +30,13 @@ import platform.posix.pread
 import platform.posix.pwrite
 
 @ExperimentalForeignApi
-internal actual inline fun platformFDataSync(
-    fd: Int,
-): Int = fcntl(fd, F_FULLFSYNC)
-
-@ExperimentalForeignApi
-internal actual inline fun platformFTruncate(
+internal actual inline fun unixFTruncate(
     fd: Int,
     offset: Long,
 ): Int = ftruncate(fd, offset)
 
 @ExperimentalForeignApi
-internal actual inline fun platformLSeek(
+internal actual inline fun unixLSeek(
     fd: Int,
     offset: Long,
     whence: Int,
@@ -49,8 +44,7 @@ internal actual inline fun platformLSeek(
 
 @ExperimentalForeignApi
 @OptIn(UnsafeNumber::class)
-@Suppress("RemoveRedundantCallsOfConversionMethods")
-internal actual inline fun platformPRead(
+internal actual inline fun unixPRead(
     fd: Int,
     buf: CPointer<ByteVarOf<Byte>>,
     len: Int,
@@ -59,10 +53,21 @@ internal actual inline fun platformPRead(
 
 @ExperimentalForeignApi
 @OptIn(UnsafeNumber::class)
-@Suppress("RemoveRedundantCallsOfConversionMethods")
-internal actual inline fun platformPWrite(
+internal actual inline fun unixPWrite(
     fd: Int,
     buf: CPointer<ByteVarOf<Byte>>,
     len: Int,
     position: Long,
 ): Int = pwrite(fd, buf, len.convert(), position).toInt()
+
+@ExperimentalForeignApi
+internal actual inline fun unixSync(
+    fd: Int,
+    meta: Boolean,
+): Int {
+    if (fcntl(fd, F_FULLFSYNC) != -1) return 0
+    // TODO: (Issue #212)
+    //  Cinterop - Use fstatfs from <sys/mount.h>
+    //    return if ((stat.f_flags & MNT_LOCAL) == 0) fsync(fd) else -1
+    return -1
+}

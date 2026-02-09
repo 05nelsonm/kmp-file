@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+@file:Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
+
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.AbstractFileStream
@@ -36,7 +38,6 @@ import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 import platform.posix.errno
 import platform.posix.fstat
-import platform.posix.fsync
 import platform.posix.stat
 import kotlin.concurrent.AtomicReference
 
@@ -61,7 +62,7 @@ internal class UnixFileStream(
         synchronized(positionLock) {
             val ret = ignoreEINTR64 {
                 val fd = _fd.value ?: throw ClosedException()
-                platformLSeek(fd, 0L, SEEK_CUR)
+                unixLSeek(fd, 0L, SEEK_CUR)
             }
             if (ret == -1L) throw errnoToIOException(errno)
             return ret
@@ -75,7 +76,7 @@ internal class UnixFileStream(
         synchronized(positionLock) {
             val ret = ignoreEINTR64 {
                 val fd = _fd.value ?: throw ClosedException()
-                platformLSeek(fd, new, SEEK_SET)
+                unixLSeek(fd, new, SEEK_SET)
             }
             if (ret == -1L) throw errnoToIOException(errno)
             return this
@@ -100,7 +101,6 @@ internal class UnixFileStream(
         if (len == 0) return 0
         synchronizedIfNotNull(lock = if (p == -1L) positionLock else null) {
             @OptIn(UnsafeNumber::class)
-            @Suppress("RemoveRedundantCallsOfConversionMethods")
             val read = buf.usePinned { pinned ->
                 ignoreEINTR32 {
                     val fd = _fd.value ?: throw ClosedException()
@@ -111,7 +111,7 @@ internal class UnixFileStream(
                             len.convert(),
                         ).toInt()
                     } else {
-                        platformPRead(
+                        unixPRead(
                             fd,
                             pinned.addressOf(offset),
                             len,
@@ -148,18 +148,18 @@ internal class UnixFileStream(
         synchronized(positionLock) {
             ignoreEINTR32 {
                 val fd = _fd.value ?: throw ClosedException()
-                platformFTruncate(fd, new)
+                unixFTruncate(fd, new)
             }.let { if (it == -1) throw errnoToIOException(errno) }
             if (isAppending) return this
             val pos = ignoreEINTR64 {
                 val fd = _fd.value ?: throw ClosedException()
-                platformLSeek(fd, 0L, SEEK_CUR)
+                unixLSeek(fd, 0L, SEEK_CUR)
             }
             if (pos == -1L) throw errnoToIOException(errno)
             if (pos <= new) return this
             val ret = ignoreEINTR64 {
                 val fd = _fd.value ?: throw ClosedException()
-                platformLSeek(fd, new, SEEK_SET)
+                unixLSeek(fd, new, SEEK_SET)
             }
             if (ret == -1L) throw errnoToIOException(errno)
             return this
@@ -170,7 +170,7 @@ internal class UnixFileStream(
         checkIsOpen()
         val ret = ignoreEINTR32 {
             val fd = _fd.value ?: throw ClosedException()
-            if (meta) fsync(fd) else platformFDataSync(fd)
+            unixSync(fd, meta)
         }
         if (ret == 0) return this
         throw errnoToIOException(errno)
@@ -198,13 +198,12 @@ internal class UnixFileStream(
                 // See Issue #175
                 val ret = ignoreEINTR64 {
                     val fd = _fd.value ?: throw ClosedException()
-                    platformLSeek(fd, 0L, SEEK_END)
+                    unixLSeek(fd, 0L, SEEK_END)
                 }
                 if (ret == -1L) throw errnoToIOException(errno)
             }
 
             @OptIn(UnsafeNumber::class)
-            @Suppress("RemoveRedundantCallsOfConversionMethods")
             buf.usePinned { pinned ->
                 var total = 0
                 while (total < len) {
@@ -217,7 +216,7 @@ internal class UnixFileStream(
                                 (len - total).convert(),
                             ).toInt()
                         } else {
-                            platformPWrite(
+                            unixPWrite(
                                 fd,
                                 pinned.addressOf(offset + total),
                                 len - total,
@@ -243,25 +242,20 @@ internal class UnixFileStream(
 }
 
 @ExperimentalForeignApi
-internal expect inline fun platformFDataSync(
-    fd: Int,
-): Int
-
-@ExperimentalForeignApi
-internal expect inline fun platformFTruncate(
+internal expect inline fun unixFTruncate(
     fd: Int,
     offset: Long,
 ): Int
 
 @ExperimentalForeignApi
-internal expect inline fun platformLSeek(
+internal expect inline fun unixLSeek(
     fd: Int,
     offset: Long,
     whence: Int,
 ): Long
 
 @ExperimentalForeignApi
-internal expect inline fun platformPRead(
+internal expect inline fun unixPRead(
     fd: Int,
     buf: CPointer<ByteVarOf<Byte>>,
     len: Int,
@@ -269,9 +263,15 @@ internal expect inline fun platformPRead(
 ): Int
 
 @ExperimentalForeignApi
-internal expect inline fun platformPWrite(
+internal expect inline fun unixPWrite(
     fd: Int,
     buf: CPointer<ByteVarOf<Byte>>,
     len: Int,
     position: Long,
+): Int
+
+@ExperimentalForeignApi
+internal expect inline fun unixSync(
+    fd: Int,
+    meta: Boolean,
 ): Int

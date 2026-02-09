@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE", "REDUNDANT_CALL_OF_CONVERSION_METHOD")
 
 package io.matthewnelson.kmp.file.internal
 
@@ -23,24 +23,20 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.convert
 import platform.posix.fdatasync
+import platform.posix.fsync
 import platform.posix.ftruncate64
 import platform.posix.lseek64
 import platform.posix.pread64
 import platform.posix.pwrite64
 
 @ExperimentalForeignApi
-internal actual inline fun platformFDataSync(
-    fd: Int,
-): Int = fdatasync(fd)
-
-@ExperimentalForeignApi
-internal actual inline fun platformFTruncate(
+internal actual inline fun unixFTruncate(
     fd: Int,
     offset: Long,
 ): Int = ftruncate64(fd, offset)
 
 @ExperimentalForeignApi
-internal actual inline fun platformLSeek(
+internal actual inline fun unixLSeek(
     fd: Int,
     offset: Long,
     whence: Int,
@@ -48,8 +44,7 @@ internal actual inline fun platformLSeek(
 
 @ExperimentalForeignApi
 @OptIn(UnsafeNumber::class)
-@Suppress("RemoveRedundantCallsOfConversionMethods")
-internal actual inline fun platformPRead(
+internal actual inline fun unixPRead(
     fd: Int,
     buf: CPointer<ByteVarOf<Byte>>,
     len: Int,
@@ -58,10 +53,15 @@ internal actual inline fun platformPRead(
 
 @ExperimentalForeignApi
 @OptIn(UnsafeNumber::class)
-@Suppress("RemoveRedundantCallsOfConversionMethods")
-internal actual inline fun platformPWrite(
+internal actual inline fun unixPWrite(
     fd: Int,
     buf: CPointer<ByteVarOf<Byte>>,
     len: Int,
     position: Long,
 ): Int = pwrite64(fd, buf, len.convert(), position).toInt()
+
+@ExperimentalForeignApi
+internal actual inline fun unixSync(
+    fd: Int,
+    meta: Boolean,
+): Int = if (meta) fsync(fd) else fdatasync(fd)

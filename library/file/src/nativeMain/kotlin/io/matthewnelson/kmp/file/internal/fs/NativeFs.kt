@@ -41,7 +41,7 @@ internal actual value class RealPathScope private actual constructor(private act
 }
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual inline fun <T: Any?> realPathScope(block: RealPathScope.() -> T): T = memScoped {
+internal actual inline fun <T> realPathScope(block: RealPathScope.() -> T): T = memScoped {
     val scope = RealPathScope(this)
     block(scope)
 }
