@@ -64,4 +64,4 @@ internal actual inline fun unixPWrite(
 internal actual inline fun unixSync(
     fd: Int,
     meta: Boolean,
-): Int = if (meta) fsync(fd) else fdatasync(fd)
+): Int = ignoreEINTR32 { if (meta) fsync(fd) else fdatasync(fd) }

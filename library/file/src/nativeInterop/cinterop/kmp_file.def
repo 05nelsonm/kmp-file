@@ -1,5 +1,40 @@
 package = io.matthewnelson.kmp.file.internal
 ---
 #ifdef __APPLE__
+#include <errno.h>
+#include <fcntl.h>
 #include <sys/mount.h>
+#include <unistd.h>
+#endif // __APPLE__
+
+#ifdef __APPLE__
+int
+kmp_file_fullfsync(int fd)
+{
+  int           ret = -1;
+
+  do {
+    ret = fcntl(fd, F_FULLFSYNC);
+  } while (ret == -1 && errno == EINTR);
+  if (ret == -1) {
+    return -1;
+  }
+
+  int           saved = errno;
+  struct statfs buf;
+
+  do {
+    ret = fstatfs(fd, &buf)
+  } while (ret == -1 && errno == EINTR);
+  if (ret != 0) {
+    errno = saved;
+    return -1;
+  }
+  if ((buf.f_flags & MNT_LOCAL) == 0) {
+    // Non-local file/directory. Try to fsync.
+    return fsync(fd);
+  } else {
+    return -1;
+  }
+}
 #endif // __APPLE__

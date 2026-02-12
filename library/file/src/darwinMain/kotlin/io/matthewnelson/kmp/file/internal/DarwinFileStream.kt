@@ -22,8 +22,6 @@ import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.convert
-import platform.posix.F_FULLFSYNC
-import platform.posix.fcntl
 import platform.posix.ftruncate
 import platform.posix.lseek
 import platform.posix.pread
@@ -64,10 +62,4 @@ internal actual inline fun unixPWrite(
 internal actual inline fun unixSync(
     fd: Int,
     meta: Boolean,
-): Int {
-    if (fcntl(fd, F_FULLFSYNC) != -1) return 0
-    // TODO: (Issue #212)
-    //  Cinterop - Use fstatfs from <sys/mount.h>
-    //    return if ((stat.f_flags & MNT_LOCAL) == 0) fsync(fd) else -1
-    return -1
-}
+): Int = kmp_file_fullfsync(fd)
