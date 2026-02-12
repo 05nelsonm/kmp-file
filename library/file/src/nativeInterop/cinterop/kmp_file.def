@@ -51,7 +51,7 @@ kmp_file_fsize(int fd, int64_t size[1])
 #endif
   } while (ret == -1 && errno == EINTR);
   if (ret == -1) {
-    return ret;
+    return -1;
   }
   size[0] = buf.st_size;
   return 0;
@@ -95,18 +95,23 @@ kmp_file_fullfsync(int fd)
   int           saved = errno;
   struct statfs buf;
 
+  ret = -1;
   do {
-    ret = fstatfs(fd, &buf)
+    ret = fstatfs(fd, &buf);
   } while (ret == -1 && errno == EINTR);
   if (ret != 0) {
     errno = saved;
     return -1;
   }
-  if ((buf.f_flags & MNT_LOCAL) == 0) {
-    // Non-local file/directory. Try to fsync.
-    return fsync(fd);
-  } else {
+  if ((buf.f_flags & MNT_LOCAL) != 0) {
     return -1;
   }
+
+  // Non-local file or directory. Try fsync.
+  ret = -1;
+  do {
+    ret = fsync(fd);
+  } while (ret == -1 && errno == EINTR);
+  return ret;
 }
 #endif // __APPLE__
