@@ -58,6 +58,27 @@ kmp_file_fsize(int fd, int64_t size[1])
 #endif // _WIN32
 }
 
+#ifndef _WIN32
+int
+kmp_file_fis_directory(int fd)
+{
+  int         ret = -1;
+  struct stat buf;
+
+  do {
+    ret = fstat(fd, &buf);
+  } while (ret == -1 && errno == EINTR);
+  if (ret == -1) {
+    return -1;
+  }
+  if ((buf.st_mode & S_IFMT) == S_IFDIR) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+#endif
+
 #ifdef __APPLE__
 int
 kmp_file_fullfsync(int fd)

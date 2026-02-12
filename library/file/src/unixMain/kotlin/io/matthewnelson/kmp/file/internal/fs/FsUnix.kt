@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("RedundantVisibilityModifier")
+@file:Suppress("RedundantVisibilityModifier", "REDUNDANT_CALL_OF_CONVERSION_METHOD")
 
 package io.matthewnelson.kmp.file.internal.fs
 
@@ -30,14 +30,12 @@ import io.matthewnelson.kmp.file.internal.UnixFileStream
 import io.matthewnelson.kmp.file.internal.errnoToString
 import io.matthewnelson.kmp.file.internal.ignoreEINTR
 import io.matthewnelson.kmp.file.internal.ignoreEINTR32
+import io.matthewnelson.kmp.file.internal.kmp_file_fis_directory
 import io.matthewnelson.kmp.file.path
 import io.matthewnelson.kmp.file.toFile
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
-import kotlinx.cinterop.alloc
 import kotlinx.cinterop.convert
-import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
 import platform.posix.EEXIST
 import platform.posix.EINVAL
@@ -50,8 +48,6 @@ import platform.posix.O_RDONLY
 import platform.posix.O_RDWR
 import platform.posix.O_TRUNC
 import platform.posix.O_WRONLY
-import platform.posix.S_IFDIR
-import platform.posix.S_IFMT
 import platform.posix.S_IRGRP
 import platform.posix.S_IROTH
 import platform.posix.S_IRUSR
@@ -64,11 +60,9 @@ import platform.posix.S_IXUSR
 import platform.posix.chmod
 import platform.posix.close
 import platform.posix.errno
-import platform.posix.fstat
 import platform.posix.mkdir
 import platform.posix.realpath
 import platform.posix.remove
-import platform.posix.stat
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
 internal data object FsUnix: Fs(info = FsInfo.of(name = "FsUnix", isPosix = true)) {
@@ -112,7 +106,6 @@ internal data object FsUnix: Fs(info = FsInfo.of(name = "FsUnix", isPosix = true
     @Throws(IOException::class)
     internal override fun chmod(file: File, mode: Mode, mustExist: Boolean) {
         val m = MODE_MASK.convert(mode = mode)
-        @Suppress("RemoveRedundantCallsOfConversionMethods")
         if (ignoreEINTR32 { chmod(file.path, m.convert()).toInt() } == 0) return
         if (errno == ENOENT && !mustExist) return
         throw errnoToIOException(errno, file)
@@ -133,7 +126,6 @@ internal data object FsUnix: Fs(info = FsInfo.of(name = "FsUnix", isPosix = true
     @Throws(IOException::class)
     internal override fun mkdir(dir: File, mode: Mode, mustCreate: Boolean) {
         val m = MODE_MASK.convert(mode = mode)
-        @Suppress("RemoveRedundantCallsOfConversionMethods")
         if (ignoreEINTR32 { mkdir(dir.path, m.convert()).toInt() } == 0) return
         if (!mustCreate && errno == EEXIST) return
         throw errnoToIOException(errno, dir)
@@ -143,15 +135,13 @@ internal data object FsUnix: Fs(info = FsInfo.of(name = "FsUnix", isPosix = true
     internal override fun openRead(file: File): AbstractFileStream {
         val fd = file.open(O_RDONLY, OpenExcl.MustExist)
 
-        val e = memScoped {
-            val stat = alloc<stat>()
-            if (ignoreEINTR32 { fstat(fd, stat.ptr) } != 0) {
-                return@memScoped errnoToIOException(errno)
-            }
-            if ((stat.st_mode.toInt() and S_IFMT) == S_IFDIR) {
-                return@memScoped errnoToIOException(EISDIR, file)
-            }
-            null
+        val e = when (kmp_file_fis_directory(fd)) {
+            // false
+            0 -> null
+            // true
+            1 -> errnoToIOException(EISDIR, file)
+            // -1 (fstat error)
+            else -> errnoToIOException(errno)
         }
         if (e != null) {
             if (close(fd) != 0) {
