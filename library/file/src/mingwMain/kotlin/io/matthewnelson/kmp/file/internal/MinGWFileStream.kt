@@ -39,7 +39,6 @@ import platform.windows.ERROR_HANDLE_EOF
 import platform.windows.FALSE
 import platform.windows.FILE_BEGIN
 import platform.windows.FlushFileBuffers
-import platform.windows.GetFileSizeEx
 import platform.windows.GetLastError
 import platform.windows.HANDLE
 import platform.windows.INVALID_HANDLE_VALUE
@@ -146,19 +145,16 @@ internal class MinGWFileStream(
         checkIsOpen()
         // Does it really need to be synchronized???
         synchronized(positionLock) {
-            memScoped {
-                val size = alloc<LARGE_INTEGER>()
+            val size = UIntArray(2)
+            size.usePinned { pinned ->
                 val h = _h.value ?: throw ClosedException()
-                val ret = GetFileSizeEx(
-                    hFile = h,
-                    lpFileSize = size.ptr,
-                )
-                if (ret == FALSE) throw lastErrorToIOException()
-
-                val hi = (size.HighPart.toLong() and 0xffffffff) shl 32
-                val lo = (size.LowPart.toLong() and 0xffffffff)
-                return hi or lo
+                if (kmp_file_fsize(h, pinned.addressOf(0)) != 0) {
+                    throw lastErrorToIOException()
+                }
             }
+            val hi = (size[0].toLong() and 0xffffffff) shl 32
+            val lo = (size[1].toLong() and 0xffffffff)
+            return hi or lo
         }
     }
 

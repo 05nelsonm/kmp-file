@@ -28,17 +28,12 @@ import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.alloc
 import kotlinx.cinterop.convert
-import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
 import platform.posix.SEEK_CUR
 import platform.posix.SEEK_END
 import platform.posix.SEEK_SET
 import platform.posix.errno
-import platform.posix.fstat
-import platform.posix.stat
 import kotlin.concurrent.AtomicReference
 
 @OptIn(ExperimentalForeignApi::class)
@@ -129,15 +124,14 @@ internal class UnixFileStream(
     override fun size(): Long {
         checkIsOpen()
         synchronized(positionLock) {
-            memScoped {
-                val stat = alloc<stat>()
-                val ret = ignoreEINTR32 {
-                    val fd = _fd.value ?: throw ClosedException()
-                    fstat(fd, stat.ptr)
+            val size = LongArray(1)
+            size.usePinned { pinned ->
+                val fd = _fd.value ?: throw ClosedException()
+                if (kmp_file_fsize(fd, pinned.addressOf(0)) != 0) {
+                    throw errnoToIOException(errno)
                 }
-                if (ret != 0) throw errnoToIOException(errno)
-                return stat.st_size
             }
+            return size[0]
         }
     }
 
@@ -168,11 +162,8 @@ internal class UnixFileStream(
 
     override fun sync(meta: Boolean): FileStream.ReadWrite {
         checkIsOpen()
-        val ret = ignoreEINTR32 {
-            val fd = _fd.value ?: throw ClosedException()
-            unixSync(fd, meta)
-        }
-        if (ret == 0) return this
+        val fd = _fd.value ?: throw ClosedException()
+        if (unixSync(fd, meta) == 0) return this
         throw errnoToIOException(errno)
     }
 
