@@ -18,6 +18,7 @@ import io.matthewnelson.kmp.configuration.extension.container.target.KmpConfigur
 import org.gradle.api.Action
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.jetbrains.kotlin.konan.target.HostManager
 
 fun KmpConfigurationExtension.configureShared(
@@ -114,6 +115,10 @@ fun KmpConfigurationExtension.configureShared(
                     }
                 }
             }
+        }
+
+        if (!HostManager.hostIsMac) {
+            project.extraProperties.set("kotlin.native.enableKlibsCrossCompilation", false.toString())
         }
     }
 }

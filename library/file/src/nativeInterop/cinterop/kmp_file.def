@@ -1,0 +1,5 @@
+package = io.matthewnelson.kmp.file.internal
+---
+#ifdef __APPLE__
+#include <sys/mount.h>
+#endif // __APPLE__
