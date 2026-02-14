@@ -108,7 +108,7 @@ suspend fun main() {
 <!-- TAG_VERSION -->
 ```kotlin
 dependencies {
-    val vKmpFile = "0.6.0"
+    val vKmpFile = "0.6.1"
     implementation("io.matthewnelson.kmp-file:file:$vKmpFile")
 
     // If you need async APIs
@@ -117,7 +117,7 @@ dependencies {
 ```
 
 <!-- TAG_VERSION -->
-[badge-latest-release]: https://img.shields.io/badge/latest--release-0.6.0-blue.svg?style=flat
+[badge-latest-release]: https://img.shields.io/badge/latest--release-0.6.1-blue.svg?style=flat
 [badge-license]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
 
 <!-- TAG_DEPENDENCIES -->

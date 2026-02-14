@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## Version 0.6.1 (2026-02-14)
+ - Ensure `FileStream` Js/WasmJs implementation clears its async `JsBuffer` pool on closure [[#207]][207]
+ - Ensure `FsJvmAndroid` supplemental `O_CLOEXEC` value check deletes temporary file immediately after 
+   opening [[#208]][208]
+ - Mitigate unnecessary boxing by using default values, instead of nullable [[#210]][210] [[#224]][224]
+ - Ensure `FileSystemException` with reason containing `Is a directory` is always thrown when `File.open*` 
+   fails due to being a directory [[#217]][217]
+ - Updated `FsJvmAndroidLegacy.delete` implementation to check for JDK 25+ behaviorial changes to `File.delete` 
+   for Windows read-only files [[#219]][219]
+ - Fix `FileStream.sync` implementation for Apple targets by always using `fcntl` + `F_FULLFSYNC` [[#221]][221]
+ - Use `AtomicReference` instead of `Volatile` + `synchronized` for closure of underlying `FileChannel` [[#223]][223]
+
 ## Version 0.6.0 (2025-12-16)
  - Updates `kotlin` to `2.2.21` [[#199]][199]
  - Adds asynchronous APIs via new extension module `:async` [[#192]][192] [[#193]][193] [[#201]][201] [[#203]][203] [[#204]][204]
@@ -233,3 +245,11 @@
 [204]: https://github.com/05nelsonm/kmp-file/pull/204
 [205]: https://github.com/05nelsonm/kmp-file/pull/205
 [206]: https://github.com/05nelsonm/kmp-file/pull/206
+[207]: https://github.com/05nelsonm/kmp-file/pull/207
+[208]: https://github.com/05nelsonm/kmp-file/pull/208
+[210]: https://github.com/05nelsonm/kmp-file/pull/210
+[217]: https://github.com/05nelsonm/kmp-file/pull/217
+[219]: https://github.com/05nelsonm/kmp-file/pull/219
+[221]: https://github.com/05nelsonm/kmp-file/pull/221
+[223]: https://github.com/05nelsonm/kmp-file/pull/223
+[224]: https://github.com/05nelsonm/kmp-file/pull/224
