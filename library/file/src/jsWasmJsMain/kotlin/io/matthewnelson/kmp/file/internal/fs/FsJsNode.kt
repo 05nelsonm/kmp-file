@@ -887,29 +887,42 @@ internal class FsJsNode private constructor(
         isAppending: Boolean,
     ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
-        private var _position: Long = 0L
-        private var _fd: Double? = fd
+        init { if (fd < 0.0) throw IOException("fd[$fd] < 0") }
+        init { if (fd.isNaN()) throw IOException("fd == NaN") }
 
+        @Deprecated("Use fdOrClosed", level = DeprecationLevel.ERROR)
+        private var _fd: Double = fd
+
+        private var _position: Long = 0L
         private var positionLock: AsyncLock? = null
+
+        // Need to utilize a pool for copy buffers when reading/writing asynchronously
+        private val asyncPool = ArrayDeque<JsBuffer>(1)
+
+        private inline fun fdOrClosed(): Double {
+            @Suppress("DEPRECATION_ERROR")
+            val fd = _fd
+            if (fd.isNaN()) throw ClosedException()
+            return fd
+        }
+
+        private inline fun <R> ArrayDeque<JsBuffer>.useBuffer(block: (jsBuf: JsBuffer) -> R): R {
+            val buf = removeFirstOrNull() ?: jsBufferAlloc(DEFAULT_BUFFER_SIZE.toDouble())
+            try {
+                return block(buf)
+            } finally {
+                if (isOpen() && size < 3) add(buf)
+            }
+        }
+
         override fun _initAsyncLock(create: (isLocked: Boolean) -> AsyncLock) {
             if (positionLock != null) return
             checkIsOpen()
             positionLock = create(false)
         }
 
-        // Need to utilize a pool for copy buffers when reading/writing asynchronously
-        private val asyncPool = ArrayDeque<JsBuffer>(1)
-        @Suppress("UnusedReceiverParameter")
-        private inline fun <R: Any?> ArrayDeque<JsBuffer>.useBuffer(block: (jsBuf: JsBuffer) -> R): R {
-            val buf = asyncPool.removeFirstOrNull() ?: jsBufferAlloc(DEFAULT_BUFFER_SIZE.toDouble())
-            try {
-                return block(buf)
-            } finally {
-                if (isOpen() && asyncPool.size < 3) asyncPool.add(buf)
-            }
-        }
-
-        override fun isOpen(): Boolean = _fd != null
+        @Suppress("DEPRECATION_ERROR")
+        override fun isOpen(): Boolean = _fd >= 0.0
 
         override fun position(): Long {
             return position(_size = ::size)
@@ -1053,7 +1066,7 @@ internal class FsJsNode private constructor(
             while (total < len) {
                 val length = minOf(copyBuf.length.toInt(), len - total)
                 val position = if (p == -1L) _position else (p + total.toLong())
-                val fd = delegateOrClosed(isWrite = false, total) { _fd }
+                val fd = delegateOrClosed(isWrite = false, total) { fdOrClosed() }
                 val read = try {
                     _read(
                         fd,
@@ -1182,7 +1195,7 @@ internal class FsJsNode private constructor(
             buf.length.toLong().checkBounds(offset, len)
             if (len == 0L) return 0L
 
-            val fd = _fd ?: throw ClosedException()
+            val fd = fdOrClosed()
             val read = try {
                 _read(
                     fd,
@@ -1226,7 +1239,7 @@ internal class FsJsNode private constructor(
             contract {
                 callsInPlace(_fstat, InvocationKind.AT_MOST_ONCE)
             }
-            val fd = _fd ?: throw ClosedException()
+            val fd = fdOrClosed()
             val stat = try {
                 _fstat(fd)
             } catch (t: Throwable) {
@@ -1273,7 +1286,7 @@ internal class FsJsNode private constructor(
             contract {
                 callsInPlace(_ftruncate, InvocationKind.AT_MOST_ONCE)
             }
-            val fd = _fd ?: throw ClosedException()
+            val fd = fdOrClosed()
             try {
                 _ftruncate(fd, new.toDouble())
             } catch (t: Throwable) {
@@ -1327,7 +1340,7 @@ internal class FsJsNode private constructor(
                 callsInPlace(_fsync, InvocationKind.AT_MOST_ONCE)
                 callsInPlace(_fdatasync, InvocationKind.AT_MOST_ONCE)
             }
-            val fd = _fd ?: throw ClosedException()
+            val fd = fdOrClosed()
             try {
                 if (meta) _fsync(fd) else _fdatasync(fd)
             } catch (t: Throwable) {
@@ -1459,7 +1472,7 @@ internal class FsJsNode private constructor(
                 }
 
                 val position = if (p == -1L) _position else p + total
-                val fd = delegateOrClosed(isWrite = true, total) { _fd }
+                val fd = delegateOrClosed(isWrite = true, total) { fdOrClosed() }
                 val write = try {
                     _write(
                         fd,
@@ -1587,7 +1600,7 @@ internal class FsJsNode private constructor(
             var total = 0L
             while (total < len) {
                 val position = if (p == -1L) _position else p + total
-                val fd = delegateOrClosed(isWrite = true, total.toInt()) { _fd }
+                val fd = delegateOrClosed(isWrite = true, total.toInt()) { fdOrClosed() }
                 val write = try {
                     _write(
                         fd,
@@ -1606,9 +1619,11 @@ internal class FsJsNode private constructor(
             }
         }
 
+        @Suppress("DEPRECATION_ERROR")
         override fun close() {
-            val fd = _fd ?: return
-            _fd = null
+            val fd = _fd
+            if (fd.isNaN()) return
+            _fd = Double.NaN
             unsetCoroutineContext()
             try {
                 jsExternTryCatch { fs.closeSync(fd) }
@@ -1619,9 +1634,11 @@ internal class FsJsNode private constructor(
             }
         }
 
+        @Suppress("DEPRECATION_ERROR")
         override suspend fun _closeAsync() {
-            val fd = _fd ?: return
-            _fd = null
+            val fd = _fd
+            if (fd.isNaN()) return
+            _fd = Double.NaN
             unsetCoroutineContext()
             var wasClosed = false
             try {

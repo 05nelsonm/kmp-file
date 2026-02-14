@@ -60,7 +60,9 @@ internal class MinGWFileStream(
     isAppending: Boolean,
 ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
-    init { if (h == INVALID_HANDLE_VALUE) throw lastErrorToIOException() }
+    init { if (h == INVALID_HANDLE_VALUE) throw IOException("h == INVALID_HANDLE_VALUE") }
+
+    private val _h = AtomicReference<HANDLE?>(h)
 
     // Windows ReadFile/WriteFile always advancing the HANDLE position,
     // even when OVERLAPPED is non-NULL. This is problematic because if
@@ -72,7 +74,6 @@ internal class MinGWFileStream(
     // for writes.
     @Volatile
     private var _position = 0L
-    private val _h = AtomicReference<HANDLE?>(h)
     private val positionLock = SynchronizedObject()
 
     override fun isOpen(): Boolean = _h.value != null
