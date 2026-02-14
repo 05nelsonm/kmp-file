@@ -26,6 +26,7 @@ import java.nio.channels.AsynchronousCloseException
 import java.nio.channels.FileChannel
 import java.nio.channels.NonReadableChannelException
 import java.nio.channels.NonWritableChannelException
+import java.util.concurrent.atomic.AtomicReference
 
 internal class NioFileStream private constructor(
     ch: FileChannel,
@@ -35,20 +36,18 @@ internal class NioFileStream private constructor(
     parents: Array<out Closeable>,
 ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
-    @Volatile
-    private var _ch: FileChannel? = ch
+    private val _ch: AtomicReference<FileChannel?> = AtomicReference(/* initialValue = */ ch)
     @Volatile
     private var _parents: Array<out Closeable>? = parents
-    private val closeLock = Any()
     private val positionLock = Any()
 
-    override fun isOpen(): Boolean = _ch?.isOpen ?: false
+    override fun isOpen(): Boolean = _ch.get()?.isOpen ?: false
 
     override fun position(): Long {
         if (isAppending) return size()
         checkIsOpen()
         synchronized(positionLock) {
-            val ch = _ch ?: throw ClosedException()
+            val ch = _ch.get() ?: throw ClosedException()
             return ch.position()
         }
     }
@@ -58,7 +57,7 @@ internal class NioFileStream private constructor(
         new.checkIsNotNegative()
         if (isAppending) return this
         synchronized(positionLock) {
-            val ch = _ch ?: throw ClosedException()
+            val ch = _ch.get() ?: throw ClosedException()
             ch.position(new)
             return this
         }
@@ -83,7 +82,7 @@ internal class NioFileStream private constructor(
         synchronizedIfNotNull(lock = positionLockOrNull(p)) {
             var total = 0
             while (total < len) {
-                val ch = delegateOrClosed(isWrite = false, total) { _ch }
+                val ch = delegateOrClosed(isWrite = false, total) { _ch.get() }
                 val read = try {
                     if (p == -1L) ch.read(bb) else ch.read(bb, p + total)
                 } catch (e: IOException) {
@@ -114,7 +113,7 @@ internal class NioFileStream private constructor(
 
     private fun realRead(dst: ByteBuffer?, p: Long): Int {
         synchronizedIfNotNull(lock = positionLockOrNull(p)) {
-            val ch = _ch ?: throw AsynchronousCloseException()
+            val ch = _ch.get() ?: throw AsynchronousCloseException()
             return if (p == -1L) ch.read(dst) else ch.read(dst, p)
         }
     }
@@ -122,7 +121,7 @@ internal class NioFileStream private constructor(
     override fun size(): Long {
         checkIsOpen()
         synchronized(positionLock) {
-            val ch = _ch ?: throw ClosedException()
+            val ch = _ch.get() ?: throw ClosedException()
             return ch.size()
         }
     }
@@ -132,7 +131,7 @@ internal class NioFileStream private constructor(
         checkCanSizeNew()
         new.checkIsNotNegative()
         synchronized(positionLock) {
-            val ch = _ch ?: throw ClosedException()
+            val ch = _ch.get() ?: throw ClosedException()
             if (new > ch.size()) {
                 val bb = ByteBuffer.wrap(ByteArray(1))
                 ch.write(bb, new - 1L)
@@ -152,7 +151,7 @@ internal class NioFileStream private constructor(
     }
 
     override fun sync(meta: Boolean): FileStream.ReadWrite {
-        val ch = _ch ?: throw ClosedException()
+        val ch = _ch.get() ?: throw ClosedException()
         ch.force(meta)
         return this
     }
@@ -192,7 +191,7 @@ internal class NioFileStream private constructor(
     private fun realWrite(src: ByteBuffer?, p: Long): Int {
         if (src == null) throw NullPointerException("src == null")
         synchronizedIfNotNull(lock = positionLockOrNull(p)) {
-            val ch = _ch ?: throw AsynchronousCloseException()
+            val ch = _ch.get() ?: throw AsynchronousCloseException()
             if (p == -1L) {
                 if (isAppending) {
                     val end = ch.size()
@@ -215,13 +214,9 @@ internal class NioFileStream private constructor(
     }
 
     override fun close() {
-        val (ch, parents) = synchronized(closeLock) {
-            val ch = _ch ?: return
-            val parents = _parents
-            _ch = null
-            _parents = null
-            ch to parents
-        }
+        val ch = _ch.getAndSet(/* newValue = */ null) ?: return
+        val parents = _parents
+        _parents = null
 
         unsetCoroutineContext()
         var threw: IOException? = null
