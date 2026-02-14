@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-@file:Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
+@file:Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD", "NOTHING_TO_INLINE")
 
 package io.matthewnelson.kmp.file.internal
 
 import io.matthewnelson.kmp.file.AbstractFileStream
 import io.matthewnelson.kmp.file.ClosedException
 import io.matthewnelson.kmp.file.FileStream
+import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.errnoToIOException
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
@@ -39,7 +40,7 @@ import platform.posix.SEEK_SET
 import platform.posix.errno
 import platform.posix.fstat
 import platform.posix.stat
-import kotlin.concurrent.AtomicReference
+import kotlin.concurrent.AtomicInt
 
 @OptIn(ExperimentalForeignApi::class)
 internal class UnixFileStream(
@@ -49,19 +50,28 @@ internal class UnixFileStream(
     isAppending: Boolean,
 ): AbstractFileStream(canRead, canWrite, isAppending, INIT) {
 
-    init { if (fd == -1) throw errnoToIOException(errno) }
+    init { if (fd < 0) throw IOException("fd[$fd] < 0") }
 
-    private val _fd = AtomicReference<Int?>(fd)
+    @Deprecated("Use fdOrClosed", level = DeprecationLevel.ERROR)
+    private val _fd = AtomicInt(fd)
     private val positionLock = SynchronizedObject()
 
-    override fun isOpen(): Boolean = _fd.value != null
+    private inline fun fdOrClosed(): Int {
+        @Suppress("DEPRECATION_ERROR")
+        val fd = _fd.value
+        if (fd == -1) throw ClosedException()
+        return fd
+    }
+
+    @Suppress("DEPRECATION_ERROR")
+    override fun isOpen(): Boolean = _fd.value != -1
 
     override fun position(): Long {
         if (isAppending) return size()
         checkIsOpen()
         synchronized(positionLock) {
             val ret = ignoreEINTR64 {
-                val fd = _fd.value ?: throw ClosedException()
+                val fd = fdOrClosed()
                 unixLSeek(fd, 0L, SEEK_CUR)
             }
             if (ret == -1L) throw errnoToIOException(errno)
@@ -75,7 +85,7 @@ internal class UnixFileStream(
         if (isAppending) return this
         synchronized(positionLock) {
             val ret = ignoreEINTR64 {
-                val fd = _fd.value ?: throw ClosedException()
+                val fd = fdOrClosed()
                 unixLSeek(fd, new, SEEK_SET)
             }
             if (ret == -1L) throw errnoToIOException(errno)
@@ -103,7 +113,7 @@ internal class UnixFileStream(
             @OptIn(UnsafeNumber::class)
             val read = buf.usePinned { pinned ->
                 ignoreEINTR32 {
-                    val fd = _fd.value ?: throw ClosedException()
+                    val fd = fdOrClosed()
                     if (p == -1L) {
                         platform.posix.read(
                             fd,
@@ -132,7 +142,7 @@ internal class UnixFileStream(
             memScoped {
                 val stat = alloc<stat>()
                 val ret = ignoreEINTR32 {
-                    val fd = _fd.value ?: throw ClosedException()
+                    val fd = fdOrClosed()
                     fstat(fd, stat.ptr)
                 }
                 if (ret != 0) throw errnoToIOException(errno)
@@ -147,18 +157,18 @@ internal class UnixFileStream(
         new.checkIsNotNegative()
         synchronized(positionLock) {
             ignoreEINTR32 {
-                val fd = _fd.value ?: throw ClosedException()
+                val fd = fdOrClosed()
                 unixFTruncate(fd, new)
             }.let { if (it == -1) throw errnoToIOException(errno) }
             if (isAppending) return this
             val pos = ignoreEINTR64 {
-                val fd = _fd.value ?: throw ClosedException()
+                val fd = fdOrClosed()
                 unixLSeek(fd, 0L, SEEK_CUR)
             }
             if (pos == -1L) throw errnoToIOException(errno)
             if (pos <= new) return this
             val ret = ignoreEINTR64 {
-                val fd = _fd.value ?: throw ClosedException()
+                val fd = fdOrClosed()
                 unixLSeek(fd, new, SEEK_SET)
             }
             if (ret == -1L) throw errnoToIOException(errno)
@@ -169,7 +179,7 @@ internal class UnixFileStream(
     override fun sync(meta: Boolean): FileStream.ReadWrite {
         checkIsOpen()
         val ret = ignoreEINTR32 {
-            val fd = _fd.value ?: throw ClosedException()
+            val fd = fdOrClosed()
             unixSync(fd, meta)
         }
         if (ret == 0) return this
@@ -197,7 +207,7 @@ internal class UnixFileStream(
             if (p == -1L && isAppending) {
                 // See Issue #175
                 val ret = ignoreEINTR64 {
-                    val fd = _fd.value ?: throw ClosedException()
+                    val fd = fdOrClosed()
                     unixLSeek(fd, 0L, SEEK_END)
                 }
                 if (ret == -1L) throw errnoToIOException(errno)
@@ -208,7 +218,7 @@ internal class UnixFileStream(
                 var total = 0
                 while (total < len) {
                     val ret = ignoreEINTR32 {
-                        val fd = delegateOrClosed(isWrite = true, total) { _fd.value }
+                        val fd = delegateOrClosed(isWrite = true, total) { fdOrClosed() }
                         if (p == -1L) {
                             platform.posix.write(
                                 fd,
@@ -234,7 +244,9 @@ internal class UnixFileStream(
     }
 
     override fun close() {
-        val fd = _fd.getAndSet(null) ?: return
+        @Suppress("DEPRECATION_ERROR")
+        val fd = _fd.getAndSet(-1)
+        if (fd == -1) return
         unsetCoroutineContext()
         if (platform.posix.close(fd) == 0) return
         throw errnoToIOException(errno)
