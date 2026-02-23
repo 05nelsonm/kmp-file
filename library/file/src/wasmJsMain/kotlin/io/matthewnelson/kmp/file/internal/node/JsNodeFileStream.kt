@@ -19,6 +19,7 @@ package io.matthewnelson.kmp.file.internal.node
 
 import io.matthewnelson.encoding.core.EncoderDecoder.Companion.DEFAULT_BUFFER_SIZE
 import io.matthewnelson.kmp.file.DelicateFileApi
+import io.matthewnelson.kmp.file.IOException
 import io.matthewnelson.kmp.file.internal.async.SuspendCancellable
 import io.matthewnelson.kmp.file.internal.async.complete
 import io.matthewnelson.kmp.file.internal.async.withLockAsync
@@ -335,6 +336,11 @@ internal actual class JsNodeFileStream internal actual constructor(
             total += write
             if (p == -1L) _position += write
         }
+    }
+
+    override fun closeFinally(t: IOException?) {
+        _asyncPool?.clear()
+        _asyncPool = null
     }
 
     private companion object {
