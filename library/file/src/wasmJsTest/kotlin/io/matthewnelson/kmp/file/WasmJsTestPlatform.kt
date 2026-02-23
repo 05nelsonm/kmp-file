@@ -17,4 +17,4 @@
 
 package io.matthewnelson.kmp.file
 
-internal actual fun jsEnvPath(): String? = js("require('process').env['PATH']")
+internal actual fun jsEnvPath(): String? = js("eval('require')('process').env['PATH']")

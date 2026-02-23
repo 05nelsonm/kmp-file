@@ -20,7 +20,10 @@ package io.matthewnelson.kmp.file.internal.js
 import kotlin.js.JsName
 
 @JsName("Object")
-internal abstract external class JsObject
+internal sealed external class JsObject
+
+internal const val CODE_JS_OBJECT = "({})"
+internal const val CODE_JS_OBJECT_SET = "obj[key] = value"
 
 internal expect fun jsObject(): JsObject
 

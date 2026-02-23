@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Matthew Nelson
+ * Copyright (c) 2026 Matthew Nelson
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.matthewnelson.kmp.file.internal.js
+package io.matthewnelson.kmp.file.internal.node
 
-internal sealed external interface JsNavigator { val platform: String }
+import io.matthewnelson.kmp.file.internal.js.JsError
 
-internal const val CODE_JS_NAVIGATOR: String = "window ? window.navigator : self.navigator"
-
-internal expect fun jsNavigator(): JsNavigator
+internal sealed external interface JsErrnoException: JsError {
+    val code: String?
+}

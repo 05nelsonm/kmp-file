@@ -18,7 +18,7 @@ package io.matthewnelson.kmp.file.internal.node
 import io.matthewnelson.kmp.file.internal.Path
 
 /** [docs](https://nodejs.org/api/path.html) */
-internal external interface ModulePath {
+internal sealed external interface ModulePath {
     val sep: String
     val delimiter: String
     fun isAbsolute(path: Path): Boolean

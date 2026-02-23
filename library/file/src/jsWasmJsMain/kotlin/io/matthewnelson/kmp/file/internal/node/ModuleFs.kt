@@ -20,10 +20,10 @@ package io.matthewnelson.kmp.file.internal.node
 import io.matthewnelson.kmp.file.internal.js.JsObject
 import io.matthewnelson.kmp.file.internal.Path
 import io.matthewnelson.kmp.file.internal.js.JsError
-import kotlin.js.JsName
+import io.matthewnelson.kmp.file.internal.js.JsTypedArray
 
 /** [docs](https://nodejs.org/api/fs.html) */
-internal external interface ModuleFs {
+internal sealed external interface ModuleFs {
     fun access(path: Path, mode: Int, callback: (err: JsError?) -> Unit)
     fun chmod(path: Path, mode: String, callback: (err: JsError?) -> Unit)
     fun close(fd: Double, callback: (err: JsError?) -> Unit)
@@ -36,13 +36,13 @@ internal external interface ModuleFs {
     fun open(path: Path, flags: Int, callback: (err: JsError?, fd: Double?) -> Unit)
     fun open(path: Path, flags: Int, mode: String, callback: (err: JsError?, fd: Double?) -> Unit)
     fun open(path: Path, flags: String, mode: String, callback: (err: JsError?, fd: Double?) -> Unit)
-    fun read(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double, callback: (err: JsError?, read: Double?, JsBuffer?) -> Unit)
+    fun read(fd: Double, buffer: JsTypedArray, offset: Double, length: Double, position: Double, callback: (err: JsError?, read: Double?, JsTypedArray?) -> Unit)
     fun readFile(path: Path, callback: (err: JsError?, JsBuffer?) -> Unit)
     fun realpath(path: Path, callback: (err: JsError?, resolved: Path?) -> Unit)
     fun rmdir(path: Path, options: JsObject, callback: (err: JsError?) -> Unit)
     fun stat(path: Path, callback: (err: JsError?, stats: JsStats?) -> Unit)
     fun unlink(path: Path, callback: (err: JsError?) -> Unit)
-    fun write(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double, callback: (err: JsError?, write: Double?, JsBuffer?) -> Unit)
+    fun write(fd: Double, buffer: JsTypedArray, offset: Double, length: Double, position: Double, callback: (err: JsError?, write: Double?, JsTypedArray?) -> Unit)
 
     fun accessSync(path: Path, mode: Int)
     fun chmodSync(path: Path, mode: String)
@@ -56,19 +56,19 @@ internal external interface ModuleFs {
     fun openSync(path: Path, flags: Int): Double
     fun openSync(path: Path, flags: Int, mode: String): Double
     fun openSync(path: Path, flags: String, mode: String): Double // Windows
-    fun readSync(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double): Double
+    fun readSync(fd: Double, buffer: JsTypedArray, offset: Double, length: Double, position: Double): Double
     fun readFileSync(path: Path): JsBuffer
     fun realpathSync(path: Path): Path
     fun rmdirSync(path: Path, options: JsObject)
     fun statSync(path: Path): JsStats
     fun unlinkSync(path: Path)
-    fun writeSync(fd: Double, buffer: JsBuffer, offset: Double, length: Double, position: Double?): Double
+    fun writeSync(fd: Double, buffer: JsTypedArray, offset: Double, length: Double, position: Double?): Double
 
     val constants: ConstantsFs
 }
 
 /** [docs](https://nodejs.org/api/fs.html#fsconstants) */
-internal external interface ConstantsFs {
+internal sealed external interface ConstantsFs {
     val F_OK: Int
     val R_OK: Int
     val W_OK: Int
@@ -101,8 +101,7 @@ internal external interface ConstantsFs {
 }
 
 /** [docs](https://nodejs.org/api/fs.html#class-fsstats) */
-@JsName("Stats")
-internal expect interface JsStats {
+internal expect sealed interface JsStats {
     val mode: Int
     val size: Double
     fun isFile(): Boolean

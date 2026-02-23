@@ -19,10 +19,8 @@ package io.matthewnelson.kmp.file.internal.js
 
 import io.matthewnelson.kmp.file.toWasmJsException
 
-@JsName("Error")
-internal actual external class JsError: JsAny {
+internal actual external interface JsError: JsAny {
     actual val message: String?
-    val code: String?
 }
 
 internal actual inline fun JsError.toThrowable(): Throwable = toWasmJsException()

@@ -254,6 +254,7 @@ public object InteropAsyncFs {
     public suspend fun readBuffer(file: File, suspendCancellable: SuspendCancellable<Any?>): Buffer {
         return file.nodeRead(
             _readFile = { path ->
+                @Suppress("UNCHECKED_CAST")
                 suspendCancellable { cont ->
                     readFile(path) { err, buf ->
                         cont.complete(err) { buf }

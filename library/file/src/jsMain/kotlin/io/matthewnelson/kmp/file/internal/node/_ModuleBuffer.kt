@@ -18,21 +18,24 @@
 package io.matthewnelson.kmp.file.internal.node
 
 import io.matthewnelson.kmp.file.DelicateFileApi
+import io.matthewnelson.kmp.file.internal.js.JsUint8Array
 
 /** [docs](https://nodejs.org/api/buffer.html#class-buffer) */
 @JsName("Buffer")
-internal actual external interface JsBuffer {
-    actual val length: Double
-    actual fun fill()
-    actual fun readInt8(offset: Double): Byte
-    actual fun writeInt8(value: Byte, offset: Double)
-    actual fun toString(encoding: String, start: Double, end: Double): String
+internal actual sealed external class JsBuffer: JsUint8Array {
+
+    internal actual fun fill()
+    internal actual fun readInt8(offset: Double): Byte
+    internal actual fun writeInt8(value: Byte, offset: Double)
+    internal actual fun toString(encoding: String, start: Double, end: Double): String
+
+    internal actual companion object {
+        // Always need to check for FsJsNode first
+        @DelicateFileApi
+        internal actual fun alloc(size: Double): JsBuffer
+
+        // Always need to check for FsJsNode first
+        @DelicateFileApi
+        internal fun isBuffer(any: dynamic): Boolean
+    }
 }
-
-// Always need to check for FsJsNode first
-@DelicateFileApi
-internal actual fun jsBufferAlloc(size: Double): JsBuffer = js("Buffer.alloc(size)")
-
-// Always need to check for FsJsNode first
-@DelicateFileApi
-internal fun jsBufferIsInstance(any: dynamic): Boolean = js("Buffer.isBuffer(any)")

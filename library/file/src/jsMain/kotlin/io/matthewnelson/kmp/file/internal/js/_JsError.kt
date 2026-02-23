@@ -17,6 +17,10 @@
 
 package io.matthewnelson.kmp.file.internal.js
 
-internal actual typealias JsError = Throwable
+import kotlin.js.unsafeCast
 
-internal actual inline fun JsError.toThrowable(): Throwable = this
+internal actual external interface JsError {
+    actual val message: String?
+}
+
+internal actual inline fun JsError.toThrowable(): Throwable = unsafeCast<Throwable>()

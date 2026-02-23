@@ -18,8 +18,7 @@
 package io.matthewnelson.kmp.file.internal.node
 
 /** [docs](https://nodejs.org/api/fs.html#class-fsstats) */
-@JsName("Stats")
-internal actual external interface JsStats: JsAny {
+internal actual sealed external interface JsStats: JsAny {
     actual val mode: Int
     actual val size: Double
     actual fun isFile(): Boolean
