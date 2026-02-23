@@ -17,6 +17,6 @@
 
 package io.matthewnelson.kmp.file.internal.js
 
-internal actual fun jsObject(): JsObject = js("({})")
-internal actual fun jsObjectSet(obj: JsObject, key: String, value: Boolean) { js("obj[key] = value") }
-internal actual fun jsObjectSet(obj: JsObject, key: String, value: String) { js("obj[key] = value") }
+internal actual fun jsObject(): JsObject = js(CODE_JS_OBJECT)
+internal actual fun jsObjectSet(obj: JsObject, key: String, value: Boolean) { js(CODE_JS_OBJECT_SET) }
+internal actual fun jsObjectSet(obj: JsObject, key: String, value: String) { js(CODE_JS_OBJECT_SET) }

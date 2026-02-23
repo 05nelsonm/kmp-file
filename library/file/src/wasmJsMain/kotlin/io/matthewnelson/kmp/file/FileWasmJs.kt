@@ -17,10 +17,13 @@
 
 package io.matthewnelson.kmp.file
 
+import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 import io.matthewnelson.kmp.file.internal.js.JsError
+import io.matthewnelson.kmp.file.internal.node.JsErrnoException
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.js.unsafeCast
 
 /**
  * Helper for calling externally defined code in order to propagate a proper
@@ -56,7 +59,7 @@ import kotlin.contracts.contract
 @DelicateFileApi
 // @Throws(Throwable::class)
 @OptIn(ExperimentalContracts::class)
-public actual inline fun <T: Any?> jsExternTryCatch(crossinline block: () -> T): T {
+public actual inline fun <T> jsExternTryCatch(crossinline block: () -> T): T {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -76,15 +79,14 @@ public actual inline fun <T: Any?> jsExternTryCatch(crossinline block: () -> T):
  * */
 public actual val Throwable.errorCodeOrNull: String? get() {
     if (this is WasmJsException) return code
-    if (this is JsException) {
-        val t = thrownValue ?: return null
-        return try {
-            (t.unsafeCast<JsError>()).code
-        } catch (_: Throwable) {
-            null
-        }
+    if (this !is JsException) return null
+    FsJsNode.INSTANCE ?: return null // Not Node.js
+    val t = thrownValue ?: return null
+    return try {
+        t.unsafeCast<JsErrnoException>().code
+    } catch (_: Throwable) {
+        null
     }
-    return null
 }
 
 @PublishedApi
@@ -96,7 +98,12 @@ internal fun internalWasmJsExternTryCatch(block: () -> Unit) {
 
 internal fun JsError.toWasmJsException(): Throwable {
     val m = message?.ifBlank { null }
-    val c = code?.ifBlank { null }
+    FsJsNode.INSTANCE ?: return WasmJsException(m, null) // Not Node.js
+    val c = try {
+        unsafeCast<JsErrnoException>().code
+    } catch (_: Throwable) {
+        null
+    }
     return WasmJsException(m, c)
 }
 

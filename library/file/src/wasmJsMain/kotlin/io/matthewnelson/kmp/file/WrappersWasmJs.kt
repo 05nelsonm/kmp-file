@@ -21,8 +21,6 @@ package io.matthewnelson.kmp.file
 import io.matthewnelson.kmp.file.internal.fs.FsJsNode
 import io.matthewnelson.kmp.file.internal.node.JsBuffer
 import io.matthewnelson.kmp.file.internal.node.JsStats
-import io.matthewnelson.kmp.file.internal.node.jsBufferAlloc
-import io.matthewnelson.kmp.file.internal.node.jsBufferIsInstance
 import io.matthewnelson.kmp.file.internal.require
 import kotlin.js.unsafeCast
 
@@ -110,7 +108,7 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
         // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public actual fun alloc(size: Number): Buffer = try {
             FsJsNode.require()
-            val b = jsExternTryCatch { jsBufferAlloc(size.toDouble()) }
+            val b = jsExternTryCatch { JsBuffer.alloc(size.toDouble()) }
             Buffer(b)
         } catch (t: Throwable) {
             if (t is IllegalArgumentException) throw t
@@ -133,7 +131,7 @@ public actual value class Buffer internal constructor(internal val value: JsBuff
         // @Throws(IllegalArgumentException::class, UnsupportedOperationException::class)
         public fun wrap(buffer: JsAny): Buffer {
             FsJsNode.require()
-            if (!jsBufferIsInstance(buffer)) {
+            if (!JsBuffer.isBuffer(buffer)) {
                 throw IllegalArgumentException("Object is not a Buffer")
             }
             return Buffer(buffer.unsafeCast())

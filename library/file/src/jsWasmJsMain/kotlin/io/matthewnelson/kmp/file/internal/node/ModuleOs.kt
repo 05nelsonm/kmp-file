@@ -18,7 +18,7 @@ package io.matthewnelson.kmp.file.internal.node
 import io.matthewnelson.kmp.file.internal.Path
 
 /** [docs](https://nodejs.org/api/os.html) */
-internal external interface ModuleOs {
+internal sealed external interface ModuleOs {
     fun platform(): String
     fun tmpdir(): Path
 }
