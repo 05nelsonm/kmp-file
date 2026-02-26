@@ -33,7 +33,9 @@ internal actual sealed external class JsBuffer: JsUint8Array {
         // Always need to check for FsJsNode first
         @DelicateFileApi
         internal actual fun alloc(size: Double): JsBuffer
-
+        // Always need to check for FsJsNode first
+        @DelicateFileApi
+        internal actual fun allocUnsafe(size: Double): JsBuffer
         // Always need to check for FsJsNode first
         @DelicateFileApi
         internal fun isBuffer(any: dynamic): Boolean

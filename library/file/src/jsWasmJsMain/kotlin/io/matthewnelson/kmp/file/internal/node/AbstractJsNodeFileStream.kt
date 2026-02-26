@@ -136,8 +136,8 @@ internal abstract class AbstractJsNodeFileStream protected constructor(
                 offset,
                 len,
                 -1L,
-                _read = { fd, BUF, offset, len, position ->
-                    jsExternTryCatch { fs.readSync(fd, BUF, offset, len, position) }
+                _read = { fd, buffer, offset, len, position ->
+                    jsExternTryCatch { fs.readSync(fd, buffer, offset, len, position) }
                 },
             )
         }
@@ -552,23 +552,16 @@ internal abstract class AbstractJsNodeFileStream protected constructor(
         }
     }
 
-    protected open fun closeFinally(t: IOException?) {}
-
     @Suppress("DEPRECATION_ERROR")
     final override fun close() {
         val fd = _fd
         if (fd.isNaN()) return
         _fd = Double.NaN
         unsetCoroutineContext()
-        var threw: IOException? = null
         try {
             jsExternTryCatch { fs.closeSync(fd) }
         } catch (t: Throwable) {
-            val e = t.toIOException()
-            threw = e
-            throw e
-        } finally {
-            closeFinally(threw)
+            throw t.toIOException()
         }
     }
 
@@ -579,7 +572,6 @@ internal abstract class AbstractJsNodeFileStream protected constructor(
         _fd = Double.NaN
         unsetCoroutineContext()
         var wasClosed = false
-        var threw: IOException? = null
         try {
             suspendCoroutine<Unit> { cont ->
                 fs.close(fd) { err ->
@@ -595,12 +587,7 @@ internal abstract class AbstractJsNodeFileStream protected constructor(
                     t.addSuppressed(tt)
                 }
             }
-
-            val e = t.toIOException()
-            threw = e
-            throw e
-        } finally {
-            closeFinally(threw)
+            throw t.toIOException()
         }
     }
 }
