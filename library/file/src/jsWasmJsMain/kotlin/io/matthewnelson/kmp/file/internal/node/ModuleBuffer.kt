@@ -44,5 +44,8 @@ internal expect sealed class JsBuffer: JsUint8Array {
         // Always need to check for FsJsNode first
         @DelicateFileApi
         internal fun alloc(size: Double): JsBuffer
+        // Always need to check for FsJsNode first
+        @DelicateFileApi
+        internal fun allocUnsafe(size: Double): JsBuffer
     }
 }
